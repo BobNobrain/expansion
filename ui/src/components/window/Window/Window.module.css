@@ -1,0 +1,128 @@
+.window {
+    display: grid;
+    grid-template-columns: 4px 1fr 4px;
+    grid-template-rows: 4px 1fr 4px;
+
+    position: absolute;
+}
+
+.minimized {
+    pointer-events: none;
+}
+
+.drag-handle-edge:hover {
+    border-color: var(--color-primary);
+}
+.drag-handle-corner:hover {
+    background-color: var(--color-primary);
+}
+
+.drag-l-t {
+    composes: drag-handle-corner;
+    cursor: nwse-resize;
+}
+
+.drag-t {
+    composes: drag-handle-edge;
+    cursor: ns-resize;
+    border-bottom: 2px solid transparent;
+    margin-left: 16px;
+}
+
+.drag-r-t {
+    composes: drag-handle-corner;
+    cursor: nesw-resize;
+}
+
+.drag-l {
+    composes: drag-handle-edge;
+    cursor: ew-resize;
+    border-right: 2px solid transparent;
+    margin-top: 16px;
+}
+
+.drag-r {
+    composes: drag-handle-edge;
+    cursor: ew-resize;
+    border-left: 2px solid transparent;
+    margin-bottom: 16px;
+}
+
+.drag-l-b {
+    composes: drag-handle-corner;
+    cursor: nesw-resize;
+}
+
+.drag-b {
+    composes: drag-handle-edge;
+    cursor: ns-resize;
+    border-top: 2px solid transparent;
+    margin-right: 16px;
+}
+
+.drag-r-b {
+    composes: drag-handle-corner;
+    cursor: nwse-resize;
+}
+
+.inner {
+    display: flex;
+    flex-flow: column;
+}
+
+.content {
+    border: solid var(--color-border);
+    border-width: 0 1px;
+    flex: 1 1 auto;
+    padding: 8px 6px;
+    background-color: var(--color-background);
+}
+
+.header {
+    height: 16px;
+    margin-left: 16px;
+    position: relative;
+    background-color: var(--color-border);
+    flex: 0 0 16px;
+
+    display: flex;
+    pointer-events: all;
+}
+.header::before {
+    display: inline-block;
+    position: absolute;
+    left: -16px;
+    top: 0;
+    content: ' ';
+    width: 0;
+    height: 0;
+    border: 8px solid;
+    border-color: transparent var(--color-border) var(--color-border) transparent;
+}
+
+.title {
+    flex: 1 1 auto;
+
+    font-size: 14px;
+    font-weight: bold;
+    padding-left: 16px;
+    cursor: grab;
+}
+.title.dragging {
+    cursor: grabbing;
+    font-weight: bold;
+}
+
+.controls {
+    flex: 0 0 auto;
+}
+
+.footer {
+    flex: 0 0 16px;
+    display: flex;
+}
+
+.footer-spacer {
+    flex: 1 1 auto;
+    background-color: var(--color-border);
+}

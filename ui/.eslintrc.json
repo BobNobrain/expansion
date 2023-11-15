@@ -1,0 +1,30 @@
+{
+    "root": true,
+    "extends": ["eslint:recommended"],
+    "parserOptions": {
+        "ecmaVersion": "latest"
+    },
+    "env": {
+        "node": true,
+        "es6": true
+    },
+    "overrides": [
+        {
+            "files": ["**/*.ts", "**/*.tsx"],
+            "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended-type-checked"],
+            "plugins": ["@typescript-eslint"],
+            "parser": "@typescript-eslint/parser",
+            "parserOptions": {
+                "project": true,
+                "tsconfigRootDir": "."
+            },
+            "rules": {
+                "@typescript-eslint/consistent-type-imports": ["error", {
+                    "fixStyle": "inline-type-imports"
+                }],
+                "@typescript-eslint/no-namespace": "off"
+            }
+        }
+    ],
+    "rules": {}
+}

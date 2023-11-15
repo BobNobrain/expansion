@@ -1,0 +1,19 @@
+.wrapper {
+    display: flex;
+    flex-flow: column;
+    height: 100vh;
+}
+
+.middle {
+    display: flex;
+    flex: 1 1 auto;
+}
+
+.main {
+    flex: 1 1 auto;
+    position: relative;
+}
+
+.nav {
+    flex: 0 0 auto;
+}

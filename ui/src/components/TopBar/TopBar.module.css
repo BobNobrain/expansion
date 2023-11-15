@@ -1,0 +1,21 @@
+.topBar {
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+}
+
+.item {
+    padding: 8px 16px;
+}
+
+.leftItem {
+    composes: item;
+    flex: 0 0 auto;
+}
+.separator {
+    composes: item;
+    flex: 1 1 auto;
+}
+.rightItem {
+    composes: item;
+    flex: 0 0 auto;
+}

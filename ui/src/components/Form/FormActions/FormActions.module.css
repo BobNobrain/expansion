@@ -1,0 +1,6 @@
+.actions {
+    padding-left: var(--form-label-width, 100px);
+
+    display: flex;
+    justify-content: flex-end;
+}

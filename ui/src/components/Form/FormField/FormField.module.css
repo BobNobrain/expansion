@@ -1,0 +1,23 @@
+.field {
+    display: flex;
+    align-items: stretch;
+}
+
+.field + .field {
+    margin-top: 4px;
+}
+
+.label {
+    flex: 0 0 var(--form-label-width, 150px);
+    background-color: var(--color-border);
+
+    padding: 2px 4px;
+}
+
+.label.empty {
+    background-color: transparent;
+}
+
+.input {
+    flex: 1 1 auto;
+}

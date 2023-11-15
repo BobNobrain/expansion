@@ -1,0 +1,71 @@
+@font-face {
+    font-family: 'Raleway';
+    src: url('./fonts/Raleway-VariableFont_wght.ttf') format('truetype');
+    font-style: normal;
+    font-weight: normal;
+}
+@font-face {
+    font-family: 'Raleway';
+    src: url('./fonts/Raleway-Italic-VariableFont_wght.ttf') format('truetype');
+    font-style: italic;
+    font-weight: normal;
+}
+
+:root {
+    --color-primary: #F5A60F;
+    --color-primary-dark: #986300;
+    --color-primary-light: #FDBD43;
+
+    --color-info: #0F6FF5;
+    --color-info-dark: #034299;
+    --color-info-light: #3083F5;
+
+    --color-error: #E93320;
+    --color-error-dark: #940E00;
+    --color-error-light: #F65C4C;
+
+    --color-success: #18B03A;
+    --color-success-dark: #007019;
+    --color-success-light: #3ABA56;
+
+    --color-disabled: #ccc2a6;
+
+    --color-background: #1F2937;
+    --color-background-dark: #131F2E;
+    --color-background-light: #36404E;
+
+    --color-border: #2a3a50;
+    --color-border-sharp: #3F67A0;
+
+    --color-text: #E4CEA9;
+    --color-text-dim: #98886D;
+    --color-text-inverted: #32230A;
+    --color-text-dim-inverted: #47361A;
+
+    --color-text-selected: #F6EBD9;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+
+    font-family: Raleway;
+    font-weight: 400;
+    font-variation-settings: "wght" 400;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+::selection {
+    color: var(--color-text-selected);
+    background-color: var(--color-primary);
+}
+
+#app {
+    width: 100%;
+    height: 100%;
+}
