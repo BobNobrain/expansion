@@ -2,6 +2,7 @@ package stubs
 
 import (
 	"srv/internal/domain"
+	"srv/internal/utils/common"
 	"strconv"
 	"time"
 )
@@ -19,11 +20,11 @@ func NewStubAuthenticator(userRepo domain.UserRepo) domain.Authenticator {
 	}
 }
 
-func (impl *stubAuthenticator) Login(request domain.AuthenticatorLoginRequest) (*domain.AuthenticatorLoginResponse, error) {
+func (impl *stubAuthenticator) Login(request domain.AuthenticatorLoginRequest) (*domain.AuthenticatorLoginResponse, common.Error) {
 	creds, err := impl.userRepo.GetCredentialsByUsername(request.Username)
 
 	if err != nil || creds.PasswordHash != stubPasswordHasher(request.Password) {
-		return nil, domain.NewInvalidLoginError()
+		return nil, newInvalidLoginError()
 	}
 
 	user, err := impl.userRepo.GetByUsername(request.Username)
@@ -45,16 +46,16 @@ func (impl *stubAuthenticator) Login(request domain.AuthenticatorLoginRequest) (
 	return result, nil
 }
 
-func (impl *stubAuthenticator) CheckToken(token string) (*domain.AuthenticatorLoginResponse, error) {
+func (impl *stubAuthenticator) CheckToken(token string) (*domain.AuthenticatorLoginResponse, common.Error) {
 	result, ok := impl.issuedTokens[token]
 	if !ok || time.Now().After(result.Auth.Expires) {
-		return nil, domain.NewInvalidTokenError()
+		return nil, newInvalidTokenError()
 	}
 
 	return result, nil
 }
 
-func (impl *stubAuthenticator) RenewToken(token string) (*domain.AuthenticatorToken, error) {
+func (impl *stubAuthenticator) RenewToken(token string) (*domain.AuthenticatorToken, common.Error) {
 	result, err := impl.CheckToken(token)
 	if err != nil {
 		return nil, err

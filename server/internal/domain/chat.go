@@ -1,33 +1,34 @@
 package domain
 
 import (
-	"fmt"
 	"math/rand"
+	"srv/internal/utils"
+	"srv/internal/utils/common"
 	"time"
 )
 
-type ChatID uint64
+type ChatID string
 
 func NewChatID() ChatID {
-	return ChatID(rand.Uint64())
+	return ChatID(utils.GenerateRandomStringID(16))
 }
 
 type ChatData struct {
-	ChatID          ChatID   `json:"chatID"`
-	Title           string   `json:"title"`
-	MemberUsernames []string `json:"memberUsernames"`
+	ChatID          ChatID
+	Title           string
+	MemberUsernames []Username
 }
 
 type ChatRepo interface {
-	ListChatsForUser(uname string) ([]ChatData, error)
-	ListChatMessages(ChatMessageDataFilter) ([]ChatMessageData, error)
+	ListChatsForUser(uname Username) ([]*ChatData, common.Error)
+	ListChatMessages(ChatMessageDataFilter) ([]*ChatMessageData, common.Error)
 
-	CreateChat(*ChatCreateData) (*ChatData, error)
+	CreateChat(*ChatCreateData) (*ChatData, common.Error)
 
-	InviteMember(cid ChatID, username string) error
-	KickMember(cid ChatID, username string) error
+	InviteMember(cid ChatID, username Username) common.Error
+	KickMember(cid ChatID, username Username) common.Error
 
-	PostMessage(PostChatMessageData) (*ChatMessageData, error)
+	PostMessage(PostChatMessageData) (*ChatMessageData, common.Error)
 }
 
 type MessageID uint64
@@ -37,37 +38,25 @@ func NewMessageID() MessageID {
 }
 
 type ChatMessageData struct {
-	MessageID MessageID `json:"messageID"`
-	Author    string    `json:"author"`
-	PostedAt  time.Time `json:"postedAt"`
-	Content   string    `json:"content"`
+	MessageID MessageID
+	Author    Username
+	PostedAt  time.Time
+	Content   string
 }
 
 type ChatMessageDataFilter struct {
-	ChatID       ChatID    `json:"chatID"`
-	PostedBefore time.Time `json:"postedBefore"`
-	Limit        int       `json:"limit"`
+	ChatID       ChatID
+	PostedBefore time.Time
+	Limit        int
 }
 
 type ChatCreateData struct {
-	Title           string   `json:"title"`
-	MemberUsernames []string `json:"memberUsernames"`
+	Title           string
+	MemberUsernames []Username
 }
 
 type PostChatMessageData struct {
 	ChatID  ChatID
-	Author  string
+	Author  Username
 	Content string
-}
-
-type ChatNotFoundError struct {
-	ChatID ChatID
-}
-
-func (e *ChatNotFoundError) Error() string {
-	return fmt.Sprintf("no chat with id %d", e.ChatID)
-}
-
-func NewChatNotFoundError(chatID ChatID) *ChatNotFoundError {
-	return &ChatNotFoundError{ChatID: chatID}
 }

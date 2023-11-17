@@ -1,0 +1,10 @@
+packages:
+  - path: "srv/pkg/api"
+    fallback_type: "unknown"
+    output_path: "../ui/src/lib/net/types.generated.ts"
+    type_mappings:
+      time.Time: "string /* RFC3339 */"
+      null.String: "null | string"
+      null.Bool: "null | boolean"
+      uuid.UUID: "string /* uuid */"
+      uuid.NullUUID: "null | string /* uuid */"

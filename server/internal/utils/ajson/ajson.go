@@ -1,6 +1,9 @@
 package ajson
 
-import "strconv"
+import (
+	"srv/internal/utils/common"
+	"strconv"
+)
 
 type ArbitraryJSONPath = []string
 
@@ -13,7 +16,7 @@ type GetNullableOptions struct {
 	Optional bool
 }
 
-func GetPrimitive[T JSONPrimitive](json interface{}, path ArbitraryJSONPath) (T, error) {
+func GetPrimitive[T JSONPrimitive](json interface{}, path ArbitraryJSONPath) (T, common.Error) {
 	content, err := lookup(json, path, false)
 	if err != nil {
 		var nothing T
@@ -30,7 +33,7 @@ func GetPrimitive[T JSONPrimitive](json interface{}, path ArbitraryJSONPath) (T,
 	}
 }
 
-func GetNullablePrimitive[T JSONPrimitive](json interface{}, opts GetNullableOptions) (*T, error) {
+func GetNullablePrimitive[T JSONPrimitive](json interface{}, opts GetNullableOptions) (*T, common.Error) {
 	content, err := lookup(json, opts.Path, opts.Optional)
 	if err != nil {
 		return nil, err
@@ -49,7 +52,7 @@ func GetNullablePrimitive[T JSONPrimitive](json interface{}, opts GetNullableOpt
 	}
 }
 
-func GetArrayOfPrimitives[T JSONPrimitive](json interface{}, opts GetNullableOptions) ([]T, error) {
+func GetArrayOfPrimitives[T JSONPrimitive](json interface{}, opts GetNullableOptions) ([]T, common.Error) {
 	content, err := lookup(json, opts.Path, opts.Optional)
 	if err != nil {
 		return nil, err
@@ -85,7 +88,7 @@ func GetArrayOfPrimitives[T JSONPrimitive](json interface{}, opts GetNullableOpt
 	}
 }
 
-func lookup(root interface{}, path ArbitraryJSONPath, optional bool) (interface{}, error) {
+func lookup(root interface{}, path ArbitraryJSONPath, optional bool) (interface{}, common.Error) {
 	cursor := root
 	for i, nextProp := range path {
 		switch casted := cursor.(type) {

@@ -12,7 +12,11 @@ run-editor:
 
 .PHONY: run-server
 run-server:
-	cd server && go run cmd/srv/srv.go
+	cd server && make run
+
+.PHONY: api-types
+api-types:
+	cd server && make api-types
 
 .PHONY: rebuild-and-run
-rebuild-and-run: build-desktop run-server
+rebuild-and-run: api-types build-desktop run-server

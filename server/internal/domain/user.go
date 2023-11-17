@@ -1,6 +1,8 @@
 package domain
 
-import "fmt"
+import (
+	"srv/internal/utils/common"
+)
 
 type Username string
 
@@ -19,20 +21,8 @@ type UserCredentials struct {
 }
 
 type UserRepo interface {
-	GetByUsername(Username) (*User, error)
-	GetCredentialsByUsername(Username) (UserCredentials, error)
+	GetByUsername(Username) (*User, common.Error)
+	GetCredentialsByUsername(Username) (UserCredentials, common.Error)
 
-	CreateUser(UserCreateData) (*User, error)
-}
-
-type UserNotFoundError struct {
-	Username Username
-}
-
-func (e *UserNotFoundError) Error() string {
-	return fmt.Sprintf("cannot find user with username %s", e.Username)
-}
-
-func NoUserFoundByUsername(uname Username) error {
-	return &UserNotFoundError{Username: uname}
+	CreateUser(UserCreateData) (*User, common.Error)
 }

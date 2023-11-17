@@ -4,6 +4,12 @@
 
 ## Development
 
+Preprequisites:
+
+```bash
+go install github.com/gzuidhof/tygo@latest # for generating API typings
+```
+
 Run server:
 
 ```bash

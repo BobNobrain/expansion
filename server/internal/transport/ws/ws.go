@@ -50,11 +50,11 @@ func (c *wsClient) handleInbox() {
 			break
 		}
 
-		c.hub.dispatcher.DispatchCommand(&domain.DispatcherCommand{
+		c.hub.dispatcher.EnqueueForDispatching(&domain.DispatcherCommand{
 			ID:       domain.DispatcherCommandID(parsed.ID),
 			ClientID: c.id,
 			OnBehalf: c.user,
-			Scope:    parsed.Scope,
+			Scope:    domain.DispatcherScope(parsed.Scope),
 			Command:  parsed.Command,
 			Payload:  parsed.Payload,
 		})

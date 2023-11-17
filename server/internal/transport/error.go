@@ -20,6 +20,10 @@ func (e *TransportError) ToApiError() *api.ApiError {
 	}
 }
 
+func (e *TransportError) Encode() interface{} {
+	return e.ToApiError()
+}
+
 func NewUnauthorizedError() *TransportError {
 	return &TransportError{
 		Code:    "ERR_UNAUTHORIZED",

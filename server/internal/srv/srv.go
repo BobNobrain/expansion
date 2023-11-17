@@ -2,7 +2,9 @@ package srv
 
 import (
 	"fmt"
+	"srv/internal/chats"
 	"srv/internal/dispatcher"
+	"srv/internal/domain"
 	"srv/internal/stubs"
 	"srv/internal/transport/http"
 	"srv/internal/transport/ws"
@@ -11,8 +13,16 @@ import (
 func Run() error {
 	userRepo := stubs.NewStubUserRepo()
 	auth := stubs.NewStubAuthenticator(userRepo)
+
 	missionControl := dispatcher.NewDispatcher()
 	comms := ws.NewWebSocketComms(missionControl, auth)
+	missionControl.Start(comms)
+
+	chatRepo := chats.NewChatRepo(comms, missionControl)
+	chatRepo.CreateChat(&domain.ChatCreateData{
+		Title:           "Global Chat",
+		MemberUsernames: []domain.Username{"bob", "alice"},
+	})
 
 	srv := http.NewHTTPServer(auth, comms)
 

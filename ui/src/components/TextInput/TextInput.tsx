@@ -4,6 +4,7 @@ import styles from './TextInput.module.css';
 export type TextInputProps = {
     value: string;
     onUpdate: (newValue: string, ev: Event) => void;
+    onKeyUp?: (ev: KeyboardEvent) => void;
 
     readonly?: boolean;
     password?: boolean;
@@ -25,6 +26,7 @@ export const TextInput: Component<TextInputProps> = (props) => {
                 readOnly={props.readonly}
                 type={props.password ? 'password' : 'text'}
                 placeholder={props.placeholder}
+                onKeyUp={props.onKeyUp}
             />
         </div>
     );

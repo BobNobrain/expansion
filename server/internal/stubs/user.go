@@ -2,6 +2,7 @@ package stubs
 
 import (
 	"srv/internal/domain"
+	"srv/internal/utils/common"
 	"sync"
 )
 
@@ -27,7 +28,7 @@ func NewStubUserRepo() domain.UserRepo {
 	}
 }
 
-func (impl *stubUserRepo) GetByUsername(uname domain.Username) (*domain.User, error) {
+func (impl *stubUserRepo) GetByUsername(uname domain.Username) (*domain.User, common.Error) {
 	impl.mu.Lock()
 	defer impl.mu.Unlock()
 
@@ -40,7 +41,7 @@ func (impl *stubUserRepo) GetByUsername(uname domain.Username) (*domain.User, er
 	return nil, nil
 }
 
-func (impl *stubUserRepo) GetCredentialsByUsername(uname domain.Username) (domain.UserCredentials, error) {
+func (impl *stubUserRepo) GetCredentialsByUsername(uname domain.Username) (domain.UserCredentials, common.Error) {
 	impl.mu.Lock()
 	defer impl.mu.Unlock()
 
@@ -50,10 +51,10 @@ func (impl *stubUserRepo) GetCredentialsByUsername(uname domain.Username) (domai
 		}
 	}
 
-	return domain.UserCredentials{}, domain.NoUserFoundByUsername(uname)
+	return domain.UserCredentials{}, newUserNotFoundError(uname)
 }
 
-func (impl *stubUserRepo) CreateUser(ucd domain.UserCreateData) (*domain.User, error) {
+func (impl *stubUserRepo) CreateUser(ucd domain.UserCreateData) (*domain.User, common.Error) {
 	impl.mu.Lock()
 	defer impl.mu.Unlock()
 

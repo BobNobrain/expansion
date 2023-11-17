@@ -74,7 +74,6 @@
     border: solid var(--color-border);
     border-width: 0 1px;
     flex: 1 1 auto;
-    padding: 8px 6px;
     background-color: var(--color-background);
 }
 

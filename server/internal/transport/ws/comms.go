@@ -3,6 +3,7 @@ package ws
 import (
 	"srv/internal/domain"
 	"srv/internal/utils"
+	"srv/internal/utils/common"
 	"srv/pkg/api"
 	"sync"
 
@@ -36,14 +37,14 @@ func (impl *WSComms) HandleNewConnection(conn *websocket.Conn, user *domain.User
 	impl.onOnlineCountChange()
 }
 
-func (impl *WSComms) Broadcast(rq domain.CommsBroadcastRequest) error {
+func (impl *WSComms) Broadcast(rq domain.CommsBroadcastRequest) common.Error {
 	impl.mu.Lock()
 	defer impl.mu.Unlock()
 
 	message := &api.ServerEvent{
-		Scope:   rq.Scope,
+		Scope:   string(rq.Scope),
 		Event:   rq.Event,
-		Payload: rq.Payload,
+		Payload: rq.Payload.Encode(),
 	}
 
 	if len(rq.Recepients) > 0 {
@@ -65,7 +66,7 @@ func (impl *WSComms) Broadcast(rq domain.CommsBroadcastRequest) error {
 	return nil
 }
 
-func (impl *WSComms) Respond(rq domain.CommsRespondRequest) error {
+func (impl *WSComms) Respond(rq domain.CommsRespondRequest) common.Error {
 	impl.mu.Lock()
 	defer impl.mu.Unlock()
 
@@ -77,14 +78,14 @@ func (impl *WSComms) Respond(rq domain.CommsRespondRequest) error {
 	var message interface{} = nil
 	if rq.Error != nil {
 		message = &api.ServerCommandErrorResponse{
-			ID:    rq.ResponseTo,
+			ID:    uint64(rq.ResponseTo),
 			Code:  "ERR_UNKNOWN",
 			Error: rq.Error.Error(),
 		}
 	} else {
 		message = &api.ServerCommandSuccessResponse{
-			ID:     rq.ResponseTo,
-			Result: rq.Result,
+			ID:     uint64(rq.ResponseTo),
+			Result: rq.Result.Encode(),
 		}
 	}
 

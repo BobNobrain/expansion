@@ -2,6 +2,7 @@ package ajson
 
 import (
 	"fmt"
+	"srv/internal/utils/common"
 	"strings"
 )
 
@@ -14,6 +15,14 @@ func (e *IncorrectTypeError) Error() string {
 	return fmt.Sprintf("incorrect type in arbitrary json: expected %s, found %s", e.expected, e.actual)
 }
 
+func (e *IncorrectTypeError) Code() string {
+	return "ERR_JSON"
+}
+
+func (e *IncorrectTypeError) Details() common.Encodable {
+	return nil
+}
+
 type PathDoesNotExistError struct {
 	path         ArbitraryJSONPath
 	maxValidPath ArbitraryJSONPath
@@ -24,14 +33,22 @@ func (e *PathDoesNotExistError) Error() string {
 	return fmt.Sprintf("no path '%s' found", path)
 }
 
-func newIncorrectType(expected string, actual interface{}) error {
+func (e *PathDoesNotExistError) Code() string {
+	return "ERR_JSON"
+}
+
+func (e *PathDoesNotExistError) Details() common.Encodable {
+	return nil
+}
+
+func newIncorrectType(expected string, actual interface{}) common.Error {
 	return &IncorrectTypeError{
 		expected: expected,
 		actual:   getActualTypeName(actual),
 	}
 }
 
-func newPathDoesNotExist(path ArbitraryJSONPath, stopIndex int) error {
+func newPathDoesNotExist(path ArbitraryJSONPath, stopIndex int) common.Error {
 	return &PathDoesNotExistError{
 		path:         path,
 		maxValidPath: path[:stopIndex],

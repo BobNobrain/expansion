@@ -3,7 +3,7 @@ import {
     type ServerCommandErrorResponse,
     type ServerCommandSuccessResponse,
     type ServerEvent,
-} from './types';
+} from './types.generated';
 
 type PendingCommand = {
     id: number;
@@ -76,7 +76,7 @@ class WSClient {
             const cmd: ClientCommand = {
                 id: commandId,
                 scope,
-                command,
+                cmd: command,
                 payload,
             };
             this.sock.send(JSON.stringify(cmd));
@@ -111,6 +111,9 @@ class WSClient {
 }
 
 export const ws = new WSClient();
+
+// @ts-expect-error temporary global variable for testing purposes
+window.ws = ws;
 
 export class WSError extends Error {
     readonly code: string;

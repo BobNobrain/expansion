@@ -1,16 +1,13 @@
 import { createSignal } from 'solid-js';
 import { ws } from '../lib/net/ws';
+import { type OnlineCountChangeEventPayload } from '../lib/net/types.generated';
 
 const [getOnlineCount, setOnlineCount] = createSignal(0);
-
-type OnlineChangePayload = {
-    count: number;
-};
 
 ws.subscribe('online', (ev) => {
     switch (ev.event) {
         case 'change':
-            setOnlineCount((ev.payload as OnlineChangePayload).count);
+            setOnlineCount((ev.payload as OnlineCountChangeEventPayload).count);
             break;
 
         default:

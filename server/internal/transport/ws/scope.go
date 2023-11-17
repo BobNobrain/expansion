@@ -2,25 +2,10 @@ package ws
 
 import (
 	"srv/internal/domain"
+	"srv/internal/encodables"
 )
 
-func (impl *WSComms) AsCommandHandler() domain.DispatcherCommandHandler {
-	return impl
-}
-
 const scopeName = domain.DispatcherScope("online")
-
-func (impl *WSComms) GetScope() domain.DispatcherScope {
-	return scopeName
-}
-
-func (impl *WSComms) HandleCommand(cmd *domain.DispatcherCommand) error {
-	return domain.NewUnknownDispatcherCommandError(cmd)
-}
-
-type onlineChangePayload struct {
-	Count int `json:"count"`
-}
 
 func (impl *WSComms) onOnlineCountChange() {
 	c, err := impl.GetOnlineCount()
@@ -31,6 +16,6 @@ func (impl *WSComms) onOnlineCountChange() {
 	impl.Broadcast(domain.CommsBroadcastRequest{
 		Scope:   scopeName,
 		Event:   "change",
-		Payload: &onlineChangePayload{Count: c},
+		Payload: encodables.NewOnlineCountChangePayload(c),
 	})
 }

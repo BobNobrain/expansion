@@ -1,4 +1,4 @@
-import { type LoginErrorBody, type LoginResponseBody } from './types';
+import { type ApiError, type LoginResponseBody } from './types.generated';
 
 export type LoginRequest = {
     username: string;
@@ -19,7 +19,7 @@ export async function login({ username, password }: LoginRequest): Promise<UserD
     });
 
     if (!response.ok) {
-        throw new Error(((await response.json()) as LoginErrorBody).message);
+        throw new Error(((await response.json()) as ApiError).message);
     }
 
     const user = (await response.json()) as LoginResponseBody;
@@ -39,6 +39,6 @@ export async function logout(): Promise<void> {
     });
 
     if (!response.ok) {
-        throw new Error(((await response.json()) as LoginErrorBody).message);
+        throw new Error(((await response.json()) as ApiError).message);
     }
 }
