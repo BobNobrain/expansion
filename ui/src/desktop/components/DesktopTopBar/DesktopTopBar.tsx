@@ -1,7 +1,7 @@
 import { type Component } from 'solid-js';
-import { useAuthenticated } from '../../LogInGuard';
-import { Text } from '../../Text/Text';
-import { TopBar } from '../../TopBar/TopBar';
+import { useAuthenticated } from '../../../components/LogInGuard';
+import { Text } from '../../../components/Text/Text';
+import { TopBar } from '../../../components/TopBar/TopBar';
 // import { useWindowManager } from '../../window/context';
 import { useOnlineCount } from '../../../store/online';
 

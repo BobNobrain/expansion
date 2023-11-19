@@ -2,11 +2,12 @@ package encodables
 
 import (
 	"srv/internal/domain"
+	"srv/internal/utils/common"
 	"srv/pkg/api"
 	"time"
 )
 
-type ChatPostedEvent struct {
+type chatPostedEvent struct {
 	ChatID    domain.ChatID
 	MessageID domain.MessageID
 	Author    domain.Username
@@ -14,8 +15,8 @@ type ChatPostedEvent struct {
 	Content   string
 }
 
-func NewChatPostedEvent(chat *domain.ChatData, msg *domain.ChatMessageData) *ChatPostedEvent {
-	return &ChatPostedEvent{
+func NewChatPostedEvent(chat *domain.ChatData, msg *domain.ChatMessageData) common.Encodable {
+	return &chatPostedEvent{
 		ChatID:    chat.ChatID,
 		MessageID: msg.MessageID,
 		Author:    msg.Author,
@@ -24,7 +25,7 @@ func NewChatPostedEvent(chat *domain.ChatData, msg *domain.ChatMessageData) *Cha
 	}
 }
 
-func (ev *ChatPostedEvent) Encode() interface{} {
+func (ev *chatPostedEvent) Encode() interface{} {
 	return &api.ChatPostedEventPayload{
 		ChatID:    string(ev.ChatID),
 		MessageID: uint64(ev.MessageID),
@@ -34,15 +35,15 @@ func (ev *ChatPostedEvent) Encode() interface{} {
 	}
 }
 
-type ChatListResponse struct {
+type chatListResponse struct {
 	chats []*domain.ChatData
 }
 
-func NewChatListResponse(chats []*domain.ChatData) *ChatListResponse {
-	return &ChatListResponse{chats: chats}
+func NewChatListResponse(chats []*domain.ChatData) common.Encodable {
+	return &chatListResponse{chats: chats}
 }
 
-func (r *ChatListResponse) Encode() interface{} {
+func (r *chatListResponse) Encode() interface{} {
 	apiChats := make([]api.ChatListResultPayloadItem, 0, len(r.chats))
 	for _, chat := range r.chats {
 		apiChats = append(apiChats, api.ChatListResultPayloadItem{
@@ -53,5 +54,29 @@ func (r *ChatListResponse) Encode() interface{} {
 
 	return &api.ChatListResultPayload{
 		Chats: apiChats,
+	}
+}
+
+type chatHistoryResponse struct {
+	history []*domain.ChatMessageData
+}
+
+func NewChatHistoryResponse(history []*domain.ChatMessageData) common.Encodable {
+	return &chatHistoryResponse{history: history}
+}
+
+func (r *chatHistoryResponse) Encode() interface{} {
+	apiMessages := make([]api.ChatHistoryResultPayloadItem, 0, len(r.history))
+	for _, msg := range r.history {
+		apiMessages = append(apiMessages, api.ChatHistoryResultPayloadItem{
+			MessageID: uint64(msg.MessageID),
+			Author:    string(msg.Author),
+			Date:      msg.PostedAt,
+			Content:   msg.Content,
+		})
+	}
+
+	return &api.ChatHistoryResultPayload{
+		Messages: apiMessages,
 	}
 }

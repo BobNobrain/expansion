@@ -1,0 +1,70 @@
+.wrapper {
+    position: relative;
+    margin: auto;
+}
+
+.s {
+    width: 8px;
+    height: 8px;
+}
+
+.m {
+    width: 16px;
+    height: 16px;
+}
+
+.l {
+    width: 24px;
+    height: 24px;
+}
+
+.bar1, .bar2 {
+    position: absolute;
+    background-color: var(--color-info);
+    animation: bar-movement 1s infinite linear;
+}
+
+.bar1 {
+    animation-delay: 0.5s;
+}
+.bar2 {
+    animation-delay: 0;
+}
+
+@keyframes bar-movement {
+    0% {
+        top: 0;
+        left: 15%;
+        right: 15%;
+        height: 15%;
+        opacity: 0.7;
+    }
+    25% {
+        top: 45%;
+        left: 0;
+        right: 0;
+        height: 10%;
+        opacity: 1;
+    }
+    50% {
+        top: 85%;
+        left: 15%;
+        right: 15%;
+        height: 15%;
+        opacity: 0.7;
+    }
+    75% {
+        top: 40%;
+        left: 30%;
+        right: 30%;
+        height: 20%;
+        opacity: 0.5;
+    }
+    100% {
+        top: 0;
+        left: 15%;
+        right: 15%;
+        height: 15%;
+        opacity: 0.7;
+    }
+}

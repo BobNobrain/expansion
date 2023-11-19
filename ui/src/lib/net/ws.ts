@@ -100,7 +100,7 @@ class WSClient {
     }
 
     private handleEvent(evt: ServerEvent) {
-        console.log('[server event]', evt);
+        console.log(`[server event] ${evt.scope}/${evt.event}`, evt.payload);
 
         const scope = evt.scope;
         const handlers = this.subs[scope] ?? [];

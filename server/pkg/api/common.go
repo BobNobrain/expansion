@@ -1,10 +1,12 @@
 package api
 
+import "encoding/json"
+
 type ClientCommand struct {
-	ID      uint64      `json:"id"`
-	Scope   string      `json:"scope"`
-	Command string      `json:"cmd"`
-	Payload interface{} `json:"payload"`
+	ID      uint64          `json:"id"`
+	Scope   string          `json:"scope"`
+	Command string          `json:"cmd"`
+	Payload json.RawMessage `json:"payload"`
 }
 
 type ServerCommandSuccessResponse struct {

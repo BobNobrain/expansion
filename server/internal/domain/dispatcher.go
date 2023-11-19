@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"encoding/json"
 	"srv/internal/utils/common"
 )
 
@@ -24,5 +25,5 @@ type DispatcherCommand struct {
 	OnBehalf Username
 	Scope    DispatcherScope
 	Command  string
-	Payload  interface{}
+	Payload  json.RawMessage
 }

@@ -1,10 +1,10 @@
 import { For, type Component, createSignal, Show } from 'solid-js';
 import { type ChatData, useChats } from '../../../store/chats';
-import { Text } from '../../Text/Text';
-import styles from './ChatWindow.module.css';
-import { TextInput } from '../../TextInput/TextInput';
+import { TextInput } from '../../../components/TextInput/TextInput';
+import styles from './ChatsView.module.css';
+import { ChatMessages } from './ChatMessages/ChatMessages';
 
-export const ChatWindow: Component = () => {
+export const ChatsView: Component = () => {
     const chats = useChats();
     const [getActiveChat, setActiveChat] = createSignal<ChatData | null>(null);
 
@@ -46,21 +46,7 @@ export const ChatWindow: Component = () => {
             </div>
             <div class={styles.activeChat}>
                 <Show when={getActiveChat()} fallback={<div class={styles.empty}>No chat selected</div>}>
-                    <div class={styles.messageHistory}>
-                        <For each={getActiveChat()!.messages}>
-                            {(msg) => {
-                                return (
-                                    <div class={styles.message}>
-                                        <Text bold color="primary">
-                                            {msg.author}:
-                                        </Text>
-                                        {msg.content}
-                                        <Text color="dim">({msg.date.toLocaleString()})</Text>
-                                    </div>
-                                );
-                            }}
-                        </For>
-                    </div>
+                    <ChatMessages activeChat={getActiveChat()!} />
                     <div class={styles.input}>
                         <TextInput
                             value={getMessageText()}

@@ -1,8 +1,8 @@
 import { createSignal, type Component } from 'solid-js';
-import { App } from '../../App/App';
-import { LogInGuard } from '../../LogInGuard';
-import { WindowManagerContext } from '../../window/context';
-import { WindowManager, type WindowManagerController } from '../../window';
+import { App } from '../../../components/App/App';
+import { LogInGuard } from '../../../components/LogInGuard';
+import { WindowManagerContext } from '../../../components/window/context';
+import { WindowManager, type WindowManagerController } from '../../../components/window';
 import { DesktopNav } from '../DesktopNav/DesktopNav';
 import { DesktopTopBar } from '../DesktopTopBar/DesktopTopBar';
 import styles from './DesktopUI.module.css';

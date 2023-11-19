@@ -45,14 +45,11 @@ func (impl *chatRepoImpl) ListChatsForUser(uname domain.Username) ([]*domain.Cha
 	return result, nil
 }
 
-func (impl *chatRepoImpl) ListChatMessages(filter domain.ChatMessageDataFilter) ([]*domain.ChatMessageData, common.Error) {
+func (impl *chatRepoImpl) ListChatMessages(filter *domain.ChatHistoryFilter) ([]*domain.ChatMessageData, common.Error) {
 	impl.mu.Lock()
 	defer impl.mu.Unlock()
 
-	history, found := impl.messages[filter.ChatID]
-	if !found {
-		return nil, NewChatNotFoundError(filter.ChatID)
-	}
+	history := impl.messages[filter.ChatID]
 
 	result := make([]*domain.ChatMessageData, 0)
 	for i := len(history) - 1; i >= 0; i -= 1 {
@@ -112,7 +109,7 @@ func (impl *chatRepoImpl) KickMember(cid domain.ChatID, username domain.Username
 	return nil
 }
 
-func (impl *chatRepoImpl) PostMessage(data domain.PostChatMessageData) (*domain.ChatMessageData, common.Error) {
+func (impl *chatRepoImpl) PostMessage(data *domain.PostChatMessageData) (*domain.ChatMessageData, common.Error) {
 	impl.mu.Lock()
 	defer impl.mu.Unlock()
 

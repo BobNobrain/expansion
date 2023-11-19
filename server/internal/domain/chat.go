@@ -21,14 +21,14 @@ type ChatData struct {
 
 type ChatRepo interface {
 	ListChatsForUser(uname Username) ([]*ChatData, common.Error)
-	ListChatMessages(ChatMessageDataFilter) ([]*ChatMessageData, common.Error)
+	ListChatMessages(*ChatHistoryFilter) ([]*ChatMessageData, common.Error)
 
 	CreateChat(*ChatCreateData) (*ChatData, common.Error)
 
 	InviteMember(cid ChatID, username Username) common.Error
 	KickMember(cid ChatID, username Username) common.Error
 
-	PostMessage(PostChatMessageData) (*ChatMessageData, common.Error)
+	PostMessage(*PostChatMessageData) (*ChatMessageData, common.Error)
 }
 
 type MessageID uint64
@@ -44,7 +44,7 @@ type ChatMessageData struct {
 	Content   string
 }
 
-type ChatMessageDataFilter struct {
+type ChatHistoryFilter struct {
 	ChatID       ChatID
 	PostedBefore time.Time
 	Limit        int

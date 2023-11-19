@@ -1,10 +1,10 @@
 package chats
 
 import (
+	"srv/internal/decodables"
 	"srv/internal/dispatcher"
 	"srv/internal/domain"
 	"srv/internal/encodables"
-	"srv/internal/utils/ajson"
 	"srv/internal/utils/common"
 )
 
@@ -21,20 +21,12 @@ func (impl *chatRepoImpl) GetScope() domain.DispatcherScope {
 func (impl *chatRepoImpl) HandleCommand(cmd *domain.DispatcherCommand) (common.Encodable, common.Error) {
 	switch cmd.Command {
 	case "post":
-		chatId, err := ajson.GetPrimitive[string](cmd.Payload, []string{"chatId"})
-		if err != nil {
-			return nil, err
-		}
-		content, err := ajson.GetPrimitive[string](cmd.Payload, []string{"content"})
+		parsedPayload, err := decodables.DecodeChatPostCommand(cmd)
 		if err != nil {
 			return nil, err
 		}
 
-		_, err = impl.PostMessage(domain.PostChatMessageData{
-			ChatID:  domain.ChatID(chatId),
-			Author:  cmd.OnBehalf,
-			Content: content,
-		})
+		_, err = impl.PostMessage(parsedPayload)
 
 		if err != nil {
 			return nil, err
@@ -49,6 +41,19 @@ func (impl *chatRepoImpl) HandleCommand(cmd *domain.DispatcherCommand) (common.E
 		}
 
 		return encodables.NewChatListResponse(chats), nil
+
+	case "history":
+		filter, err := decodables.DecodeChatHistoryCommand(cmd)
+		if err != nil {
+			return nil, err
+		}
+
+		history, err := impl.ListChatMessages(filter)
+		if err != nil {
+			return nil, err
+		}
+
+		return encodables.NewChatHistoryResponse(history), nil
 	}
 
 	return nil, dispatcher.NewUnknownDispatcherCommandError(cmd)

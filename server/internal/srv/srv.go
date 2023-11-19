@@ -21,7 +21,7 @@ func Run() error {
 	chatRepo := chats.NewChatRepo(comms, missionControl)
 	chatRepo.CreateChat(&domain.ChatCreateData{
 		Title:           "Global Chat",
-		MemberUsernames: []domain.Username{"bob", "alice"},
+		MemberUsernames: []domain.Username{"bob", "alice", "eve", "joe"},
 	})
 
 	srv := http.NewHTTPServer(auth, comms)

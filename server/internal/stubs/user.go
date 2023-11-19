@@ -21,6 +21,14 @@ func NewStubUserRepo() domain.UserRepo {
 		uname:        "alice",
 		passwordHash: "222",
 	})
+	users = append(users, userData{
+		uname:        "eve",
+		passwordHash: "333",
+	})
+	users = append(users, userData{
+		uname:        "joe",
+		passwordHash: "444",
+	})
 
 	return &stubUserRepo{
 		mu:    sync.Mutex{},

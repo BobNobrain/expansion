@@ -1,8 +1,8 @@
 import { type Component, createSignal } from 'solid-js';
-import { NavSidebar, type NavSidebarItem } from '../../NavSidebar/NavSidebar';
-import { useWindowManager } from '../../window/context';
-import { type WindowController } from '../../window';
-import { ChatWindow } from '../ChatWindow/ChatWindow';
+import { NavSidebar, type NavSidebarItem } from '../../../components/NavSidebar/NavSidebar';
+import { useWindowManager } from '../../../components/window/context';
+import { type WindowController } from '../../../components/window';
+import { ChatsView } from '../../views/ChatView/ChatsView';
 
 export const DesktopNav: Component = () => {
     const allItems: NavSidebarItem[] = [
@@ -30,7 +30,7 @@ export const DesktopNav: Component = () => {
                                 constrainWidth: { min: 400 },
                                 constrainHeight: { min: 300 },
                             },
-                            content: ChatWindow,
+                            content: ChatsView,
                         }) ?? null
                     );
                 });
