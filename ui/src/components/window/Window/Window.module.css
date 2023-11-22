@@ -1,8 +1,4 @@
 .window {
-    display: grid;
-    grid-template-columns: 4px 1fr 4px;
-    grid-template-rows: 4px 1fr 4px;
-
     position: absolute;
 }
 
@@ -10,8 +6,17 @@
     pointer-events: none;
 }
 
+.drag-handle-edge {
+    /* composes: drag-handle; */
+    position: absolute;
+}
 .drag-handle-edge:hover {
     border-color: var(--color-primary);
+}
+
+.drag-handle-corner {
+    /* composes: drag-handle; */
+    position: absolute;
 }
 .drag-handle-corner:hover {
     background-color: var(--color-primary);
@@ -20,6 +25,10 @@
 .drag-l-t {
     composes: drag-handle-corner;
     cursor: nwse-resize;
+    top: -4px;
+    left: -4px;
+    width: 4px;
+    height: 4px;
 }
 
 .drag-t {
@@ -27,45 +36,72 @@
     cursor: ns-resize;
     border-bottom: 2px solid transparent;
     margin-left: 16px;
+    top: -4px;
+    left: 0;
+    right: 0;
+    height: 4px;
 }
 
 .drag-r-t {
     composes: drag-handle-corner;
     cursor: nesw-resize;
+    top: -4px;
+    right: -4px;
+    width: 4px;
+    height: 4px;
 }
 
 .drag-l {
     composes: drag-handle-edge;
     cursor: ew-resize;
     border-right: 2px solid transparent;
-    margin-top: 16px;
+    top: 16px;
+    left: -4px;
+    width: 4px;
+    bottom: 0;
 }
 
 .drag-r {
     composes: drag-handle-edge;
     cursor: ew-resize;
     border-left: 2px solid transparent;
-    margin-bottom: 16px;
+    top: 0;
+    right: -4px;
+    width: 4px;
+    bottom: 16px;
 }
 
 .drag-l-b {
     composes: drag-handle-corner;
     cursor: nesw-resize;
+    left: -4px;
+    width: 4px;
+    bottom: -4px;
+    height: 4px;
 }
 
 .drag-b {
     composes: drag-handle-edge;
     cursor: ns-resize;
     border-top: 2px solid transparent;
-    margin-right: 16px;
+    left: 0;
+    right: 16px;
+    bottom: -4px;
+    height: 4px;;
 }
 
 .drag-r-b {
     composes: drag-handle-corner;
     cursor: nwse-resize;
+    right: -4px;
+    width: 4px;
+    bottom: 12px;
+    height: 4px;
 }
 
 .inner {
+    position: absolute;
+    inset: 0;
     display: flex;
     flex-flow: column;
 }
@@ -75,6 +111,7 @@
     border-width: 0 1px;
     flex: 1 1 auto;
     background-color: var(--color-background);
+    overflow: auto;
 }
 
 .header {
@@ -109,7 +146,6 @@
 }
 .title.dragging {
     cursor: grabbing;
-    font-weight: bold;
 }
 
 .controls {

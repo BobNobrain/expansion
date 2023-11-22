@@ -1,7 +1,6 @@
 import { type Component, createSignal } from 'solid-js';
 import { NavSidebar, type NavSidebarItem } from '../../../components/NavSidebar/NavSidebar';
 import { useWindowManager } from '../../../components/window/context';
-import { type WindowController } from '../../../components/window';
 import { ChatsView } from '../../views/ChatView/ChatsView';
 
 export const DesktopNav: Component = () => {
@@ -13,27 +12,24 @@ export const DesktopNav: Component = () => {
 
     const [getActiveScreen, setActiveScreen] = createSignal<NavSidebarItem | null>(allItems[0]);
     const wm = useWindowManager();
-    const [getChatWindow, setChatWindow] = createSignal<WindowController | null>(null);
+
+    const chatWindow = wm()?.createWindow({
+        title: { text: 'Chat' },
+        attributes: {
+            constrainWidth: { min: 400 },
+            constrainHeight: { min: 300 },
+        },
+        content: ChatsView,
+    });
 
     const onActivate = (item: NavSidebarItem) => {
         switch (item.id) {
             case 'chat':
-                setChatWindow((old) => {
-                    if (old) {
-                        return old;
-                    }
+                if (!chatWindow || chatWindow.isOpen()) {
+                    return;
+                }
 
-                    return (
-                        wm()?.createWindow({
-                            title: { text: 'Chat' },
-                            attributes: {
-                                constrainWidth: { min: 400 },
-                                constrainHeight: { min: 300 },
-                            },
-                            content: ChatsView,
-                        }) ?? null
-                    );
-                });
+                chatWindow.open();
                 break;
 
             default:
@@ -44,7 +40,7 @@ export const DesktopNav: Component = () => {
 
     const getActiveItems = (): NavSidebarItem[] => {
         const activeScreen = getActiveScreen();
-        const isChatOpen = getChatWindow() !== null;
+        const isChatOpen = chatWindow?.isOpen();
 
         return allItems.filter((item) => item === activeScreen || (item.id === 'chat' && isChatOpen));
     };

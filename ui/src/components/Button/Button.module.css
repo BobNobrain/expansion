@@ -8,102 +8,77 @@
 
     background-color: var(--button-background);
     color: var(--button-text);
+
+    clip-path: polygon(
+        var(--button-wing-top-left, 0px) 0,
+        calc(100% - var(--button-wing-top-right, 0px)) 0,
+        calc(100% - var(--button-wing-bottom-right, 0px)) 100%,
+        var(--button-wing-bottom-left, 0px) 100%
+    );
 }
 .button:hover {
-    color: var(--color-text-selected);
+    background-color: var(--button-background-l);
 }
 .button:active {
     color: var(--color-text);
     text-shadow: 0 -1px 1px var(--color-background);
 }
 
-.downLeftWing, .upLeftWing {
-    margin-left: 16px;
-}
-.downRightWing, .upRightWing {
-    margin-right: 16px;
-}
-
 .downLeftWing {
-    --button-wing-bottom-left: -16px;
+    --button-wing-top-left: 16px;
+    padding-left: 24px;
 }
 .upLeftWing {
-    --button-wing-top-left: -16px;
+    --button-wing-bottom-left: 16px;
+    padding-left: 24px;
 }
 .downRightWing {
-    --button-wing-bottom-right: -16px;
+    --button-wing-top-right: 16px;
+    padding-right: 24px;
 }
 .upRightWing {
-    --button-wing-top-right: -16px;
+    --button-wing-bottom-right: 16px;
+    padding-right: 24px;
 }
 
-.downLeftWing::before,
-.upLeftWing::before,
-.downRightWing::after,
-.upRightWing::after {
-    content: ' ';
-    display: inline-block;
-    border: 8px solid transparent;
-    width: 0;
-    height: 0;
-    position: absolute;
-}
-
-.downLeftWing::before, .upLeftWing::before {
-    left: -16px;
-}
-.downRightWing::after, .upRightWing::after {
-    right: -16px;
-}
-
-.downLeftWing::before {
-    border-color: transparent var(--button-background) var(--button-background) transparent;
-}
-.upLeftWing::before {
-    border-color: var(--button-background) var(--button-background) transparent transparent;
-}
-.downRightWing::after {
-    border-color: transparent transparent var(--button-background) var(--button-background);
-}
-.upRightWing::after {
-    border-color: var(--button-background) transparent transparent var(--button-background);
-}
-
-.downRightWing + .downLeftWing,
 .downRightWing + .upLeftWing,
-.upRightWing + .downLeftWing,
-.upRightWing + .upLeftWing {
-    margin-left: 0;
+.upRightWing + .downLeftWing {
+    margin-left: -16px;
 }
 
 .primary {
     --button-background: var(--color-primary);
+    --button-background-l: var(--color-primary-light);
     --button-text: var(--color-text-inverted);
 }
 
 .secondary {
     --button-background: var(--color-border);
+    --button-background-l: var(--color-border-sharp);
     --button-text: var(--color-text);
 }
-.secondary:hover {
+/* .secondary:hover {
     --button-background: var(--color-primary);
 }
 .secondary.loading:hover {
     --button-background: var(--color-border);
-}
+} */
 
 .info {
     --button-background: var(--color-info);
+    --button-background-l: var(--color-info-light);
     --button-text: var(--color-text-inverted);
 }
 
 .error {
     --button-background: var(--color-error);
+    --button-background-l: var(--color-error-light);
     --button-text: var(--color-text-inverted);
 }
 
 .success {
     --button-background: var(--color-success);
+    --button-background-l: var(--color-success-light);
     --button-text: var(--color-text-inverted);
 }
 
@@ -116,16 +91,25 @@
 .button.loading {
     position: relative;
     color: var(--color-text-dim);
-    animation: loading ease-in-out infinite alternate 0.8s;
+    animation: loading linear infinite 1s;
     cursor: wait;
+
+    background: repeating-linear-gradient(
+        135deg,
+        var(--button-background) 0,
+        var(--button-background) 8px,
+        var(--button-background-l) 8px,
+        var(--button-background-l) 16px
+    );
+    background-size: 45.254834px 45.254834px;
 }
 
 @keyframes loading {
     0% {
-        color: var(--color-text-dim);
+        background-position-y: 0;
     }
     100% {
-        color: var(--button-text);
+        background-position-y: 45.254834px;
     }
 }
 
@@ -133,39 +117,31 @@
     z-index: 1;
     position: absolute;
     height: 1px;
+    left: 0;
+    right: 0;
     background-color: var(--color-text-selected);
-    animation: loader-movement ease-in-out 1s infinite normal;
+    animation: loader-movement ease-in-out 2s infinite normal;
 }
 
 @keyframes loader-movement {
     0% {
         opacity: 0;
         top: 0;
-        left: var(--button-wing-top-left, 0);
-        right: var(--button-wing-top-right, 0);
     }
     10% {
         opacity: 0.2;
         top: 0;
-        left: var(--button-wing-top-left, 0);
-        right: var(--button-wing-top-right, 0);
     }
     50% {
         opacity: 0.2;
         top: calc(100% - 1px);
-        left: var(--button-wing-bottom-left, 0);
-        right: var(--button-wing-bottom-right, 0);
     }
     60% {
         opacity: 0;
         top: calc(100% - 1px);
-        left: var(--button-wing-bottom-left, 0);
-        right: var(--button-wing-bottom-right, 0);
     }
     100% {
         opacity: 0;
         top: calc(100% - 1px);
-        left: var(--button-wing-bottom-left, 0);
-        right: var(--button-wing-bottom-right, 0);
     }
 }

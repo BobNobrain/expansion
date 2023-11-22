@@ -1,4 +1,4 @@
-import { For, type Component, onMount } from 'solid-js';
+import { For, type Component, onMount, Show } from 'solid-js';
 import throttle from 'lodash/throttle';
 import { type ChatData, useChats } from '../../../../store/chats';
 import { InlineLoader } from '../../../../components/InlineLoader/InlineLoader';
@@ -36,7 +36,9 @@ export const ChatMessages: Component<ChatMessagesProps> = (props) => {
 
     return (
         <div class={styles.messageHistory} ref={scrollableWrapper} onScroll={onHistoryScroll}>
-            <InlineLoader />
+            <Show when={!props.activeChat.noHistoryLeft}>
+                <InlineLoader />
+            </Show>
             <For each={props.activeChat.messages}>
                 {(msg) => {
                     return (

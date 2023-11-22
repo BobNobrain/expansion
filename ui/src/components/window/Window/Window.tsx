@@ -39,11 +39,9 @@ export const Window: Component<WindowProps> = (props) => {
     });
 
     const onMinimizeClick = () => {
-        props.controller.setWindowState((old) =>
-            old === WindowState.Normal ? WindowState.Minimized : WindowState.Normal,
-        );
+        props.controller.setMinimized((old) => !old);
     };
-    const close = () => props.controller.destroy();
+    const close = () => props.controller.close();
 
     return (
         <div
@@ -81,12 +79,14 @@ export const Window: Component<WindowProps> = (props) => {
                     <footer class={styles.footer}>
                         <div class={styles.footerSpacer} />
                         <Button leftWing="none">Cancel</Button>
-                        <Button>Wait a minute...</Button>
-                        <Button theme="primary">OK!</Button>
+                        <Button loading>Wait a minute...</Button>
+                        <Button theme="primary" loading>
+                            OK!
+                        </Button>
                     </footer>
                 </Show>
             </div>
-            <div class={styles.dragR} {...rightEdge.handlers} draggable={false} />
+            <div class={styles.dragR} {...rightEdge.handlers} />
             <div class={styles.dragLB} />
             <div class={styles.dragB} {...bottomEdge.handlers} />
             <div class={styles.dragRB} />

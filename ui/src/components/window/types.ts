@@ -12,14 +12,13 @@ export type WindowTitle = {
 };
 
 export enum WindowState {
-    Normal,
+    Closed,
+    Open,
     Minimized,
 }
 
 export type WindowAttributes = {
     minimizable: boolean;
-    constrainX: NumericLimits;
-    constrainY: NumericLimits;
     constrainWidth: NumericLimits;
     constrainHeight: NumericLimits;
 };
