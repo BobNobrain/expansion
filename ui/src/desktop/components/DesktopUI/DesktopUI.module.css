@@ -7,11 +7,13 @@
 .middle {
     display: flex;
     flex: 1 1 auto;
+    min-height: 0;
 }
 
 .main {
     flex: 1 1 auto;
     position: relative;
+    display: flex;
 }
 
 .nav {

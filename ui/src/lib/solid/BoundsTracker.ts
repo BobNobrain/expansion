@@ -1,8 +1,9 @@
 import { createSignal, onCleanup } from 'solid-js';
 
 export type BoundsTracker<T extends HTMLElement> = {
-    getBounds(): DOMRect;
+    getBounds: () => DOMRect;
     ref: (el: T) => void;
+    getElement: () => T | null;
 };
 
 export function createBoundsTracker<T extends HTMLElement>(): BoundsTracker<T> {
@@ -19,9 +20,11 @@ export function createBoundsTracker<T extends HTMLElement>(): BoundsTracker<T> {
     };
 
     window.addEventListener('resize', updateBounds);
+    // const interval = setInterval(updateBounds, 200);
 
     onCleanup(() => {
         window.removeEventListener('resize', updateBounds);
+        // clearInterval(interval);
     });
 
     return {
@@ -30,6 +33,7 @@ export function createBoundsTracker<T extends HTMLElement>(): BoundsTracker<T> {
             setTimeout(updateBounds, 0);
         },
         getBounds,
+        getElement: () => el,
     };
 }
 

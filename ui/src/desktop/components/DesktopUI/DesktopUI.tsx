@@ -3,6 +3,7 @@ import { App } from '../../../components/App/App';
 import { LogInGuard } from '../../../components/LogInGuard';
 import { WindowManagerContext } from '../../../components/window/context';
 import { WindowManager, type WindowManagerController } from '../../../components/window';
+import { PlanetView } from '../../../views/PlanetView/PlanetView';
 import { DesktopNav } from '../DesktopNav/DesktopNav';
 import { DesktopTopBar } from '../DesktopTopBar/DesktopTopBar';
 import styles from './DesktopUI.module.css';
@@ -20,6 +21,7 @@ export const DesktopUI: Component = () => {
                         <div class={styles.middle}>
                             <div class={styles.main}>
                                 <WindowManager mode="static" onController={setWM} />
+                                <PlanetView />
                             </div>
                             <div class={styles.nav}>
                                 <DesktopNav />
