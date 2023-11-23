@@ -18,5 +18,13 @@ run-server:
 api-types:
 	cd server && make api-types
 
+.PHONY: dev-server
+dev-srv:
+	cd server && SRV_STATIC="http://localhost:3000" make watch
+
+.PHONY: dev-desktop
+dev-desktop:
+	cd ui && npm run serve:desktop
+
 .PHONY: rebuild-and-run
 rebuild-and-run: api-types build-desktop run-server

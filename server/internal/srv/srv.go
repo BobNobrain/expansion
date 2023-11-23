@@ -3,6 +3,7 @@ package srv
 import (
 	"fmt"
 	"srv/internal/chats"
+	"srv/internal/config"
 	"srv/internal/dispatcher"
 	"srv/internal/domain"
 	"srv/internal/stubs"
@@ -10,7 +11,7 @@ import (
 	"srv/internal/transport/ws"
 )
 
-func Run() error {
+func Run(cfg *config.SrvConfig) error {
 	userRepo := stubs.NewStubUserRepo()
 	auth := stubs.NewStubAuthenticator(userRepo)
 
@@ -24,8 +25,11 @@ func Run() error {
 		MemberUsernames: []domain.Username{"bob", "alice", "eve", "joe"},
 	})
 
-	srv := http.NewHTTPServer(auth, comms)
+	srv, err := http.NewHTTPServer(auth, comms, cfg)
+	if err != nil {
+		return err
+	}
 
-	fmt.Println("Starting server at http://127.0.0.1:8031")
-	return srv.Run(":8031")
+	fmt.Printf("Starting server at http://127.0.0.1:%s\n", cfg.Port)
+	return srv.Run(":" + cfg.Port)
 }
