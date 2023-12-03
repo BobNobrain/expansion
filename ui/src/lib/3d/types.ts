@@ -28,3 +28,18 @@ export type UIScene = {
     onCanvasResize?: (resize: ResizeData) => void;
     onDestroy?: () => void;
 };
+
+export type RawVertex = [x: number, y: number, z: number];
+export type RawEdge = [startIndex: number, endIndex: number];
+export type RawFace = [number, number, number];
+
+export enum FaceType {
+    EdgeIndicies,
+    VertexIndicies,
+}
+
+export type Face =
+    | { type: FaceType.EdgeIndicies; edges: number[] }
+    | { type: FaceType.VertexIndicies; verticies: number[] };
+
+export type Poly = number[];
