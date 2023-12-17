@@ -1,6 +1,6 @@
 import * as T from 'three';
 import { type UISceneConstructor, type AnimationFrameData } from '../../lib/3d/types';
-import { createCustomMesh } from './planet';
+import { createPlanetMeshes } from './planet';
 
 export type PlanetViewSceneProps = {
     seed: string;
@@ -16,9 +16,10 @@ export const PlanetViewScene = (_: PlanetViewSceneProps): UISceneConstructor => 
         const mainCamera = new T.PerspectiveCamera(75, canvas.width / canvas.height, 0.1, 1000);
         mainCamera.position.z = 2.5;
 
-        const mesh = createCustomMesh();
-        mesh.castShadow = true;
-        scene.add(mesh);
+        const meshes = createPlanetMeshes();
+        for (const mesh of meshes) {
+            scene.add(mesh);
+        }
 
         const sun = new T.DirectionalLight(0xffffff, 1);
         sun.position.set(1, SUN_Y, 0);
@@ -27,7 +28,9 @@ export const PlanetViewScene = (_: PlanetViewSceneProps): UISceneConstructor => 
         const rotateSun = ({ time }: AnimationFrameData) => {
             sun.position.set(Math.cos(time * SUN_ROTATION_FACTOR), SUN_Y, Math.sin(time * SUN_ROTATION_FACTOR));
 
-            mesh.rotation.set(time * SUN_ROTATION_FACTOR, time * 2 * SUN_ROTATION_FACTOR, 0);
+            for (const mesh of meshes) {
+                mesh.rotation.set(time * SUN_ROTATION_FACTOR, time * 2 * SUN_ROTATION_FACTOR, 0);
+            }
         };
 
         return {

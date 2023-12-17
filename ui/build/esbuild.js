@@ -28,7 +28,8 @@ async function main() {
         publicPath: '/',
         outdir: path.resolve('out'),
         outbase: path.resolve('src', 'entries'),
-        minify: true,
+        minify: false,
+        sourcemap: true,
         logLevel: 'info',
         plugins: [
             solidPlugin(),

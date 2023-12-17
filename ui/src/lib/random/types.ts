@@ -1,0 +1,1 @@
+export type RandomSequence = () => number;

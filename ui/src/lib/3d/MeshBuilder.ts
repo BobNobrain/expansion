@@ -11,19 +11,30 @@ const areClose = (a: RawVertex, b: RawVertex, eps: number) => {
     return true;
 };
 
+export type MeshBuilderSize = {
+    verticies: number;
+    faces: number;
+};
+
 export class MeshBuilder {
     private verticies: RawVertex[] = [];
     private faces: Poly[] = [];
 
-    private eps = 1e-3;
-    setEps(eps: number) {
-        this.eps = eps;
+    size(): MeshBuilderSize {
+        return {
+            verticies: this.verticies.length,
+            faces: this.faces.length,
+        };
     }
 
     add(x: number, y: number, z: number): number {
         const i = this.verticies.length;
         this.verticies.push([x, y, z]);
         return i;
+    }
+    addIfNotClose(x: number, y: number, z: number): number {
+        const i = this.lookup(x, y, z);
+        return i === -1 ? this.add(x, y, z) : i;
     }
     addMany(vs: RawVertex[]): number {
         const i = this.verticies.length;
@@ -34,7 +45,37 @@ export class MeshBuilder {
     coords(vertexIndex: number): RawVertex {
         return this.verticies[vertexIndex];
     }
+    setCoords(vertexIndex: number, coords: RawVertex) {
+        this.verticies[vertexIndex] = coords;
+    }
 
+    mapVerticies(f: (v: RawVertex, i: number) => RawVertex) {
+        this.verticies = this.verticies.map(f);
+    }
+
+    calculateConnectionMap(): Set<number>[] {
+        const result = this.verticies.map(() => new Set<number>());
+
+        for (const face of this.faces) {
+            result[face[0]].add(face[face.length - 1]);
+            result[face[face.length - 1]].add(face[0]);
+
+            for (let fvi = 1; fvi < face.length - 1; fvi++) {
+                result[face[fvi]].add(face[fvi - 1]);
+                result[face[fvi - 1]].add(face[fvi]);
+
+                result[face[fvi]].add(face[fvi + 1]);
+                result[face[fvi + 1]].add(face[fvi]);
+            }
+        }
+
+        return result;
+    }
+
+    private eps = 1e-3;
+    setEps(eps: number) {
+        this.eps = eps;
+    }
     lookup(x: number, y: number, z: number): number {
         const target: RawVertex = [x, y, z];
         for (let i = 0; i < this.verticies.length; i++) {
@@ -52,6 +93,23 @@ export class MeshBuilder {
         return i;
     }
 
+    face(faceIndex: number): Poly {
+        return this.faces[faceIndex];
+    }
+    findConnectedFaces(vertexIndicies: number[]): number[] {
+        const result: number[] = [];
+        for (let f = 0; f < this.faces.length; f++) {
+            const face = this.faces[f];
+            if (vertexIndicies.every((vi) => face.includes(vi))) {
+                result.push(f);
+            }
+        }
+        return result;
+    }
+    replaceFace(faceIndex: number, vs: number[]) {
+        this.faces[faceIndex] = vs;
+    }
+
     subdivide(f: (face: Poly, b: MeshBuilder) => Poly[]) {
         const newFaces: Poly[] = [];
         for (const face of this.faces) {
@@ -61,8 +119,20 @@ export class MeshBuilder {
         this.faces = newFaces;
     }
 
-    mapVerticies(f: (v: RawVertex, i: number) => RawVertex) {
-        this.verticies = this.verticies.map(f);
+    triangulate() {
+        const triangulatedFaces: RawFace[] = [];
+        for (const poly of this.faces) {
+            if (poly.length === 3) {
+                triangulatedFaces.push(poly as RawFace);
+                continue;
+            }
+
+            const triangles = triangulatePoly(poly);
+            for (const t of triangles) {
+                triangulatedFaces.push(t);
+            }
+        }
+        this.faces = triangulatedFaces;
     }
 
     build(): T.BufferGeometry {

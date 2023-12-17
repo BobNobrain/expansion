@@ -29,7 +29,7 @@ export type UIScene = {
     onDestroy?: () => void;
 };
 
-export type RawVertex = [x: number, y: number, z: number];
+export type RawVertex = Readonly<[x: number, y: number, z: number]>;
 export type RawEdge = [startIndex: number, endIndex: number];
 export type RawFace = [number, number, number];
 
