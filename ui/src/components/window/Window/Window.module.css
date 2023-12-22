@@ -1,5 +1,6 @@
 .window {
     position: absolute;
+    pointer-events: all;
 }
 
 .minimized {

@@ -50,7 +50,6 @@ export const SceneRenderer: Component<GLViewportProps> = (props) => {
         if (scene.onCanvasResize) {
             createEffect(() => {
                 const newBounds = getBounds();
-                console.log(newBounds);
                 renderer.setSize(newBounds.width, newBounds.height);
                 scene.onCanvasResize!({
                     canvas,

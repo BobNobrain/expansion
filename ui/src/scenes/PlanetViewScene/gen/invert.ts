@@ -32,9 +32,6 @@ export function getInvertedMesh(source: MeshBuilder): MeshBuilder {
 
             const projection = normalizedProjections[i];
             const angle = fullAngle(projection, axis, planeNormal);
-            if (Math.abs(angle) < 1e-8) {
-                console.log(vi, i, projection, planeNormal, angle);
-            }
 
             return { fi, angle, projection };
         });
@@ -42,17 +39,6 @@ export function getInvertedMesh(source: MeshBuilder): MeshBuilder {
 
         inverted.assembleVerticies(withAngles.map(({ fi }) => fi));
     }
-
-    console.log([
-        (fullAngle([0, 1, 0], [1, 0, 0], [0, 0, 1]) / Math.PI) * 180,
-        (fullAngle([0, -1, 0], [1, 0, 0], [0, 0, 1]) / Math.PI) * 180,
-        (fullAngle([1, 0, 0], [1, 0, 0], [0, 0, 1]) / Math.PI) * 180,
-        (fullAngle([-1, 0, 0], [1, 0, 0], [0, 0, 1]) / Math.PI) * 180,
-        (fullAngle([Math.SQRT1_2, Math.SQRT1_2, 0], [1, 0, 0], [0, 0, 1]) / Math.PI) * 180,
-        (fullAngle([-Math.SQRT1_2, Math.SQRT1_2, 0], [1, 0, 0], [0, 0, 1]) / Math.PI) * 180,
-        (fullAngle([Math.SQRT1_2, -Math.SQRT1_2, 0], [1, 0, 0], [0, 0, 1]) / Math.PI) * 180,
-        (fullAngle([-Math.SQRT1_2, -Math.SQRT1_2, 0], [1, 0, 0], [0, 0, 1]) / Math.PI) * 180,
-    ]);
 
     return inverted;
 }

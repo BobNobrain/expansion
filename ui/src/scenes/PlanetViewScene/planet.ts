@@ -1,34 +1,48 @@
 import * as T from 'three';
 import { type MeshBuilder } from '../../lib/3d/MeshBuilder';
-import { RandomNumberGenerator } from '../../lib/random';
+import { RandomNumberGenerator, type RandomSequence } from '../../lib/random';
 import { icosahedron } from './gen/icosahedron';
 import { rotateRandomEdges } from './gen/rotate';
 import * as utils from './gen/utils';
 import { relaxMesh } from './gen/relax';
 import { getInvertedMesh } from './gen/invert';
+import { generateHabitablePlanet } from './gen/habitable';
 
 export function createPlanetMeshes(): T.Mesh[] {
-    const planetGraph = createPlanetGeometry();
+    const rng = new RandomNumberGenerator('deadmouse');
+    const seq = rng.detached();
+
+    const planetGraph = createPlanetGeometry(seq);
     const planetSurface = getInvertedMesh(planetGraph);
-    planetGraph.mapVerticies(utils.scale(1.01));
+
+    const tiles = generateHabitablePlanet({
+        graph: planetGraph,
+        seq,
+    });
+    tiles.paintSurface(planetSurface);
+
+    planetGraph.mapVerticies((v, i) => {
+        const e = tiles.getTile(i).data.elevation;
+        return utils.mul(v, 1 + 0.05 + e * 0.05);
+    });
 
     const graphMesh = planetGraph.build();
+    tiles.paintGraph(graphMesh);
     const graphMaterial = new T.MeshStandardMaterial({
         color: 0xffffff,
         emissive: 0xffffff,
-        emissiveIntensity: 0.2,
+        emissiveIntensity: 0.02,
+        opacity: 0.5,
+        vertexColors: true,
         wireframe: true,
     });
     const graph = new T.Mesh(graphMesh, graphMaterial);
 
     const surfaceMaterial = new T.MeshStandardMaterial({
-        color: 0x2080f0,
-        emissive: 0x2080f0,
-        emissiveIntensity: 0.05,
         roughness: 0.6,
         metalness: 0.3,
         flatShading: true,
-        // wireframe: true,
+        vertexColors: true,
     });
     const surfaceMesh = planetSurface.build();
     const surface = new T.Mesh(surfaceMesh, surfaceMaterial);
@@ -37,7 +51,7 @@ export function createPlanetMeshes(): T.Mesh[] {
     return [graph, surface];
 }
 
-function createPlanetGeometry(): MeshBuilder {
+function createPlanetGeometry(seq: RandomSequence): MeshBuilder {
     const SIZE = 1;
     const planet = icosahedron({
         size: SIZE,
@@ -47,8 +61,6 @@ function createPlanetGeometry(): MeshBuilder {
     // @ts-expect-error 111
     window.builder = planet;
 
-    const rng = new RandomNumberGenerator('deadmouse');
-    const seq = rng.detached();
     rotateRandomEdges({
         builder: planet,
         seq,
