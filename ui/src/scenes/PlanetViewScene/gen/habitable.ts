@@ -27,29 +27,50 @@ type LandscapeOptions = {
     noiseFactor: number;
     /** how much blur is added: 0=none, 1=everything will try to even out */
     blurFactor: number;
+    /** how much moisture spread passes to do at max */
+    moistureIterations: number;
+    /** max moisture amount spread per pass */
+    moistureTransfer: number;
 };
 
-enum Colors {
-    Plains,
+enum Biome {
+    Unknown,
     Ocean,
     DeepOcean,
+    FrozenOcean,
     Islands,
-    Mountains,
-    Forest,
     Desert,
+    Savanna,
+    Plains,
+    Tundra,
     Arctic,
+    Forest,
+    WetForest,
+    Taiga,
+    Mountains,
 }
 
-const palette: RawColor[] = [
-    [0.2, 0.6, 0.1],
-    [0.0, 0.2, 0.5],
-    [0.1, 0.3, 0.7],
-    [0.1, 0.9, 1.0],
-    [0.6, 0.5, 0.4],
-    [0.1, 0.4, 0.2],
-    [0.7, 0.9, 0.2],
-    [0.95, 0.95, 1],
-];
+const biomeColors: Record<Biome, RawColor> = {
+    [Biome.Unknown]: [1, 0, 1],
+    [Biome.Ocean]: [0.12, 0.36, 0.85],
+    [Biome.DeepOcean]: [0.0, 0.2, 0.5],
+    [Biome.FrozenOcean]: [0.5, 0.8, 1],
+    [Biome.Islands]: [0.33, 0.91, 0.97],
+    [Biome.Desert]: [1, 0.92, 0.42],
+    [Biome.Savanna]: [0.89, 0.96, 0.59],
+    [Biome.Plains]: [0.33, 0.91, 0.18],
+    [Biome.Tundra]: [0.53, 0.62, 0.3],
+    [Biome.Arctic]: [0.92, 0.98, 0.99],
+    [Biome.Forest]: [0.26, 0.51, 0.13],
+    [Biome.WetForest]: [0.07, 0.73, 0.03],
+    [Biome.Taiga]: [0.15, 0.53, 0.36],
+    [Biome.Mountains]: [0.59, 0.57, 0.5],
+};
+
+const palette = Object.entries(biomeColors).reduce<RawColor[]>((acc, [biome, color]) => {
+    acc[Number(biome)] = color;
+    return acc;
+}, []);
 
 const heightsPalette: RawColor[] = [
     [0.0, 0.0, 0.4],
@@ -68,6 +89,8 @@ type HabitableTileData = {
     plateIndex: number;
     elevation: number;
     plateMovement: RawVertex | null;
+    moisture: number;
+    biome: Biome;
 };
 
 type PlateData = {
@@ -83,6 +106,8 @@ type PlateData = {
 
 type PTM = PlanetTileManager<HabitableTileData>;
 
+const ALMOST1 = 0.9999;
+
 export function generateHabitablePlanet({
     graph,
     seq,
@@ -94,10 +119,12 @@ export function generateHabitablePlanet({
             plateIndex: -1,
             elevation: 0,
             plateMovement: null,
+            moisture: 0,
+            biome: Biome.Plains,
         }),
     );
-    // tiles.setPalette(palette);
-    tiles.setPalette(heightsPalette);
+    tiles.setPalette(palette);
+    // tiles.setPalette(heightsPalette);
 
     const connections = graph.calculateConnectionMap();
     const vn = connections.length;
@@ -106,11 +133,13 @@ export function generateHabitablePlanet({
         nPlates: landscapeOpts.nPlates ?? Math.max(3, Math.min(Math.floor(vn / 40), 20)),
         oceanPercentage: landscapeOpts.oceanPercentage ?? 0.6,
         minPlateSize: Math.max(3, Math.min(Math.floor(vn / 120), 10)),
-        extremeness: landscapeOpts.extremeness ?? 0.7,
+        extremeness: landscapeOpts.extremeness ?? 0.6,
         oceanToLandGap: landscapeOpts.oceanToLandGap ?? 0.2,
-        slopeFactor: landscapeOpts.slopeFactor ?? 0.1,
+        slopeFactor: landscapeOpts.slopeFactor ?? 0.3,
         blurFactor: landscapeOpts.blurFactor ?? 0.1,
         noiseFactor: landscapeOpts.noiseFactor ?? 0.1,
+        moistureIterations: landscapeOpts.moistureIterations ?? 20,
+        moistureTransfer: landscapeOpts.moistureTransfer ?? 0.8,
     };
     const { nPlates } = landscape;
 
@@ -132,13 +161,20 @@ export function generateHabitablePlanet({
 
     calculateElevationMap(plates, tiles, connections, landscape);
     blurAndNoiseElevations(seq, tiles, connections, landscape);
+    calculateMoisture(tiles, connections, landscape);
+    calculateBiomes(tiles);
 
     for (let vi = 0; vi < vn; vi++) {
         const tileData = tiles.getTile(vi).data;
         // const plateData = plates[tileData.plateIndex];
         // tiles.setTileColor(vi, Math.floor(((plateData.elevation + 1) / 2) * heightsPalette.length));
-        tiles.setTileColor(vi, Math.floor(((tileData.elevation + 1) / 2) * heightsPalette.length));
+        // tiles.setTileColor(vi, Math.floor(((tileData.elevation + 1) / 2) * heightsPalette.length));
+        // tiles.setTileColor(vi, Math.floor((1 - (tileData.moisture || 0.001)) * heightsPalette.length));
+        tiles.setTileColor(vi, tileData.biome);
     }
+
+    // @ts-expect-error 111
+    window.tiles = tiles;
 
     return tiles;
 }
@@ -360,6 +396,110 @@ function blurAndNoiseElevations(
         }
         dH /= neighbours.length;
 
-        tileData.elevation = Math.max(-1, Math.min(tileData.elevation + dH, 0.999));
+        tileData.elevation = Math.max(-1, Math.min(tileData.elevation + dH, ALMOST1));
     }
+}
+
+function calculateMoisture(
+    tiles: PTM,
+    connections: Set<number>[],
+    { moistureIterations, moistureTransfer }: LandscapeOptions,
+) {
+    const vn = connections.length;
+    const calculatedTiles = new Set<number>();
+    const closestNeighbours = new Set<[number, number]>();
+
+    for (let vi = 0; vi < vn; vi++) {
+        const tile = tiles.getTile(vi);
+        const isWatery = tile.data.elevation <= 0;
+
+        if (isWatery) {
+            tile.data.moisture = ALMOST1;
+            calculatedTiles.add(vi);
+        }
+    }
+
+    for (let i = 0; i < moistureIterations; i++) {
+        for (const vi of calculatedTiles) {
+            for (const nvi of connections[vi]) {
+                if (calculatedTiles.has(nvi)) {
+                    continue;
+                }
+
+                closestNeighbours.add([vi, nvi]);
+            }
+        }
+
+        console.log({ i, calc: calculatedTiles.size, close: closestNeighbours.size });
+
+        for (const [vi, nvi] of closestNeighbours) {
+            const srcTile = tiles.getTile(vi).data;
+            const destTile = tiles.getTile(nvi).data;
+
+            const transferBlockByHeightPercentage = Math.max(0, destTile.elevation - Math.max(0, srcTile.elevation));
+            const moistureToTransfer =
+                (1 - transferBlockByHeightPercentage) * Math.min(srcTile.moisture * moistureTransfer);
+
+            destTile.moisture = Math.max(moistureToTransfer, destTile.moisture);
+            calculatedTiles.add(nvi);
+        }
+
+        if (calculatedTiles.size === vn) {
+            break;
+        }
+
+        closestNeighbours.clear();
+    }
+}
+
+function calculateBiomes(tiles: PTM) {
+    const vn = tiles.size();
+    for (let vi = 0; vi < vn; vi++) {
+        const tile = tiles.getTile(vi);
+        const moisture = tile.data.moisture;
+        const height = tile.data.elevation;
+        const warmth = 1 - Math.abs(tile.pos[1]);
+
+        tile.data.biome = getBiome({ moisture, height, warmth });
+    }
+}
+
+function getBiome(t: { moisture: number; warmth: number; height: number }): Biome {
+    if (t.height >= 0.7) {
+        return Biome.Mountains;
+    }
+
+    if (t.height < -0.05) {
+        if (t.warmth < 0.2) {
+            return Biome.FrozenOcean;
+        }
+
+        return t.height < -0.5 ? Biome.DeepOcean : Biome.Ocean;
+    }
+
+    if (t.warmth < 0.2) {
+        return Biome.Arctic;
+    }
+
+    if (t.height < 0.05) {
+        return Biome.Islands;
+    }
+
+    if (t.warmth < 0.4) {
+        return t.moisture < 0.5 ? Biome.Tundra : Biome.Taiga;
+    }
+    if (t.warmth < 0.7) {
+        if (t.moisture < 0.1) {
+            return Biome.Desert;
+        }
+        return t.moisture < 0.5 ? Biome.Plains : Biome.Forest;
+    }
+
+    if (t.moisture < 0.3) {
+        return Biome.Desert;
+    }
+    if (t.moisture < 0.5) {
+        return Biome.Savanna;
+    }
+    return Biome.WetForest;
 }

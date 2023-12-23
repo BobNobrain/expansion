@@ -19,6 +19,10 @@ export class PlanetTileManager<TileData> {
         }
     }
 
+    size(): number {
+        return this.tileData.length;
+    }
+
     setPalette(palette: RawColor[]) {
         this.palette = palette;
     }

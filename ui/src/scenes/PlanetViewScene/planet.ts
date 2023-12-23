@@ -8,6 +8,8 @@ import { relaxMesh } from './gen/relax';
 import { getInvertedMesh } from './gen/invert';
 import { generateHabitablePlanet } from './gen/habitable';
 
+const GRID_ELEVATION_FACTOR = 0.1;
+
 export function createPlanetMeshes(): T.Mesh[] {
     const rng = new RandomNumberGenerator('deadmouse');
     const seq = rng.detached();
@@ -23,7 +25,7 @@ export function createPlanetMeshes(): T.Mesh[] {
 
     planetGraph.mapVerticies((v, i) => {
         const e = tiles.getTile(i).data.elevation;
-        return utils.mul(v, 1 + 0.05 + e * 0.05);
+        return utils.mul(v, 1 + GRID_ELEVATION_FACTOR + e * GRID_ELEVATION_FACTOR);
     });
 
     const graphMesh = planetGraph.build();
