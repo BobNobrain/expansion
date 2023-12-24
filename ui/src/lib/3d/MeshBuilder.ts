@@ -73,7 +73,7 @@ export class MeshBuilder {
         return result;
     }
 
-    private eps = 1e-3;
+    private eps = 1e-4;
     setEps(eps: number) {
         this.eps = eps;
     }

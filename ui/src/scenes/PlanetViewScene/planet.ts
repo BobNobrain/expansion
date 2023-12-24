@@ -57,7 +57,7 @@ function createPlanetGeometry(seq: RandomSequence): MeshBuilder {
     const SIZE = 1;
     const planet = icosahedron({
         size: SIZE,
-        subdivisions: 3,
+        subdivisions: 20,
     });
 
     // @ts-expect-error 111

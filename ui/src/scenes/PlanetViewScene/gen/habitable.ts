@@ -57,7 +57,7 @@ const biomeColors: Record<Biome, RawColor> = {
     [Biome.FrozenOcean]: [0.5, 0.8, 1],
     [Biome.Islands]: [0.33, 0.91, 0.97],
     [Biome.Desert]: [1, 0.92, 0.42],
-    [Biome.Savanna]: [0.89, 0.96, 0.59],
+    [Biome.Savanna]: [0.72, 0.87, 0.38],
     [Biome.Plains]: [0.33, 0.91, 0.18],
     [Biome.Tundra]: [0.53, 0.62, 0.3],
     [Biome.Arctic]: [0.92, 0.98, 0.99],
@@ -470,14 +470,14 @@ function getBiome(t: { moisture: number; warmth: number; height: number }): Biom
     }
 
     if (t.height < -0.05) {
-        if (t.warmth < 0.2) {
+        if (t.warmth < 0.1) {
             return Biome.FrozenOcean;
         }
 
         return t.height < -0.5 ? Biome.DeepOcean : Biome.Ocean;
     }
 
-    if (t.warmth < 0.2) {
+    if (t.warmth < 0.15) {
         return Biome.Arctic;
     }
 

@@ -1,6 +1,6 @@
 import { MeshBuilder } from '../../../lib/3d/MeshBuilder';
-import { type Poly } from '../../../lib/3d/types';
-import { calcCenter, normz, scale } from './utils';
+import { type RawVertex, type Poly } from '../../../lib/3d/types';
+import * as utils from './utils';
 
 type GenerateOptions = {
     size?: number;
@@ -49,30 +49,59 @@ export function icosahedron({ size = 1, subdivisions = 1 }: GenerateOptions) {
     builder.assembleVerticies([8, 9, 6]);
     builder.assembleVerticies([11, 10, 7]);
 
-    for (let i = 0; i < subdivisions; i++) {
-        builder.subdivide(subdivideTriangle);
-    }
+    builder.subdivide(subdivideTriangleN(subdivisions));
 
-    builder.mapVerticies(normz);
-    builder.mapVerticies(scale(size));
+    builder.mapVerticies(utils.normz);
+    builder.mapVerticies(utils.scale(size));
 
     return builder;
 }
 
-function subdivideTriangle(triangle: Poly, builder: MeshBuilder): Poly[] {
-    const coords = triangle.map((i) => builder.coords(i));
-    const middleCoords = [
-        calcCenter([coords[0], coords[1]]),
-        calcCenter([coords[1], coords[2]]),
-        calcCenter([coords[2], coords[0]]),
-    ];
+const subdivideTriangleN =
+    (n: number) =>
+    (triangle: Poly, builder: MeshBuilder): Poly[] => {
+        const createVertex = (coords: RawVertex) => builder.addIfNotClose(...coords);
+        const [main, sideAEnd, sideBEnd] = triangle.map((vi) => builder.coords(vi));
+        const sideACoords = interpolate(main, sideAEnd, n);
+        const sideBCoords = interpolate(main, sideBEnd, n);
 
-    const middles = middleCoords.map((c) => builder.addIfNotClose(...c));
+        const lines = new Array<number[]>(n);
+        lines[0] = [triangle[0]];
 
-    return [
-        [middles[2], triangle[0], middles[0]],
-        [middles[0], triangle[1], middles[1]],
-        [middles[1], triangle[2], middles[2]],
-        middles,
-    ];
+        for (let l = 1; l < n; l++) {
+            const lineCoords = interpolate(sideACoords[l], sideBCoords[l], l + 1);
+            const line = lineCoords.map(createVertex);
+            lines[l] = line;
+        }
+
+        const miniTriangles: Poly[] = [];
+
+        for (let l = 1; l < n; l++) {
+            const prevLine = lines[l - 1];
+            const line = lines[l];
+            for (let i = 1; i < l + 1; i++) {
+                miniTriangles.push([prevLine[i - 1], line[i - 1], line[i]]);
+            }
+
+            for (let i = 1; i < l; i++) {
+                miniTriangles.push([prevLine[i], prevLine[i - 1], line[i]]);
+            }
+        }
+
+        return miniTriangles;
+    };
+
+function interpolate(start: RawVertex, end: RawVertex, n: number): RawVertex[] {
+    if (n <= 2) {
+        return [start, end];
+    }
+
+    const step = utils.mul(utils.diff(end, start), 1 / (n - 1));
+    const result = new Array<RawVertex>(n);
+    result[0] = start;
+    result[n - 1] = end;
+    for (let i = 1; i < n - 1; i++) {
+        result[i] = utils.sum(result[i - 1], step);
+    }
+    return result;
 }
