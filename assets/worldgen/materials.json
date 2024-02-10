@@ -1,0 +1,10 @@
+{
+    "materials": [
+        {
+            "id": "water",
+            "meltingPoint": 0,
+            "boilingPoint": 100,
+            "density": 1000
+        }
+    ]
+}

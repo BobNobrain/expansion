@@ -16,6 +16,8 @@ func main() {
 	err := srv.Run(&config.SrvConfig{
 		Port:                "8031",
 		StaticFilesLocation: statics,
+
+		WorldSeed: "deadmouse",
 	})
 	if err != nil {
 		fmt.Printf("Error: %s\n", err.Error())

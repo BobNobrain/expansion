@@ -12,8 +12,8 @@ export const LogInGuard: ParentComponent = (props) => {
         setLoading(true);
         try {
             const userData = await api.login(creds);
-            setUser(userData);
             await ws.connect();
+            setUser(userData);
         } catch (error) {
             console.error(error);
         }

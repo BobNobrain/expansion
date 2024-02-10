@@ -28,6 +28,14 @@ export class MeshBuilder {
         };
     }
 
+    clone(): MeshBuilder {
+        const clone = new MeshBuilder();
+        clone.verticies = this.verticies.slice();
+        clone.colors = this.colors.slice();
+        clone.faces = this.faces.slice();
+        return clone;
+    }
+
     add(x: number, y: number, z: number): number {
         const i = this.verticies.length;
         this.verticies.push([x, y, z]);

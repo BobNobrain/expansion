@@ -9,6 +9,7 @@ import (
 	"srv/internal/stubs"
 	"srv/internal/transport/http"
 	"srv/internal/transport/ws"
+	"srv/internal/world/gameworld"
 )
 
 func Run(cfg *config.SrvConfig) error {
@@ -24,6 +25,12 @@ func Run(cfg *config.SrvConfig) error {
 		Title:           "Global Chat",
 		MemberUsernames: []domain.Username{"bob", "alice", "eve", "joe"},
 	})
+
+	world := gameworld.NewGameWorld(cfg.WorldSeed, missionControl)
+	werr := world.LaunchSimulation()
+	if werr != nil {
+		return werr
+	}
 
 	srv, err := http.NewHTTPServer(auth, comms, cfg)
 	if err != nil {
