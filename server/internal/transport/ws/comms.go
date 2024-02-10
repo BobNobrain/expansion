@@ -2,6 +2,7 @@ package ws
 
 import (
 	"srv/internal/domain"
+	"srv/internal/encodables"
 	"srv/internal/utils"
 	"srv/internal/utils/common"
 	"srv/pkg/api"
@@ -31,10 +32,18 @@ func (impl *WSComms) AsComms() domain.Comms {
 	return impl
 }
 
+const userDataScopeName = domain.DispatcherScope("user")
+
 func (impl *WSComms) HandleNewConnection(conn *websocket.Conn, user *domain.User) {
 	client := newClient(conn, user.Username, impl)
 	impl.attachClient(client)
 	impl.onOnlineCountChange()
+
+	impl.Broadcast(domain.CommsBroadcastRequest{
+		Scope:   userDataScopeName,
+		Event:   "login",
+		Payload: encodables.NewUserDataUpdatePayload(user.Username),
+	})
 }
 
 func (impl *WSComms) Broadcast(rq domain.CommsBroadcastRequest) common.Error {

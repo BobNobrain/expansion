@@ -49,8 +49,9 @@ class WSClient {
             this.handleEvent(parsed);
         });
 
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             this.sock!.addEventListener('open', () => resolve());
+            this.sock!.addEventListener('error', reject);
         });
     }
 

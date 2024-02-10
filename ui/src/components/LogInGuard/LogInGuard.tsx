@@ -3,13 +3,16 @@ import * as api from '../../lib/net/api';
 import { ws } from '../../lib/net/ws';
 import { LogInForm } from './LogInForm/LogInForm';
 import { AuthenticatedContext, type AuthenticatedData } from './context';
+import { type UserDataUpdateEventPayload } from '../../lib/net/types.generated';
+import { SplashScreen } from './SplashScreen/SplashScreen';
 
 export const LogInGuard: ParentComponent = (props) => {
     const [getUser, setUser] = createSignal<api.UserData | null>(null);
-    const [getLoading, setLoading] = createSignal(false);
+    const [getIsSubmitting, setIsSubmitting] = createSignal(false);
+    const [getIsConnecting, setIsConnecting] = createSignal(true);
 
     const submit = async (creds: api.LoginRequest) => {
-        setLoading(true);
+        setIsSubmitting(true);
         try {
             const userData = await api.login(creds);
             await ws.connect();
@@ -17,11 +20,27 @@ export const LogInGuard: ParentComponent = (props) => {
         } catch (error) {
             console.error(error);
         }
-        setLoading(false);
+        setIsSubmitting(false);
     };
 
     onMount(() => {
-        void submit({ username: '', password: '' });
+        void ws
+            .connect()
+            .then(() => {
+                ws.subscribe('user', (evt) => {
+                    switch (evt.event) {
+                        case 'login': {
+                            const { username } = evt.payload as UserDataUpdateEventPayload;
+                            setUser({ username });
+                            setIsConnecting(false);
+                            break;
+                        }
+                    }
+                });
+            })
+            .catch(() => {
+                setIsConnecting(false);
+            });
     });
 
     const logout = async () => {
@@ -37,10 +56,19 @@ export const LogInGuard: ParentComponent = (props) => {
 
     return (
         <Show
-            when={getUser() === null}
-            fallback={<AuthenticatedContext.Provider value={context}>{props.children}</AuthenticatedContext.Provider>}
+            when={getIsConnecting()}
+            fallback={
+                <Show
+                    when={getUser() === null}
+                    fallback={
+                        <AuthenticatedContext.Provider value={context}>{props.children}</AuthenticatedContext.Provider>
+                    }
+                >
+                    <LogInForm loading={getIsSubmitting()} onSubmit={(creds) => void submit(creds)} />
+                </Show>
+            }
         >
-            <LogInForm loading={getLoading()} onSubmit={(creds) => void submit(creds)} />
+            <SplashScreen />
         </Show>
     );
 };
