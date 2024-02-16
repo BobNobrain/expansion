@@ -1,16 +1,15 @@
-import { type Component, createSignal } from 'solid-js';
+import { type Component } from 'solid-js';
 import { NavSidebar, type NavSidebarItem } from '../../../components/NavSidebar/NavSidebar';
 import { useWindowManager } from '../../../components/window/context';
 import { ChatsView } from '../../views/ChatView/ChatsView';
 
-export const DesktopNav: Component = () => {
-    const allItems: NavSidebarItem[] = [
-        { id: '1', title: 'Screen 1', keybind: 'M' },
-        { id: '2', title: 'Screen 2', keybind: 'B' },
-        { id: 'chat', title: 'Chat', keybind: 'C' },
-    ];
+type DesktopNavProps = {
+    screens: NavSidebarItem[];
+    activeScreen: NavSidebarItem;
+    onActiveSreenUpdate: (newValue: NavSidebarItem) => void;
+};
 
-    const [getActiveScreen, setActiveScreen] = createSignal<NavSidebarItem | null>(allItems[0]);
+export const DesktopNav: Component<DesktopNavProps> = (props) => {
     const wm = useWindowManager();
 
     const chatWindow = wm()?.createWindow({
@@ -33,17 +32,17 @@ export const DesktopNav: Component = () => {
                 break;
 
             default:
-                setActiveScreen(item);
+                props.onActiveSreenUpdate(item);
                 break;
         }
     };
 
     const getActiveItems = (): NavSidebarItem[] => {
-        const activeScreen = getActiveScreen();
+        const activeScreen = props.activeScreen;
         const isChatOpen = chatWindow?.isOpen();
 
-        return allItems.filter((item) => item === activeScreen || (item.id === 'chat' && isChatOpen));
+        return props.screens.filter((item) => item === activeScreen || (item.id === 'chat' && isChatOpen));
     };
 
-    return <NavSidebar items={allItems} activeItem={getActiveItems()} onActivate={onActivate} />;
+    return <NavSidebar items={props.screens} activeItem={getActiveItems()} onActivate={onActivate} />;
 };

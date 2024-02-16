@@ -21,7 +21,7 @@
 }
 .chat-title:hover {
     background-color: var(--color-background-light);
-    border-color: var(--color-primary-light);
+    border-color: var(--color-primary-700);
 }
 .chat-title.selected-chat {
     border-color: var(--color-primary);

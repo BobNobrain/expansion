@@ -1,11 +1,11 @@
 import { type Component } from 'solid-js';
-import { PlanetViewScene } from '../../scenes/PlanetViewScene/PlanetViewScene';
+import { GalaxyMapScene } from '../../scenes/GalaxyMapScene/GalaxyMapScene';
 import { SceneRenderer } from '../../components/three/SceneRenderer/SceneRenderer';
 
-export const PlanetView: Component = () => {
+export const GalaxyMapView: Component = () => {
     return (
         <SceneRenderer>
-            <PlanetViewScene seed="deadmouse" />
+            <GalaxyMapScene />
         </SceneRenderer>
     );
 };

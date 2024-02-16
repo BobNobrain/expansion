@@ -23,7 +23,7 @@ export const PlanetViewSceneLight = () => {
     return (
         <>
             <DirectionalLight ref={light.ref} color={0xffffff} intensity={1} />
-            <AmbientLight color={0xffffff} intensity={0.05} />
+            <AmbientLight color={0xffffff} intensity={0.2} />
         </>
     );
 };

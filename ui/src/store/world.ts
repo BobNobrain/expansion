@@ -11,7 +11,7 @@ enum WorldDBCommand {
 const [planets, updatePlanets] = createStore<Record<string, WorldPlanetData>>({});
 
 type UsePlanetDataResult = {
-    getData: () => WorldPlanetData;
+    getData: () => WorldPlanetData | undefined;
 };
 
 export const usePlanetData = (id: string): UsePlanetDataResult => {

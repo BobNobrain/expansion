@@ -130,7 +130,8 @@ export class MeshBuilder {
 
     triangulate() {
         const triangulatedFaces: RawFace[] = [];
-        for (const poly of this.faces) {
+        for (let fi = 0; fi < this.faces.length; fi++) {
+            const poly = this.faces[fi];
             if (poly.length === 3) {
                 triangulatedFaces.push(poly as RawFace);
                 continue;
@@ -176,16 +177,20 @@ export class MeshBuilder {
         }
     }
 
-    build(): T.BufferGeometry {
+    build(): { geometry: T.BufferGeometry; faceIndexMap: Record<number, number> } {
+        const triangleFaceIndicies: Record<number, number> = {};
         const faces: RawFace[] = [];
-        for (const poly of this.faces) {
+        for (let fi = 0; fi < this.faces.length; fi++) {
+            const poly = this.faces[fi];
             if (poly.length === 3) {
+                triangleFaceIndicies[faces.length] = fi;
                 faces.push(poly as RawFace);
                 continue;
             }
 
             const triangles = triangulatePoly(poly);
             for (const t of triangles) {
+                triangleFaceIndicies[faces.length] = fi;
                 faces.push(t);
             }
         }
@@ -201,7 +206,7 @@ export class MeshBuilder {
             geometry.setAttribute('emissive', colorsAttr.clone());
         }
 
-        return geometry;
+        return { geometry, faceIndexMap: triangleFaceIndicies };
     }
 }
 

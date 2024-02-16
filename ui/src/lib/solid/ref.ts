@@ -2,16 +2,17 @@ import { createSignal } from 'solid-js';
 
 export interface CreateRefResult<T> {
     value: () => T | null;
-    ref: (value: T | null) => void;
+    ref: (value: T) => void;
 }
 
-export function createRef<T>(): CreateRefResult<T> {
+export function createRef<T>(chained?: (value: T) => void): CreateRefResult<T> {
     let value: T | null = null;
 
     return {
         value: () => value,
         ref: (newValue) => {
             value = newValue;
+            chained?.(newValue);
         },
     };
 }

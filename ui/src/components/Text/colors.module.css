@@ -18,6 +18,14 @@
     color: var(--color-success);
 }
 
+.warn {
+    color: var(--color-warn);
+}
+
+.accent {
+    color: var(--color-accent);
+}
+
 .dim {
     color: var(--color-text-dim);
 }
