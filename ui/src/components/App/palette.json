@@ -1,0 +1,330 @@
+[
+    {
+        "paletteName": "Main",
+        "swatches": [
+            {
+                "name": "p-main-100",
+                "color": "16162A"
+            },
+            {
+                "name": "p-main-200",
+                "color": "21213C"
+            },
+            {
+                "name": "p-main-300",
+                "color": "333358"
+            },
+            {
+                "name": "p-main-400",
+                "color": "464673"
+            },
+            {
+                "name": "p-main-500",
+                "color": "59598A"
+            },
+            {
+                "name": "p-main-600",
+                "color": "6F6F9F"
+            },
+            {
+                "name": "p-main-700",
+                "color": "8989B8"
+            },
+            {
+                "name": "p-main-800",
+                "color": "ACACD8"
+            },
+            {
+                "name": "p-main-900",
+                "color": "D4D4F9"
+            }
+        ]
+    },
+    {
+        "paletteName": "Primary",
+        "swatches": [
+            {
+                "name": "p-primary-100",
+                "color": "2F2100"
+            },
+            {
+                "name": "p-primary-200",
+                "color": "765200"
+            },
+            {
+                "name": "p-primary-300",
+                "color": "AC7903"
+            },
+            {
+                "name": "p-primary-400",
+                "color": "D79807"
+            },
+            {
+                "name": "p-primary-500",
+                "color": "F7B212"
+            },
+            {
+                "name": "p-primary-600",
+                "color": "FCBD2C"
+            },
+            {
+                "name": "p-primary-700",
+                "color": "FFCC55"
+            },
+            {
+                "name": "p-primary-800",
+                "color": "FFD779"
+            },
+            {
+                "name": "p-primary-900",
+                "color": "FFE3A1"
+            }
+        ]
+    },
+    {
+        "paletteName": "Secondary",
+        "swatches": [
+            {
+                "name": "p-secondary-100",
+                "color": "1C102D"
+            },
+            {
+                "name": "p-secondary-200",
+                "color": "2C1948"
+            },
+            {
+                "name": "p-secondary-300",
+                "color": "3B2261"
+            },
+            {
+                "name": "p-secondary-400",
+                "color": "4D2C7E"
+            },
+            {
+                "name": "p-secondary-500",
+                "color": "5B3495"
+            },
+            {
+                "name": "p-secondary-600",
+                "color": "7147B0"
+            },
+            {
+                "name": "p-secondary-700",
+                "color": "895ECA"
+            },
+            {
+                "name": "p-secondary-800",
+                "color": "A378E5"
+            },
+            {
+                "name": "p-secondary-900",
+                "color": "BF94FF"
+            }
+        ]
+    },
+    {
+        "paletteName": "Red",
+        "swatches": [
+            {
+                "name": "p-red-100",
+                "color": "290B0A"
+            },
+            {
+                "name": "p-red-200",
+                "color": "4E1614"
+            },
+            {
+                "name": "p-red-300",
+                "color": "792421"
+            },
+            {
+                "name": "p-red-400",
+                "color": "AC3531"
+            },
+            {
+                "name": "p-red-500",
+                "color": "CE413C"
+            },
+            {
+                "name": "p-red-600",
+                "color": "E74E48"
+            },
+            {
+                "name": "p-red-700",
+                "color": "F5635E"
+            },
+            {
+                "name": "p-red-800",
+                "color": "FB7D78"
+            },
+            {
+                "name": "p-red-900",
+                "color": "FF9692"
+            }
+        ]
+    },
+    {
+        "paletteName": "Green",
+        "swatches": [
+            {
+                "name": "p-green-100",
+                "color": "02210B"
+            },
+            {
+                "name": "p-green-200",
+                "color": "044015"
+            },
+            {
+                "name": "p-green-300",
+                "color": "086924"
+            },
+            {
+                "name": "p-green-400",
+                "color": "0F9535"
+            },
+            {
+                "name": "p-green-500",
+                "color": "18B044"
+            },
+            {
+                "name": "p-green-600",
+                "color": "27CB56"
+            },
+            {
+                "name": "p-green-700",
+                "color": "48E675"
+            },
+            {
+                "name": "p-green-800",
+                "color": "70F897"
+            },
+            {
+                "name": "p-green-900",
+                "color": "A1FFBC"
+            }
+        ]
+    },
+    {
+        "paletteName": "Orange",
+        "swatches": [
+            {
+                "name": "p-orange-100",
+                "color": "341A00"
+            },
+            {
+                "name": "p-orange-200",
+                "color": "773A00"
+            },
+            {
+                "name": "p-orange-300",
+                "color": "B05703"
+            },
+            {
+                "name": "p-orange-400",
+                "color": "D56D0A"
+            },
+            {
+                "name": "p-orange-500",
+                "color": "F17E12"
+            },
+            {
+                "name": "p-orange-600",
+                "color": "F9891F"
+            },
+            {
+                "name": "p-orange-700",
+                "color": "FB9A3F"
+            },
+            {
+                "name": "p-orange-800",
+                "color": "FDAB5D"
+            },
+            {
+                "name": "p-orange-900",
+                "color": "FFC085"
+            }
+        ]
+    },
+    {
+        "paletteName": "Blue",
+        "swatches": [
+            {
+                "name": "p-blue-100",
+                "color": "040832"
+            },
+            {
+                "name": "p-blue-200",
+                "color": "080E58"
+            },
+            {
+                "name": "p-blue-300",
+                "color": "101A87"
+            },
+            {
+                "name": "p-blue-400",
+                "color": "1C28AD"
+            },
+            {
+                "name": "p-blue-500",
+                "color": "2D3BD1"
+            },
+            {
+                "name": "p-blue-600",
+                "color": "4351E8"
+            },
+            {
+                "name": "p-blue-700",
+                "color": "616DF3"
+            },
+            {
+                "name": "p-blue-800",
+                "color": "808AF9"
+            },
+            {
+                "name": "p-blue-900",
+                "color": "9CA4FF"
+            }
+        ]
+    },
+    {
+        "paletteName": "Neutral",
+        "swatches": [
+            {
+                "name": "p-neutral-100",
+                "color": "131313"
+            },
+            {
+                "name": "p-neutral-200",
+                "color": "1E1E1E"
+            },
+            {
+                "name": "p-neutral-300",
+                "color": "313131"
+            },
+            {
+                "name": "p-neutral-400",
+                "color": "4F4F4F"
+            },
+            {
+                "name": "p-neutral-500",
+                "color": "6D6D6D"
+            },
+            {
+                "name": "p-neutral-600",
+                "color": "8D8D8D"
+            },
+            {
+                "name": "p-neutral-700",
+                "color": "AEAEAE"
+            },
+            {
+                "name": "p-neutral-800",
+                "color": "D4D4D4"
+            },
+            {
+                "name": "p-neutral-900",
+                "color": "FAFAFA"
+            }
+        ]
+    }
+]

@@ -1,4 +1,5 @@
-import { ParentProps } from 'solid-js';
+import { type ParentProps } from 'solid-js';
+import './colors.css';
 import './global.css';
 import styles from './App.module.css';
 

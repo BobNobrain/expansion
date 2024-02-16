@@ -1,5 +1,6 @@
 import { type ParentProps, type Component, Show } from 'solid-js';
 import { type SemanticColor } from '../../lib/appearance';
+import themes from './themes.module.css';
 import styles from './Button.module.css';
 
 export type ButtonWing = 'none' | 'up' | 'down';
@@ -28,7 +29,7 @@ export const Button: Component<ButtonProps> = (props) => {
         <button
             class={styles.button}
             classList={{
-                [styles[props.theme ?? 'secondary']]: !props.disabled,
+                [themes[props.theme ?? 'secondary']]: !props.disabled,
                 [styles[`${props.leftWing ?? 'down'}LeftWing`]]: true,
                 [styles[`${props.rightWing ?? 'up'}RightWing`]]: true,
                 [styles.disabled]: props.disabled,

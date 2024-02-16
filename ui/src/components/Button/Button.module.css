@@ -6,22 +6,12 @@
     padding: 0 8px;
     position: relative;
 
-    background-color: var(--button-background);
-    color: var(--button-text);
-
     clip-path: polygon(
         var(--button-wing-top-left, 0px) 0,
         calc(100% - var(--button-wing-top-right, 0px)) 0,
         calc(100% - var(--button-wing-bottom-right, 0px)) 100%,
         var(--button-wing-bottom-left, 0px) 100%
     );
-}
-.button:hover {
-    background-color: var(--button-background-l);
-}
-.button:active {
-    color: var(--color-text);
-    text-shadow: 0 -1px 1px var(--color-background);
 }
 
 .downLeftWing {
@@ -46,60 +36,24 @@
     margin-left: -16px;
 }
 
-.primary {
-    --button-background: var(--color-primary);
-    --button-background-l: var(--color-primary-light);
-    --button-text: var(--color-text-inverted);
-}
-
-.secondary {
-    --button-background: var(--color-border);
-    --button-background-l: var(--color-border-sharp);
-    --button-text: var(--color-text);
-}
-/* .secondary:hover {
-    --button-background: var(--color-primary);
-}
-.secondary.loading:hover {
-    --button-background: var(--color-border);
-} */
-
-.info {
-    --button-background: var(--color-info);
-    --button-background-l: var(--color-info-light);
-    --button-text: var(--color-text-inverted);
-}
-
-.error {
-    --button-background: var(--color-error);
-    --button-background-l: var(--color-error-light);
-    --button-text: var(--color-text-inverted);
-}
-
-.success {
-    --button-background: var(--color-success);
-    --button-background-l: var(--color-success-light);
-    --button-text: var(--color-text-inverted);
-}
-
 .disabled {
-    --button-background: var(--color-background-light);
-    --button-text: var(--color-text-dim);
+    background-color: var(--color-neutral-700);
+    color: var(--color-neutral-300);
     cursor: not-allowed;
 }
 
 .button.loading {
     position: relative;
-    color: var(--color-text-dim);
+    /* color: var(--color-text-dim); */
     animation: loading linear infinite 1s;
     cursor: wait;
 
     background: repeating-linear-gradient(
         135deg,
-        var(--button-background) 0,
-        var(--button-background) 8px,
-        var(--button-background-l) 8px,
-        var(--button-background-l) 16px
+        var(--button-loading-dark) 0,
+        var(--button-loading-dark) 8px,
+        var(--button-loading-light) 8px,
+        var(--button-loading-light) 16px
     );
     background-size: 45.254834px 45.254834px;
 }
@@ -119,7 +73,7 @@
     height: 1px;
     left: 0;
     right: 0;
-    background-color: var(--color-text-selected);
+    background-color: var(--color-neutral-500);
     animation: loader-movement ease-in-out 2s infinite normal;
 }
 
