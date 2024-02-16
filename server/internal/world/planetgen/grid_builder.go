@@ -51,6 +51,7 @@ func (grid *GridBuilder) GetConnections() mesh.ConnectionMap {
 
 func (grid *GridBuilder) Generate() world.PlanetaryGrid {
 	subdivisions := minGridSubdivisions + int(float64(maxGridSubdivisions-minGridSubdivisions)*grid.opts.Size)
+	// subdivisions := 2
 	grid.builder = mesh.CreateSubdividedIcosahedron(1.0, subdivisions)
 	grid.nodesCount = grid.builder.VertexCount()
 	grid.edgesCount = 20*3*(subdivisions-1)*subdivisions/2 - 30*(subdivisions-1)

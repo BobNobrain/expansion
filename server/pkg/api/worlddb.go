@@ -18,4 +18,5 @@ type WorldPlanetGrid struct {
 
 type WorldPlanetTile struct {
 	SolidElevationKm float64 `json:"se"`
+	BiomeColor       string  `json:"biomeColor"`
 }

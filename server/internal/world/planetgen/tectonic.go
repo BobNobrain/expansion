@@ -146,6 +146,7 @@ func (tl *tectonicLandscaper) floodFillPlates() {
 			hasNonEmptyQueue = true
 			if !visitedNodes.Has(*nextNode) {
 				plate.nodes.Add(*nextNode)
+				tl.plateIndexes[*nextNode] = tectonicPlateIndex(pi)
 				visitedNodes.Add(*nextNode)
 			}
 

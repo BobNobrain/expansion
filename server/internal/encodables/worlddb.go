@@ -46,8 +46,10 @@ func (e *encodablePlanetData) Encode() interface{} {
 
 	encodedTiles := make([]api.WorldPlanetTile, nNodes)
 	for i := 0; i < nNodes; i++ {
+		conditions := e.planet.Tiles.GetConditions(world.PlanetaryNodeIndex(i))
 		encodedTiles[i] = api.WorldPlanetTile{
-			SolidElevationKm: e.planet.Tiles.GetConditions(world.PlanetaryNodeIndex(i)).Solid.Elevation.Kilometers(),
+			BiomeColor:       conditions.BiomeColor,
+			SolidElevationKm: conditions.Solid.Elevation.Kilometers(),
 		}
 	}
 

@@ -9,20 +9,21 @@ type PlanetaryGridData interface {
 }
 
 type PlanetaryTile struct {
-	Solid       *PlanetaryTileConditions
-	Marine      *PlanetaryTileConditions
-	Atmospheric *PlanetaryTileConditions
+	BiomeColor string
+	Solid      *PlanetaryTileConditions
+	// Marine      *PlanetaryTileConditions
+	// Atmospheric *PlanetaryTileConditions
 }
 
-func (node *PlanetaryTile) HasLand() bool {
-	return node.Solid != nil && node.Marine == nil
-}
-func (node *PlanetaryTile) HasSea() bool {
-	return node.Marine != nil
-}
-func (node *PlanetaryTile) HasAtmospheric() bool {
-	return node.Atmospheric != nil
-}
+// func (node *PlanetaryTile) HasLand() bool {
+// 	return node.Solid != nil && node.Marine == nil
+// }
+// func (node *PlanetaryTile) HasSea() bool {
+// 	return node.Marine != nil
+// }
+// func (node *PlanetaryTile) HasAtmospheric() bool {
+// 	return node.Atmospheric != nil
+// }
 
 type PlanetaryTileConditions struct {
 	Elevation   phys.Distance
