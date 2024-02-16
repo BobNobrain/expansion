@@ -9,6 +9,7 @@ export type SceneRendererContext = {
     animation: Listenable<AnimationFrameData>;
 
     getBounds: () => DOMRect;
+    getMainCamera: () => Camera | null;
     setMainCamera: (c: Camera) => void;
 
     scene: () => Scene;
@@ -26,6 +27,7 @@ export const SceneRendererContext = createContext<SceneRendererContext>({
         off: outOfContext,
     },
     getBounds: outOfContext,
+    getMainCamera: outOfContext,
     setMainCamera: outOfContext,
     scene: outOfContext,
 });

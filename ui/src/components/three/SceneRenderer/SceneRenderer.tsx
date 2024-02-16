@@ -84,6 +84,7 @@ export const SceneRenderer: ParentComponent<SceneRendererProps> = (props) => {
         scene: () => scene,
         animation,
         getBounds,
+        getMainCamera,
         setMainCamera,
     };
 

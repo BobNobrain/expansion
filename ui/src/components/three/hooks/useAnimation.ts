@@ -26,9 +26,9 @@ export function useLazyAnimation(onFrame: AnimationHandler): () => void {
             if (!shouldUpdate) {
                 return;
             }
+            shouldUpdate = false;
 
             onFrame(frameData);
-            shouldUpdate = false;
         });
         onCleanup(() => {
             animation.off(id);
