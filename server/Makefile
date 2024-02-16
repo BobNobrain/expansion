@@ -6,7 +6,7 @@ run:
 
 .PHONY: watch
 watch:
-	gow run cmd/srv/srv.go
+	gow -r=false run cmd/srv/srv.go
 
 .PHONY: api-types
 api-types:

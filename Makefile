@@ -1,3 +1,5 @@
+CAESAR = node ./tools/caesar.js
+
 .PHONY: build-desktop
 build-desktop:
 	cd ui && npm run build:desktop
@@ -22,9 +24,13 @@ api-types:
 dev-srv:
 	cd server && SRV_STATIC="http://localhost:3000" make watch
 
-.PHONY: dev-desktop
-dev-desktop:
+.PHONY: dev-desktop-ui
+dev-desktop-ui:
 	cd ui && npm run serve:desktop
 
 .PHONY: rebuild-and-run
 rebuild-and-run: api-types build-desktop run-server
+
+.PHONY: dev-desktop
+dev-desktop:
+	$(CAESAR) client: make dev-desktop-ui server: make dev-srv
