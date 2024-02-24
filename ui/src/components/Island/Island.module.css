@@ -1,0 +1,81 @@
+.island {
+    clip-path: polygon(
+        0 8px,
+        8px 0,
+        100% 0,
+        100% calc(100% - 8px),
+        calc(100% - 8px) 100%,
+        0 100%
+    );
+
+    position: relative;
+}
+
+.padded {
+    padding: 12px;
+}
+
+.solid.primary {
+    background-color: var(--color-primary);
+    color: var(--color-text-inverted);
+}
+.solid.secondary {
+    background-color: var(--color-secondary);
+    color: var(--color-text);
+}
+.solid.accent {
+    background-color: var(--color-accent);
+    color: var(--color-text);
+}
+.solid.info {
+    background-color: var(--color-info);
+    color: var(--color-text);
+}
+.solid.background {
+    background-color: var(--color-background);
+    color: var(--color-text);
+}
+
+.outlined {
+    background-color: transparent;
+    border: 2px solid;
+}
+.outlined::before, .outlined::after {
+    content: ' ';
+    display: block;
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: var(--island-border-color, currentColor);
+}
+.outlined::before {
+    top: -2px;
+    left: -2px;
+    clip-path: polygon(8px 0, 9.414214px 1.414214px, 1.414214px 9.414214px, 0 8px);
+    z-index: 1;
+}
+.outlined::after {
+    right: -2px;
+    bottom: -2px;
+    clip-path: polygon(10px 2px, 2px 10px, 0.585786px 8.585786px, 8.585786px 0.585786px);
+}
+
+.outlined.primary {
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+.outlined.secondary {
+    color: var(--color-secondary-700);
+    border-color: var(--color-secondary);
+    --island-border-color: var(--color-secondary);
+}
+.outlined.accent {
+    color: var(--color-accent-700);
+    border-color: var(--color-accent);
+    --island-border-color: var(--color-accent);
+}
+.outlined.info {
+    color: var(--color-info-700);
+    border-color: var(--color-info);
+    --island-border-color: var(--color-info);
+}

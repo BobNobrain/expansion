@@ -8,10 +8,13 @@ import { createRef } from '../../../lib/solid/ref';
 import { useLazyAnimation } from '../../../components/three/hooks/useAnimation';
 import { useSceneRenderer } from '../../../components/three/context';
 import { useDrag } from '../../../lib/solid/drag';
+import { useEventListener } from '../../../lib/solid/useEventListener';
+import { lerp } from '../../../lib/math/misc';
 
 const PITCH_MIN = 0.087; // ~5deg
 const PITCH_MAX = Math.PI - PITCH_MIN;
 const ZOOM_SENSITIVITY = 0.1;
+const PINCH_ZOOM_SENSITIVITY = 1;
 
 const EPS = 1e-6;
 
@@ -30,7 +33,7 @@ export type RotatableCameraProps = PerspectiveCameraProps & {
 
 export const RotatableCamera: Component<RotatableCameraProps> = (props) => {
     const camera = createRef<T.PerspectiveCamera>(props.ref);
-    const { canvas } = useSceneRenderer();
+    const { canvas, gestures } = useSceneRenderer();
 
     let yaw = 0;
     let pitch = Math.PI / 2;
@@ -90,6 +93,48 @@ export const RotatableCamera: Component<RotatableCameraProps> = (props) => {
             isInertiaAllowed = true;
             relocateCamera();
         },
+    });
+
+    onMount(() => {
+        useEventListener(gestures().dragStart, () => {
+            isInertiaAllowed = false;
+        });
+        useEventListener(gestures().drag, (drag) => {
+            const dpitch = -drag.last.y * (Math.PI / 1000);
+            const dyaw = -drag.last.x * (Math.PI / 1000);
+
+            yawV = lerp(yawV, dyaw * (props.yawInertia ?? 0), 0.1);
+            pitchV = lerp(pitchV, dpitch * (props.pitchInertia ?? 0), 0.05);
+            updateRotation(dyaw, dpitch);
+        });
+        useEventListener(gestures().dragEnd, () => {
+            isInertiaAllowed = true;
+            relocateCamera();
+        });
+
+        let distanceWhenPinchStarted = 0;
+        useEventListener(gestures().pinchStart, () => {
+            distanceWhenPinchStarted = distance;
+            console.log('pinch start!!!', distanceWhenPinchStarted);
+        });
+        useEventListener(gestures().pinch, (pinch) => {
+            const { minDistance = 0, maxDistance } = props;
+            const distanceScaling = maxDistance === undefined ? minDistance : (maxDistance - minDistance) / 100;
+            const d = pinch.total.scale * PINCH_ZOOM_SENSITIVITY * distanceScaling;
+            const newDistance = (PINCH_ZOOM_SENSITIVITY * distanceWhenPinchStarted) / pinch.total.scale;
+
+            console.log('pinch!!!!', {
+                d,
+                distance,
+                // newDistance: distanceWhenPinchStarted - d,
+                newDistance,
+                scale: pinch.total.scale,
+            });
+
+            distance = Math.max(minDistance, Math.min(newDistance, maxDistance ?? Infinity));
+
+            relocateCamera();
+        });
     });
 
     const handleZoom = (ev: WheelEvent) => {

@@ -19,6 +19,7 @@ func (srv *httpServerImpl) serveSocket() {
 
 		if err != nil {
 			respondJson(w, http.StatusUnauthorized, transport.NewUnauthorizedError())
+			return
 		}
 
 		connection, _ := upgrader.Upgrade(w, r, nil)

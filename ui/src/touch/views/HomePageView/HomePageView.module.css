@@ -1,0 +1,131 @@
+.overview {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px;
+    color: var(--color-text);
+}
+.overview-balance {
+    font-size: 16px;
+    font-weight: bold;
+}
+.overview-events {
+    display: flex;
+    align-items: baseline;
+    color: var(--color-text);
+    background-color: var(--color-background-light);
+}
+.overview-events-text {
+    flex: 1 1 auto;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    padding: 0 6px;
+}
+
+.feed-element {
+    display: block;
+    flex: 0 0 96px;
+    width: 96px;
+    height: 96px;
+    overflow: hidden;
+}
+
+.feed-element-icon {
+    position: absolute;
+    inset: 0;
+
+    font-size: 64px;
+    line-height: 80px;
+    text-align: center;
+    color: var(--color-secondary-700);
+
+    user-select: none;
+}
+
+.feed-element-label {
+    position: absolute;
+    left: 6px;
+    bottom: 2px;
+    right: 6px;
+
+    color: var(--color-text);
+
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.feed-element-category {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 1px 6px;
+
+    background-color: var(--color-border);
+    color: var(--color-text);
+    font-size: 12px;
+}
+
+.menu {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.tile {
+    display: block;
+    min-height: 100px;
+    position: relative;
+    color: unset;
+    text-decoration: none;
+}
+.tile-label {
+    font-weight: bold;
+    font-size: 24px;
+    margin-bottom: 8px;
+}
+.tile-description {
+    font-size: 12px;
+}
+.tile-icon {
+    font-size: 32px;
+    line-height: 26px;
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    pointer-events: none;
+}
+
+.subtiles {
+    display: flex;
+    overflow: auto;
+    gap: 8px;
+
+    margin: 8px -12px 0;
+    padding: 0 12px;
+}
+.subtile {
+    flex: 0 0 64px;
+    height: 64px;
+    display: flex;
+}
+.subtile > * {
+    width: 100%;
+}
+.subtile-icon {
+    position: absolute;
+    inset: 0;
+    font-size: 24px;
+    line-height: 42px;
+    text-align: center;
+}
+.subtile-label {
+    position: absolute;
+    left: 4px;
+    right: 4px;
+    bottom: 2px;
+
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}

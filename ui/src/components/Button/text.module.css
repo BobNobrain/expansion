@@ -1,0 +1,106 @@
+.text-button {
+    background-color: transparent;
+    --button-loading-light: transparent;
+}
+
+.primary {
+    composes: text-button;
+
+    color: var(--color-primary);
+
+    --button-loading-dark: var(--color-primary);
+}
+.primary:hover {
+    color: var(--color-primary-700);
+}
+.primary:active {
+    color: var(--color-primary-300);
+}
+
+.secondary {
+    composes: text-button;
+
+    color: var(--color-neutral-700);
+
+    --button-loading-dark: var(--color-secondary);
+}
+.secondary:hover {
+    color: var(--color-neutral-900);
+}
+.secondary:active {
+    color: var(--color-secondary-900);
+}
+
+.accent {
+    composes: text-button;
+
+    color: var(--color-accent);
+
+    --button-loading-dark: var(--color-accent);
+}
+.accent:hover {
+    background-color: var(--color-accent-700);
+}
+.accent:active {
+    background-color: var(--color-accent-300);
+}
+
+.info {
+    composes: text-button;
+
+    color: var(--color-info);
+
+    --button-loading-dark: var(--color-info);
+}
+.info:hover {
+    background-color: var(--color-info-700);
+}
+.info:active {
+    background-color: var(--color-info-300);
+}
+
+.error {
+    composes: text-button;
+
+    color: var(--color-error);
+
+    --button-loading-dark: var(--color-error);
+}
+.error:hover {
+    color: var(--color-error-700);
+}
+.error:active {
+    color: var(--color-error-300);
+}
+
+.success {
+    composes: text-button;
+
+    color: var(--color-success);
+
+    --button-loading-dark: var(--color-success);
+}
+.success:hover {
+    background-color: var(--color-success-700);
+    color: var(--color-text-inverted);
+}
+.success:active {
+    background-color: var(--color-success-300);
+    color: var(--color-text);
+}
+
+.warn {
+    composes: text-button;
+
+    color: var(--color-warn);
+
+    --button-loading-dark: var(--color-warn);
+}
+.warn:hover {
+    background-color: var(--color-warn-700);
+    color: var(--color-text-inverted);
+}
+.warn:active {
+    background-color: var(--color-warn-300);
+    color: var(--color-text);
+}

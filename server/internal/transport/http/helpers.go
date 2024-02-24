@@ -16,7 +16,7 @@ func setTokenCookie(w http.ResponseWriter, auth domain.AuthenticatorToken) {
 		Value:    auth.Token,
 		Expires:  auth.Expires,
 		Path:     "/",
-		Secure:   true,
+		Secure:   false, // TODO: for local development
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 	})

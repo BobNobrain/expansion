@@ -9,7 +9,7 @@ const N = 10000;
 const R = 2;
 const MAX_DENSITY_AT = 0.05;
 const H = 0.1;
-const INNER_R = 0.5;
+const INNER_R = 0.2;
 
 type SleeveConfig = {
     position: number;
@@ -133,7 +133,11 @@ const genScatterStar = (): Star => {
     return { pos: [Math.cos(theta) * r, genY(), Math.sin(theta) * r], color: [1, 1, 1] };
 };
 
-export const GalaxyMapScene: Component = () => {
+export type GalaxyMapSceneProps = {
+    onSectorClick: (id: string) => void;
+};
+
+export const GalaxyMapScene: Component<GalaxyMapSceneProps> = () => {
     const material = new T.PointsMaterial({
         color: 0xffffff,
         size: 1,
@@ -163,7 +167,7 @@ export const GalaxyMapScene: Component = () => {
 
     return (
         <>
-            <RotatableCamera main minDistance={0.1} maxDistance={4} yawInertia={0.95} pitchInertia={0.9} />
+            <RotatableCamera main minDistance={0.1} maxDistance={6} yawInertia={0.95} pitchInertia={0.9} />
         </>
     );
 };

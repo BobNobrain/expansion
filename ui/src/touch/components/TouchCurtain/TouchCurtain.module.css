@@ -1,0 +1,37 @@
+.wrapper {
+    position: relative;
+}
+
+.height-s {
+    height: 64px;
+    flex: 0 0 64px;
+}
+.height-m {
+    height: 128px;
+    flex: 0 0 128px;
+}
+.height-l {
+    height: 256px;
+    flex: 0 0 256px;
+}
+
+.handle {
+    position: absolute;
+    top: -16px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+}
+
+.curtain {
+    position: absolute;
+    inset: 0;
+    transition: top 0.5s ease-in-out;
+
+    background-color: var(--color-background);
+    border-top: 2px solid var(--color-secondary);
+}
+.curtain.expanded {
+    top: calc(128px - 100svh + 100%);
+}

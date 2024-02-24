@@ -1,12 +1,20 @@
-import { type ParentProps, type Component, Show } from 'solid-js';
+import { type ParentProps, type Component, Show, createMemo } from 'solid-js';
 import { type SemanticColor } from '../../lib/appearance';
-import themes from './themes.module.css';
-import styles from './Button.module.css';
+import solidStyleColors from './solid.module.css';
+import textStyleColors from './text.module.css';
+import sizes from './sizes.module.css';
+import common from './Button.module.css';
 
 export type ButtonWing = 'none' | 'up' | 'down';
+export type ButtonStyle = 'solid' | 'text';
+export type ButtonSize = 's' | 'm' | 'l' | 'xl';
 
 export type ButtonProps = ParentProps & {
-    theme?: SemanticColor;
+    color?: SemanticColor;
+    style?: ButtonStyle;
+    size?: ButtonSize;
+    square?: boolean;
+
     leftWing?: ButtonWing;
     rightWing?: ButtonWing;
 
@@ -25,20 +33,42 @@ export const Button: Component<ButtonProps> = (props) => {
         props.onClick(ev);
     };
 
+    const classList = createMemo<Record<string, boolean | undefined>>(() => {
+        const color = props.color ?? 'secondary';
+        const style = props.style ?? 'solid';
+        const size = props.size ?? 'm';
+
+        const defaultLeftWing: ButtonWing = style === 'text' ? 'none' : 'down';
+        const leftWing = `${props.leftWing ?? defaultLeftWing}LeftWing`;
+        const defaultRightWing: ButtonWing = style === 'text' ? 'none' : 'up';
+        const rightWing = `${props.rightWing ?? defaultRightWing}RightWing`;
+
+        let colorClassName: string;
+        switch (style) {
+            case 'solid':
+                colorClassName = solidStyleColors[color];
+                break;
+
+            case 'text':
+                colorClassName = textStyleColors[color];
+                break;
+        }
+
+        return {
+            [colorClassName]: !props.disabled,
+            [sizes[size]]: true,
+            [common[`${leftWing}`]]: true,
+            [common[`${rightWing}`]]: true,
+            [common.square]: props.square,
+            [common.disabled]: props.disabled,
+            [common.loading]: props.loading && !props.disabled,
+        };
+    });
+
     return (
-        <button
-            class={styles.button}
-            classList={{
-                [themes[props.theme ?? 'secondary']]: !props.disabled,
-                [styles[`${props.leftWing ?? 'down'}LeftWing`]]: true,
-                [styles[`${props.rightWing ?? 'up'}RightWing`]]: true,
-                [styles.disabled]: props.disabled,
-                [styles.loading]: props.loading && !props.disabled,
-            }}
-            onClick={onClick}
-        >
+        <button class={common.button} classList={classList()} onClick={onClick}>
             <Show when={props.loading}>
-                <div class={styles.loader} />
+                <div class={common.loader} />
             </Show>
             {props.children}
         </button>

@@ -1,0 +1,8 @@
+.icon {
+    fill: currentColor;
+
+    transition: all 0.2s ease-in-out;
+
+    flex-grow: 0;
+    flex-shrink: 0;
+}

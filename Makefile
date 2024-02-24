@@ -28,9 +28,17 @@ dev-srv:
 dev-desktop-ui:
 	cd ui && npm run serve:desktop
 
+.PHONY: dev-touch-ui
+dev-touch-ui:
+	cd ui && npm run serve:touch
+
 .PHONY: rebuild-and-run
 rebuild-and-run: api-types build-desktop run-server
 
 .PHONY: dev-desktop
 dev-desktop:
 	$(CAESAR) client: make dev-desktop-ui server: make dev-srv
+
+.PHONY: dev-touch
+dev-touch:
+	$(CAESAR) client: make dev-touch-ui server: make dev-srv

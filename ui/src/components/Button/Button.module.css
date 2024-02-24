@@ -2,9 +2,11 @@
     border: 0;
     outline: none;
     cursor: pointer;
-    height: 16px;
-    padding: 0 8px;
+    height: var(--button-size);
+    padding: 0 var(--button-half-size);
     position: relative;
+
+    font-size: var(--button-half-size);
 
     clip-path: polygon(
         var(--button-wing-top-left, 0px) 0,
@@ -15,25 +17,31 @@
 }
 
 .downLeftWing {
-    --button-wing-top-left: 16px;
-    padding-left: 24px;
+    --button-wing-top-left: var(--button-size);
+    padding-left: calc(var(--button-size) + var(--button-half-size));
 }
 .upLeftWing {
-    --button-wing-bottom-left: 16px;
-    padding-left: 24px;
+    --button-wing-bottom-left: var(--button-size);
+    padding-left: calc(var(--button-size) + var(--button-half-size));
 }
 .downRightWing {
-    --button-wing-top-right: 16px;
-    padding-right: 24px;
+    --button-wing-top-right: var(--button-size);
+    padding-right: calc(var(--button-size) + var(--button-half-size));
 }
 .upRightWing {
-    --button-wing-bottom-right: 16px;
-    padding-right: 24px;
+    --button-wing-bottom-right: var(--button-size);
+    padding-right: calc(var(--button-size) + var(--button-half-size));
 }
 
 .downRightWing + .upLeftWing,
 .upRightWing + .downLeftWing {
-    margin-left: -16px;
+    margin-left: calc(-1 * var(--button-size));
+}
+
+.square {
+    width: var(--button-size);
+    padding-left: 0;
+    padding-right: 0;
 }
 
 .disabled {
@@ -44,18 +52,17 @@
 
 .button.loading {
     position: relative;
-    /* color: var(--color-text-dim); */
     animation: loading linear infinite 1s;
     cursor: wait;
 
     background: repeating-linear-gradient(
         135deg,
         var(--button-loading-dark) 0,
-        var(--button-loading-dark) 8px,
-        var(--button-loading-light) 8px,
-        var(--button-loading-light) 16px
+        var(--button-loading-dark) var(--button-half-size),
+        var(--button-loading-light) var(--button-half-size),
+        var(--button-loading-light) var(--button-size)
     );
-    background-size: 45.254834px 45.254834px;
+    background-size: var(--button-diagonal-size) var(--button-diagonal-size);
 }
 
 @keyframes loading {
@@ -63,7 +70,7 @@
         background-position-y: 0;
     }
     100% {
-        background-position-y: 45.254834px;
+        background-position-y: var(--button-diagonal-size);
     }
 }
 

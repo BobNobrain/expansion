@@ -80,7 +80,7 @@ export const Window: Component<WindowProps> = (props) => {
                         <div class={styles.footerSpacer} />
                         <Button leftWing="none">Cancel</Button>
                         <Button loading>Wait a minute...</Button>
-                        <Button theme="primary" loading>
+                        <Button color="primary" loading>
                             OK!
                         </Button>
                     </footer>

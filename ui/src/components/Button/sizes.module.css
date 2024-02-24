@@ -1,0 +1,23 @@
+.s {
+    --button-size: 16px;
+    --button-half-size: 8px;
+    --button-diagonal-size: 45.254834px;
+}
+
+.m {
+    --button-size: 24px;
+    --button-half-size: 12px;
+    --button-diagonal-size: 67.882251px;
+}
+
+.l {
+    --button-size: 32px;
+    --button-half-size: 16px;
+    --button-diagonal-size: 90.509668px;
+}
+
+.xl {
+    --button-size: 48px;
+    --button-half-size: 24px;
+    --button-diagonal-size: 135.764502px;
+}

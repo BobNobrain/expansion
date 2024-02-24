@@ -18,22 +18,6 @@ func (srv *httpServerImpl) serveAuthAPI() {
 			return
 		}
 
-		if len(loginRequest.Username) == 0 {
-			// this request just checks if user is already authorized
-			auth, err := checkTokenCookie(r, srv.auth)
-
-			if err != nil {
-				respondError(w, http.StatusUnauthorized, transport.NewUnauthorizedError())
-				return
-			}
-
-			respondJson(w, http.StatusOK, &api.LoginResponseBody{
-				Username: string(auth.User.Username),
-			})
-
-			return
-		}
-
 		result, err := srv.auth.Login(domain.AuthenticatorLoginRequest{
 			Username: domain.Username(loginRequest.Username),
 			Password: loginRequest.Password,

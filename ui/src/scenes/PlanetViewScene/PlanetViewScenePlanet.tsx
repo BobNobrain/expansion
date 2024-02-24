@@ -3,7 +3,7 @@ import * as T from 'three';
 import { Mesh } from '../../components/three/Mesh/Mesh';
 import { useInScene } from '../../components/three/hooks/useInScene';
 import { useSceneRenderer } from '../../components/three/context';
-import { usePlanet } from './Planet';
+import { usePlanet } from './planet';
 import { scale } from './gen/utils';
 // import { MeshBuilder } from '../../lib/3d/MeshBuilder';
 

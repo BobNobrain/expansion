@@ -5,6 +5,7 @@ import { createEvent } from '../../../lib/event';
 import { SceneRendererContext } from '../context';
 import { type AnimationFrameData } from '../types';
 import styles from './SceneRenderer.module.css';
+import { type TouchGestureManager, createTouchGestureManager } from '../../../lib/gestures/TouchGestureManager';
 
 type SceneRendererProps = {
     clearColor?: T.ColorRepresentation;
@@ -19,10 +20,14 @@ export const SceneRenderer: ParentComponent<SceneRendererProps> = (props) => {
     let renderer: T.WebGLRenderer | null = null;
     const [getMainCamera, setMainCamera] = createSignal<T.Camera | null>(null);
 
+    let gestures!: TouchGestureManager;
+
     onMount(() => {
         if (!canvas) {
-            return;
+            throw new Error('canvas ref is not set');
         }
+
+        gestures = createTouchGestureManager(canvas);
 
         renderer = new T.WebGLRenderer({
             canvas,
@@ -75,6 +80,7 @@ export const SceneRenderer: ParentComponent<SceneRendererProps> = (props) => {
             active = false;
             setMainCamera(null);
             renderer?.dispose();
+            gestures.destroy();
         });
     });
 
@@ -86,6 +92,7 @@ export const SceneRenderer: ParentComponent<SceneRendererProps> = (props) => {
         getBounds,
         getMainCamera,
         setMainCamera,
+        gestures: () => gestures,
     };
 
     return (

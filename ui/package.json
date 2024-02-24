@@ -8,6 +8,7 @@
         "build:editor": "node build/esbuild.js editor",
         "test": "echo \"Error: no test specified\" && exit 1",
         "serve:desktop": "ESBUILD_SERVE=1 node build/esbuild.js desktop",
+        "serve:touch": "ESBUILD_SERVE=1 node build/esbuild.js touch",
         "serve:editor": "ESBUILD_SERVE=1 node build/esbuild.js editor"
     },
     "author": "BobNobrain",
@@ -25,11 +26,12 @@
         "eslint": "^8.51.0",
         "prettier": "^3.0.3",
         "serve": "^14.2.1",
-        "typescript": "^5.2.2"
+        "typescript": "^5.3.3"
     },
     "dependencies": {
+        "@solidjs/router": "^0.12.4",
         "lodash": "^4.17.21",
-        "solid-js": "^1.8.3",
+        "solid-js": "^1.8.15",
         "three": "^0.158.0"
     }
 }

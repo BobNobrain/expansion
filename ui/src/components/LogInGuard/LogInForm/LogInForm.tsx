@@ -38,7 +38,7 @@ export const LogInForm: Component<LogInFormProps> = (props) => {
                         <TextInput value={getPassword()} onUpdate={setPassword} password />
                     </FormField>
                     <FormActions>
-                        <Button theme="primary" leftWing="up" rightWing="none" onClick={login} loading={props.loading}>
+                        <Button color="primary" leftWing="up" rightWing="none" onClick={login} loading={props.loading}>
                             Log In
                         </Button>
                     </FormActions>

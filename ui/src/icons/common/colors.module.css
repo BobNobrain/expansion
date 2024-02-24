@@ -1,0 +1,26 @@
+.text {
+    color: var(--color-text);
+}
+
+.primary {
+    color: var(--color-primary);
+}
+.secondary {
+    color: var(--color-secondary);
+}
+.accent {
+    color: var(--color-accent);
+}
+
+.success {
+    color: var(--color-success);
+}
+.info {
+    color: var(--color-info);
+}
+.warn {
+    color: var(--color-warn);
+}
+.error {
+    color: var(--color-error);
+}
