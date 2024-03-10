@@ -1,11 +1,11 @@
 package ws
 
 import (
-	"srv/internal/domain"
+	"srv/internal/components"
 	"srv/internal/encodables"
 )
 
-const scopeName = domain.DispatcherScope("online")
+const scopeName = components.DispatcherScope("online")
 
 func (impl *WSComms) onOnlineCountChange() {
 	c, err := impl.GetOnlineCount()
@@ -13,7 +13,7 @@ func (impl *WSComms) onOnlineCountChange() {
 		return
 	}
 
-	impl.Broadcast(domain.CommsBroadcastRequest{
+	impl.Broadcast(components.CommsBroadcastRequest{
 		Scope:   scopeName,
 		Event:   "change",
 		Payload: encodables.NewOnlineCountChangePayload(c),

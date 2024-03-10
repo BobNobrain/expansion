@@ -3,7 +3,7 @@ package ws
 import (
 	"encoding/json"
 	"fmt"
-	"srv/internal/domain"
+	"srv/internal/components"
 	"srv/pkg/api"
 	"time"
 
@@ -50,11 +50,11 @@ func (c *wsClient) handleInbox() {
 			break
 		}
 
-		c.hub.dispatcher.EnqueueForDispatching(&domain.DispatcherCommand{
-			ID:       domain.DispatcherCommandID(parsed.ID),
+		c.hub.dispatcher.EnqueueForDispatching(&components.DispatcherCommand{
+			ID:       components.DispatcherCommandID(parsed.ID),
 			ClientID: c.id,
 			OnBehalf: c.user,
-			Scope:    domain.DispatcherScope(parsed.Scope),
+			Scope:    components.DispatcherScope(parsed.Scope),
 			Command:  parsed.Command,
 			Payload:  parsed.Payload,
 		})

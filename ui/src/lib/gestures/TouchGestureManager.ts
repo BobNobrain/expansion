@@ -17,10 +17,12 @@ export type TouchGestureManager = {
     readonly pinch: Listenable<PinchGestureData>;
     readonly pinchEnd: Listenable<void>;
 
+    attach(el: HTMLElement): void;
+    detach(): void;
     destroy(): void;
 };
 
-class TouchGestureManagerImpl {
+class TouchGestureManagerImpl implements TouchGestureManager {
     readonly tap = createEvent<TapGestureData>();
     readonly longTap = createEvent<TapGestureData>();
 
@@ -44,6 +46,8 @@ class TouchGestureManagerImpl {
             !this.pinchEnd.length()
         );
     }
+
+    private target: HTMLElement | null = null;
 
     private tracker = new TouchTracker();
     private tapDetector = new TapDetector(this.tracker, this.tap, this.longTap);
@@ -69,22 +73,35 @@ class TouchGestureManagerImpl {
         this.tracker.onTouchEnd(ev);
     };
 
-    constructor(private target: HTMLElement) {
-        target.addEventListener('touchstart', this.handleTouchStart);
+    attach(target: HTMLElement) {
+        this.target = target;
+
+        this.target.addEventListener('touchstart', this.handleTouchStart);
 
         this.tracker.started.on(() => {
-            this.target.addEventListener('touchmove', this.handleTouchMove);
-            this.target.addEventListener('touchend', this.handleTouchEnd);
-            this.target.addEventListener('touchcancel', this.handleTouchEnd);
+            this.target!.addEventListener('touchmove', this.handleTouchMove);
+            this.target!.addEventListener('touchend', this.handleTouchEnd);
+            this.target!.addEventListener('touchcancel', this.handleTouchEnd);
         });
 
         this.tracker.finished.on(() => {
-            this.target.removeEventListener('touchmove', this.handleTouchMove);
-            this.target.removeEventListener('touchend', this.handleTouchEnd);
-            this.target.removeEventListener('touchcancel', this.handleTouchEnd);
+            this.target!.removeEventListener('touchmove', this.handleTouchMove);
+            this.target!.removeEventListener('touchend', this.handleTouchEnd);
+            this.target!.removeEventListener('touchcancel', this.handleTouchEnd);
         });
+    }
+    detach() {
+        if (!this.target) {
+            return;
+        }
+        this.target.removeEventListener('touchstart', this.handleTouchStart);
 
-        // this.debugPinch();
+        // just in case
+        this.target.removeEventListener('touchmove', this.handleTouchMove);
+        this.target.removeEventListener('touchend', this.handleTouchEnd);
+        this.target.removeEventListener('touchcancel', this.handleTouchEnd);
+
+        this.target = null;
     }
 
     debugPinch() {
@@ -113,12 +130,7 @@ class TouchGestureManagerImpl {
     }
 
     destroy() {
-        this.target.removeEventListener('touchstart', this.handleTouchStart);
-
-        // just in case
-        this.target.removeEventListener('touchmove', this.handleTouchMove);
-        this.target.removeEventListener('touchend', this.handleTouchEnd);
-        this.target.removeEventListener('touchcancel', this.handleTouchEnd);
+        this.detach();
 
         this.tapDetector.destroy();
         this.dragDetector.destroy();
@@ -126,6 +138,6 @@ class TouchGestureManagerImpl {
     }
 }
 
-export function createTouchGestureManager(el: HTMLElement): TouchGestureManager {
-    return new TouchGestureManagerImpl(el);
+export function createTouchGestureManager(): TouchGestureManager {
+    return new TouchGestureManagerImpl();
 }

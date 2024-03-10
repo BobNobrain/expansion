@@ -1,24 +1,24 @@
 package chats
 
 import (
+	"srv/internal/components"
 	"srv/internal/decodables"
 	"srv/internal/dispatcher"
-	"srv/internal/domain"
 	"srv/internal/encodables"
 	"srv/internal/utils/common"
 )
 
-const scope = domain.DispatcherScope("chat")
+const scope = components.DispatcherScope("chat")
 
-func (impl *chatRepoImpl) AsDispatcherCommandHandler() domain.DispatcherCommandHandler {
+func (impl *chatRepoImpl) AsDispatcherCommandHandler() components.DispatcherCommandHandler {
 	return impl
 }
 
-func (impl *chatRepoImpl) GetScope() domain.DispatcherScope {
+func (impl *chatRepoImpl) GetScope() components.DispatcherScope {
 	return scope
 }
 
-func (impl *chatRepoImpl) HandleCommand(cmd *domain.DispatcherCommand) (common.Encodable, common.Error) {
+func (impl *chatRepoImpl) HandleCommand(cmd *components.DispatcherCommand) (common.Encodable, common.Error) {
 	switch cmd.Command {
 	case "post":
 		parsedPayload, err := decodables.DecodeChatPostCommand(cmd)

@@ -2,6 +2,7 @@ package chats
 
 import (
 	"slices"
+	"srv/internal/components"
 	"srv/internal/domain"
 	"srv/internal/encodables"
 	"srv/internal/utils"
@@ -16,10 +17,10 @@ type chatRepoImpl struct {
 	chats    map[domain.ChatID]*domain.ChatData
 	messages map[domain.ChatID][]*domain.ChatMessageData
 
-	comms domain.Comms
+	comms components.Comms
 }
 
-func NewChatRepo(comms domain.Comms, dispatcher domain.Dispatcher) domain.ChatRepo {
+func NewChatRepo(comms components.Comms, dispatcher components.Dispatcher) domain.ChatRepo {
 	repo := &chatRepoImpl{
 		mu:       sync.Mutex{},
 		chats:    make(map[domain.ChatID]*domain.ChatData),
@@ -137,7 +138,7 @@ func (impl *chatRepoImpl) PostMessage(data *domain.PostChatMessageData) (*domain
 }
 
 func (impl *chatRepoImpl) broadcastPostedMessage(chat *domain.ChatData, msg *domain.ChatMessageData) {
-	impl.comms.Broadcast(domain.CommsBroadcastRequest{
+	impl.comms.Broadcast(components.CommsBroadcastRequest{
 		Scope:      scope,
 		Event:      "post",
 		Recepients: chat.MemberUsernames,

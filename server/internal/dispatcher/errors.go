@@ -2,13 +2,13 @@ package dispatcher
 
 import (
 	"fmt"
-	"srv/internal/domain"
+	"srv/internal/components"
 	"srv/internal/encodables"
 	"srv/internal/utils/common"
 )
 
 type unknownDispatcherScopeError struct {
-	Scope domain.DispatcherScope
+	Scope components.DispatcherScope
 }
 
 func (e *unknownDispatcherScopeError) Error() string {
@@ -21,14 +21,14 @@ func (e *unknownDispatcherScopeError) Details() common.Encodable {
 	return encodables.NewDebugEncodable().Add("scope", e.Scope)
 }
 
-func newUnknownDispatcherScopeError(scope domain.DispatcherScope) common.Error {
+func newUnknownDispatcherScopeError(scope components.DispatcherScope) common.Error {
 	return &unknownDispatcherScopeError{
 		Scope: scope,
 	}
 }
 
 type UnknownDispatcherCommandError struct {
-	Scope   domain.DispatcherScope
+	Scope   components.DispatcherScope
 	Command string
 }
 
@@ -42,7 +42,7 @@ func (e *UnknownDispatcherCommandError) Details() common.Encodable {
 	return encodables.NewDebugEncodable().Add("scope", e.Scope).Add("command", e.Command)
 }
 
-func NewUnknownDispatcherCommandError(dcmd *domain.DispatcherCommand) common.Error {
+func NewUnknownDispatcherCommandError(dcmd *components.DispatcherCommand) common.Error {
 	return &UnknownDispatcherCommandError{
 		Scope:   dcmd.Scope,
 		Command: dcmd.Command,

@@ -1,10 +1,9 @@
 package gameworld
 
 import (
-	"hash/fnv"
-	"math"
 	"math/rand"
-	"srv/internal/domain"
+	"srv/internal/components"
+	"srv/internal/utils"
 	"srv/internal/utils/common"
 	"srv/internal/utils/phys"
 	"srv/internal/world"
@@ -16,7 +15,7 @@ type GameWorld interface {
 	LaunchSimulation() common.Error
 }
 
-func NewGameWorld(seed string, dispatcher domain.Dispatcher) GameWorld {
+func NewGameWorld(seed string, dispatcher components.Dispatcher) GameWorld {
 	return &gameWorldImpl{
 		seed:       seed,
 		dispatcher: dispatcher,
@@ -26,7 +25,7 @@ func NewGameWorld(seed string, dispatcher domain.Dispatcher) GameWorld {
 
 type gameWorldImpl struct {
 	seed       string
-	dispatcher domain.Dispatcher
+	dispatcher components.Dispatcher
 
 	testPlanet *world.Planet
 }
@@ -36,21 +35,7 @@ func (w *gameWorldImpl) GetSeed() string {
 }
 
 func (w *gameWorldImpl) getRandom(additionalSeed string) *rand.Rand {
-	seed := w.seed + ":" + additionalSeed
-
-	hash := fnv.New64a()
-	hash.Write([]byte(seed))
-	usum := hash.Sum64()
-
-	sum := int64(usum)
-	if usum > math.MaxInt64 {
-		sum = -int64(usum - math.MaxInt64)
-	}
-
-	source := rand.NewSource(sum)
-	rnd := rand.New(source)
-
-	return rnd
+	return utils.GetSeededRandom(w.seed + ":" + additionalSeed)
 }
 
 func (w *gameWorldImpl) LaunchSimulation() common.Error {

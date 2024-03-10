@@ -1,0 +1,25 @@
+{
+    "users": [
+        {
+            "username": "bob",
+            "password": "111",
+            "org": {
+                "name": "Bob's Stuff",
+                "ticker": "BOBS"
+            }
+        },
+        {
+            "username": "alice",
+            "password": "222",
+            "org": {
+                "name": "A Company Making Everything",
+                "ticker": "ACME"
+            }
+        },
+        {
+            "username": "newbie",
+            "password": "hello",
+            "org": null
+        }
+    ]
+}

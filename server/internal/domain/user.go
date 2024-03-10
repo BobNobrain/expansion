@@ -5,14 +5,18 @@ import (
 )
 
 type Username string
+type UserID string
 
 type User struct {
-	Username Username `json:"username"`
+	ID       UserID
+	Username Username
+	Email    string
 }
 
 type UserCreateData struct {
-	Username Username `json:"username"`
-	Password string   `json:"password"`
+	Username     Username
+	Email        string
+	PasswordHash string
 }
 
 type UserCredentials struct {
@@ -21,8 +25,9 @@ type UserCredentials struct {
 }
 
 type UserRepo interface {
+	GetByID(UserID) (*User, common.Error)
 	GetByUsername(Username) (*User, common.Error)
-	GetCredentialsByUsername(Username) (UserCredentials, common.Error)
+	GetCredentialsByUsername(Username) (*UserCredentials, common.Error)
 
 	CreateUser(UserCreateData) (*User, common.Error)
 }

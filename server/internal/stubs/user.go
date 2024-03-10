@@ -14,18 +14,22 @@ type stubUserRepo struct {
 func NewStubUserRepo() domain.UserRepo {
 	users := make([]userData, 0)
 	users = append(users, userData{
+		id:           "bob",
 		uname:        "bob",
 		passwordHash: "111",
 	})
 	users = append(users, userData{
+		id:           "alice",
 		uname:        "alice",
 		passwordHash: "222",
 	})
 	users = append(users, userData{
+		id:           "eve",
 		uname:        "eve",
 		passwordHash: "333",
 	})
 	users = append(users, userData{
+		id:           "joe",
 		uname:        "joe",
 		passwordHash: "444",
 	})
@@ -34,6 +38,19 @@ func NewStubUserRepo() domain.UserRepo {
 		mu:    sync.Mutex{},
 		users: users,
 	}
+}
+
+func (impl *stubUserRepo) GetByID(uid domain.UserID) (*domain.User, common.Error) {
+	impl.mu.Lock()
+	defer impl.mu.Unlock()
+
+	for _, u := range impl.users {
+		if u.id == uid {
+			return u.toUser(), nil
+		}
+	}
+
+	return nil, nil
 }
 
 func (impl *stubUserRepo) GetByUsername(uname domain.Username) (*domain.User, common.Error) {
@@ -49,7 +66,7 @@ func (impl *stubUserRepo) GetByUsername(uname domain.Username) (*domain.User, co
 	return nil, nil
 }
 
-func (impl *stubUserRepo) GetCredentialsByUsername(uname domain.Username) (domain.UserCredentials, common.Error) {
+func (impl *stubUserRepo) GetCredentialsByUsername(uname domain.Username) (*domain.UserCredentials, common.Error) {
 	impl.mu.Lock()
 	defer impl.mu.Unlock()
 
@@ -59,7 +76,7 @@ func (impl *stubUserRepo) GetCredentialsByUsername(uname domain.Username) (domai
 		}
 	}
 
-	return domain.UserCredentials{}, newUserNotFoundError(uname)
+	return nil, newUserNotFoundError(uname)
 }
 
 func (impl *stubUserRepo) CreateUser(ucd domain.UserCreateData) (*domain.User, common.Error) {
@@ -68,7 +85,7 @@ func (impl *stubUserRepo) CreateUser(ucd domain.UserCreateData) (*domain.User, c
 
 	newUser := userData{
 		uname:        ucd.Username,
-		passwordHash: ucd.Password,
+		passwordHash: ucd.PasswordHash,
 	}
 
 	impl.users = append(impl.users, newUser)
@@ -76,6 +93,7 @@ func (impl *stubUserRepo) CreateUser(ucd domain.UserCreateData) (*domain.User, c
 }
 
 type userData struct {
+	id           domain.UserID
 	uname        domain.Username
 	passwordHash string
 }
@@ -85,8 +103,8 @@ func (udata userData) toUser() *domain.User {
 		Username: udata.uname,
 	}
 }
-func (udata userData) getCreds() domain.UserCredentials {
-	return domain.UserCredentials{
+func (udata userData) getCreds() *domain.UserCredentials {
+	return &domain.UserCredentials{
 		Username:     udata.uname,
 		PasswordHash: udata.passwordHash,
 	}

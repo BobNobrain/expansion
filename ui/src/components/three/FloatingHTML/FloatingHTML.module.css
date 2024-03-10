@@ -1,0 +1,19 @@
+.wrapper {
+    position: absolute;
+    z-index: 1;
+
+    width: 0;
+    height: 0;
+    overflow: visible;
+    outline: 1px solid red;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    transition: all linear 50ms;
+}
+
+.hidden {
+    display: none;
+}

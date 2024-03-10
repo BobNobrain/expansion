@@ -1,25 +1,54 @@
 package phys
 
-import "srv/internal/utils/geom"
+import (
+	"srv/internal/utils/geom"
+	"srv/internal/utils/scale"
+)
 
-type Mass float64
+type massScale byte
+
+const (
+	massScaleTons massScale = iota
+	massScaleSuns massScale = iota
+)
+
+const solarMassInTons = 1.989e27
+
+var massScaleData = scale.MakeScale([]scale.ScaleItem[massScale]{
+	{ScaleValue: massScaleTons, CoeffToPrev: 1},
+	{ScaleValue: massScaleSuns, CoeffToPrev: solarMassInTons},
+})
+
+type Mass struct {
+	value scale.ScaledScalar[massScale]
+}
 
 func Kilograms(kg float64) Mass {
-	return Mass(kg)
+	return Tons(kg * 1e-3)
 }
 func Tons(t float64) Mass {
-	return Mass(t * 1e3)
+	return Mass{
+		value: scale.MakeScalar(massScaleTons, t),
+	}
 }
-
-func FromVolumeAndDensity(v Volume, d Density) Mass {
-	return Mass(v.CubicKilometers() * d.KilogramsPerCubicKilometer())
+func SolarMasses(suns float64) Mass {
+	return Mass{
+		value: scale.MakeScalar(massScaleSuns, suns),
+	}
 }
 
 func (m Mass) Kilograms() float64 {
-	return float64(m)
+	return m.Tons() * 1e3
 }
 func (m Mass) Tons() float64 {
-	return float64(m) * 1e-3
+	return m.value.ToScale(massScaleTons, massScaleData)
+}
+func (m Mass) SolarMasses() float64 {
+	return m.value.ToScale(massScaleSuns, massScaleData)
+}
+
+func FromVolumeAndDensity(v Volume, d Density) Mass {
+	return Tons(v.CubicKilometers() * d.TonsPerCubicKilometer())
 }
 
 type Volume float64
@@ -41,10 +70,10 @@ func (v1 Volume) Diff(v2 Volume) Volume {
 
 type Density float64
 
-func KilogramsPerCubicKilometer(d float64) Density {
+func TonsPerCubicKilometer(d float64) Density {
 	return Density(d)
 }
 
-func (d Density) KilogramsPerCubicKilometer() float64 {
+func (d Density) TonsPerCubicKilometer() float64 {
 	return float64(d)
 }

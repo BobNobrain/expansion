@@ -1,44 +1,52 @@
 CAESAR = node ./tools/caesar.js
 
-.PHONY: build-desktop
-build-desktop:
-	cd ui && npm run build:desktop
-
-.PHONY: build-editor
-build-editor:
-	cd ui && npm run build:editor
-
-.PHONY: run-editor
-run-editor:
-	echo TBD...
-
-.PHONY: run-server
-run-server:
-	cd server && make run
-
-.PHONY: api-types
+#
+# generated files
+#
+.PHONY: api-types assetgen
 api-types:
 	cd server && make api-types
 
-.PHONY: dev-server
+assetgen:
+	cd server && make assetgen
+
+#
+# dev servers
+#
+.PHONY: dev-server dev-desktop-ui dev-touch-ui dev-desktop dev-touch
 dev-srv:
 	cd server && SRV_STATIC="http://localhost:3000" make watch
 
-.PHONY: dev-desktop-ui
 dev-desktop-ui:
 	cd ui && npm run serve:desktop
 
-.PHONY: dev-touch-ui
 dev-touch-ui:
 	cd ui && npm run serve:touch
 
-.PHONY: rebuild-and-run
-rebuild-and-run: api-types build-desktop run-server
-
-.PHONY: dev-desktop
 dev-desktop:
 	$(CAESAR) client: make dev-desktop-ui server: make dev-srv
 
-.PHONY: dev-touch
 dev-touch:
 	$(CAESAR) client: make dev-touch-ui server: make dev-srv
+
+#
+# db
+#
+.PHONY: dev-db dev-db-schema dev-db-galaxy dev-db-users
+dev-db:
+	docker run \
+		--name expansion-dev-db \
+		-e POSTGRES_USER=devsrv \
+		-e POSTGRES_PASSWORD=dev \
+		-e POSTGRES_DB=expansion \
+		-p 5012:5432 \
+		-d postgres:16.2-alpine
+
+dev-db-schema:
+	cd server && ARGS='-action=schema' make dev-db
+
+dev-db-galaxy:
+	cd server && ARGS='-action=galaxy' make dev-db
+
+dev-db-users:
+	cd server && ARGS='-action=users' make dev-db

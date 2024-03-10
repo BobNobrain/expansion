@@ -15,7 +15,7 @@ export type SceneRendererContext = {
 
     scene: () => Scene;
 
-    gestures: () => TouchGestureManager;
+    gestures: TouchGestureManager;
 };
 
 const outOfContext = () => {
@@ -33,7 +33,9 @@ export const SceneRendererContext = createContext<SceneRendererContext>({
     getMainCamera: outOfContext,
     setMainCamera: outOfContext,
     scene: outOfContext,
-    gestures: outOfContext,
+    get gestures() {
+        return outOfContext();
+    },
 });
 
 export const useSceneRenderer = () => useContext(SceneRendererContext);

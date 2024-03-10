@@ -1,23 +1,23 @@
 package gameworld
 
 import (
+	"srv/internal/components"
 	"srv/internal/dispatcher"
-	"srv/internal/domain"
 	"srv/internal/encodables"
 	"srv/internal/utils/common"
 )
 
-const worldDatabaseScope domain.DispatcherScope = "world"
+const worldDatabaseScope components.DispatcherScope = "world"
 
 type worldDatabase struct {
 	world *gameWorldImpl
 }
 
-func (wdb *worldDatabase) GetScope() domain.DispatcherScope {
+func (wdb *worldDatabase) GetScope() components.DispatcherScope {
 	return worldDatabaseScope
 }
 
-func (wdb *worldDatabase) HandleCommand(cmd *domain.DispatcherCommand) (common.Encodable, common.Error) {
+func (wdb *worldDatabase) HandleCommand(cmd *components.DispatcherCommand) (common.Encodable, common.Error) {
 	switch cmd.Command {
 	case "getPlanet":
 		return encodables.NewPlanetDataEncodable(wdb.world.testPlanet), nil
@@ -26,6 +26,6 @@ func (wdb *worldDatabase) HandleCommand(cmd *domain.DispatcherCommand) (common.E
 	return nil, dispatcher.NewUnknownDispatcherCommandError(cmd)
 }
 
-func (w *gameWorldImpl) newWorldDatabase() domain.DispatcherCommandHandler {
+func (w *gameWorldImpl) newWorldDatabase() components.DispatcherCommandHandler {
 	return &worldDatabase{world: w}
 }

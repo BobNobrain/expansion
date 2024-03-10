@@ -1,8 +1,11 @@
 package ws
 
-import "srv/internal/domain"
+import (
+	"srv/internal/components"
+	"srv/internal/domain"
+)
 
-func (impl *WSComms) AsOnlineTracker() domain.OnlinePresenceTracker {
+func (impl *WSComms) AsOnlineTracker() components.OnlinePresenceTracker {
 	return impl
 }
 

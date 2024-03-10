@@ -3,14 +3,14 @@ package http
 import (
 	"encoding/json"
 	"net/http"
-	"srv/internal/domain"
+	"srv/internal/components"
 	"srv/internal/transport"
 	"time"
 )
 
 const tokenCookieName = "token"
 
-func setTokenCookie(w http.ResponseWriter, auth domain.AuthenticatorToken) {
+func setTokenCookie(w http.ResponseWriter, auth components.AuthenticatorToken) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     tokenCookieName,
 		Value:    auth.Token,
@@ -33,7 +33,7 @@ func clearTokenCookie(w http.ResponseWriter) {
 	})
 }
 
-func checkTokenCookie(r *http.Request, auth domain.Authenticator) (*domain.AuthenticatorLoginResponse, error) {
+func checkTokenCookie(r *http.Request, auth components.Authenticator) (*components.AuthenticatorLoginResponse, error) {
 	tokenCookie, err := r.Cookie(tokenCookieName)
 	if err != nil {
 		return nil, err

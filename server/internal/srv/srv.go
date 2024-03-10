@@ -2,35 +2,57 @@ package srv
 
 import (
 	"fmt"
+	"srv/internal/assets"
+	"srv/internal/auth"
 	"srv/internal/chats"
 	"srv/internal/config"
+	"srv/internal/db"
 	"srv/internal/dispatcher"
 	"srv/internal/domain"
-	"srv/internal/stubs"
+	"srv/internal/gamerunner"
 	"srv/internal/transport/http"
 	"srv/internal/transport/ws"
-	"srv/internal/world/gameworld"
 )
 
 func Run(cfg *config.SrvConfig) error {
-	userRepo := stubs.NewStubUserRepo()
-	auth := stubs.NewStubAuthenticator(userRepo)
+	_, err := assets.Configure(cfg.AssetDir)
+	if err != nil {
+		return err
+	}
+
+	store := db.NewDBPermastore()
+	err = store.Open(cfg)
+	if err != nil {
+		return err
+	}
+
+	userRepo := store.UserRepo()
+	auth := auth.NewAuthenticator(userRepo, cfg)
 
 	missionControl := dispatcher.NewDispatcher()
 	comms := ws.NewWebSocketComms(missionControl, auth)
 	missionControl.Start(comms)
 
 	chatRepo := chats.NewChatRepo(comms, missionControl)
+	// TODO
 	chatRepo.CreateChat(&domain.ChatCreateData{
 		Title:           "Global Chat",
 		MemberUsernames: []domain.Username{"bob", "alice", "eve", "joe"},
 	})
 
-	world := gameworld.NewGameWorld(cfg.WorldSeed, missionControl)
-	werr := world.LaunchSimulation()
-	if werr != nil {
-		return werr
+	galaxyContent, err := gamerunner.LoadGalaxyContent(store)
+	if err != nil {
+		return err
 	}
+	runner := gamerunner.NewGameRunner(missionControl, comms, store, galaxyContent)
+
+	go runner.Run()
+
+	// world := gameworld.NewGameWorld(cfg.WorldSeed, missionControl)
+	// werr := world.LaunchSimulation()
+	// if werr != nil {
+	// 	return werr
+	// }
 
 	srv, err := http.NewHTTPServer(auth, comms, cfg)
 	if err != nil {

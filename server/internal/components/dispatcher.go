@@ -1,7 +1,8 @@
-package domain
+package components
 
 import (
 	"encoding/json"
+	"srv/internal/domain"
 	"srv/internal/utils/common"
 )
 
@@ -21,8 +22,8 @@ type DispatcherCommandHandler interface {
 
 type DispatcherCommand struct {
 	ID       DispatcherCommandID
-	ClientID ClientID
-	OnBehalf Username
+	ClientID domain.ClientID
+	OnBehalf domain.Username
 	Scope    DispatcherScope
 	Command  string
 	Payload  json.RawMessage

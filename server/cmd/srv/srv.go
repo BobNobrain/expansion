@@ -8,17 +8,15 @@ import (
 )
 
 func main() {
-	statics := os.Getenv("SRV_STATIC")
-	if statics == "" {
-		statics = "../ui/dist"
+	config, err := config.Get()
+
+	if err != nil {
+		fmt.Printf("Cannot get config: %s\n", err.Error())
+		os.Exit(2)
 	}
 
-	err := srv.Run(&config.SrvConfig{
-		Port:                "8031",
-		StaticFilesLocation: statics,
+	err = srv.Run(config)
 
-		WorldSeed: "deadmouse",
-	})
 	if err != nil {
 		fmt.Printf("Error: %s\n", err.Error())
 		os.Exit(1)

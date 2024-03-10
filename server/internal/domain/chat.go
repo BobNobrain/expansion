@@ -10,7 +10,7 @@ import (
 type ChatID string
 
 func NewChatID() ChatID {
-	return ChatID(utils.GenerateRandomStringID(16))
+	return ChatID(utils.GenerateRandomStringID(16, rand.New(rand.NewSource(rand.Int63()))))
 }
 
 type ChatData struct {

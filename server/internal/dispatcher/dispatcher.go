@@ -2,33 +2,33 @@ package dispatcher
 
 import (
 	"fmt"
-	"srv/internal/domain"
+	"srv/internal/components"
 	"srv/internal/utils/common"
 )
 
 type dispatcherImpl struct {
-	handlers     map[domain.DispatcherScope]domain.DispatcherCommandHandler
-	comms        domain.Comms
-	commandQueue chan *domain.DispatcherCommand
+	handlers     map[components.DispatcherScope]components.DispatcherCommandHandler
+	comms        components.Comms
+	commandQueue chan *components.DispatcherCommand
 }
 
 const maxCommandQueueSize = 512
 
 func NewDispatcher() *dispatcherImpl {
 	return &dispatcherImpl{
-		handlers:     make(map[domain.DispatcherScope]domain.DispatcherCommandHandler),
+		handlers:     make(map[components.DispatcherScope]components.DispatcherCommandHandler),
 		comms:        nil,
-		commandQueue: make(chan *domain.DispatcherCommand, maxCommandQueueSize),
+		commandQueue: make(chan *components.DispatcherCommand, maxCommandQueueSize),
 	}
 }
 
-func (impl *dispatcherImpl) Start(comms domain.Comms) {
+func (impl *dispatcherImpl) Start(comms components.Comms) {
 	impl.comms = comms
 
 	go impl.processCommandQueue()
 }
 
-func (impl *dispatcherImpl) EnqueueForDispatching(cmd *domain.DispatcherCommand) {
+func (impl *dispatcherImpl) EnqueueForDispatching(cmd *components.DispatcherCommand) {
 	impl.commandQueue <- cmd
 }
 
@@ -49,7 +49,7 @@ func (impl *dispatcherImpl) processCommandQueue() {
 		}
 
 		fmt.Printf("[dispatcher] responsing: %v / %v\n", result, derr)
-		impl.comms.Respond(domain.CommsRespondRequest{
+		impl.comms.Respond(components.CommsRespondRequest{
 			ClientID:   cmd.ClientID,
 			ResponseTo: cmd.ID,
 			Error:      derr,
@@ -58,6 +58,6 @@ func (impl *dispatcherImpl) processCommandQueue() {
 	}
 }
 
-func (impl *dispatcherImpl) RegisterHandler(handler domain.DispatcherCommandHandler) {
+func (impl *dispatcherImpl) RegisterHandler(handler components.DispatcherCommandHandler) {
 	impl.handlers[handler.GetScope()] = handler
 }

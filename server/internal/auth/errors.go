@@ -1,4 +1,4 @@
-package stubs
+package auth
 
 import "srv/internal/utils/common"
 

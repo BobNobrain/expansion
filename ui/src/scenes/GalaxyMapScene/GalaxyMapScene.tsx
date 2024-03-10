@@ -1,173 +1,103 @@
-import { type Component } from 'solid-js';
-import * as T from 'three';
-import { type RawColor, type RawVertex } from '../../lib/3d/types';
-import { useInScene } from '../../components/three/hooks/useInScene';
+import { type Component, createMemo, Show, createEffect } from 'solid-js';
+
 import { RotatableCamera } from '../common/RotatableCamera/RotatableCamera';
+import { Point2D } from '../../lib/math/2d';
+import { FloatingHTML } from '../../components/three/FloatingHTML/FloatingHTML';
+import { Text } from '../../components/Text/Text';
+import { useGalaxyGrid } from '../../store/galaxy';
 
-const FULL_ANGLE = 2 * Math.PI;
-const N = 10000;
-const R = 2;
-const MAX_DENSITY_AT = 0.05;
-const H = 0.1;
-const INNER_R = 0.2;
-
-type SleeveConfig = {
-    position: number;
-    widthTheta: number;
-    percentage: number;
-    twist: number;
-    color: RawColor;
-};
-
-type Star = {
-    pos: RawVertex;
-    color: RawColor;
-};
-
-const starColors: RawColor[] = [
-    [1, 0.3, 0.3],
-    [1, 0.7, 0.3],
-    [0.95, 0.95, 0.3],
-    [0.5, 0.5, 1],
-    [0.3, 0.1, 0.8],
-    [0.8, 0.3, 1],
-    [1, 1, 1],
-    [0.9, 1, 0.5],
-    [1, 1, 0.9],
-    [0.9, 0.8, 0.6],
-];
-
-const sleeves: SleeveConfig[] = [
-    {
-        position: 0,
-        widthTheta: FULL_ANGLE / 7,
-        percentage: 0.15,
-        twist: 3.1,
-        color: [1, 0.3, 0.3],
-    },
-    {
-        position: 0.19,
-        widthTheta: FULL_ANGLE / 7,
-        percentage: 0.1,
-        twist: 2.9,
-        color: [1, 0.7, 0.3],
-    },
-    {
-        position: 0.37,
-        widthTheta: FULL_ANGLE / 7,
-        percentage: 0.1,
-        twist: 3,
-        color: [0.95, 0.95, 0.3],
-    },
-    {
-        position: 0.54,
-        widthTheta: FULL_ANGLE / 10,
-        percentage: 0.05,
-        twist: 2.8,
-        color: [0.5, 0.5, 1],
-    },
-    {
-        position: 0.7,
-        widthTheta: FULL_ANGLE / 7,
-        percentage: 0.1,
-        twist: 3.1,
-        color: [0.3, 0.1, 0.8],
-    },
-    {
-        position: 0.87,
-        widthTheta: FULL_ANGLE / 100,
-        percentage: 0.01,
-        twist: 3,
-        color: [0.8, 0.3, 1],
-    },
-];
-
-const pickSleeve = (): SleeveConfig | null => {
-    const rnd = Math.random();
-    let acc = 0;
-    for (const s of sleeves) {
-        acc += s.percentage;
-        if (rnd < acc) {
-            return s;
-        }
-    }
-    return null;
-};
-
-const genY = () => {
-    const h = Math.random() * Math.random() * H;
-    return Math.random() > 0.5 ? h : -h;
-};
-
-const sampleRndForR = () => {
-    const rnd = Math.random() * Math.random();
-    if (Math.random() < MAX_DENSITY_AT) {
-        return MAX_DENSITY_AT * (1 - rnd);
-    }
-    return rnd * (1 - MAX_DENSITY_AT) + MAX_DENSITY_AT;
-};
-
-const genSleeveStar = (): Star | null => {
-    const sleeve = pickSleeve();
-    if (!sleeve) {
-        return null;
-    }
-
-    const rnd = sampleRndForR();
-    const r = INNER_R + rnd * (R - INNER_R);
-
-    const thetaStrict = (rnd * FULL_ANGLE) / sleeve.twist + sleeve.position * FULL_ANGLE;
-
-    const thetaVariated =
-        thetaStrict + ((Math.random() * (1 - rnd / 2) * sleeve.widthTheta) / 2) * (Math.random() < 0.5 ? 1 : -1);
-
-    const x = Math.cos(thetaVariated) * r;
-    const z = Math.sin(thetaVariated) * r;
-    const y = genY();
-    return { pos: [x, y, z], color: sleeve.color };
-};
-
-const genScatterStar = (): Star => {
-    const theta = Math.random() * FULL_ANGLE;
-    const r = INNER_R + sampleRndForR() * (R - INNER_R);
-    return { pos: [Math.cos(theta) * r, genY(), Math.sin(theta) * r], color: [1, 1, 1] };
-};
+import { FULL_CIRCLE } from './constants';
+import { type Sector, divideGalaxy } from './sectors';
+import { generateStars } from './stars';
+import { GalaxyStars } from './GalaxyStars';
+import { GalaxySectorsGrid } from './GalaxySectorsGrid';
+import { GalaxyMapActiveSector } from './GalaxyMapActiveSector';
 
 export type GalaxyMapSceneProps = {
-    onSectorClick: (id: string) => void;
+    selectedSector: string | null;
+    onSectorClick: (id: string | undefined) => void;
 };
 
-export const GalaxyMapScene: Component<GalaxyMapSceneProps> = () => {
-    const material = new T.PointsMaterial({
-        color: 0xffffff,
-        size: 1,
-        sizeAttenuation: false,
-        fog: false,
-        vertexColors: true,
+export const GalaxyMapScene: Component<GalaxyMapSceneProps> = (props) => {
+    const { verticies, colors } = generateStars();
+    const { sectors } = divideGalaxy();
+
+    const galaxyGrid = useGalaxyGrid();
+    createEffect(() => {
+        console.log({ grid: galaxyGrid.data });
     });
 
-    const verticies: RawVertex[] = [];
-    const colors: RawColor[] = [];
+    const sectorsByName: Record<string, Sector> = {};
 
-    for (let i = 0; i < N; i++) {
-        const star = genSleeveStar() || genScatterStar();
-        verticies.push(star.pos);
-        // colors.push(star.color);
-        colors.push(starColors[Math.floor(Math.random() * starColors.length)]);
+    for (const sector of sectors) {
+        sectorsByName[sector.name] = sector;
     }
 
-    console.log('regen', verticies.length);
+    const selectedSector = createMemo(() => {
+        const selectedSectorName = props.selectedSector;
+        console.log({ selectedSectorName, s: sectorsByName[selectedSectorName || ''] });
+        if (!selectedSectorName) {
+            return null;
+        }
+        return sectorsByName[selectedSectorName] ?? null;
+    });
 
-    const geom = new T.BufferGeometry();
-    geom.setAttribute('position', new T.BufferAttribute(new Float32Array(verticies.flat()), 3));
-    geom.setAttribute('color', new T.BufferAttribute(new Float32Array(colors.flat()), 3));
+    const onSectorClick = (sector: Sector | null) => {
+        let nStarsInside = 0;
+        if (sector) {
+            for (const [x, , z] of verticies) {
+                const r = Math.sqrt(x * x + z * z);
+                if (r < sector.innerR || sector.outerR < r) {
+                    continue;
+                }
+                let theta = Point2D.angle({ x: 1, y: 0 }, { x, y: z });
+                if (theta < 0) {
+                    theta += FULL_CIRCLE;
+                }
+                if (theta < sector.thetaStart || sector.thetaEnd < theta) {
+                    continue;
+                }
 
-    const stars = new T.Points(geom, material);
-    useInScene(() => stars);
+                ++nStarsInside;
+            }
+        }
+
+        console.log(sector, { nStarsInside });
+
+        props.onSectorClick(sector ? sector.name : undefined);
+    };
+
+    const selectedSectorCenterCoords = createMemo(() => {
+        const sector = selectedSector();
+        if (!sector) {
+            return null;
+        }
+        const r = sector.innerR + (sector.outerR - sector.innerR) / 2;
+        const theta = sector.thetaStart + (sector.thetaEnd - sector.thetaStart) / 2;
+        const x = r * Math.cos(theta);
+        const z = r * Math.sin(theta);
+        return { x, y: 0, z };
+    });
+
+    const deselectSector = () => props.onSectorClick(undefined);
 
     return (
         <>
-            <RotatableCamera main minDistance={0.1} maxDistance={6} yawInertia={0.95} pitchInertia={0.9} />
+            <GalaxyStars positions={verticies} colors={colors} />
+            <GalaxySectorsGrid sectors={sectors} isActive={!selectedSector()} onClick={onSectorClick} />
+            <GalaxyMapActiveSector sector={selectedSector()} onClickOff={deselectSector} />
+            <RotatableCamera main pannable minDistance={0.1} maxDistance={6} yawInertia={0.95} pitchInertia={0.9} />
+            <Show when={selectedSector()}>
+                <FloatingHTML
+                    x={selectedSectorCenterCoords()!.x}
+                    y={selectedSectorCenterCoords()!.y}
+                    z={selectedSectorCenterCoords()!.z}
+                >
+                    <div style="pointer-events: none">
+                        <Text color="primary">{selectedSector()!.name}</Text>
+                    </div>
+                </FloatingHTML>
+            </Show>
         </>
     );
 };

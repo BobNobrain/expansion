@@ -5,6 +5,7 @@ import { LogInGuard } from '../../../components/LogInGuard';
 
 import { HomePageView } from '../../views/HomePageView/HomePageView';
 import { GalaxyMapView } from '../../views/GalaxyMapView/GalaxyMapView';
+import { PlanetView } from '../../views/PlanetView/PlanetView';
 
 import './touch.css';
 
@@ -15,6 +16,7 @@ export const TouchUI: Component = () => {
                 <HashRouter>
                     <Route path="/" component={HomePageView} />
                     <Route path="/map/:sectorId?" component={GalaxyMapView} />
+                    <Route path="/planets/:planeetId/:tileId?" component={PlanetView} />
                 </HashRouter>
             </LogInGuard>
         </App>

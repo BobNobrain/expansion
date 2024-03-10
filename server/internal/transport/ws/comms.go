@@ -1,6 +1,7 @@
 package ws
 
 import (
+	"srv/internal/components"
 	"srv/internal/domain"
 	"srv/internal/encodables"
 	"srv/internal/utils"
@@ -13,13 +14,13 @@ import (
 
 type WSComms struct {
 	mu         sync.Mutex
-	dispatcher domain.Dispatcher
+	dispatcher components.Dispatcher
 
 	clientsByUsername map[domain.Username][]*wsClient
 	clientsById       map[domain.ClientID]*wsClient
 }
 
-func NewWebSocketComms(dispatcher domain.Dispatcher, auth domain.Authenticator) *WSComms {
+func NewWebSocketComms(dispatcher components.Dispatcher, auth components.Authenticator) *WSComms {
 	return &WSComms{
 		mu:                sync.Mutex{},
 		dispatcher:        dispatcher,
@@ -28,25 +29,25 @@ func NewWebSocketComms(dispatcher domain.Dispatcher, auth domain.Authenticator) 
 	}
 }
 
-func (impl *WSComms) AsComms() domain.Comms {
+func (impl *WSComms) AsComms() components.Comms {
 	return impl
 }
 
-const userDataScopeName = domain.DispatcherScope("user")
+const userDataScopeName = components.DispatcherScope("user")
 
 func (impl *WSComms) HandleNewConnection(conn *websocket.Conn, user *domain.User) {
 	client := newClient(conn, user.Username, impl)
 	impl.attachClient(client)
 	impl.onOnlineCountChange()
 
-	impl.Broadcast(domain.CommsBroadcastRequest{
+	impl.Broadcast(components.CommsBroadcastRequest{
 		Scope:   userDataScopeName,
 		Event:   "login",
 		Payload: encodables.NewUserDataUpdatePayload(user.Username),
 	})
 }
 
-func (impl *WSComms) Broadcast(rq domain.CommsBroadcastRequest) common.Error {
+func (impl *WSComms) Broadcast(rq components.CommsBroadcastRequest) common.Error {
 	impl.mu.Lock()
 	defer impl.mu.Unlock()
 
@@ -75,7 +76,7 @@ func (impl *WSComms) Broadcast(rq domain.CommsBroadcastRequest) common.Error {
 	return nil
 }
 
-func (impl *WSComms) Respond(rq domain.CommsRespondRequest) common.Error {
+func (impl *WSComms) Respond(rq components.CommsRespondRequest) common.Error {
 	impl.mu.Lock()
 	defer impl.mu.Unlock()
 

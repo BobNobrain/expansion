@@ -1,6 +1,7 @@
-package domain
+package components
 
 import (
+	"srv/internal/domain"
 	"srv/internal/utils/common"
 )
 
@@ -12,13 +13,13 @@ type Comms interface {
 type CommsBroadcastRequest struct {
 	Scope            DispatcherScope
 	Event            string
-	Recepients       []Username
-	RecipientClients []ClientID
+	Recepients       []domain.Username
+	RecipientClients []domain.ClientID
 	Payload          common.Encodable
 }
 
 type CommsRespondRequest struct {
-	ClientID   ClientID
+	ClientID   domain.ClientID
 	ResponseTo DispatcherCommandID
 	Error      common.Error
 	Result     common.Encodable

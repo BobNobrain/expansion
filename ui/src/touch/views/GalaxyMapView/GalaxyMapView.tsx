@@ -12,7 +12,7 @@ export const GalaxyMapView: Component = () => {
     const navigate = useNavigate();
     const backToMain = () => navigate('/');
 
-    const onOpenSector = (sectorId: string) => navigate(`/map/${sectorId}`);
+    const onOpenSector = (sectorId: string | undefined) => navigate(sectorId ? `/map/${sectorId}` : '/map');
     const params = useParams();
 
     return (
@@ -33,7 +33,7 @@ export const GalaxyMapView: Component = () => {
             }
         >
             <SceneRenderer>
-                <GalaxyMapScene onSectorClick={onOpenSector} />
+                <GalaxyMapScene selectedSector={params.sectorId} onSectorClick={onOpenSector} />
             </SceneRenderer>
             <TouchCurtain height="s">
                 <Container padded>

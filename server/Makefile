@@ -11,3 +11,11 @@ watch:
 .PHONY: api-types
 api-types:
 	tygo generate
+
+.PHONY: assetgen
+assetgen:
+	go run cmd/assetgen/assetgen.go
+
+.PHONY: dev-db
+dev-db:
+	go run cmd/devdb/devdb.go $(ARGS)

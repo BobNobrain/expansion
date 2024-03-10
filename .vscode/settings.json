@@ -1,12 +1,25 @@
 {
-    "typescript.tsdk": "ts/node_modules/typescript/lib",
+    "typescript.tsdk": "ui/node_modules/typescript/lib",
     "[typescript]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
     "[typescriptreact]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
     "[javascript]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
-    }
+    },
+    "sqltools.connections": [
+        {
+            "previewLimit": 100,
+            "server": "localhost",
+            "port": 5012,
+            "driver": "PostgreSQL",
+            "name": "Expansion Dev DB",
+            "group": "expansion-dev",
+            "database": "expansion",
+            "username": "devsrv",
+            "password": "dev"
+        }
+    ]
 }

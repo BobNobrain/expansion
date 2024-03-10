@@ -5,9 +5,9 @@ import "math"
 type distanceScale byte
 
 const (
-	scaleKm distanceScale = iota
-	scaleAu distanceScale = iota
-	scaleLy distanceScale = iota
+	distanceScaleKm distanceScale = iota
+	distanceScaleAu distanceScale = iota
+	distanceScaleLy distanceScale = iota
 )
 
 type Distance struct {
@@ -30,16 +30,16 @@ func maxScale(s1, s2 distanceScale) distanceScale {
 }
 
 func Kilometers(km float64) Distance {
-	return Distance{value: km, scale: scaleKm}
+	return Distance{value: km, scale: distanceScaleKm}
 }
 func Meters(m float64) Distance {
-	return Distance{value: m * 1e-3, scale: scaleKm}
+	return Distance{value: m * 1e-3, scale: distanceScaleKm}
 }
 func AstronomicalUnits(au float64) Distance {
-	return Distance{value: au, scale: scaleAu}
+	return Distance{value: au, scale: distanceScaleAu}
 }
 func LightYears(ly float64) Distance {
-	return Distance{value: ly, scale: scaleLy}
+	return Distance{value: ly, scale: distanceScaleLy}
 }
 
 func (d Distance) rescaled(target distanceScale) float64 {
@@ -49,30 +49,30 @@ func (d Distance) rescaled(target distanceScale) float64 {
 
 	var coeff float64 = 1.0
 	switch d.scale {
-	case scaleKm:
+	case distanceScaleKm:
 		switch target {
-		case scaleAu:
+		case distanceScaleAu:
 			coeff = auPerKm
 
-		case scaleLy:
+		case distanceScaleLy:
 			coeff = lyPerKm
 		}
 
-	case scaleAu:
+	case distanceScaleAu:
 		switch target {
-		case scaleKm:
+		case distanceScaleKm:
 			coeff = kmPerAu
 
-		case scaleLy:
+		case distanceScaleLy:
 			coeff = lyPerAu
 		}
 
-	case scaleLy:
+	case distanceScaleLy:
 		switch target {
-		case scaleKm:
+		case distanceScaleKm:
 			coeff = kmPerLy
 
-		case scaleAu:
+		case distanceScaleAu:
 			coeff = auPerLy
 		}
 	}
@@ -81,16 +81,16 @@ func (d Distance) rescaled(target distanceScale) float64 {
 }
 
 func (d Distance) Kilometers() float64 {
-	return d.rescaled(scaleKm)
+	return d.rescaled(distanceScaleKm)
 }
 func (d Distance) Meters() float64 {
-	return d.rescaled(scaleKm) * 1e3
+	return d.rescaled(distanceScaleKm) * 1e3
 }
 func (d Distance) AstronomicalUnits() float64 {
-	return d.rescaled(scaleAu)
+	return d.rescaled(distanceScaleAu)
 }
 func (d Distance) LightYears() float64 {
-	return d.rescaled(scaleLy)
+	return d.rescaled(distanceScaleLy)
 }
 
 func (d1 Distance) Add(d2 Distance) Distance {

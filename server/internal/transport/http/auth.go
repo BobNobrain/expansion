@@ -3,6 +3,7 @@ package http
 import (
 	"encoding/json"
 	"net/http"
+	"srv/internal/components"
 	"srv/internal/domain"
 	"srv/internal/transport"
 	"srv/pkg/api"
@@ -18,7 +19,7 @@ func (srv *httpServerImpl) serveAuthAPI() {
 			return
 		}
 
-		result, err := srv.auth.Login(domain.AuthenticatorLoginRequest{
+		result, err := srv.auth.Login(components.AuthenticatorLoginRequest{
 			Username: domain.Username(loginRequest.Username),
 			Password: loginRequest.Password,
 		})

@@ -59,7 +59,7 @@ class WSClient {
         this.sock?.close();
     }
 
-    sendCommand<T>(scope: string, command: string, payload: unknown): Promise<T> {
+    sendCommand<T, P = unknown>(scope: string, command: string, payload?: P): Promise<T> {
         const commandId = this.commandSeq++;
 
         return new Promise<unknown>((resolve, reject) => {

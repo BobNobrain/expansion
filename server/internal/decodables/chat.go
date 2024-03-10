@@ -2,12 +2,13 @@ package decodables
 
 import (
 	"encoding/json"
+	"srv/internal/components"
 	"srv/internal/domain"
 	"srv/internal/utils/common"
 	"srv/pkg/api"
 )
 
-func DecodeChatPostCommand(cmd *domain.DispatcherCommand) (*domain.PostChatMessageData, common.Error) {
+func DecodeChatPostCommand(cmd *components.DispatcherCommand) (*domain.PostChatMessageData, common.Error) {
 	var payload api.ChatPostCommandPayload
 	err := json.Unmarshal(cmd.Payload, &payload)
 
@@ -22,7 +23,7 @@ func DecodeChatPostCommand(cmd *domain.DispatcherCommand) (*domain.PostChatMessa
 	}, nil
 }
 
-func DecodeChatHistoryCommand(cmd *domain.DispatcherCommand) (*domain.ChatHistoryFilter, common.Error) {
+func DecodeChatHistoryCommand(cmd *components.DispatcherCommand) (*domain.ChatHistoryFilter, common.Error) {
 	var payload api.ChatHistoryCommandPayload
 	err := json.Unmarshal(cmd.Payload, &payload)
 

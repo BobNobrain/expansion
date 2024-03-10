@@ -21,5 +21,5 @@ func (e *unknownError) Code() string {
 	return "ERR_UNKNOWN"
 }
 func (e *unknownError) Details() Encodable {
-	return nil
+	return EmptyEncodable()
 }

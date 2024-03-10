@@ -18,7 +18,6 @@ const SIZE_CLS: Record<NonNullable<ContainerProps['size']>, string> = {
 
 export const Container: ParentComponent<ContainerProps> = (props) => {
     const isFlex = () => props.threads === undefined || props.threads === 1 || props.threads === '1';
-    console.log(styles);
     return (
         <div
             class={styles.container}

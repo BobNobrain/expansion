@@ -8,6 +8,7 @@
     min-height: 75px;
 
     overflow: hidden;
+    contain: paint;
 }
 
 .canvas {

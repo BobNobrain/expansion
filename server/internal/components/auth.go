@@ -1,26 +1,28 @@
-package domain
+package components
 
 import (
+	"srv/internal/domain"
 	"srv/internal/utils/common"
 	"time"
 )
 
 type AuthenticatorLoginRequest struct {
-	Username Username `json:"username"`
-	Password string   `json:"password"`
+	Username domain.Username
+	Password string
 }
 type AuthenticatorLoginResponse struct {
-	User *User              `json:"user"`
-	Auth AuthenticatorToken `json:"auth"`
+	User *domain.User
+	Auth AuthenticatorToken
 }
 
 type AuthenticatorToken struct {
-	Token   string    `json:"token"`
-	Expires time.Time `json:"expires"`
+	Token   string
+	Expires time.Time
 }
 
 type Authenticator interface {
 	Login(AuthenticatorLoginRequest) (*AuthenticatorLoginResponse, common.Error)
+	HashPassword(string) (string, common.Error)
 	CheckToken(string) (*AuthenticatorLoginResponse, common.Error)
 	RenewToken(string) (*AuthenticatorToken, common.Error)
 }

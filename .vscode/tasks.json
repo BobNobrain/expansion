@@ -3,6 +3,20 @@
     "tasks": [
         {
             "type": "shell",
+            "label": "Run Dev Client (Touch) & Server",
+            "command": "make dev-touch",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "dedicated",
+                "showReuseMessage": false,
+                "clear": true
+            }
+        },
+        {
+            "type": "shell",
             "label": "Run Dev Client (Desktop) & Server",
             "command": "make dev-desktop",
             "group": "build",
@@ -19,6 +33,34 @@
             "type": "shell",
             "label": "Generate API .d.ts Files",
             "command": "make api-types",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": false
+            }
+        },
+        {
+            "type": "shell",
+            "label": "Run asset generation",
+            "command": "make assetgen",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": false
+            }
+        },
+        {
+            "type": "shell",
+            "label": "Start dev DB",
+            "command": "make start-dev-db",
             "group": "build",
             "presentation": {
                 "echo": true,
