@@ -13,12 +13,13 @@ export type GalaxyFogProps = {
 // const N_POINTS = 100;
 
 export const GalaxyFog: Component<GalaxyFogProps> = (props) => {
-    const { getBounds } = useSceneRenderer();
+    const { getBounds, getMainCamera } = useSceneRenderer();
 
     const mat = new GalaxyFogMaterial();
     mat.setDimensions(props);
 
     createEffect(() => {
+        console.log(getMainCamera());
         const { width, height } = getBounds();
         mat.setAspect(width / height);
     });

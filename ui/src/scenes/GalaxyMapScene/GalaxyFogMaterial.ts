@@ -1,21 +1,24 @@
 import { ShaderMaterial, Uniform, Vector3 } from 'three';
+import fragmentProgram from './galaxyFogFragment.glsl';
 
 // three built-ins for shaders:
 // https://threejs.org/docs/index.html#api/en/renderers/webgl/WebGLProgram
 
 enum UniformName {
-    InnerR = 'innerR',
-    OuterR = 'outerR',
-    MaxH = 'maxH',
-    CameraAspect = 'cameraAspect',
+    InnerR = 'u_innerR',
+    OuterR = 'u_outerR',
+    MaxH = 'u_maxH',
+    CameraAspect = 'u_cameraAspect',
 
-    PointSize = 'pointSize',
-    PointBrightness = 'pointBrightness',
+    PointSize = 'u_pointSize',
+    PointBrightness = 'u_pointBrightness',
 
-    TargetPoints = 'targets',
+    TargetPoints = 'u_targetPoints',
+    Sleeves = 'u_sleeves',
 }
 
 const N_POINTS = 6;
+const N_SLEEVES = 1;
 
 const uniformsDefinition = `
 uniform float ${UniformName.InnerR};
@@ -25,6 +28,15 @@ uniform float ${UniformName.CameraAspect};
 uniform float ${UniformName.PointSize};
 uniform float ${UniformName.PointBrightness};
 uniform vec3[${N_POINTS}] ${UniformName.TargetPoints};
+
+struct Sleeve {
+    float thPos;
+    float thWidth;
+    float thTwist;
+    float density;
+};
+
+uniform Sleeve[${N_SLEEVES}] ${UniformName.Sleeves};
 `;
 
 const vertexShader = `
@@ -39,74 +51,22 @@ void main() {
 
 const fragmentShader = `
 ${uniformsDefinition}
-varying vec2 vUv;
-
-vec3 onViewLine(vec3 origin, vec3 forward, float k) {
-    return k * forward + (1.0 - k) * origin;
-}
-
-vec2 getClosestPointToSight(vec3 origin, vec3 forward, vec3 target) {
-    vec3 fo = origin - forward;
-    vec3 to = origin - target;
-    float k = dot(fo, to) / dot(fo, fo);
-
-    if (k <= 0.0) {
-        // clipping off
-        return vec2(-1.0, k);
-    }
-
-    vec3 closestPoint = k * forward + (1.0 - k) * origin;
-    float d = length(closestPoint - target);
-    return vec2(d, k);
-}
-
-float calcBrightness(vec2 casted) {
-    if (casted[1] <= 0.0) {
-        return 0.0;
-    }
-
-    float exponential = exp(-casted[0] / ${UniformName.PointSize});
-    float scaled = ${UniformName.PointBrightness} * exponential;
-
-    if (casted[1] < 0.1) {
-        // smoothing camera clipping
-        return scaled * casted[1] / 0.1;
-    }
-
-    return scaled;
-}
-
-void main() {
-    vec2 screenCoords = vUv * 2.0 - 1.0;
-    screenCoords.x *= ${UniformName.CameraAspect};
-    vec4 camView = vec4(screenCoords, -1.0, 0.0) * viewMatrix;
-
-    // a & b are 2 points we need to define a line of sight
-    vec3 origin = vec3(cameraPosition);
-    vec3 forward = origin + normalize(vec3(camView));
-
-    float brightness = 0.0;
-
-    for (int i = 0; i < ${N_POINTS}; i++) {
-        vec2 casted = getClosestPointToSight(origin, forward, ${UniformName.TargetPoints}[i]);
-        float b = calcBrightness(casted);
-        brightness += b;
-        if (brightness >= 1.0) {
-            brightness = 1.0;
-            break;
-        }
-    }
-
-    gl_FragColor = vec4(brightness, brightness, brightness, 1.0);
-}
+#define N_POINTS ${N_POINTS}
+#define N_SLEEVES ${N_SLEEVES}
+${fragmentProgram}
 `;
-
-// line: a in line, b in line, => line: k(a-b)
 
 export type GalaxyFogDimensions = {
     innerR: number;
     outerR: number;
     maxH: number;
+};
+
+type SleeveConfig = {
+    thPos: number;
+    thWidth: number;
+    thTwist: number;
+    density: number;
 };
 
 export class GalaxyFogMaterial extends ShaderMaterial {
@@ -131,6 +91,9 @@ export class GalaxyFogMaterial extends ShaderMaterial {
                     new Vector3(0.2, 0, 0.2),
                     new Vector3(0.3, 0, 0.3),
                 ]),
+                [UniformName.Sleeves]: new Uniform<SleeveConfig[]>([
+                    { thPos: 0, thWidth: (Math.PI * 2) / 7, thTwist: 3.1, density: 0.15 },
+                ]),
             },
         });
     }
@@ -142,6 +105,7 @@ export class GalaxyFogMaterial extends ShaderMaterial {
     }
 
     setAspect(cameraAspect: number) {
+        console.log({ cameraAspect });
         this.uniforms[UniformName.CameraAspect].value = cameraAspect;
     }
 
