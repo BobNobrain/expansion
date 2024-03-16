@@ -1,17 +1,20 @@
-import { createEffect, type Component } from 'solid-js';
+import { createEffect, type Component, createMemo, For } from 'solid-js';
 import * as T from 'three';
 import { useSceneRenderer } from '../../components/three/context';
-import { useInScene } from '../../components/three/hooks/useInScene';
+import { type GalacticGrid, type GalacticGridSector } from '../../domain/GalacticOverview';
 import { Point2D } from '../../lib/math/2d';
 import { useEventListener } from '../../lib/solid/useEventListener';
-import { findSectorFor, type Sector } from './sectors';
-import { useLazyAnimation } from '../../components/three/hooks/useAnimation';
-import { lerp } from '../../lib/math/misc';
+import { GridBuilder } from './GridBuilder';
+import { SceneObject } from '../../components/three/SceneObject/SceneObject';
+import { useAnimatedNumber } from '../../components/three/hooks/useAnimatedValue';
+import { useCanvasListener } from '../../components/three/hooks/useCanvasListener';
+import { GalaxyStars } from './GalaxyStars';
+import { useSectorContent } from '../../store/galaxy';
 
 export type GalaxySectorsGridProps = {
-    sectors: Sector[];
-    isActive: boolean;
-    onClick: (sector: Sector | null) => void;
+    grid: GalacticGrid;
+    activeSectorId: string | null;
+    onClick: (sector: GalacticGridSector | null) => void;
 };
 
 export const GalaxySectorsGrid: Component<GalaxySectorsGridProps> = (props) => {
@@ -21,16 +24,50 @@ export const GalaxySectorsGrid: Component<GalaxySectorsGridProps> = (props) => {
         opacity: 1,
     });
 
-    const gridLines: T.Line[] = [];
+    const activeSectorMaterial = new T.LineBasicMaterial({
+        color: 0xf7b212,
+        opacity: 1,
+    });
 
-    for (const sector of props.sectors) {
-        const sectorGeom = new T.BufferGeometry();
-        const verticies = sector.points.map(({ x, y }) => [x, 0, y]);
-        sectorGeom.setAttribute('position', new T.BufferAttribute(new Float32Array(verticies.flat()), 3));
-        const bounds = new T.Line(sectorGeom, sectorsLineMaterial);
-        gridLines.push(bounds);
-        useInScene(() => bounds);
-    }
+    const makeGridBuilder = createMemo(() => {
+        if (!props.grid) {
+            return null;
+        }
+        return new GridBuilder(props.grid);
+    });
+
+    const gridMeshes = createMemo(() => {
+        const gridLines: T.Line[] = [];
+
+        const gridBuilder = makeGridBuilder();
+        if (!gridBuilder) {
+            return gridLines;
+        }
+
+        let activeLines: T.Line | null = null;
+
+        for (const sector of props.grid.sectors) {
+            const sectorGeom = new T.BufferGeometry();
+            const verticies = gridBuilder.getVerticiesOf(sector);
+            sectorGeom.setAttribute('position', new T.BufferAttribute(new Float32Array(verticies.flat()), 3));
+
+            const isActive = sector.id === props.activeSectorId;
+            const bounds = new T.Line(sectorGeom, isActive ? activeSectorMaterial : sectorsLineMaterial);
+
+            if (isActive) {
+                activeLines = bounds;
+            } else {
+                gridLines.push(bounds);
+            }
+        }
+
+        if (activeLines) {
+            activeLines.renderOrder = -1;
+            gridLines.push(activeLines);
+        }
+
+        return gridLines;
+    });
 
     const xzPlane = new T.Plane(new T.Vector3(0, 1, 0), 0);
 
@@ -38,36 +75,25 @@ export const GalaxySectorsGrid: Component<GalaxySectorsGridProps> = (props) => {
 
     const { gestures, getMainCamera, getBounds } = useSceneRenderer();
 
-    const triggerFadeAnimation = useLazyAnimation(() => {
-        const targetOpacity = props.isActive ? 1 : 0.05;
-        const currentOpacity = sectorsLineMaterial.opacity;
-
-        if (Math.abs(targetOpacity - currentOpacity) < 0.1) {
-            sectorsLineMaterial.opacity = targetOpacity;
-            return;
-        }
-
-        sectorsLineMaterial.opacity = lerp(currentOpacity, targetOpacity, 0.1);
-        triggerFadeAnimation();
+    const gridOpacity = useAnimatedNumber({
+        target: () => (props.activeSectorId ? 0.05 : 1),
+        durationMs: 200,
+        eps: 1e-2,
     });
 
     createEffect(() => {
-        props.isActive;
-        triggerFadeAnimation();
+        const op = gridOpacity();
+        sectorsLineMaterial.opacity = op;
     });
 
-    useEventListener(gestures.tap, (tap) => {
-        if (!props.isActive) {
-            return;
-        }
-
+    const onClick = (clientX: number, clientY: number) => {
         const cam = getMainCamera();
         if (!cam) {
             return;
         }
 
         const { x, y, width, height } = getBounds();
-        const pointer = new T.Vector2(((tap.client.x - x) / width) * 2 - 1, 1 - ((tap.client.y - y) / height) * 2);
+        const pointer = new T.Vector2(((clientX - x) / width) * 2 - 1, 1 - ((clientY - y) / height) * 2);
         raycaster.setFromCamera(pointer, cam);
         const intersectionCoords = new T.Vector3();
         raycaster.ray.intersectPlane(xzPlane, intersectionCoords);
@@ -76,9 +102,19 @@ export const GalaxySectorsGrid: Component<GalaxySectorsGridProps> = (props) => {
         const r = intersectionCoords.length();
         const theta = Point2D.angle({ x: 1, y: 0 }, intersectionPoint);
 
-        const sector = findSectorFor(props.sectors, r, theta);
+        const sector = props.grid.findContainingSector({ r, theta, h: 0 });
         props.onClick(sector);
-    });
+    };
 
-    return null;
+    useEventListener(gestures.tap, (tap) => onClick(tap.client.x, tap.client.y));
+    useCanvasListener('click', (ev) => onClick(ev.clientX, ev.clientY));
+
+    const sectorContent = useSectorContent(() => props.activeSectorId);
+
+    return (
+        <>
+            <For each={gridMeshes()}>{(line) => <SceneObject object={line} />}</For>
+            <GalaxyStars stars={sectorContent.data ?? []} withNormals dim={!sectorContent.data} />
+        </>
+    );
 };

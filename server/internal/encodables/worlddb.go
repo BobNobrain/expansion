@@ -89,6 +89,9 @@ func (data *encodableGetSectorContentResult) Encode() any {
 			RadiusAu:       star.StarData.Radius.AstronomicalUnits(),
 			MassSuns:       star.StarData.Mass.SolarMasses(),
 			AgeByrs:        star.StarData.Age.BillionYears(),
+			CoordsR:        float64(star.StarData.Coords.R),
+			CoordsTheta:    float64(star.StarData.Coords.Theta),
+			CoordsH:        float64(star.StarData.Coords.H),
 		}
 	}
 
@@ -97,19 +100,23 @@ func (data *encodableGetSectorContentResult) Encode() any {
 	}
 }
 
-type encodableGalaxyGrid struct {
-	sectors []*domain.GalacticSector
+type encodableGalaxyOverview struct {
+	sectors   []*domain.GalacticSector
+	landmarks []domain.Star
 }
 
-func NewGalaxyGridEncodable(sectors []*domain.GalacticSector) common.Encodable {
-	return &encodableGalaxyGrid{sectors: sectors}
+func NewGalaxyOverviewEncodable(
+	sectors []*domain.GalacticSector,
+	landmarks []domain.Star,
+) common.Encodable {
+	return &encodableGalaxyOverview{sectors: sectors, landmarks: landmarks}
 }
 
-func (data *encodableGalaxyGrid) Encode() any {
-	sectors := make([]api.WorldGetGalaxyGridResultSector, len(data.sectors))
+func (data *encodableGalaxyOverview) Encode() any {
+	sectors := make([]api.WorldGetGalaxyOverviewResultGridSector, len(data.sectors))
 
 	for i, sector := range data.sectors {
-		sectors[i] = api.WorldGetGalaxyGridResultSector{
+		sectors[i] = api.WorldGetGalaxyOverviewResultGridSector{
 			ID:         string(sector.ID),
 			InnerR:     float64(sector.Coords.InnerR),
 			OuterR:     float64(sector.Coords.OuterR),
@@ -118,10 +125,28 @@ func (data *encodableGalaxyGrid) Encode() any {
 		}
 	}
 
-	return &api.WorldGetGalaxyGridResult{
-		InnerR:  float64(domain.InnerRimRadius),
-		OuterR:  float64(domain.OuterRimRadius),
-		MaxH:    float64(domain.MaxHeightDispacement),
-		Sectors: sectors,
+	landmarks := make([]api.WorldGetGalaxyOverviewResultLandmark, len(data.landmarks))
+	for i, star := range data.landmarks {
+		landmarks[i] = api.WorldGetGalaxyOverviewResultLandmark{
+			CoordsR:        float64(star.StarData.Coords.R),
+			CoordsTheta:    float64(star.StarData.Coords.Theta),
+			CoordsH:        float64(star.StarData.Coords.H),
+			StarID:         string(star.StarID),
+			TempK:          star.StarData.Temperature.Kelvins(),
+			LuminositySuns: star.StarData.Luminosity.Suns(),
+		}
+	}
+
+	labels := make([]api.WorldGetGalaxyOverviewResultLabel, 0)
+
+	return &api.WorldGetGalaxyOverviewResult{
+		Grid: api.WorldGetGalaxyOverviewResultGrid{
+			InnerR:  float64(domain.InnerRimRadius),
+			OuterR:  float64(domain.OuterRimRadius),
+			MaxH:    float64(domain.MaxHeightDispacement),
+			Sectors: sectors,
+		},
+		Landmarks: landmarks,
+		Labels:    labels,
 	}
 }

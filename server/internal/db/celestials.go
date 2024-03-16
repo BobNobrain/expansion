@@ -113,14 +113,19 @@ func (repo *celestialRepoImpl) LoadAll() ([]*domain.StarSystem, common.Error) {
 	return result, nil
 }
 
-func (repo *celestialRepoImpl) GetSectorContent(params domain.GetSectorContentParams) ([]domain.Star, common.Error) {
+func (repo *celestialRepoImpl) List(params domain.CelestialListParams) ([]domain.Star, common.Error) {
 	b := repo.stars.selectBuilder("*")
-	b.Where(b.Like(starFieldID, params.SectorID+"%"))
-	b.OrderBy(starFieldLuminosity)
-	if 0 < params.Limit && params.Limit < 200 {
+
+	if params.SectorID != "" {
+		b.Where(b.Like(starFieldID, params.SectorID+"%"))
+	}
+
+	if params.OrderByLuminosity {
+		b.OrderBy(starFieldLuminosity).Desc()
+	}
+
+	if params.Limit > 0 {
 		b.Limit(params.Limit)
-	} else {
-		b.Limit(200)
 	}
 
 	var rows []*dbStar

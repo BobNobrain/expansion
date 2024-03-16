@@ -89,22 +89,12 @@ export class TouchTracker {
     }
 
     onTouchMove(ev: TouchEvent) {
-        for (const updatedTouch of ev.changedTouches) {
-            const id = updatedTouch.identifier;
-            const index = this.trajectoryIdToIndex(id);
-
-            if (index === -1) {
-                continue;
-            }
-
-            updateTrajectory(updatedTouch, this.activeTrajectories[index]);
-        }
-
+        this.processUpdates(ev);
         this.updated.trigger();
     }
 
     onTouchEnd(ev: TouchEvent) {
-        this.onTouchMove(ev);
+        this.processUpdates(ev);
 
         for (const finishedTouch of ev.changedTouches) {
             const id = finishedTouch.identifier;
@@ -120,6 +110,19 @@ export class TouchTracker {
         if (this.activeTrajectories.length === 0) {
             this.finished.trigger();
             this.maxTrajectories = 0;
+        }
+    }
+
+    private processUpdates(ev: TouchEvent) {
+        for (const updatedTouch of ev.changedTouches) {
+            const id = updatedTouch.identifier;
+            const index = this.trajectoryIdToIndex(id);
+
+            if (index === -1) {
+                continue;
+            }
+
+            updateTrajectory(updatedTouch, this.activeTrajectories[index]);
         }
     }
 

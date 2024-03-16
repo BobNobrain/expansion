@@ -1,5 +1,5 @@
 import { type Component, createEffect, onCleanup, onMount } from 'solid-js';
-import * as T from 'three';
+import type * as T from 'three';
 import {
     PerspectiveCamera,
     type PerspectiveCameraProps,
@@ -9,14 +9,19 @@ import { useLazyAnimation } from '../../../components/three/hooks/useAnimation';
 import { useSceneRenderer } from '../../../components/three/context';
 import { useDrag } from '../../../lib/solid/drag';
 import { useEventListener } from '../../../lib/solid/useEventListener';
-import { lerp } from '../../../lib/math/misc';
+import { RotatableCameraState } from './RotatableCameraState';
+import { useKeyboardTracker } from '../../../lib/solid/useKeyboardTracker';
+import { KeyCodes } from '../../../lib/keyboard';
+import { type RawVertex } from '../../../lib/3d/types';
 
-const PITCH_MIN = 0.087; // ~5deg
-const PITCH_MAX = Math.PI - PITCH_MIN;
 const ZOOM_SENSITIVITY = 0.1;
 const PINCH_ZOOM_SENSITIVITY = 1;
 
-const EPS = 1e-6;
+export type PanLimits = {
+    x?: { min?: number; max?: number };
+    y?: { min?: number; max?: number };
+    z?: { min?: number; max?: number };
+};
 
 export type RotatableCameraProps = PerspectiveCameraProps & {
     targetX?: number;
@@ -30,100 +35,156 @@ export type RotatableCameraProps = PerspectiveCameraProps & {
     yawInertia?: number;
     pitchInertia?: number;
 
-    pannable?: boolean; // TODO: implement panning with wheel drags and multifinger drags
+    initialYaw?: number;
+    initialPitch?: number;
+
+    pannable?: boolean;
+    panLimits?: PanLimits;
+    panSpeed?: number | ((distance: number) => number);
+    panPlaneNormal?: RawVertex;
 };
 
 export const RotatableCamera: Component<RotatableCameraProps> = (props) => {
     const camera = createRef<T.PerspectiveCamera>(props.ref);
-    const { canvas, gestures } = useSceneRenderer();
+    const { canvas, gestures, animation } = useSceneRenderer();
 
-    let yaw = 0;
-    let pitch = Math.PI / 2;
+    const keyboard = useKeyboardTracker();
 
-    let isInertiaAllowed = false;
-    let yawV = 0;
-    let pitchV = 0;
+    const cameraState = new RotatableCameraState();
 
-    const updateRotation = (dyaw: number, dpitch: number) => {
-        yaw += dyaw;
-        pitch = Math.max(PITCH_MIN, Math.min(pitch + dpitch, PITCH_MAX));
-        relocateCamera();
-    };
+    const { minDistance = 0, maxDistance, initialPitch, initialYaw } = props;
+    const initialDistance = maxDistance === undefined ? 1 : minDistance + (maxDistance - minDistance) / 2;
+    cameraState.setDistance(initialDistance);
 
-    const { minDistance = 0, maxDistance } = props;
-    let distance = maxDistance === undefined ? 1 : minDistance + (maxDistance - minDistance) / 2;
+    if (initialPitch !== undefined) {
+        cameraState.setPitch(initialPitch);
+    }
+    if (initialYaw !== undefined) {
+        cameraState.setYaw(initialYaw);
+    }
 
-    const relocateCamera = useLazyAnimation(() => {
+    createEffect(() => {
+        const { panLimits: { x = {}, y = {}, z = {} } = {} } = props;
+
+        cameraState.setPanLimits({
+            xMin: x.min ?? -Infinity,
+            xMax: x.max ?? Infinity,
+            yMin: y.min ?? -Infinity,
+            yMax: y.max ?? Infinity,
+            zMin: z.min ?? -Infinity,
+            zMax: z.max ?? Infinity,
+        });
+    });
+
+    const updateCamera = useLazyAnimation(() => {
         const cam = camera.value();
         if (!cam) {
             return;
         }
 
-        const { targetX = 0, targetY = 0, targetZ = 0 } = props;
+        cameraState.apply(cam);
 
-        cam.position.setFromSphericalCoords(distance, pitch, yaw).add(new T.Vector3(targetX, targetY, targetZ));
-        cam.lookAt(targetX, targetY, targetZ);
+        const { yawInertia = 0, pitchInertia = yawInertia } = props;
+        cameraState.setRotationInertia(yawInertia, pitchInertia);
 
-        if (isInertiaAllowed && (yawV || pitchV)) {
-            const inertia = props.yawInertia ?? 0;
-            updateRotation(yawV, pitchV);
-            yawV *= inertia;
-            pitchV *= inertia * inertia;
-
-            if (Math.abs(yawV) < EPS) {
-                yawV = 0;
-            }
-            if (Math.abs(pitchV) < EPS) {
-                pitchV = 0;
-            }
+        const hasFinishedAnimation = cameraState.animationStep();
+        if (!hasFinishedAnimation) {
+            updateCamera();
         }
+    });
+
+    createEffect(() => {
+        if (!props.pannable) {
+            return;
+        }
+
+        const animationHandlerId = animation.on(({ dt }) => {
+            let upDirection = 0;
+            let rightDirection = 0;
+
+            if (keyboard.isPressed[KeyCodes.ArrowDown] || keyboard.isPressed[KeyCodes.KeyS]) {
+                upDirection -= 1;
+            }
+            if (keyboard.isPressed[KeyCodes.ArrowUp] || keyboard.isPressed[KeyCodes.KeyW]) {
+                upDirection += 1;
+            }
+
+            if (keyboard.isPressed[KeyCodes.ArrowLeft] || keyboard.isPressed[KeyCodes.KeyA]) {
+                rightDirection -= 1;
+            }
+            if (keyboard.isPressed[KeyCodes.ArrowRight] || keyboard.isPressed[KeyCodes.KeyD]) {
+                rightDirection += 1;
+            }
+
+            if (!upDirection && !rightDirection) {
+                return;
+            }
+
+            let panSpeed = 1e-3;
+            switch (typeof props.panSpeed) {
+                case 'function':
+                    panSpeed = props.panSpeed(cameraState.getDistance());
+                    break;
+
+                case 'number':
+                    panSpeed = props.panSpeed;
+            }
+            cameraState.pan(upDirection * dt * panSpeed, rightDirection * dt * panSpeed, props.panPlaneNormal);
+            updateCamera();
+        });
+        console.log('animation set', animationHandlerId);
+
+        onCleanup(() => {
+            console.log('cleanup', animationHandlerId);
+            if (animationHandlerId !== undefined) {
+                animation.off(animationHandlerId);
+            }
+        });
     });
 
     const { handlers } = useDrag({
         onStart: () => {
-            isInertiaAllowed = false;
+            cameraState.hold();
         },
         onDrag: (ev) => {
             const dpitch = -ev.lastChange.y * (Math.PI / 1000);
             const dyaw = -ev.lastChange.x * (Math.PI / 1000);
 
-            yawV = dyaw * (props.yawInertia ?? 0);
-            pitchV = dpitch * (props.pitchInertia ?? 0);
-            updateRotation(dyaw, dpitch);
+            cameraState.updateRotationWithInertia(dyaw, dpitch);
+            updateCamera();
         },
         onEnd: () => {
-            isInertiaAllowed = true;
-            relocateCamera();
+            cameraState.release();
+            updateCamera();
         },
     });
 
     useEventListener(gestures.dragStart, () => {
-        isInertiaAllowed = false;
+        cameraState.hold();
     });
     useEventListener(gestures.drag, (drag) => {
         const dpitch = -drag.last.y * (Math.PI / 1000);
         const dyaw = -drag.last.x * (Math.PI / 1000);
 
-        yawV = lerp(yawV, dyaw * (props.yawInertia ?? 0), 0.1);
-        pitchV = lerp(pitchV, dpitch * (props.pitchInertia ?? 0), 0.05);
-        updateRotation(dyaw, dpitch);
+        cameraState.updateRotationWithInertia(dyaw, dpitch);
+        updateCamera();
     });
     useEventListener(gestures.dragEnd, () => {
-        isInertiaAllowed = true;
-        relocateCamera();
+        cameraState.release();
+        updateCamera();
     });
 
     let distanceWhenPinchStarted = 0;
     useEventListener(gestures.pinchStart, () => {
-        distanceWhenPinchStarted = distance;
+        distanceWhenPinchStarted = cameraState.getDistance();
     });
     useEventListener(gestures.pinch, (pinch) => {
         const { minDistance = 0, maxDistance } = props;
         const newDistance = (PINCH_ZOOM_SENSITIVITY * distanceWhenPinchStarted) / pinch.total.scale;
 
-        distance = Math.max(minDistance, Math.min(newDistance, maxDistance ?? Infinity));
+        cameraState.setDistance(Math.max(minDistance, Math.min(newDistance, maxDistance ?? Infinity)));
 
-        relocateCamera();
+        updateCamera();
     });
 
     const handleZoom = (ev: WheelEvent) => {
@@ -131,19 +192,21 @@ export const RotatableCamera: Component<RotatableCameraProps> = (props) => {
         const distanceScaling = maxDistance === undefined ? minDistance : (maxDistance - minDistance) / 100;
         const d = ev.deltaY * ZOOM_SENSITIVITY * distanceScaling;
 
-        distance = Math.max(props.minDistance ?? 0, Math.min(distance + d, props.maxDistance ?? Infinity));
+        cameraState.setDistance(
+            Math.max(props.minDistance ?? 0, Math.min(cameraState.getDistance() + d, props.maxDistance ?? Infinity)),
+        );
 
-        relocateCamera();
+        updateCamera();
     };
 
     createEffect(() => {
         if (props.targetX !== undefined || props.targetY !== undefined || props.targetZ !== undefined) {
-            relocateCamera();
+            updateCamera();
         }
     });
 
     onMount(() => {
-        relocateCamera();
+        updateCamera();
 
         const c = canvas();
 

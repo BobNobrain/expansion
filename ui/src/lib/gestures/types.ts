@@ -18,6 +18,7 @@ export type LongTapGestureHandlers = {
 export type DragGestureData = {
     total: Point2D;
     last: Point2D;
+    points: number;
 };
 
 export type DragGestureHandlers = {

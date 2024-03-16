@@ -1,17 +1,15 @@
-import { type Component, createMemo, Show, createEffect } from 'solid-js';
+import { type Component, createMemo, Show } from 'solid-js';
 
-import { RotatableCamera } from '../common/RotatableCamera/RotatableCamera';
-import { Point2D } from '../../lib/math/2d';
+import { type PanLimits, RotatableCamera } from '../common/RotatableCamera/RotatableCamera';
 import { FloatingHTML } from '../../components/three/FloatingHTML/FloatingHTML';
 import { Text } from '../../components/Text/Text';
-import { useGalaxyGrid } from '../../store/galaxy';
+import { type GalacticGridSector } from '../../domain/GalacticOverview';
+import { type RawVertex } from '../../lib/3d/types';
+import { useGalaxyOverview } from '../../store/galaxy';
 
-import { FULL_CIRCLE } from './constants';
-import { type Sector, divideGalaxy } from './sectors';
-import { generateStars } from './stars';
-import { GalaxyStars } from './GalaxyStars';
+import { GalaxyFog } from './GalaxyFog';
 import { GalaxySectorsGrid } from './GalaxySectorsGrid';
-import { GalaxyMapActiveSector } from './GalaxyMapActiveSector';
+import { GalaxyStars } from './GalaxyStars';
 
 export type GalaxyMapSceneProps = {
     selectedSector: string | null;
@@ -19,52 +17,18 @@ export type GalaxyMapSceneProps = {
 };
 
 export const GalaxyMapScene: Component<GalaxyMapSceneProps> = (props) => {
-    const { verticies, colors } = generateStars();
-    const { sectors } = divideGalaxy();
-
-    const galaxyGrid = useGalaxyGrid();
-    createEffect(() => {
-        console.log({ grid: galaxyGrid.data });
-    });
-
-    const sectorsByName: Record<string, Sector> = {};
-
-    for (const sector of sectors) {
-        sectorsByName[sector.name] = sector;
-    }
+    const overview = useGalaxyOverview();
 
     const selectedSector = createMemo(() => {
-        const selectedSectorName = props.selectedSector;
-        console.log({ selectedSectorName, s: sectorsByName[selectedSectorName || ''] });
-        if (!selectedSectorName) {
+        const selectedSectorId = props.selectedSector;
+        if (!selectedSectorId || !overview.data) {
             return null;
         }
-        return sectorsByName[selectedSectorName] ?? null;
+        return overview.data.grid.getSectorById(selectedSectorId);
     });
 
-    const onSectorClick = (sector: Sector | null) => {
-        let nStarsInside = 0;
-        if (sector) {
-            for (const [x, , z] of verticies) {
-                const r = Math.sqrt(x * x + z * z);
-                if (r < sector.innerR || sector.outerR < r) {
-                    continue;
-                }
-                let theta = Point2D.angle({ x: 1, y: 0 }, { x, y: z });
-                if (theta < 0) {
-                    theta += FULL_CIRCLE;
-                }
-                if (theta < sector.thetaStart || sector.thetaEnd < theta) {
-                    continue;
-                }
-
-                ++nStarsInside;
-            }
-        }
-
-        console.log(sector, { nStarsInside });
-
-        props.onSectorClick(sector ? sector.name : undefined);
+    const onSectorClick = (sector: GalacticGridSector | null) => {
+        props.onSectorClick(sector ? sector.id : undefined);
     };
 
     const selectedSectorCenterCoords = createMemo(() => {
@@ -79,14 +43,56 @@ export const GalaxyMapScene: Component<GalaxyMapSceneProps> = (props) => {
         return { x, y: 0, z };
     });
 
-    const deselectSector = () => props.onSectorClick(undefined);
+    const panLimits = createMemo<PanLimits>(() => {
+        const grid = overview.data?.grid;
+        if (!grid) {
+            return { x: { min: 0, max: 0 }, y: { min: 0, max: 0 }, z: { min: 0, max: 0 } };
+        }
+
+        return {
+            x: { min: -grid.outerR, max: grid.outerR },
+            // y: { min: -grid.maxH, max: grid.maxH },
+            y: { min: 0, max: 0 },
+            z: { min: -grid.outerR, max: grid.outerR },
+        };
+    });
+
+    const panPlaneNormal: RawVertex = [0, 1, 0];
+    const panSpeed = (d: number) => 3e-4 * d;
 
     return (
         <>
-            <GalaxyStars positions={verticies} colors={colors} />
-            <GalaxySectorsGrid sectors={sectors} isActive={!selectedSector()} onClick={onSectorClick} />
-            <GalaxyMapActiveSector sector={selectedSector()} onClickOff={deselectSector} />
-            <RotatableCamera main pannable minDistance={0.1} maxDistance={6} yawInertia={0.95} pitchInertia={0.9} />
+            <Show when={overview.data}>
+                <GalaxySectorsGrid
+                    grid={overview.data!.grid}
+                    activeSectorId={props.selectedSector}
+                    onClick={onSectorClick}
+                />
+                <GalaxyFog
+                    innerR={overview.data!.grid.innerR}
+                    outerR={overview.data!.grid.outerR}
+                    maxH={overview.data!.grid.maxH}
+                />
+            </Show>
+            <GalaxyStars
+                stars={overview.data?.landmarks ?? []}
+                withNormals
+                dim={Boolean(!overview.data || props.selectedSector)}
+            />
+            <RotatableCamera
+                main
+                near={0.01}
+                far={20}
+                minDistance={0.1}
+                maxDistance={6}
+                initialPitch={0}
+                yawInertia={0.95}
+                pitchInertia={0.9}
+                pannable
+                panLimits={panLimits()}
+                panPlaneNormal={panPlaneNormal}
+                panSpeed={panSpeed}
+            />
             <Show when={selectedSector()}>
                 <FloatingHTML
                     x={selectedSectorCenterCoords()!.x}
@@ -94,7 +100,7 @@ export const GalaxyMapScene: Component<GalaxyMapSceneProps> = (props) => {
                     z={selectedSectorCenterCoords()!.z}
                 >
                     <div style="pointer-events: none">
-                        <Text color="primary">{selectedSector()!.name}</Text>
+                        <Text color="primary">{selectedSector()!.id}</Text>
                     </div>
                 </FloatingHTML>
             </Show>

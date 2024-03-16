@@ -35,3 +35,8 @@
 .curtain.expanded {
     top: calc(128px - 100svh + 100%);
 }
+
+.content {
+    overflow: auto;
+    max-height: 100%;
+}

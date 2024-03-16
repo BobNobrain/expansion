@@ -36,7 +36,7 @@ func (impl *dispatcherImpl) processCommandQueue() {
 	for {
 		cmd := <-impl.commandQueue
 
-		fmt.Printf("[dispatcher] next cmd: %v\n", cmd)
+		fmt.Printf("[dispatcher] next cmd: #%x %v\n", cmd.ID, cmd)
 		handler, found := impl.handlers[cmd.Scope]
 
 		var derr common.Error
@@ -48,7 +48,7 @@ func (impl *dispatcherImpl) processCommandQueue() {
 			result, derr = handler.HandleCommand(cmd)
 		}
 
-		fmt.Printf("[dispatcher] responsing: %v / %v\n", result, derr)
+		fmt.Printf("[dispatcher] responsing to cmd #%x / %v\n", cmd.ID, derr)
 		impl.comms.Respond(components.CommsRespondRequest{
 			ClientID:   cmd.ClientID,
 			ResponseTo: cmd.ID,

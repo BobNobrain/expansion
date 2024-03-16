@@ -1,0 +1,36 @@
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.cell {
+    padding: 6px 8px;
+}
+
+.cell:first-child {
+    padding-left: 16px;
+}
+.cell:last-child {
+    padding-right: 16px;
+}
+
+.header-cell {
+    composes: cell;
+
+    background-color: var(--color-primary);
+    color: var(--color-text-inverted);
+    text-align: left;
+}
+
+.data-cell {
+    composes: cell;
+}
+
+.data-row:hover {
+    background-color: var(--color-background-light);
+}
+
+.emptyBanner {
+    padding: 32px 16px;
+    text-align: center;
+}

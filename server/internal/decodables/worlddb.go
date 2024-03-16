@@ -8,15 +8,15 @@ import (
 	"srv/pkg/api"
 )
 
-func DecodeWorldGetStarsPayload(cmd *components.DispatcherCommand) (domain.GetSectorContentParams, common.Error) {
+func DecodeWorldGetStarsPayload(cmd *components.DispatcherCommand) (domain.CelestialListParams, common.Error) {
 	var payload api.WorldGetSectorContentPayload
 	err := json.Unmarshal(cmd.Payload, &payload)
 
 	if err != nil {
-		return domain.GetSectorContentParams{}, newDecodeError(err)
+		return domain.CelestialListParams{}, newDecodeError(err)
 	}
 
-	return domain.GetSectorContentParams{
+	return domain.CelestialListParams{
 		SectorID: domain.GalacticSectorID(payload.SectorID),
 		Limit:    payload.Limit,
 	}, nil

@@ -37,16 +37,42 @@ type WorldGetSectorContentResultStar struct {
 	RadiusAu       float64 `json:"radiusAu"`
 	MassSuns       float64 `json:"massSuns"`
 	AgeByrs        float64 `json:"ageByrs"`
+	CoordsR        float64 `json:"gR"`
+	CoordsTheta    float64 `json:"gTheta"`
+	CoordsH        float64 `json:"gH"`
 }
 
-type WorldGetGalaxyGridResult struct {
-	OuterR  float64                          `json:"outerR"`
-	InnerR  float64                          `json:"innerR"`
-	MaxH    float64                          `json:"maxH"`
-	Sectors []WorldGetGalaxyGridResultSector `json:"sectors"`
+type WorldGetGalaxyOverviewResult struct {
+	Grid      WorldGetGalaxyOverviewResultGrid       `json:"grid"`
+	Landmarks []WorldGetGalaxyOverviewResultLandmark `json:"landmarks"`
+	Labels    []WorldGetGalaxyOverviewResultLabel    `json:"labels"`
 }
 
-type WorldGetGalaxyGridResultSector struct {
+type WorldGetGalaxyOverviewResultGrid struct {
+	OuterR  float64                                  `json:"outerR"`
+	InnerR  float64                                  `json:"innerR"`
+	MaxH    float64                                  `json:"maxH"`
+	Sectors []WorldGetGalaxyOverviewResultGridSector `json:"sectors"`
+}
+
+type WorldGetGalaxyOverviewResultLandmark struct {
+	CoordsR        float64 `json:"gR"`
+	CoordsTheta    float64 `json:"gTheta"`
+	CoordsH        float64 `json:"gH"`
+	StarID         string  `json:"starId"`
+	TempK          float64 `json:"tempK"`
+	LuminositySuns float64 `json:"lumSuns"`
+}
+
+type WorldGetGalaxyOverviewResultLabel struct {
+	CoordsR     float64 `json:"gR"`
+	CoordsTheta float64 `json:"gTheta"`
+	CoordsH     float64 `json:"gH"`
+	Label       string  `json:"label"`
+	Type        string  `json:"type"`
+}
+
+type WorldGetGalaxyOverviewResultGridSector struct {
 	ID         string  `json:"sectorId"`
 	OuterR     float64 `json:"outerR"`
 	InnerR     float64 `json:"innerR"`

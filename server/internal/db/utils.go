@@ -20,7 +20,6 @@ func (db *dbStorage) runSelect(builder *sqlbuilder.SelectBuilder, into any) comm
 
 func (db *dbStorage) runStatement(builder sqlbuilder.Builder) common.Error {
 	query, args := builder.BuildWithFlavor(sqlbuilder.PostgreSQL)
-	// fmt.Printf("SQL: '%s'", query)
 	_, err := db.conn.Exec(query, args...)
 	if err != nil {
 		return makeDbError(err).

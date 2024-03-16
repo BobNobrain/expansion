@@ -39,6 +39,10 @@ export function useDrag({ onDrag, onEnd, onStart, isEnabled }: DragOptions): Use
 
     let state: DragState | null = null;
 
+    const preventClicks = (ev: MouseEvent) => {
+        ev.stopPropagation();
+    };
+
     const onMove = (ev: MouseEvent) => {
         if (!state) {
             return;
@@ -58,6 +62,8 @@ export function useDrag({ onDrag, onEnd, onStart, isEnabled }: DragOptions): Use
                 globalStart: state.globalStart,
                 offset: state.offset,
             });
+
+            window.addEventListener('click', preventClicks, { capture: true });
         }
 
         onDrag({
@@ -69,6 +75,14 @@ export function useDrag({ onDrag, onEnd, onStart, isEnabled }: DragOptions): Use
         state.globalPrev = { x: ev.screenX, y: ev.screenY };
     };
 
+    const cleanup = () => {
+        window.removeEventListener('mousemove', onMove);
+        window.removeEventListener('mouseup', onRelease);
+
+        setTimeout(() => window.removeEventListener('click', preventClicks, { capture: true }), 0);
+        document.body.style.userSelect = 'auto';
+    };
+
     const onRelease = (ev: MouseEvent) => {
         if (ev.button !== MouseButton.Left) {
             return;
@@ -78,16 +92,10 @@ export function useDrag({ onDrag, onEnd, onStart, isEnabled }: DragOptions): Use
         state = null;
         onEnd?.();
 
-        window.removeEventListener('mousemove', onMove);
-        window.removeEventListener('mouseup', onRelease);
-        document.body.style.userSelect = 'auto';
+        cleanup();
     };
 
-    onCleanup(() => {
-        window.removeEventListener('mousemove', onMove);
-        window.removeEventListener('mouseup', onRelease);
-        document.body.style.userSelect = 'auto';
-    });
+    onCleanup(cleanup);
 
     return {
         isDragging,
@@ -107,6 +115,8 @@ export function useDrag({ onDrag, onEnd, onStart, isEnabled }: DragOptions): Use
                     element: ev.target as HTMLElement,
                     active: false,
                 };
+
+                ev.preventDefault();
 
                 document.body.style.userSelect = 'none';
                 window.addEventListener('mousemove', onMove);

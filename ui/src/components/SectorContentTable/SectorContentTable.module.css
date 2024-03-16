@@ -1,0 +1,33 @@
+.header {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 8px;
+
+    padding: 8px 12px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.cell {
+    padding: 6px 8px;
+}
+
+.header-cell {
+    composes: cell;
+
+    background-color: var(--color-primary);
+    color: var(--color-text-inverted);
+    text-align: left;
+}
+
+.data-cell {
+    composes: cell;
+}
+
+.data-row:hover {
+    background-color: var(--color-background-light);
+}

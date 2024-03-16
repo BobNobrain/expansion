@@ -1,5 +1,5 @@
 import { onMount, onCleanup, createEffect, createSignal, type ParentComponent } from 'solid-js';
-import * as T from 'three';
+import { Scene, WebGLRenderer, type Camera, type ColorRepresentation } from 'three';
 import { createBoundsTracker } from '../../../lib/solid/BoundsTracker';
 import { createEvent } from '../../../lib/event';
 import { SceneRendererContext } from '../context';
@@ -8,7 +8,7 @@ import styles from './SceneRenderer.module.css';
 import { createTouchGestureManager } from '../../../lib/gestures/TouchGestureManager';
 
 type SceneRendererProps = {
-    clearColor?: T.ColorRepresentation;
+    clearColor?: ColorRepresentation;
 };
 
 export const SceneRenderer: ParentComponent<SceneRendererProps> = (props) => {
@@ -16,9 +16,9 @@ export const SceneRenderer: ParentComponent<SceneRendererProps> = (props) => {
     const { getBounds, ref: wrapperRef } = createBoundsTracker<HTMLDivElement>();
 
     const animation = createEvent<AnimationFrameData>();
-    const scene = new T.Scene();
-    let renderer: T.WebGLRenderer | null = null;
-    const [getMainCamera, setMainCamera] = createSignal<T.Camera | null>(null);
+    const scene = new Scene();
+    let renderer: WebGLRenderer | null = null;
+    const [getMainCamera, setMainCamera] = createSignal<Camera | null>(null);
 
     const gestures = createTouchGestureManager();
 
@@ -29,7 +29,7 @@ export const SceneRenderer: ParentComponent<SceneRendererProps> = (props) => {
 
         gestures.attach(canvas);
 
-        renderer = new T.WebGLRenderer({
+        renderer = new WebGLRenderer({
             canvas,
         });
 
@@ -50,7 +50,7 @@ export const SceneRenderer: ParentComponent<SceneRendererProps> = (props) => {
                 return;
             }
 
-            const dt = lastTime === -1 ? 0 : time;
+            const dt = lastTime === -1 ? 0 : time - lastTime;
             lastTime = time;
 
             animation.trigger({ time, dt, renderer, canvas });

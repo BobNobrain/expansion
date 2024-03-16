@@ -1,0 +1,12 @@
+.link {
+    color: var(--color-primary);
+    text-decoration: underline;
+}
+
+.external {
+    composes: link;
+}
+
+.internal {
+    composes: link;
+}

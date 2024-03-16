@@ -43,13 +43,14 @@ type Star struct {
 	StarData StarData
 }
 
-type GetSectorContentParams struct {
-	SectorID GalacticSectorID
-	Limit    int
+type CelestialListParams struct {
+	SectorID          GalacticSectorID
+	Limit             int
+	OrderByLuminosity bool
 }
 
 type CelestialBodiesRepo interface {
 	Create(*StarSystem) common.Error
 	LoadAll() ([]*StarSystem, common.Error)
-	GetSectorContent(params GetSectorContentParams) ([]Star, common.Error)
+	List(params CelestialListParams) ([]Star, common.Error)
 }

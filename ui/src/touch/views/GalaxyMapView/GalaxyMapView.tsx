@@ -6,7 +6,7 @@ import { Button } from '../../../components/Button/Button';
 import { SceneRenderer } from '../../../components/three/SceneRenderer/SceneRenderer';
 import { GalaxyMapScene } from '../../../scenes/GalaxyMapScene/GalaxyMapScene';
 import { TouchCurtain } from '../../components/TouchCurtain/TouchCurtain';
-import { Container } from '../../../components/Container/Container';
+import { SectorContentTable } from '../../../components/SectorContentTable/SectorContentTable';
 
 export const GalaxyMapView: Component = () => {
     const navigate = useNavigate();
@@ -35,12 +35,10 @@ export const GalaxyMapView: Component = () => {
             <SceneRenderer>
                 <GalaxyMapScene selectedSector={params.sectorId} onSectorClick={onOpenSector} />
             </SceneRenderer>
-            <TouchCurtain height="s">
-                <Container padded>
-                    <Show when={params.sectorId} fallback="Galaxy Overview">
-                        Sector selected: {params.sectorId}
-                    </Show>
-                </Container>
+            <TouchCurtain height="m">
+                <Show when={params.sectorId} fallback="Galaxy Overview">
+                    <SectorContentTable sectorId={params.sectorId} />
+                </Show>
             </TouchCurtain>
         </TouchPage>
     );

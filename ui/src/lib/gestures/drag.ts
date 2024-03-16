@@ -39,10 +39,12 @@ export class DragDetector extends Detector {
                 this.dragStart.trigger({
                     total: avg,
                     last: avg,
+                    points: trajectories.length,
                 });
                 this.drag.trigger({
                     total: avg,
                     last: avg,
+                    points: trajectories.length,
                 });
                 return;
             }
@@ -56,6 +58,7 @@ export class DragDetector extends Detector {
             this.drag.trigger({
                 total: avgTotal,
                 last: avgLast,
+                points: trajectories.length,
             });
         });
 

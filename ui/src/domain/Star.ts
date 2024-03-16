@@ -1,3 +1,6 @@
+import { type RawColor } from '../lib/3d/types';
+import { type GalacticCoords } from './GalacticCoords';
+
 export type Star = Readonly<{
     id: string;
     luminositySuns: number;
@@ -5,10 +8,11 @@ export type Star = Readonly<{
     tempK: number;
     radiusAu: number;
     ageBillionYears: number;
+    coords: GalacticCoords;
 }>;
 
 export namespace Star {
-    export function getColor(star: Star): string {
+    export function getColor(star: Pick<Star, 'tempK'>): RawColor {
         const temp = star.tempK / 100;
         let red = 0,
             green = 0,
@@ -36,16 +40,10 @@ export namespace Star {
             blue = 255;
         }
 
-        return (
-            '#' +
-            [red, green, blue]
-                .map((c) => Math.max(0, Math.min(c, 255)))
-                .map((i) => i.toString(16))
-                .join('')
-        );
+        return [red, green, blue].map((c) => Math.max(0, Math.min(c, 255))).map((i) => i / 255) as RawColor;
     }
 
-    export function getSpectralClass(star: Star): string {
+    export function getSpectralClass(star: Pick<Star, 'tempK'>): string {
         const k = star.tempK;
         if (k >= 30_000) {
             return 'O';

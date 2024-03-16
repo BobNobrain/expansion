@@ -4,6 +4,7 @@ import (
 	"srv/internal/components"
 	"srv/internal/decodables"
 	"srv/internal/dispatcher"
+	"srv/internal/domain"
 	"srv/internal/encodables"
 	"srv/internal/utils/common"
 	"srv/internal/world"
@@ -32,16 +33,25 @@ func (h *worldQueryHandler) HandleCommand(cmd *components.DispatcherCommand) (co
 			return nil, err
 		}
 
-		content, err := h.store.CelestialRepo().GetSectorContent(params)
+		content, err := h.store.CelestialRepo().List(params)
 		if err != nil {
 			return nil, err
 		}
 
 		return encodables.NewGetSectorContentResultEncodable(content), nil
 
-	case "getGrid":
+	case "getOverview":
 		sectors := h.galaxy.Grid.GetSectors()
-		return encodables.NewGalaxyGridEncodable(sectors), nil
+		landmarks, err := h.store.CelestialRepo().List(domain.CelestialListParams{
+			Limit:             200,
+			OrderByLuminosity: true,
+		})
+
+		if err != nil {
+			return nil, err
+		}
+
+		return encodables.NewGalaxyOverviewEncodable(sectors, landmarks), nil
 	}
 
 	return nil, dispatcher.NewUnknownDispatcherCommandError(cmd)

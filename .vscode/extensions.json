@@ -1,0 +1,10 @@
+{
+    "recommendations": [
+        "mtxr.sqltools",
+        "mtxr.sqltools-driver-pg",
+        "editorconfig.editorconfig",
+        "dbaeumer.vscode-eslint",
+        "golang.go",
+        "esbenp.prettier-vscode"
+    ]
+}
