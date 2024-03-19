@@ -1,7 +1,7 @@
 import { GalacticCoords } from '../../domain/GalacticCoords';
 import { type GalacticGrid, type GalacticGridSector } from '../../domain/GalacticOverview';
 import { type RawVertex } from '../../lib/3d/types';
-import { FULL_CIRCLE, SEGMENT_LENGTH } from './constants';
+import { FULL_CIRCLE } from './constants';
 
 function captureGridTheta(thetas: number[], targetTheta: number): [number, number] {
     let is = 0;
@@ -39,9 +39,11 @@ function getThetasBetween(thetas: number[], thetaStart: number, thetaEnd: number
 export class GridBuilder {
     private thetasByR = new Map<number, number[]>();
     private rScale: number;
+    private segmentLength: number;
 
-    constructor(grid: GalacticGrid) {
+    constructor(grid: GalacticGrid, segmentLength: number) {
         this.rScale = (grid.outerR - grid.innerR) / grid.sectors.length;
+        this.segmentLength = segmentLength;
 
         for (const sector of grid.sectors) {
             const roundedInner = this.round(sector.innerR);
@@ -96,7 +98,7 @@ export class GridBuilder {
         }
 
         const thetas: number[] = [];
-        const dth = SEGMENT_LENGTH / (FULL_CIRCLE * roundedR);
+        const dth = this.segmentLength / (FULL_CIRCLE * roundedR);
 
         for (let th = 0; th < FULL_CIRCLE; th += dth) {
             thetas.push(th);

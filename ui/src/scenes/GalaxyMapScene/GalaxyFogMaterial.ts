@@ -1,4 +1,5 @@
-import { ShaderMaterial, Uniform, Vector3 } from 'three';
+import { ShaderMaterial, type Texture, Uniform } from 'three';
+import vertexShader from './galaxyFogVertex.glsl';
 import fragmentProgram from './galaxyFogFragment.glsl';
 
 // three built-ins for shaders:
@@ -10,51 +11,40 @@ enum UniformName {
     MaxH = 'u_maxH',
     CameraAspect = 'u_cameraAspect',
 
-    PointSize = 'u_pointSize',
-    PointBrightness = 'u_pointBrightness',
-
-    TargetPoints = 'u_targetPoints',
-    Sleeves = 'u_sleeves',
+    GalaxyTexture = 'u_galaxyTex',
+    TotalBrightness = 'u_totalBrightness',
+    SightSamplingGranularity = 'u_samplingGranularity',
+    NoiseLayers = 'u_noiseLayers',
 }
-
-const N_POINTS = 6;
-const N_SLEEVES = 1;
 
 const uniformsDefinition = `
 uniform float ${UniformName.InnerR};
 uniform float ${UniformName.OuterR};
 uniform float ${UniformName.MaxH};
 uniform float ${UniformName.CameraAspect};
-uniform float ${UniformName.PointSize};
-uniform float ${UniformName.PointBrightness};
-uniform vec3[${N_POINTS}] ${UniformName.TargetPoints};
 
-struct Sleeve {
-    float thPos;
-    float thWidth;
-    float thTwist;
-    float density;
+uniform sampler2D ${UniformName.GalaxyTexture};
+uniform float ${UniformName.TotalBrightness};
+uniform float ${UniformName.SightSamplingGranularity};
+
+struct NoiseLayer {
+    float gridSize;
+    float multiplier;
 };
 
-uniform Sleeve[${N_SLEEVES}] ${UniformName.Sleeves};
+uniform NoiseLayer[N_NOISE_LAYERS] ${UniformName.NoiseLayers};
 `;
 
-const vertexShader = `
+const fragmentShader = (nNoiseLayers: number) => `
+const int N_NOISE_LAYERS = ${nNoiseLayers};
 ${uniformsDefinition}
-varying vec2 vUv;
-
-void main() {
-    vUv = uv;
-    gl_Position = vec4(position, 1.0);
-}
-`;
-
-const fragmentShader = `
-${uniformsDefinition}
-#define N_POINTS ${N_POINTS}
-#define N_SLEEVES ${N_SLEEVES}
 ${fragmentProgram}
 `;
+
+export type NoiseLayer = {
+    gridSize: number;
+    multiplier: number;
+};
 
 export type GalaxyFogDimensions = {
     innerR: number;
@@ -62,18 +52,15 @@ export type GalaxyFogDimensions = {
     maxH: number;
 };
 
-type SleeveConfig = {
-    thPos: number;
-    thWidth: number;
-    thTwist: number;
-    density: number;
-};
-
 export class GalaxyFogMaterial extends ShaderMaterial {
-    constructor() {
+    constructor(tx: Texture, noiseLayers: NoiseLayer[]) {
+        if (!noiseLayers.length) {
+            noiseLayers.push({ gridSize: 0, multiplier: 0 });
+        }
+
         super({
             vertexShader,
-            fragmentShader,
+            fragmentShader: fragmentShader(noiseLayers.length), // glsl arrays can't be of 0 length
             depthTest: false,
             depthWrite: false,
             uniforms: {
@@ -81,19 +68,10 @@ export class GalaxyFogMaterial extends ShaderMaterial {
                 [UniformName.OuterR]: new Uniform(1),
                 [UniformName.MaxH]: new Uniform(1),
                 [UniformName.CameraAspect]: new Uniform(1),
-                [UniformName.PointSize]: new Uniform(0.2),
-                [UniformName.PointBrightness]: new Uniform(0.2),
-                [UniformName.TargetPoints]: new Uniform([
-                    new Vector3(0, 0, 0),
-                    new Vector3(1, 0, 0),
-                    new Vector3(0, 0, 1),
-                    new Vector3(0.1, 0, 0.1),
-                    new Vector3(0.2, 0, 0.2),
-                    new Vector3(0.3, 0, 0.3),
-                ]),
-                [UniformName.Sleeves]: new Uniform<SleeveConfig[]>([
-                    { thPos: 0, thWidth: (Math.PI * 2) / 7, thTwist: 3.1, density: 0.15 },
-                ]),
+                [UniformName.GalaxyTexture]: new Uniform(tx),
+                [UniformName.TotalBrightness]: new Uniform(50.0),
+                [UniformName.SightSamplingGranularity]: new Uniform(0.04),
+                [UniformName.NoiseLayers]: new Uniform(noiseLayers),
             },
         });
     }
@@ -105,11 +83,14 @@ export class GalaxyFogMaterial extends ShaderMaterial {
     }
 
     setAspect(cameraAspect: number) {
-        console.log({ cameraAspect });
         this.uniforms[UniformName.CameraAspect].value = cameraAspect;
     }
 
-    setPointSize(size: number) {
-        this.uniforms[UniformName.PointSize].value = size;
+    setBrightness(multiplier: number) {
+        this.uniforms[UniformName.TotalBrightness].value = multiplier;
+    }
+
+    setSamplingGranularity(dk: number) {
+        this.uniforms[UniformName.SightSamplingGranularity].value = dk;
     }
 }

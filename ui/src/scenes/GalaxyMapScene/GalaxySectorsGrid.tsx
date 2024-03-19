@@ -10,6 +10,7 @@ import { useAnimatedNumber } from '../../components/three/hooks/useAnimatedValue
 import { useCanvasListener } from '../../components/three/hooks/useCanvasListener';
 import { GalaxyStars } from './GalaxyStars';
 import { useSectorContent } from '../../store/galaxy';
+import { GraphicsQuality, useDeviceSettings } from '../../store/settings';
 
 export type GalaxySectorsGridProps = {
     grid: GalacticGrid;
@@ -26,17 +27,37 @@ export const GalaxySectorsGrid: Component<GalaxySectorsGridProps> = (props) => {
 
     const activeSectorMaterial = new T.LineBasicMaterial({
         color: 0xf7b212,
+        transparent: true,
         opacity: 1,
     });
+
+    const deviceSettings = useDeviceSettings();
 
     const makeGridBuilder = createMemo(() => {
         if (!props.grid) {
             return null;
         }
-        return new GridBuilder(props.grid);
+
+        let segmentLength: number;
+        switch (deviceSettings.settings.graphicsQuality) {
+            case GraphicsQuality.Low:
+                segmentLength = 0.4;
+                break;
+
+            case GraphicsQuality.Medium:
+                segmentLength = 0.3;
+                break;
+
+            case GraphicsQuality.High:
+                segmentLength = 0.2;
+                break;
+        }
+
+        return new GridBuilder(props.grid, segmentLength);
     });
 
     const gridMeshes = createMemo(() => {
+        // TODO: do not render each sector in the grid individually
         const gridLines: T.Line[] = [];
 
         const gridBuilder = makeGridBuilder();
@@ -62,7 +83,7 @@ export const GalaxySectorsGrid: Component<GalaxySectorsGridProps> = (props) => {
         }
 
         if (activeLines) {
-            activeLines.renderOrder = -1;
+            activeLines.renderOrder = -2;
             gridLines.push(activeLines);
         }
 

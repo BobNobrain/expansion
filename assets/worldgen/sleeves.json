@@ -1,0 +1,10 @@
+{
+    "sleeves": [
+        { "pos": 0, "width": 0.142857, "twist": 3.1, "density": 0.1 },
+        { "pos": 0.19, "width": 0.142857, "twist": 2.9, "density": 0.1 },
+        { "pos": 0.37, "width": 0.142857, "twist": 3, "density": 0.1 },
+        { "pos": 0.54, "width": 0.1, "twist": 2.8, "density": 0.05 },
+        { "pos": 0.7, "width": 0.142857, "twist": 3.1, "density": 0.1 },
+        { "pos": 0.87, "width": 0.01, "twist": 3, "density": 0.01 }
+    ]
+}

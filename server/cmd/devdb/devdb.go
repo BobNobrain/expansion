@@ -11,6 +11,7 @@ import (
 	"srv/internal/db"
 	"srv/internal/domain"
 	"srv/internal/utils"
+	"srv/internal/utils/cmdutils"
 	"srv/internal/world/worldgen"
 )
 
@@ -18,12 +19,12 @@ func main() {
 	mode := flag.String("action", "all", "what to do: all|schema|galaxy|users|test")
 	flag.Parse()
 
-	cfg := required(config.Get())
+	cfg := cmdutils.Require(config.Get())
 
-	required(assets.Configure(cfg.AssetDir))
+	cmdutils.Require(assets.Configure(cfg.AssetDir))
 
 	store := db.NewDBPermastore()
-	ensure(store.Open(cfg))
+	cmdutils.Ensure(store.Open(cfg))
 	defer store.Close()
 
 	auth := auth.NewAuthenticator(store.UserRepo(), cfg)
@@ -52,7 +53,7 @@ func testConnection() {
 
 func makeSchema(store components.Permastore) {
 	fmt.Println("Creating db tables")
-	ensure(store.SetupCollections())
+	cmdutils.Ensure(store.SetupCollections())
 	fmt.Println("  done!")
 }
 
@@ -61,12 +62,12 @@ func createUsers(store components.Permastore, auth components.Authenticator) {
 
 	userRepo := store.UserRepo()
 
-	users := required(assets.GetAssetLoader().LoadDevUsers())
+	users := cmdutils.Require(assets.GetAssetLoader().LoadDevUsers())
 	for _, user := range users.Users {
-		created := required(userRepo.CreateUser(domain.UserCreateData{
+		created := cmdutils.Require(userRepo.CreateUser(domain.UserCreateData{
 			Username:     domain.Username(user.Username),
 			Email:        "",
-			PasswordHash: required(auth.HashPassword(user.Password)),
+			PasswordHash: cmdutils.Require(auth.HashPassword(user.Password)),
 		}))
 		fmt.Printf("  created @%s ('%s')\n", created.Username, created.ID)
 	}
@@ -89,7 +90,7 @@ func generateGalaxy(store components.Permastore, cfg *config.SrvConfig) {
 
 	gridRepo := store.GalacticSectorsRepo()
 	for _, sector := range grid.GetSectors() {
-		ensure(gridRepo.Create(sector))
+		cmdutils.Ensure(gridRepo.Create(sector))
 	}
 
 	fmt.Println("  saved sectors to db")
@@ -145,7 +146,7 @@ func generateGalaxy(store components.Permastore, cfg *config.SrvConfig) {
 
 	celstialsRepo := store.CelestialRepo()
 	for _, system := range starSystems {
-		ensure(celstialsRepo.Create(system))
+		cmdutils.Ensure(celstialsRepo.Create(system))
 	}
 
 	fmt.Println("  saved star systems to db")
@@ -155,18 +156,4 @@ func all(store components.Permastore, cfg *config.SrvConfig) {
 	fmt.Println("Making everything!")
 	makeSchema(store)
 	generateGalaxy(store, cfg)
-}
-
-func required[T any](value T, err error) T {
-	if err != nil {
-		fmt.Printf("error: %s (%#v)\n", err.Error(), err)
-		panic(err)
-	}
-	return value
-}
-func ensure(err error) {
-	if err != nil {
-		fmt.Printf("error: %s (%#v)\n", err.Error(), err)
-		panic(err)
-	}
 }

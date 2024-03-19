@@ -42,6 +42,10 @@ type WorldGetSectorContentResultStar struct {
 	CoordsH        float64 `json:"gH"`
 }
 
+type WorldGetGalaxyOverviewPayload struct {
+	LandmarksLimit int `json:"landmarksLimit"`
+}
+
 type WorldGetGalaxyOverviewResult struct {
 	Grid      WorldGetGalaxyOverviewResultGrid       `json:"grid"`
 	Landmarks []WorldGetGalaxyOverviewResultLandmark `json:"landmarks"`

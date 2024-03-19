@@ -16,6 +16,7 @@ import { type RawVertex } from '../../../lib/3d/types';
 
 const ZOOM_SENSITIVITY = 0.1;
 const PINCH_ZOOM_SENSITIVITY = 1;
+const TOUCH_PAN_SENSITIVITY = 5;
 
 export type PanLimits = {
     x?: { min?: number; max?: number };
@@ -128,14 +129,13 @@ export const RotatableCamera: Component<RotatableCameraProps> = (props) => {
 
                 case 'number':
                     panSpeed = props.panSpeed;
+                    break;
             }
             cameraState.pan(upDirection * dt * panSpeed, rightDirection * dt * panSpeed, props.panPlaneNormal);
             updateCamera();
         });
-        console.log('animation set', animationHandlerId);
 
         onCleanup(() => {
-            console.log('cleanup', animationHandlerId);
             if (animationHandlerId !== undefined) {
                 animation.off(animationHandlerId);
             }
@@ -163,6 +163,26 @@ export const RotatableCamera: Component<RotatableCameraProps> = (props) => {
         cameraState.hold();
     });
     useEventListener(gestures.drag, (drag) => {
+        if (drag.points > 1) {
+            let panSpeed = 1e-3;
+            switch (typeof props.panSpeed) {
+                case 'function':
+                    panSpeed = props.panSpeed(cameraState.getDistance());
+                    break;
+
+                case 'number':
+                    panSpeed = props.panSpeed;
+                    break;
+            }
+            cameraState.pan(
+                drag.last.y * TOUCH_PAN_SENSITIVITY * panSpeed,
+                -drag.last.x * TOUCH_PAN_SENSITIVITY * panSpeed,
+                props.panPlaneNormal,
+            );
+            updateCamera();
+            return;
+        }
+
         const dpitch = -drag.last.y * (Math.PI / 1000);
         const dyaw = -drag.last.x * (Math.PI / 1000);
 

@@ -3,6 +3,7 @@ import { type Star } from '../domain/Star';
 import { GalacticGrid, GalacticLabelType, type GalacticOverview } from '../domain/GalacticOverview';
 import type * as api from '../lib/net/types.generated';
 import { ws } from '../lib/net/ws';
+import { GraphicsQuality, useDeviceSettings } from './settings';
 
 const SCOPE_NAME = 'galaxy';
 
@@ -45,14 +46,31 @@ export function useSectorContent(sectorId: () => string | null) {
 }
 
 export function useGalaxyOverview() {
+    const deviceSettings = useDeviceSettings();
+
+    let landmarksLimit: number;
+    switch (deviceSettings.settings.graphicsQuality) {
+        case GraphicsQuality.Low:
+            landmarksLimit = 50;
+            break;
+
+        case GraphicsQuality.Medium:
+            landmarksLimit = 100;
+            break;
+
+        case GraphicsQuality.High:
+            landmarksLimit = 200;
+            break;
+    }
+
     return createQuery(() => ({
         queryKey: ['galaxy', 'overview'],
         staleTime: Infinity,
         queryFn: async (): Promise<GalacticOverview> => {
-            const { grid, landmarks, labels } = await ws.sendCommand<api.WorldGetGalaxyOverviewResult>(
-                SCOPE_NAME,
-                GalaxyContentCommands.GetOverview,
-            );
+            const { grid, landmarks, labels } = await ws.sendCommand<
+                api.WorldGetGalaxyOverviewResult,
+                api.WorldGetGalaxyOverviewPayload
+            >(SCOPE_NAME, GalaxyContentCommands.GetOverview, { landmarksLimit });
 
             return {
                 grid: new GalacticGrid({

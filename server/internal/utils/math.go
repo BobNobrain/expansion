@@ -1,6 +1,10 @@
 package utils
 
-import "golang.org/x/exp/constraints"
+import (
+	"math"
+
+	"golang.org/x/exp/constraints"
+)
 
 type Number interface {
 	constraints.Integer | constraints.Float
@@ -17,4 +21,8 @@ func Clamp[num Number](value, min, max num) num {
 		value = max
 	}
 	return value
+}
+
+func NiceExp(x float64) float64 {
+	return math.Expm1(x) / (math.E - 1)
 }

@@ -16,6 +16,13 @@ api-types:
 assetgen:
 	go run cmd/assetgen/assetgen.go
 
+.PHONY: galaxy-texture
+galaxy-texture:
+	mkdir -p ../ui/assets/tx
+	go run cmd/galaxytex/galaxytex.go -size=512
+	go run cmd/galaxytex/galaxytex.go -size=256
+	go run cmd/galaxytex/galaxytex.go -size=128
+
 .PHONY: dev-db
 dev-db:
 	go run cmd/devdb/devdb.go $(ARGS)
