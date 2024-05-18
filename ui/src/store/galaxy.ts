@@ -1,6 +1,6 @@
 import { createQuery } from '@tanstack/solid-query';
-import { type Star } from '../domain/Star';
 import { GalacticGrid, GalacticLabelType, type GalacticOverview } from '../domain/GalacticOverview';
+import { type StarSystem } from '../domain/StarSystem';
 import type * as api from '../lib/net/types.generated';
 import { ws } from '../lib/net/ws';
 import { GraphicsQuality, useDeviceSettings } from './settings';
@@ -19,26 +19,40 @@ export function useSectorContent(sectorId: () => string | null) {
             queryKey: ['galaxy', 'sector-content', sid],
             staleTime: Infinity,
             enabled: Boolean(sid),
-            queryFn: async (): Promise<Star[]> => {
-                const { stars } = await ws.sendCommand<
+            queryFn: async (): Promise<StarSystem[]> => {
+                const { systems } = await ws.sendCommand<
                     api.WorldGetSectorContentResult,
                     api.WorldGetSectorContentPayload
-                >(SCOPE_NAME, GalaxyContentCommands.GetSectorContent, { sectorId: sid!, limit: 0 });
+                >(SCOPE_NAME, GalaxyContentCommands.GetSectorContent, { sectorId: sid!, limit: 0, q: '', offset: 0 });
 
-                return stars.map((data): Star => {
-                    return {
-                        id: data.starId,
-                        tempK: data.tempK,
-                        ageBillionYears: data.ageByrs,
-                        luminositySuns: data.lumSuns,
-                        massSuns: data.massSuns,
-                        radiusAu: data.radiusAu,
+                return systems.map((data): StarSystem => {
+                    const result: StarSystem = {
+                        id: data.systemId,
                         coords: {
                             r: data.gR,
                             theta: data.gTheta,
                             h: data.gH,
                         },
+                        stars: [],
+                        nPlanets: data.nPlanets,
+                        nAsteroids: data.nAsteroids,
                     };
+                    for (const sData of data.stars) {
+                        result.stars.push({
+                            id: sData.starId,
+                            tempK: sData.tempK,
+                            ageBillionYears: sData.ageByrs,
+                            luminositySuns: sData.lumSuns,
+                            massSuns: sData.massSuns,
+                            radiusAu: sData.radiusAu,
+                            coords: {
+                                r: data.gR,
+                                theta: data.gTheta,
+                                h: data.gH,
+                            },
+                        });
+                    }
+                    return result;
                 });
             },
         };

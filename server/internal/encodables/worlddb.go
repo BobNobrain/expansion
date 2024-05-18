@@ -1,8 +1,8 @@
 package encodables
 
 import (
-	"srv/internal/domain"
 	"srv/internal/utils/common"
+	"srv/internal/utils/pagination"
 	"srv/internal/world"
 	"srv/pkg/api"
 )
@@ -70,44 +70,47 @@ func (e *encodablePlanetData) Encode() interface{} {
 	}
 }
 
-type encodableGetSectorContentResult struct {
-	stars []domain.Star
-}
+func NewGetSectorContentResultEncodable(content pagination.Page[world.StarSystem]) common.Encodable {
+	encoded := &api.WorldGetSectorContentResult{
+		Systems: make([]api.WorldGetSectorContentResultStarSystem, len(content.Items)),
+		Total:   content.Page.Total,
+		Offset:  content.Page.Offset,
+	}
 
-func NewGetSectorContentResultEncodable(stars []domain.Star) common.Encodable {
-	return &encodableGetSectorContentResult{stars: stars}
-}
+	for i, system := range content.Items {
+		encoded.Systems[i] = api.WorldGetSectorContentResultStarSystem{
+			ID:          string(system.GetSystemID()),
+			CoordsR:     float64(system.GetCoords().R),
+			CoordsTheta: float64(system.GetCoords().Theta),
+			CoordsH:     float64(system.GetCoords().H),
+			Stars:       make([]api.WorldGetSectorContentResultStar, len(system.GetStars())),
+			NPlanets:    system.GetNPlanets(),
+			NAsteroids:  system.GenNAsteroids(),
+		}
 
-func (data *encodableGetSectorContentResult) Encode() any {
-	stars := make([]api.WorldGetSectorContentResultStar, len(data.stars))
-
-	for i, star := range data.stars {
-		stars[i] = api.WorldGetSectorContentResultStar{
-			ID:             string(star.StarID),
-			TempK:          star.StarData.Temperature.Kelvins(),
-			LuminositySuns: star.StarData.Luminosity.Suns(),
-			RadiusAu:       star.StarData.Radius.AstronomicalUnits(),
-			MassSuns:       star.StarData.Mass.SolarMasses(),
-			AgeByrs:        star.StarData.Age.BillionYears(),
-			CoordsR:        float64(star.StarData.Coords.R),
-			CoordsTheta:    float64(star.StarData.Coords.Theta),
-			CoordsH:        float64(star.StarData.Coords.H),
+		for j, star := range system.GetStars() {
+			encoded.Systems[i].Stars[j] = api.WorldGetSectorContentResultStar{
+				ID:             string(star.ID),
+				TempK:          star.Params.Temperature.Kelvins(),
+				LuminositySuns: star.Params.Luminosity.Suns(),
+				RadiusAu:       star.Params.Radius.AstronomicalUnits(),
+				MassSuns:       star.Params.Mass.SolarMasses(),
+				AgeByrs:        star.Params.Age.BillionYears(),
+			}
 		}
 	}
 
-	return &api.WorldGetSectorContentResult{
-		Stars: stars,
-	}
+	return common.AsEncodable(encoded)
 }
 
 type encodableGalaxyOverview struct {
-	sectors   []*domain.GalacticSector
-	landmarks []domain.Star
+	sectors   []*world.GalacticSector
+	landmarks []world.GalaxyBeacon
 }
 
 func NewGalaxyOverviewEncodable(
-	sectors []*domain.GalacticSector,
-	landmarks []domain.Star,
+	sectors []*world.GalacticSector,
+	landmarks []world.GalaxyBeacon,
 ) common.Encodable {
 	return &encodableGalaxyOverview{sectors: sectors, landmarks: landmarks}
 }
@@ -128,12 +131,12 @@ func (data *encodableGalaxyOverview) Encode() any {
 	landmarks := make([]api.WorldGetGalaxyOverviewResultLandmark, len(data.landmarks))
 	for i, star := range data.landmarks {
 		landmarks[i] = api.WorldGetGalaxyOverviewResultLandmark{
-			CoordsR:        float64(star.StarData.Coords.R),
-			CoordsTheta:    float64(star.StarData.Coords.Theta),
-			CoordsH:        float64(star.StarData.Coords.H),
+			CoordsR:        float64(star.Coords.R),
+			CoordsTheta:    float64(star.Coords.Theta),
+			CoordsH:        float64(star.Coords.H),
 			StarID:         string(star.StarID),
-			TempK:          star.StarData.Temperature.Kelvins(),
-			LuminositySuns: star.StarData.Luminosity.Suns(),
+			TempK:          star.Params.Temperature.Kelvins(),
+			LuminositySuns: star.Params.Luminosity.Suns(),
 		}
 	}
 
@@ -141,9 +144,9 @@ func (data *encodableGalaxyOverview) Encode() any {
 
 	return &api.WorldGetGalaxyOverviewResult{
 		Grid: api.WorldGetGalaxyOverviewResultGrid{
-			InnerR:  float64(domain.InnerRimRadius),
-			OuterR:  float64(domain.OuterRimRadius),
-			MaxH:    float64(domain.MaxHeightDispacement),
+			InnerR:  float64(world.InnerRimRadius),
+			OuterR:  float64(world.OuterRimRadius),
+			MaxH:    float64(world.MaxHeightDispacement),
 			Sectors: sectors,
 		},
 		Landmarks: landmarks,

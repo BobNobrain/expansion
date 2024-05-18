@@ -21,16 +21,12 @@ export const GalaxyStars: Component<GalaxyStarsProps> = (props) => {
         transparent: true,
     });
 
-    const normalBasesMaterial = new T.PointsMaterial({
-        color: 0xffffff,
-        size: 1,
-        sizeAttenuation: false,
-        fog: false,
+    const normalsUpMaterial = new T.LineBasicMaterial({
+        color: 0x4080ff,
         transparent: true,
     });
-
-    const normalsMaterial = new T.LineBasicMaterial({
-        color: 0x808080,
+    const normalsDownMaterial = new T.LineBasicMaterial({
+        color: 0xff8040,
         transparent: true,
     });
 
@@ -44,8 +40,8 @@ export const GalaxyStars: Component<GalaxyStarsProps> = (props) => {
         const op = opacity();
 
         starsMaterial.opacity = op;
-        normalBasesMaterial.opacity = op;
-        normalsMaterial.opacity = op;
+        normalsUpMaterial.opacity = 0.75 * op;
+        normalsDownMaterial.opacity = 0.75 * op;
     });
 
     const stars = createMemo(() => {
@@ -65,26 +61,37 @@ export const GalaxyStars: Component<GalaxyStarsProps> = (props) => {
         }
 
         const normalBasePositions = positions.map(([x, _, z]): RawVertex => [x, 0, z]);
-        const normalBasesGeom = new T.BufferGeometry();
-        normalBasesGeom.setAttribute(
-            'position',
-            new T.BufferAttribute(new Float32Array(normalBasePositions.flat()), 3),
-        );
-        const normalBases = new T.Points(normalBasesGeom, normalBasesMaterial);
 
-        const normalsPositions = new Array<RawVertex>(positions.length * 2);
+        const normalsUpPositions: RawVertex[] = [];
+        const normalsDownPositions: RawVertex[] = [];
         for (let i = 0; i < positions.length; i++) {
-            normalsPositions[i * 2] = positions[i];
-            normalsPositions[i * 2 + 1] = normalBasePositions[i];
+            const point = positions[i];
+            const base = normalBasePositions[i];
+
+            if (point[1] < 0) {
+                normalsDownPositions.push(point);
+                normalsDownPositions.push(base);
+            } else {
+                normalsUpPositions.push(point);
+                normalsUpPositions.push(base);
+            }
         }
-        const normalsGeom = new T.BufferGeometry();
-        normalsGeom.setAttribute('position', new T.BufferAttribute(new Float32Array(normalsPositions.flat()), 3));
-        const normals = new T.LineSegments(normalsGeom, normalsMaterial);
+
+        const normalsUpGeom = new T.BufferGeometry();
+        normalsUpGeom.setAttribute('position', new T.BufferAttribute(new Float32Array(normalsUpPositions.flat()), 3));
+        const normalsUp = new T.LineSegments(normalsUpGeom, normalsUpMaterial);
+
+        const normalsDownGeom = new T.BufferGeometry();
+        normalsDownGeom.setAttribute(
+            'position',
+            new T.BufferAttribute(new Float32Array(normalsDownPositions.flat()), 3),
+        );
+        const normalsDown = new T.LineSegments(normalsDownGeom, normalsDownMaterial);
 
         const everything = new T.Group();
-        everything.add(normalBases);
         everything.add(stars);
-        everything.add(normals);
+        everything.add(normalsUp);
+        everything.add(normalsDown);
 
         return everything;
     });

@@ -1,4 +1,4 @@
-import { type Component, Show, createMemo } from 'solid-js';
+import { type Component, Show, createMemo, For } from 'solid-js';
 import { Star } from '../../domain/Star';
 import { useSectorContent } from '../../store/galaxy';
 import { Link } from '../Link/Link';
@@ -13,22 +13,38 @@ export type SectorContentTableProps = {
 type TableRow = {
     id: string;
     name?: string;
-    star: Star;
+    stars: Star[];
     nPlanets: number;
     nAsteroids: number;
 };
 
+const StarTextLabel: Component<{ star: Star }> = (props) => {
+    const color = createMemo(
+        () =>
+            '#' +
+            Star.getColor(props.star)
+                .map((unit) => Math.floor(unit * 255).toString(16))
+                .join(''),
+    );
+
+    return (
+        <div style={{ color: color() }}>
+            ⊚ {Star.getSpectralClass(props.star)} ({props.star.tempK.toFixed(0)} K)
+        </div>
+    );
+};
+
 export const SectorContentTable: Component<SectorContentTableProps> = (props) => {
-    const stars = useSectorContent(() => props.sectorId);
+    const systems = useSectorContent(() => props.sectorId);
 
     const rows = createMemo(() =>
-        (stars.data ?? []).map((star): TableRow => {
+        (systems.data ?? []).map((system): TableRow => {
             return {
-                id: star.id,
+                id: system.id,
                 name: undefined,
-                star,
-                nPlanets: Math.floor(Math.random() * 20),
-                nAsteroids: Math.floor(Math.random() * 5000),
+                stars: system.stars,
+                nPlanets: system.nPlanets,
+                nAsteroids: system.nAsteroids,
             };
         }),
     );
@@ -50,26 +66,14 @@ export const SectorContentTable: Component<SectorContentTableProps> = (props) =>
             },
         },
         {
-            header: 'Star',
+            header: 'Stars',
             width: 110,
-            content: ({ star }) => {
-                const color =
-                    '#' +
-                    Star.getColor(star)
-                        .map((unit) => Math.floor(unit * 255).toString(16))
-                        .join('');
-
-                const spectralClass = Star.getSpectralClass(star);
-
-                return (
-                    <span style={{ color }}>
-                        ⊚ {spectralClass} ({star.tempK.toFixed(0)} K)
-                    </span>
-                );
+            content: ({ stars }) => {
+                return <For each={stars}>{(star) => <StarTextLabel star={star} />}</For>;
             },
         },
         {
-            header: 'System',
+            header: 'Bodies',
             content: ({ nAsteroids, nPlanets }) => {
                 return `${nPlanets} ⊘ / ~${(nAsteroids / 1000).toFixed(1)}K ◌`;
             },
@@ -83,7 +87,7 @@ export const SectorContentTable: Component<SectorContentTableProps> = (props) =>
                     {props.sectorId}
                 </Text>
                 <Text color="dim">
-                    <Show when={stars.data}>⊚ {stars.data!.length} stars</Show>
+                    <Show when={systems.data}>⊚ {systems.data!.length} systems</Show>
                 </Text>
             </header>
             <DataTable columns={columns} rows={rows()} />

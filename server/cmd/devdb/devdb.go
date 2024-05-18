@@ -3,39 +3,40 @@ package main
 import (
 	"flag"
 	"fmt"
-	"math"
-	"srv/internal/assets"
-	"srv/internal/auth"
 	"srv/internal/components"
-	"srv/internal/config"
+	"srv/internal/components/auth"
 	"srv/internal/db"
 	"srv/internal/domain"
-	"srv/internal/utils"
+	"srv/internal/game/galaxy"
+	"srv/internal/globals"
+	"srv/internal/globals/assets"
+	"srv/internal/globals/config"
 	"srv/internal/utils/cmdutils"
 	"srv/internal/world/worldgen"
+	"srv/internal/world/wsm"
 )
 
 func main() {
 	mode := flag.String("action", "all", "what to do: all|schema|galaxy|users|test")
 	flag.Parse()
 
-	cfg := cmdutils.Require(config.Get())
-
-	cmdutils.Require(assets.Configure(cfg.AssetDir))
+	globals.Init()
 
 	store := db.NewDBPermastore()
-	cmdutils.Ensure(store.Open(cfg))
+	cmdutils.Ensure(store.Open())
 	defer store.Close()
 
-	auth := auth.NewAuthenticator(store.UserRepo(), cfg)
+	auth := auth.NewAuthenticator(store.UserRepo())
+
+	wgen := worldgen.NewWorldGen(config.World().Seed)
 
 	switch *mode {
 	case "all":
-		all(store, cfg)
+		all(store, wgen)
 	case "schema":
 		makeSchema(store)
 	case "galaxy":
-		generateGalaxy(store, cfg)
+		generateGalaxy(store, wgen)
 	case "users":
 		createUsers(store, auth)
 	case "test":
@@ -51,22 +52,22 @@ func testConnection() {
 	fmt.Println("connection is ok!")
 }
 
-func makeSchema(store components.Permastore) {
+func makeSchema(store *db.Storage) {
 	fmt.Println("Creating db tables")
 	cmdutils.Ensure(store.SetupCollections())
 	fmt.Println("  done!")
 }
 
-func createUsers(store components.Permastore, auth components.Authenticator) {
+func createUsers(store *db.Storage, auth components.Authenticator) {
 	fmt.Println("Creating users:")
 
 	userRepo := store.UserRepo()
 
-	users := cmdutils.Require(assets.GetAssetLoader().LoadDevUsers())
+	users := cmdutils.Require(assets.LoadDevUsers())
 	for _, user := range users.Users {
-		created := cmdutils.Require(userRepo.CreateUser(domain.UserCreateData{
+		created := cmdutils.Require(userRepo.Create(components.UserCreateData{
 			Username:     domain.Username(user.Username),
-			Email:        "",
+			Email:        user.Email,
 			PasswordHash: cmdutils.Require(auth.HashPassword(user.Password)),
 		}))
 		fmt.Printf("  created @%s ('%s')\n", created.Username, created.ID)
@@ -75,12 +76,12 @@ func createUsers(store components.Permastore, auth components.Authenticator) {
 	fmt.Printf("  created %d users\n", len(users.Users))
 }
 
-func generateGalaxy(store components.Permastore, cfg *config.SrvConfig) {
+func generateGalaxy(store *db.Storage, wgen *worldgen.WorldGen) {
+	cmdutils.Ensure(store.PrecalculatedBlobs().Clear())
+
 	fmt.Println("Generating galaxy data:")
 
-	rnd := utils.GetSeededRandom(cfg.WorldSeed)
-	grid := worldgen.GenerateGalacticGrid(&worldgen.GalacticGridGeneratorOptions{
-		Rnd:               rnd,
+	grid := wgen.GenerateGrid(&worldgen.GalacticGridGeneratorOptions{
 		NRings:            12,
 		MinSectors:        16,
 		NSectorsIncrement: 2,
@@ -88,72 +89,51 @@ func generateGalaxy(store components.Permastore, cfg *config.SrvConfig) {
 
 	fmt.Printf("  generated %d sectors\n", grid.Size())
 
-	gridRepo := store.GalacticSectorsRepo()
-	for _, sector := range grid.GetSectors() {
-		cmdutils.Ensure(gridRepo.Create(sector))
-	}
+	gridBlob := cmdutils.Require(galaxy.SaveGalacticGrid(grid))
+	store.PrecalculatedBlobs().Create(gridBlob)
 
 	fmt.Println("  saved sectors to db")
 
-	fullCircle := math.Pi * 2
-	starSystems := worldgen.GenerateGalaxyStars(worldgen.GalaxyGeneratorConfig{
-		Rnd:    rnd,
-		Grid:   grid,
-		NStars: 10000,
+	galaxySleeves := cmdutils.Require(assets.LoadGalaxySleeves())
+	starSystems := wgen.GenerateGalaxy(worldgen.GalaxyGeneratorConfig{
+		Grid:    grid,
+		Sleeves: galaxySleeves.Sleeves,
 		// TODO: maybe load from json?
-		Sleeves: []*worldgen.GalaxyGeneratorConfigSleeve{
-			{
-				Position:        0,
-				Width:           fullCircle / 7,
-				StarsPercentage: 0.15,
-				Twist:           3.1,
-			},
-			{
-				Position:        0.19,
-				Width:           fullCircle / 7,
-				StarsPercentage: 0.1,
-				Twist:           2.9,
-			},
-			{
-				Position:        0.37,
-				Width:           fullCircle / 7,
-				StarsPercentage: 0.1,
-				Twist:           3,
-			},
-			{
-				Position:        0.54,
-				Width:           fullCircle / 10,
-				StarsPercentage: 0.05,
-				Twist:           2.8,
-			},
-			{
-				Position:        0.7,
-				Width:           fullCircle / 7,
-				StarsPercentage: 0.1,
-				Twist:           3.1,
-			},
-			{
-				Position:        0.87,
-				Width:           fullCircle / 100,
-				StarsPercentage: 0.01,
-				Twist:           3,
-			},
-		},
+		NStars:            10000,
 		MaxStarsDensityAt: 0.05,
 	})
 
 	fmt.Printf("  generated %d star systems\n", len(starSystems))
 
-	celstialsRepo := store.CelestialRepo()
+	starsPerSpectralClass := make(map[string]int)
+	for _, char := range "OBAFGKM" {
+		starsPerSpectralClass[string(char)] = 0
+	}
+
+	cmdutils.Ensure(store.StaticStarSystemData().Clear())
+
 	for _, system := range starSystems {
-		cmdutils.Ensure(celstialsRepo.Create(system))
+		state := wsm.NewSystemSharedState(wgen, system.SystemID)
+		state.FillFromGeneratedData(&system)
+		blob := cmdutils.Require(state.SaveState())
+		cmdutils.Ensure(store.StaticStarSystemData().Create(blob))
+
+		for _, star := range system.Stars {
+			spectralClass := star.Params.Temperature.GetStarSpectralClass()
+			starsPerSpectralClass[spectralClass] += 1
+		}
+	}
+
+	fmt.Println("  distribution:")
+	for spectralClass, count := range starsPerSpectralClass {
+		fmt.Printf("    spectral class %s: %d\n", spectralClass, count)
 	}
 
 	fmt.Println("  saved star systems to db")
 }
 
-func all(store components.Permastore, cfg *config.SrvConfig) {
+func all(store *db.Storage, wgen *worldgen.WorldGen) {
 	fmt.Println("Making everything!")
 	makeSchema(store)
-	generateGalaxy(store, cfg)
+	generateGalaxy(store, wgen)
 }

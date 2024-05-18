@@ -1,158 +1,111 @@
 package db
 
-import (
-	"srv/internal/domain"
-	"srv/internal/utils/common"
-	"srv/internal/utils/phys"
+// import (
+// 	"srv/internal/db/dbcore"
+// 	"srv/internal/domain"
+// 	"srv/internal/utils/common"
 
-	"github.com/huandu/go-sqlbuilder"
-)
+// 	"github.com/huandu/go-sqlbuilder"
+// )
 
-type celestialRepoImpl struct {
-	stars      repoImpl
-	celestials repoImpl
-}
+// type celestialRepoImpl struct {
+// 	db      *dbcore.Conn
+// 	systems *dbcore.Table
+// }
 
-func newCelestialRepo(db *dbStorage) *celestialRepoImpl {
-	return &celestialRepoImpl{
-		stars:      makeRepoImpl(db, "stars"),
-		celestials: makeRepoImpl(db, "celestials"),
-	}
-}
+// func newCelestialRepo(db *dbcore.Conn) *celestialRepoImpl {
+// 	return &celestialRepoImpl{
+// 		db:      db,
+// 		systems: dbcore.MakeTable("systems"),
+// 	}
+// }
 
-const (
-	starFieldID = "star_id"
+// const (
+// 	systemFieldID           = "system_id"
+// 	systemFieldCoordsR      = "coords_r"
+// 	systemFieldCoordsH      = "coords_h"
+// 	systemFieldsCoordsTheta = "coords_theta"
 
-	starFieldCoordsR      = "coords_r"
-	starFieldCoordsH      = "coords_h"
-	starFieldsCoordsTheta = "coords_theta"
+// 	systemFieldData = "system_data"
+// )
 
-	starFieldTemp       = "temp_k"
-	starFieldLuminosity = "lum_suns"
-	starFieldMass       = "mass_suns"
-	starFieldRadius     = "radius_au"
-	starFieldAge        = "age_byrs"
-)
+// type dbStarSystem struct {
+// 	ID string `db:"system_id"`
 
-type dbStar struct {
-	ID string `db:"star_id"`
+// 	CoordsR     float64 `db:"coords_r"`
+// 	CoordsH     float64 `db:"coords_h"`
+// 	CoordsTheta float64 `db:"coords_theta"`
 
-	CoordsR     float64 `db:"coords_r"`
-	CoordsH     float64 `db:"coords_h"`
-	CoordsTheta float64 `db:"coords_theta"`
+// 	DataJSON string `db:"system_data"`
+// }
 
-	Temp       float64 `db:"temp_k"`
-	Luminosity float64 `db:"lum_suns"`
-	Mass       float64 `db:"mass_suns"`
-	Radius     float64 `db:"radius_au"`
-	Age        float64 `db:"age_byrs"`
-}
+// func (repo *celestialRepoImpl) getSystemsSchemaBuilder() *sqlbuilder.CreateTableBuilder {
+// 	systems := repo.systems.CreateTableBuilder()
+// 	systems.Define(systemFieldID, "CHAR(6)", "PRIMARY KEY", "NOT NULL")
 
-func (repo *celestialRepoImpl) getStarsSchemaBuilder() *sqlbuilder.CreateTableBuilder {
-	orgs := sqlbuilder.CreateTable(repo.stars.tableName)
-	orgs.Define(starFieldID, "CHAR(6)", "PRIMARY KEY", "NOT NULL")
+// 	systems.Define(systemFieldCoordsR, "DOUBLE PRECISION", "NOT NULL")
+// 	systems.Define(systemFieldCoordsH, "DOUBLE PRECISION", "NOT NULL")
+// 	systems.Define(systemFieldsCoordsTheta, "DOUBLE PRECISION", "NOT NULL")
 
-	orgs.Define(starFieldCoordsR, "DOUBLE PRECISION", "NOT NULL")
-	orgs.Define(starFieldCoordsH, "DOUBLE PRECISION", "NOT NULL")
-	orgs.Define(starFieldsCoordsTheta, "DOUBLE PRECISION", "NOT NULL")
+// 	systems.Define(systemFieldData, "TEXT", "NOT_NULL")
 
-	orgs.Define(starFieldTemp, "DOUBLE PRECISION", "NOT NULL")
-	orgs.Define(starFieldLuminosity, "DOUBLE PRECISION", "NOT NULL")
-	orgs.Define(starFieldMass, "DOUBLE PRECISION", "NOT NULL")
-	orgs.Define(starFieldRadius, "DOUBLE PRECISION", "NOT NULL")
-	orgs.Define(starFieldAge, "DOUBLE PRECISION", "NOT NULL")
+// 	return systems
+// }
 
-	return orgs
-}
+// func (repo *celestialRepoImpl) CreateSystem(data *domain.StarSystem) common.Error {
+// 	b := repo.systems.InsertBuilderFromSingleValue(&dbStarSystem{
+// 		ID:          string(data.SystemID),
+// 		CoordsR:     float64(data.Coords.R),
+// 		CoordsH:     float64(data.Coords.H),
+// 		CoordsTheta: float64(data.Coords.Theta),
+// 		DataJSON:    encodeSystemToJSON(data),
+// 	})
 
-func (repo *celestialRepoImpl) Create(data *domain.StarSystem) common.Error {
-	b := repo.stars.insertBuilderFromValues(&dbStar{
-		ID:          string(data.StarID),
-		CoordsR:     float64(data.StarData.Coords.R),
-		CoordsH:     float64(data.StarData.Coords.H),
-		CoordsTheta: float64(data.StarData.Coords.Theta),
-		Temp:        data.StarData.Temperature.Kelvins(),
-		Luminosity:  data.StarData.Luminosity.Suns(),
-		Mass:        data.StarData.Mass.SolarMasses(),
-		Radius:      data.StarData.Radius.AstronomicalUnits(),
-		Age:         data.StarData.Age.BillionYears(),
-	})
+// 	err := repo.db.RunStatement(b)
+// 	return err
+// }
 
-	err := repo.stars.db.runStatement(b)
-	return err
-}
+// func (repo *celestialRepoImpl) LoadAll() ([]*domain.StarSystem, common.Error) {
+// 	b := repo.systems.SelectBuilder("*")
+// 	var rows []*dbStarSystem
+// 	err := repo.db.RunQuery(b, &rows)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-func (repo *celestialRepoImpl) LoadAll() ([]*domain.StarSystem, common.Error) {
-	b := repo.stars.selectBuilder("*")
-	var rows []*dbStar
-	err := repo.stars.db.runSelect(b, &rows)
-	if err != nil {
-		return nil, err
-	}
+// 	result := make([]*domain.StarSystem, len(rows))
+// 	for i := 0; i < len(rows); i++ {
+// 		row := rows[i]
+// 		result[i] = &domain.StarSystem{
+// 			SystemID: domain.StarSystemID(row.ID),
+// 			Coords: domain.GalacticCoords{
+// 				R:     domain.GalacticCoordsRadius(row.CoordsR),
+// 				H:     domain.GalacticCoordsHeight(row.CoordsH),
+// 				Theta: domain.GalacticCoordsAngle(row.CoordsTheta),
+// 			},
+// 		}
+// 		err := decodeSystemFromJSON(row.DataJSON, result[i])
+// 		if err != nil {
+// 			return nil, makeDbError(err).withDetail("field", "system_data").withDetail("json", row.DataJSON)
+// 		}
+// 	}
 
-	result := make([]*domain.StarSystem, len(rows))
-	for i := 0; i < len(rows); i++ {
-		row := rows[i]
-		result[i] = &domain.StarSystem{
-			StarID: domain.CelestialID(row.ID),
-			StarData: &domain.StarData{
-				Coords: domain.GalacticCoords{
-					R:     domain.GalacticCoordsRadius(row.CoordsR),
-					H:     domain.GalacticCoordsHeight(row.CoordsH),
-					Theta: domain.GalacticCoordsAngle(row.CoordsTheta),
-				},
-				Temperature: phys.Kelvins(row.Temp),
-				Luminosity:  phys.LuminositySuns(row.Luminosity),
-				Mass:        phys.SolarMasses(row.Mass),
-				Radius:      phys.AstronomicalUnits(row.Radius),
-				Age:         phys.BillionYears(row.Age),
-			},
-		}
-	}
+// 	return result, nil
+// }
 
-	return result, nil
-}
+// func (repo *celestialRepoImpl) Clear() common.Error {
+// 	err := repo.db.RunStatement(repo.systems.DeleteBuilder())
+// 	if err != nil {
+// 		return err
+// 	}
 
-func (repo *celestialRepoImpl) List(params domain.CelestialListParams) ([]domain.Star, common.Error) {
-	b := repo.stars.selectBuilder("*")
+// 	return nil
+// }
 
-	if params.SectorID != "" {
-		b.Where(b.Like(starFieldID, params.SectorID+"%"))
-	}
+// func (repo *celestialRepoImpl) SaveSystemData(system *domain.StarSystem) common.Error {
+// 	b := repo.systems.UpdateBuilder()
+// 	b.Set(b.Assign(systemFieldData, encodeSystemToJSON(system)))
+// 	b.Where(b.Equal(systemFieldID, system.SystemID))
 
-	if params.OrderByLuminosity {
-		b.OrderBy(starFieldLuminosity).Desc()
-	}
-
-	if params.Limit > 0 {
-		b.Limit(params.Limit)
-	}
-
-	var rows []*dbStar
-	err := repo.stars.db.runSelect(b, &rows)
-	if err != nil {
-		return nil, err
-	}
-
-	result := make([]domain.Star, len(rows))
-	for i := 0; i < len(rows); i++ {
-		row := rows[i]
-		result[i] = domain.Star{
-			StarID: domain.CelestialID(row.ID),
-			StarData: domain.StarData{
-				Coords: domain.GalacticCoords{
-					R:     domain.GalacticCoordsRadius(row.CoordsR),
-					H:     domain.GalacticCoordsHeight(row.CoordsH),
-					Theta: domain.GalacticCoordsAngle(row.CoordsTheta),
-				},
-				Temperature: phys.Kelvins(row.Temp),
-				Luminosity:  phys.LuminositySuns(row.Luminosity),
-				Mass:        phys.SolarMasses(row.Mass),
-				Radius:      phys.AstronomicalUnits(row.Radius),
-				Age:         phys.BillionYears(row.Age),
-			},
-		}
-	}
-
-	return result, nil
-}
+// 	return repo.db.RunStatement(b)
+// }

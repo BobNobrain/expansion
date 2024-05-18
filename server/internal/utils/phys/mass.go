@@ -51,6 +51,14 @@ func FromVolumeAndDensity(v Volume, d Density) Mass {
 	return Tons(v.CubicKilometers() * d.TonsPerCubicKilometer())
 }
 
+func (m Mass) MarshalBinary() ([]byte, error) {
+	return m.value.MarshalBinary()
+}
+
+func (m *Mass) UnmarshalBinary(data []byte) error {
+	return m.value.UnmarshalBinary(data)
+}
+
 type Volume float64
 
 func CubeVolume(side Distance) Volume {

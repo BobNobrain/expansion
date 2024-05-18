@@ -1,12 +1,20 @@
 package phys
 
-type Time float64
+type PhysicalTime float64
 
-func Seconds(s float64) Time {
-	return Time(s)
+const secondsPerMonth float64 = 60 * 60 * 24 * 30
+
+func Seconds(s float64) PhysicalTime {
+	return PhysicalTime(s / secondsPerMonth)
+}
+func Months(m float64) PhysicalTime {
+	return PhysicalTime(m)
 }
 
-func (t Time) Seconds() float64 {
+func (t PhysicalTime) Seconds() float64 {
+	return float64(t) * secondsPerMonth
+}
+func (t PhysicalTime) Months() float64 {
 	return float64(t)
 }
 

@@ -1,5 +1,10 @@
 package scale
 
+import (
+	"bytes"
+	"encoding/binary"
+)
+
 type ScaleItem[T ~byte] struct {
 	ScaleValue  T
 	CoeffToPrev float64
@@ -65,4 +70,24 @@ func (s *Scale) getCoeff(from, to byte) float64 {
 func (s *Scale) setCoeff(from, to byte, coeff float64) {
 	key := makeCoeffsKey(from, to)
 	s.coeffs[key] = coeff
+}
+
+func (s ScaledScalar[T]) MarshalBinary() ([]byte, error) {
+	b := new(bytes.Buffer)
+	b.WriteByte(byte(s.scaleValue))
+	err := binary.Write(b, binary.LittleEndian, s.value)
+	if err != nil {
+		return nil, err
+	}
+	return b.Bytes(), nil
+}
+
+func (s *ScaledScalar[T]) UnmarshalBinary(data []byte) error {
+	r := bytes.NewReader(data)
+	err := binary.Read(r, binary.LittleEndian, &s.scaleValue)
+	if err != nil {
+		return err
+	}
+	err = binary.Read(r, binary.LittleEndian, &s.value)
+	return err
 }

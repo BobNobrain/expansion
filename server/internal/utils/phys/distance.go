@@ -1,6 +1,10 @@
 package phys
 
-import "math"
+import (
+	"bytes"
+	"fmt"
+	"math"
+)
 
 type distanceScale byte
 
@@ -108,6 +112,15 @@ func (d1 Distance) Diff(d2 Distance) Distance {
 func (d Distance) Mul(m float64) Distance {
 	return Distance{value: d.value * m, scale: d.scale}
 }
+func (d Distance) Max(other Distance) Distance {
+	scale := maxScale(d.scale, other.scale)
+	v1 := d.rescaled(scale)
+	v2 := other.rescaled(scale)
+	if v1 >= v2 {
+		return d
+	}
+	return other
+}
 
 const proximityEps float64 = 1e-5
 
@@ -130,4 +143,19 @@ func (d1 Distance) IsLessThan(d2 Distance) bool {
 	v1 := d1.rescaled(scale)
 	v2 := d2.rescaled(scale)
 	return v1 < v2
+}
+
+func (d Distance) MarshalBinary() ([]byte, error) {
+	var b bytes.Buffer
+	_, err := fmt.Fprintln(&b, d.scale, d.value)
+	if err != nil {
+		return nil, err
+	}
+	return b.Bytes(), nil
+}
+
+func (d *Distance) UnmarshalBinary(data []byte) error {
+	b := bytes.NewBuffer(data)
+	_, err := fmt.Fscanln(b, &d.scale, &d.value)
+	return err
 }

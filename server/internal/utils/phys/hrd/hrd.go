@@ -8,12 +8,11 @@ import (
 )
 
 const (
-	probMainSequence = 0.9
-	probSuperGiants  = 0.005
-	probBrightGiants = 0.005
+	probSuperGiants  = 0.01
+	probBrightGiants = 0.01
 	probGiants       = 0.07
-	probSubGiants    = 0.01
-	probWhiteDwarfs  = 0.01
+	probSubGiants    = 0.02
+	probWhiteDwarfs  = 0.03
 )
 
 type HRDiagramPoint struct {
@@ -44,10 +43,6 @@ type sampler struct {
 
 var samplers = []sampler{
 	{
-		prob: probMainSequence,
-		f:    sampleMainSequence,
-	},
-	{
 		prob: probSuperGiants,
 		f:    sampleSuperGiants,
 	},
@@ -74,7 +69,7 @@ func SampleHRDiagram(input HRDiagramInput) HRDiagramPoint {
 	var acc float64
 	for _, s := range samplers {
 		acc += s.prob
-		if acc < r {
+		if r < acc {
 			return s.f(input)
 		}
 	}
@@ -86,23 +81,26 @@ func SampleHRDiagram(input HRDiagramInput) HRDiagramPoint {
 
 func sampleMainSequence(input HRDiagramInput) HRDiagramPoint {
 	posOnLine := input.Rnd.Float64()
-	lumPower := utils.Lerp(-4., 7, posOnLine) + input.Rnd.Float64()*0.3
+	lumPower := utils.Lerp(-4., 4, posOnLine) + input.Rnd.Float64()*0.2
 	luminosity := math.Pow(10, lumPower)
-	temp := utils.Lerp(2500., 30_000, posOnLine)
+
+	randomTempVariance := utils.Lerp(-1000., 1000, input.Rnd.Float64()*utils.Lerp(0.1, 0.7, posOnLine))
+
+	temp := utils.Lerp(3000., 27_000, utils.NiceExp(posOnLine)) + randomTempVariance
 
 	return point(luminosity, temp)
 }
 
 func sampleSuperGiants(input HRDiagramInput) HRDiagramPoint {
-	lum := utils.Lerp(5000., 80_000, input.Rnd.Float64())
-	temp := utils.Lerp(3000., 15000, input.Rnd.Float64())
+	lum := utils.Lerp(5000., 80_000, 1-utils.NiceExp(input.Rnd.Float64()))
+	temp := utils.Lerp(3000., 18000, 1-utils.NiceExp(input.Rnd.Float64()))
 
 	return point(lum, temp)
 }
 
 func sampleBrightGiants(input HRDiagramInput) HRDiagramPoint {
-	lum := utils.Lerp(300., 3000, input.Rnd.Float64())
-	temp := utils.Lerp(3000., 15000, input.Rnd.Float64())
+	lum := utils.Lerp(300., 5000, input.Rnd.Float64())
+	temp := utils.Lerp(3000., 17000, input.Rnd.Float64())
 
 	return point(lum, temp)
 }
@@ -110,15 +108,15 @@ func sampleBrightGiants(input HRDiagramInput) HRDiagramPoint {
 func sampleGiants(input HRDiagramInput) HRDiagramPoint {
 	var lum, temp float64
 	if input.Rnd.Float64() < 0.75 {
-		// left cluster
+		// right cluster
 		lum = utils.Lerp(12., 200, input.Rnd.Float64())
-		temp = utils.Lerp(2500., 5400, input.Rnd.Float64())
+		temp = utils.Lerp(2500., 5500, utils.NiceExp(input.Rnd.Float64()))
 	} else {
-		// right sparse line
+		// left line
 		pos := input.Rnd.Float64()
 		lumPower := utils.Lerp(1.5, 3.2, pos)
 		lum = math.Pow(10, lumPower)
-		temp = utils.Lerp(12., 2000, pos) + utils.Lerp(-1000., 500, input.Rnd.Float64())
+		temp = utils.Lerp(6000., 12000, utils.NiceExp(pos)) + utils.Lerp(-1000., 500, input.Rnd.Float64())
 	}
 
 	return point(lum, temp)
@@ -126,16 +124,16 @@ func sampleGiants(input HRDiagramInput) HRDiagramPoint {
 
 func sampleSubGiants(input HRDiagramInput) HRDiagramPoint {
 	var lum, temp float64
-	if input.Rnd.Float64() < 0.3 {
-		// left spot
-		lum = utils.Lerp(2., 10, input.Rnd.Float64())
+	if input.Rnd.Float64() < 0.5 {
+		// right spot
+		lum = utils.Lerp(2., 15, input.Rnd.Float64())
 		temp = utils.Lerp(4500., 6100, input.Rnd.Float64())
 	} else {
-		// right sequence, next to main
+		// left sequence, next to main
 		pos := input.Rnd.Float64()
 		lumPower := utils.Lerp(0.6, 3, pos) + utils.Lerp(-0.15, 0.15, input.Rnd.Float64())
 		lum = math.Pow(10, lumPower)
-		temp = utils.Lerp(12., 2000, pos)
+		temp = utils.Lerp(6000., 12000, utils.NiceExp(pos))
 	}
 
 	return point(lum, temp)
@@ -145,7 +143,7 @@ func sampleWhiteDwarfs(input HRDiagramInput) HRDiagramPoint {
 	posOnLine := input.Rnd.Float64()
 	lumPower := utils.Lerp(-4.0, -2.1, posOnLine)
 	luminosity := math.Pow(10, lumPower)
-	temp := utils.Lerp(4000., 12000, posOnLine) + utils.Lerp(-3000., 3000, input.Rnd.Float64())
+	temp := utils.Lerp(4000., 13000, utils.NiceExp(posOnLine)) + utils.Lerp(-1500., 1500, input.Rnd.Float64())
 
 	return point(luminosity, temp)
 }

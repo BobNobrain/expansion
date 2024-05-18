@@ -3,12 +3,15 @@ CAESAR = node ./tools/caesar.js
 #
 # generated files
 #
-.PHONY: api-types assetgen
+.PHONY: setup api-types assetgen
+setup:
+	@echo "Setting up the project for local development"
+	cd server && make setup && make setup-dev-db
+	cd ../ui && npm i
+	cd ../tools && npm i
+
 api-types:
 	cd server && make api-types
-
-assetgen:
-	cd server && make assetgen
 
 #
 # dev servers

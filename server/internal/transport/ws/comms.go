@@ -41,9 +41,10 @@ func (impl *WSComms) HandleNewConnection(conn *websocket.Conn, user *domain.User
 	impl.onOnlineCountChange()
 
 	impl.Broadcast(components.CommsBroadcastRequest{
-		Scope:   userDataScopeName,
-		Event:   "login",
-		Payload: encodables.NewUserDataUpdatePayload(user.Username),
+		Scope:            userDataScopeName,
+		Event:            "login",
+		RecipientClients: []domain.ClientID{client.id},
+		Payload:          encodables.NewUserDataUpdatePayload(user.Username),
 	})
 }
 
@@ -66,6 +67,14 @@ func (impl *WSComms) Broadcast(rq components.CommsBroadcastRequest) common.Error
 			for _, client := range usersClients {
 				client.send <- message
 			}
+		}
+	} else if len(rq.RecipientClients) > 0 {
+		for _, clientId := range rq.RecipientClients {
+			client, found := impl.clientsById[clientId]
+			if !found {
+				continue
+			}
+			client.send <- message
 		}
 	} else {
 		for _, client := range impl.clientsById {

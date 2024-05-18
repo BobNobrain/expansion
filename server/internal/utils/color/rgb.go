@@ -25,3 +25,13 @@ func (c *RGBColor) ToRGBHex() string {
 func (c *RGBColor) ToCSSString() string {
 	return fmt.Sprintf("rgb(%d,%d,%d)", c.r, c.g, c.b)
 }
+
+func (c *RGBColor) GetR() byte {
+	return c.r
+}
+func (c *RGBColor) GetG() byte {
+	return c.g
+}
+func (c *RGBColor) GetB() byte {
+	return c.b
+}

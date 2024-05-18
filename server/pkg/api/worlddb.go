@@ -23,10 +23,26 @@ type WorldPlanetTile struct {
 
 type WorldGetSectorContentPayload struct {
 	SectorID string `json:"sectorId"`
+	Search   string `json:"q"`
 	Limit    int    `json:"limit"`
+	Offset   int    `json:"offset"`
 }
 
 type WorldGetSectorContentResult struct {
+	Systems []WorldGetSectorContentResultStarSystem `json:"systems"`
+
+	Total  int `json:"total"`
+	Offset int `json:"offset"`
+}
+
+type WorldGetSectorContentResultStarSystem struct {
+	ID          string  `json:"systemId"`
+	CoordsR     float64 `json:"gR"`
+	CoordsTheta float64 `json:"gTheta"`
+	CoordsH     float64 `json:"gH"`
+	NPlanets    int     `json:"nPlanets"`
+	NAsteroids  int     `json:"nAsteroids"`
+
 	Stars []WorldGetSectorContentResultStar `json:"stars"`
 }
 
@@ -37,9 +53,22 @@ type WorldGetSectorContentResultStar struct {
 	RadiusAu       float64 `json:"radiusAu"`
 	MassSuns       float64 `json:"massSuns"`
 	AgeByrs        float64 `json:"ageByrs"`
-	CoordsR        float64 `json:"gR"`
-	CoordsTheta    float64 `json:"gTheta"`
-	CoordsH        float64 `json:"gH"`
+}
+
+type WorldGetSectorContentResultPlanet struct {
+	ID string `json:"planetId"`
+}
+
+type WorldGetSectorContentResultBody struct {
+	ID           string `json:"bodyId"`
+	OrbitsAround string `json:"around"`
+
+	OrbitSemiMajorAxisAu float64 `json:"semiMajorAu"`
+	OrbitSemiMinorAxisAu float64 `json:"semiMinorAu"`
+	OrbitRotationXRad    float64 `json:"rotx"`
+	OrbitRotationYRad    float64 `json:"roty"`
+	OrbitRotationZRad    float64 `json:"rotz"`
+	OrbitTheta0          float64 `json:"th0"`
 }
 
 type WorldGetGalaxyOverviewPayload struct {

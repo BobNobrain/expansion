@@ -1,6 +1,7 @@
 package db
 
 import (
+	"srv/internal/db/dbcore"
 	"srv/internal/domain"
 	"srv/internal/utils/common"
 
@@ -8,11 +9,12 @@ import (
 )
 
 type orgRepoImpl struct {
-	repoImpl
+	db   *dbcore.Conn
+	orgs *dbcore.Table
 }
 
-func newOrgRepo(db *dbStorage) *orgRepoImpl {
-	return &orgRepoImpl{repoImpl: makeRepoImpl(db, "orgs")}
+func newOrgRepo(db *dbcore.Conn) *orgRepoImpl {
+	return &orgRepoImpl{db: db, orgs: dbcore.MakeTable("orgs")}
 }
 
 const (
@@ -39,7 +41,7 @@ func (data *dbOrg) toOrg() *domain.Org {
 }
 
 func (repo *orgRepoImpl) getSchemaBuilder() *sqlbuilder.CreateTableBuilder {
-	orgs := sqlbuilder.CreateTable(repo.tableName)
+	orgs := repo.orgs.CreateTableBuilder()
 	orgs.Define(orgFieldID, "UUID", "PRIMARY KEY", "DEFAULT gen_random_uuid()")
 	orgs.Define(orgFieldTicker, "TEXT", "UNIQUE", "NOT NULL")
 	orgs.Define(orgFieldName, "TEXT", "NOT NULL")
@@ -48,9 +50,9 @@ func (repo *orgRepoImpl) getSchemaBuilder() *sqlbuilder.CreateTableBuilder {
 }
 
 func (repo *orgRepoImpl) GetByID(domain.OrgID) (*domain.Org, common.Error) {
-	builder := repo.selectBuilder("*")
+	builder := repo.orgs.SelectBuilder("*")
 	var rows []*dbOrg
-	err := repo.db.runSelect(builder, &rows)
+	err := repo.db.RunQuery(builder, &rows)
 	if err != nil {
 		return nil, err
 	}

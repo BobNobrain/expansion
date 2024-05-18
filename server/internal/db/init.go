@@ -4,17 +4,20 @@ import (
 	"github.com/huandu/go-sqlbuilder"
 )
 
-func (db *dbStorage) SetupCollections() error {
+func (db *Storage) SetupCollections() error {
 	builders := []*sqlbuilder.CreateTableBuilder{
-		db.users.getSchemaBuilder(),
+		db.users.getUsersSchemaBuilder(),
+		db.users.getRolesSchemaBuilder(),
 		db.orgs.getSchemaBuilder(),
-		db.celestials.getStarsSchemaBuilder(),
-		db.galacticGrid.getGalaxySectorsSchemaBuilder(),
+		// db.celestials.getSystemsSchemaBuilder(),
+		// db.galacticGrid.getGalaxySectorsSchemaBuilder(),
+		db.cnr.getCNREntriesSchemaBuilder(),
+		db.staticSystemData.getBlobSchemaBuilder(),
+		db.precalcs.getBlobSchemaBuilder(),
 	}
 
 	for _, b := range builders {
-		sql, args := b.Build()
-		_, err := db.conn.Exec(sql, args...)
+		err := db.conn.RunStatement(b)
 		if err != nil {
 			return err
 		}

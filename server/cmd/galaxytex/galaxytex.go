@@ -8,9 +8,9 @@ import (
 	"image/png"
 	"math"
 	"os"
-	"srv/internal/assets"
-	"srv/internal/config"
 	"srv/internal/domain"
+	"srv/internal/globals"
+	"srv/internal/globals/assets"
 	"srv/internal/utils"
 	"srv/internal/utils/cmdutils"
 )
@@ -24,10 +24,9 @@ func main() {
 	str := fmt.Sprintf(*outputPath, *size)
 	outputPath = &str
 
-	cfg := cmdutils.Require(config.Get())
-	cmdutils.Require(assets.Configure(cfg.AssetDir))
+	globals.Init()
 
-	sleeves := cmdutils.Require(assets.GetAssetLoader().LoadGalaxySleeves())
+	sleeves := cmdutils.Require(assets.LoadGalaxySleeves())
 
 	GenerateGalaxyTexture(*size, *outputPath, sleeves)
 }
@@ -84,7 +83,7 @@ func sampleScatterBrightness(r float64) float64 {
 	return brightnessFromR
 }
 
-func sampleSleeveBrightness(r float64, theta float64, sleeve assets.GalaxySleeveConfig) float64 {
+func sampleSleeveBrightness(r float64, theta float64, sleeve *assets.GalaxySleeveConfig) float64 {
 	rho := (r - float64(domain.InnerRimRadius)) / (float64(domain.OuterRimRadius) - float64(domain.InnerRimRadius))
 	if rho < 0.0 || rho >= 1.0 {
 		return 0.0

@@ -40,10 +40,12 @@ export class GridBuilder {
     private thetasByR = new Map<number, number[]>();
     private rScale: number;
     private segmentLength: number;
+    private grid: GalacticGrid;
 
     constructor(grid: GalacticGrid, segmentLength: number) {
         this.rScale = (grid.outerR - grid.innerR) / grid.sectors.length;
         this.segmentLength = segmentLength;
+        this.grid = grid;
 
         for (const sector of grid.sectors) {
             const roundedInner = this.round(sector.innerR);
@@ -85,6 +87,33 @@ export class GridBuilder {
 
         points.push(points[0]); // close the shape
         return points;
+    }
+
+    getRingsVerticies(): RawVertex[][] {
+        const result = new Array<RawVertex[]>(this.thetasByR.size);
+
+        let i = 0;
+        for (const [r, thetas] of this.thetasByR.entries()) {
+            result[i] = thetas.map((th) => GalacticCoords.toXYZ({ r, theta: th, h: 0 }));
+            i++;
+        }
+
+        return result;
+    }
+
+    getRadialVerticies(): RawVertex[] {
+        const result: RawVertex[] = [];
+
+        for (const sector of this.grid.sectors) {
+            const innerR = this.round(sector.innerR);
+            const outerR = this.round(sector.outerR);
+            const { thetaStart } = sector; // thetaEnd will be rendered by next sector
+
+            result.push(GalacticCoords.toXYZ({ r: innerR, theta: thetaStart, h: 0 }));
+            result.push(GalacticCoords.toXYZ({ r: outerR, theta: thetaStart, h: 0 }));
+        }
+
+        return result;
     }
 
     private round(r: number): number {

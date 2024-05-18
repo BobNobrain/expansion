@@ -5,7 +5,7 @@ type Speed float64
 func KilometersPerSecond(kmps float64) Speed {
 	return Speed(kmps)
 }
-func FromDistanceAndTime(d Distance, t Time) Speed {
+func FromDistanceAndTime(d Distance, t PhysicalTime) Speed {
 	return Speed(d.Kilometers() / t.Seconds())
 }
 

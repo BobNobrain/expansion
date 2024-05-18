@@ -1,7 +1,5 @@
 package domain
 
-import "srv/internal/utils/common"
-
 type OrgID string
 
 type Org struct {
@@ -9,8 +7,4 @@ type Org struct {
 	Name    string
 	Ticker  string
 	OwnerID UserID
-}
-
-type OrgRepo interface {
-	GetByID(OrgID) (*Org, common.Error)
 }

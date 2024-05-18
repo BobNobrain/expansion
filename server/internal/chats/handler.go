@@ -2,8 +2,8 @@ package chats
 
 import (
 	"srv/internal/components"
+	"srv/internal/components/dispatcher"
 	"srv/internal/decodables"
-	"srv/internal/dispatcher"
 	"srv/internal/encodables"
 	"srv/internal/utils/common"
 )

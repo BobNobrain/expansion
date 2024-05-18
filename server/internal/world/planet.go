@@ -2,6 +2,8 @@ package world
 
 import "srv/internal/utils/phys"
 
+// TODO: remove all these
+// they are obsolete
 type PlanetID string
 
 type Planet struct {

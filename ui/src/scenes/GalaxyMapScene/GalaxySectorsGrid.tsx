@@ -57,34 +57,36 @@ export const GalaxySectorsGrid: Component<GalaxySectorsGridProps> = (props) => {
     });
 
     const gridMeshes = createMemo(() => {
-        // TODO: do not render each sector in the grid individually
-        const gridLines: T.Line[] = [];
+        const gridLines: T.Object3D[] = [];
 
         const gridBuilder = makeGridBuilder();
         if (!gridBuilder) {
             return gridLines;
         }
 
-        let activeLines: T.Line | null = null;
-
-        for (const sector of props.grid.sectors) {
-            const sectorGeom = new T.BufferGeometry();
-            const verticies = gridBuilder.getVerticiesOf(sector);
-            sectorGeom.setAttribute('position', new T.BufferAttribute(new Float32Array(verticies.flat()), 3));
-
-            const isActive = sector.id === props.activeSectorId;
-            const bounds = new T.Line(sectorGeom, isActive ? activeSectorMaterial : sectorsLineMaterial);
-
-            if (isActive) {
-                activeLines = bounds;
-            } else {
-                gridLines.push(bounds);
-            }
+        for (const circlePoints of gridBuilder.getRingsVerticies()) {
+            const ringGeom = new T.BufferGeometry();
+            ringGeom.setAttribute('position', new T.BufferAttribute(new Float32Array(circlePoints.flat()), 3));
+            gridLines.push(new T.LineLoop(ringGeom, sectorsLineMaterial));
         }
 
-        if (activeLines) {
-            activeLines.renderOrder = -2;
-            gridLines.push(activeLines);
+        const radialGeom = new T.BufferGeometry();
+        radialGeom.setAttribute(
+            'position',
+            new T.BufferAttribute(new Float32Array(gridBuilder.getRadialVerticies().flat()), 3),
+        );
+        gridLines.push(new T.LineSegments(radialGeom, sectorsLineMaterial));
+
+        if (props.activeSectorId) {
+            const activeSector = props.grid.getSectorById(props.activeSectorId);
+            if (activeSector) {
+                const sectorGeom = new T.BufferGeometry();
+                const verticies = gridBuilder.getVerticiesOf(activeSector);
+                sectorGeom.setAttribute('position', new T.BufferAttribute(new Float32Array(verticies.flat()), 3));
+                const activeLines = new T.Line(sectorGeom, activeSectorMaterial);
+                activeLines.renderOrder = -2;
+                gridLines.push(activeLines);
+            }
         }
 
         return gridLines;
@@ -97,7 +99,7 @@ export const GalaxySectorsGrid: Component<GalaxySectorsGridProps> = (props) => {
     const { gestures, getMainCamera, getBounds } = useSceneRenderer();
 
     const gridOpacity = useAnimatedNumber({
-        target: () => (props.activeSectorId ? 0.05 : 1),
+        target: () => (props.activeSectorId ? 0.2 : 1),
         durationMs: 200,
         eps: 1e-2,
     });

@@ -2,11 +2,16 @@ export PATH := $(shell go env GOPATH)/bin:$(PATH)
 
 .PHONY: run
 run:
-	go run cmd/srv/srv.go
+	go run cmd/monolith/monolith.go
 
 .PHONY: watch
 watch:
-	gow -r=false run cmd/srv/srv.go
+	gow -r=false run cmd/monolith/monolith.go
+
+.PHONY: setup
+setup: api-types assetgen galaxy-texture
+	go install github.com/gzuidhof/tygo@latest
+	go install github.com/mitranim/gow@latest
 
 .PHONY: api-types
 api-types:
@@ -26,3 +31,9 @@ galaxy-texture:
 .PHONY: dev-db
 dev-db:
 	go run cmd/devdb/devdb.go $(ARGS)
+
+.PHONY: setup-dev-db
+setup-dev-db:
+	go run cmd/devdb/devdb.go -action=schema
+	go run cmd/devdb/devdb.go -action=users
+	go run cmd/devdb/devdb.go -action=galaxy

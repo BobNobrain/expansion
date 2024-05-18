@@ -4,13 +4,15 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"srv/internal/globals/config"
 	"strings"
 )
 
 func (srv *httpServerImpl) serveStatic() error {
 	var staticServer http.Handler
-	if strings.HasPrefix(srv.cfg.StaticFilesLocation, "http://") {
-		url, err := url.Parse(srv.cfg.StaticFilesLocation)
+	staticFilesLocation := config.HTTP().StaticFilesLocation
+	if strings.HasPrefix(staticFilesLocation, "http://") {
+		url, err := url.Parse(staticFilesLocation)
 		if err != nil {
 			return err
 		}

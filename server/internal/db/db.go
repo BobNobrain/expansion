@@ -2,44 +2,51 @@ package db
 
 import (
 	"srv/internal/components"
-	"srv/internal/domain"
+	"srv/internal/db/dbcore"
 
-	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
 
-type dbStorage struct {
-	conn *sqlx.DB
+type Storage struct {
+	conn *dbcore.Conn
 
-	users        *userRepoImpl
-	orgs         *orgRepoImpl
-	celestials   *celestialRepoImpl
-	galacticGrid *galacticGridRepoImpl
+	users            *userRepoImpl
+	orgs             *orgRepoImpl
+	cnr              *namesRegistryImpl
+	staticSystemData *blobRepoImpl
+	precalcs         *blobRepoImpl
 }
 
-func NewDBPermastore() components.Permastore {
-	db := &dbStorage{}
+func NewDBPermastore() *Storage {
+	db := &Storage{
+		conn: dbcore.MakeConnection(),
+	}
 
-	db.users = newUserRepo(db)
-	db.orgs = newOrgRepo(db)
-	db.celestials = newCelestialRepo(db)
-	db.galacticGrid = newGalacticGridRepo(db)
+	db.users = newUserRepo(db.conn)
+	db.orgs = newOrgRepo(db.conn)
+	db.cnr = newNamesRegistry(db.conn)
+	db.staticSystemData = newBlobRepo(db.conn, "stasys_data")
+	db.precalcs = newBlobRepo(db.conn, "precalcs")
 
 	return db
 }
 
-func (db *dbStorage) UserRepo() domain.UserRepo {
+func (db *Storage) UserRepo() components.UserRepo {
 	return db.users
 }
 
-func (db *dbStorage) OrgRepo() domain.OrgRepo {
-	return db.orgs
+// func (db *dbStorage) OrgRepo() components.OrgRepo {
+// 	return db.orgs
+// }
+
+func (db *Storage) NamesRegistry() components.NamesRegistry {
+	return db.cnr
 }
 
-func (db *dbStorage) CelestialRepo() domain.CelestialBodiesRepo {
-	return db.celestials
+func (db *Storage) StaticStarSystemData() components.BlobsRepo {
+	return db.staticSystemData
 }
 
-func (db *dbStorage) GalacticSectorsRepo() domain.GalacticSectorsRepo {
-	return db.galacticGrid
+func (db *Storage) PrecalculatedBlobs() components.BlobsRepo {
+	return db.precalcs
 }

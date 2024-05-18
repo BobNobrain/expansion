@@ -3,7 +3,6 @@ package http
 import (
 	"net/http"
 	"srv/internal/components"
-	"srv/internal/config"
 	"srv/internal/transport/ws"
 )
 
@@ -15,15 +14,13 @@ type httpServerImpl struct {
 	server *http.ServeMux
 	auth   components.Authenticator
 	comms  *ws.WSComms
-	cfg    *config.SrvConfig
 }
 
-func NewHTTPServer(auth components.Authenticator, comms *ws.WSComms, cfg *config.SrvConfig) (HTTPServer, error) {
+func NewHTTPServer(auth components.Authenticator, comms *ws.WSComms) (HTTPServer, error) {
 	srv := &httpServerImpl{
 		server: http.DefaultServeMux,
 		auth:   auth,
 		comms:  comms,
-		cfg:    cfg,
 	}
 
 	srv.serveAuthAPI()

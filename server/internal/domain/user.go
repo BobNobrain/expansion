@@ -1,9 +1,5 @@
 package domain
 
-import (
-	"srv/internal/utils/common"
-)
-
 type Username string
 type UserID string
 
@@ -11,12 +7,7 @@ type User struct {
 	ID       UserID
 	Username Username
 	Email    string
-}
-
-type UserCreateData struct {
-	Username     Username
-	Email        string
-	PasswordHash string
+	Roles    []UserRole
 }
 
 type UserCredentials struct {
@@ -24,10 +15,9 @@ type UserCredentials struct {
 	PasswordHash string
 }
 
-type UserRepo interface {
-	GetByID(UserID) (*User, common.Error)
-	GetByUsername(Username) (*User, common.Error)
-	GetCredentialsByUsername(Username) (*UserCredentials, common.Error)
+type UserRole string
 
-	CreateUser(UserCreateData) (*User, common.Error)
-}
+const (
+	UserRoleTrusted       UserRole = "trusted"
+	UserRoleNamesReviewer UserRole = "names_reviewer"
+)
