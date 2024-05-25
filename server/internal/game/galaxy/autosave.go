@@ -12,7 +12,7 @@ type galaxyAutosaveTask struct {
 
 func (t *galaxyAutosaveTask) Update() {
 	errors := t.g.saveState()
-	logger.Info(logger.FromMessage("worldAutoSaver", "The world has saved"))
+	logger.Info(logger.FromMessage("worldAutoSaver", "The world has been saved"))
 
 	for _, e := range errors {
 		logger.Error(logger.FromError("worldAutoSaver", e))

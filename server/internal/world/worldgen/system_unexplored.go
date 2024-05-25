@@ -32,7 +32,6 @@ func newUnexploredSystemGenerator(
 
 func (ctx *unexploredSystemGenerator) generate() {
 	system := ctx.system
-	rnd := ctx.rnd
 
 	nStars := 1
 	rand := ctx.rnd.Float64()
@@ -47,7 +46,7 @@ func (ctx *unexploredSystemGenerator) generate() {
 	isSingular := nStars == 1
 
 	for i := 0; i < nStars; i++ {
-		data := generateStarData(rnd)
+		data := generateStarData(ctx.rnd)
 		system.Stars[i] = &world.Star{
 			Params: data,
 		}

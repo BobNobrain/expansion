@@ -38,7 +38,7 @@ export const SectorContentTable: Component<SectorContentTableProps> = (props) =>
     const systems = useSectorContent(() => props.sectorId);
 
     const rows = createMemo(() =>
-        (systems.data ?? []).map((system): TableRow => {
+        (systems.data?.systems ?? []).map((system): TableRow => {
             return {
                 id: system.id,
                 name: undefined,
@@ -87,7 +87,7 @@ export const SectorContentTable: Component<SectorContentTableProps> = (props) =>
                     {props.sectorId}
                 </Text>
                 <Text color="dim">
-                    <Show when={systems.data}>⊚ {systems.data!.length} systems</Show>
+                    <Show when={systems.data}>⊚ {systems.data!.total} systems</Show>
                 </Text>
             </header>
             <DataTable columns={columns} rows={rows()} />

@@ -26,7 +26,7 @@ func noiseAndBlurElevations(
 		neighbours := grid.GetConnectedNodes(world.PlanetaryNodeIndex(vi))
 		elevation := tiles.relativeElevations[vi]
 
-		dH := opts.NoiseAmount * (rand.Float64()*2 - 1)
+		dH := opts.NoiseAmount * (rnd.Float64()*2 - 1)
 
 		for _, neighbour := range neighbours {
 			neighbourElevation := tiles.relativeElevations[neighbour]

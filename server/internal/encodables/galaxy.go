@@ -72,24 +72,25 @@ func (e *encodablePlanetData) Encode() interface{} {
 
 func NewGetSectorContentResultEncodable(content pagination.Page[world.StarSystem]) common.Encodable {
 	encoded := &api.WorldGetSectorContentResult{
-		Systems: make([]api.WorldGetSectorContentResultStarSystem, len(content.Items)),
+		Systems: make([]api.WorldGetSectorContentResultStarSystem, 0, len(content.Items)),
 		Total:   content.Page.Total,
 		Offset:  content.Page.Offset,
 	}
 
-	for i, system := range content.Items {
-		encoded.Systems[i] = api.WorldGetSectorContentResultStarSystem{
+	for _, system := range content.Items {
+		encodedSystem := api.WorldGetSectorContentResultStarSystem{
 			ID:          string(system.GetSystemID()),
 			CoordsR:     float64(system.GetCoords().R),
 			CoordsTheta: float64(system.GetCoords().Theta),
 			CoordsH:     float64(system.GetCoords().H),
-			Stars:       make([]api.WorldGetSectorContentResultStar, len(system.GetStars())),
+			Stars:       make([]api.WorldGetSectorContentResultStar, 0, len(system.GetStars())),
+			IsExplored:  system.IsExplored(),
 			NPlanets:    system.GetNPlanets(),
 			NAsteroids:  system.GenNAsteroids(),
 		}
 
-		for j, star := range system.GetStars() {
-			encoded.Systems[i].Stars[j] = api.WorldGetSectorContentResultStar{
+		for _, star := range system.GetStars() {
+			encodedStar := api.WorldGetSectorContentResultStar{
 				ID:             string(star.ID),
 				TempK:          star.Params.Temperature.Kelvins(),
 				LuminositySuns: star.Params.Luminosity.Suns(),
@@ -97,7 +98,11 @@ func NewGetSectorContentResultEncodable(content pagination.Page[world.StarSystem
 				MassSuns:       star.Params.Mass.SolarMasses(),
 				AgeByrs:        star.Params.Age.BillionYears(),
 			}
+
+			encodedSystem.Stars = append(encodedSystem.Stars, encodedStar)
 		}
+
+		encoded.Systems = append(encoded.Systems, encodedSystem)
 	}
 
 	return common.AsEncodable(encoded)

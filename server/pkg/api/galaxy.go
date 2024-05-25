@@ -40,6 +40,7 @@ type WorldGetSectorContentResultStarSystem struct {
 	CoordsR     float64 `json:"gR"`
 	CoordsTheta float64 `json:"gTheta"`
 	CoordsH     float64 `json:"gH"`
+	IsExplored  bool    `json:"isExplored"`
 	NPlanets    int     `json:"nPlanets"`
 	NAsteroids  int     `json:"nAsteroids"`
 

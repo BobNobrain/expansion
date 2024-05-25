@@ -150,6 +150,7 @@ func (system *SystemSharedState) LoadState(from *domain.OpaqueBlob) common.Error
 	stars := binpack.Read[[]world.Star](r)
 	system.stars = make([]*world.Star, 0, len(stars))
 	for _, star := range stars {
+		star := star // screw you, golang
 		system.stars = append(system.stars, &star)
 	}
 

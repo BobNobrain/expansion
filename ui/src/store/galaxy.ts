@@ -12,6 +12,11 @@ enum GalaxyContentCommands {
     GetOverview = 'getOverview',
 }
 
+export type SectorContent = {
+    systems: StarSystem[];
+    total: number;
+};
+
 export function useSectorContent(sectorId: () => string | null) {
     return createQuery(() => {
         const sid = sectorId();
@@ -19,13 +24,13 @@ export function useSectorContent(sectorId: () => string | null) {
             queryKey: ['galaxy', 'sector-content', sid],
             staleTime: Infinity,
             enabled: Boolean(sid),
-            queryFn: async (): Promise<StarSystem[]> => {
-                const { systems } = await ws.sendCommand<
+            queryFn: async (): Promise<SectorContent> => {
+                const { systems, total } = await ws.sendCommand<
                     api.WorldGetSectorContentResult,
                     api.WorldGetSectorContentPayload
                 >(SCOPE_NAME, GalaxyContentCommands.GetSectorContent, { sectorId: sid!, limit: 0, q: '', offset: 0 });
 
-                return systems.map((data): StarSystem => {
+                const transformed = systems.map((data): StarSystem => {
                     const result: StarSystem = {
                         id: data.systemId,
                         coords: {
@@ -54,6 +59,11 @@ export function useSectorContent(sectorId: () => string | null) {
                     }
                     return result;
                 });
+
+                return {
+                    systems: transformed,
+                    total,
+                };
             },
         };
     });

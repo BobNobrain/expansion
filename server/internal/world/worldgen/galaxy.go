@@ -33,7 +33,8 @@ func (gen *WorldGen) GenerateGalaxy(opts GalaxyGeneratorConfig) []GeneratedStarS
 
 	numerationRandomOffsets := make(map[world.GalacticSectorID]int)
 	for _, sector := range opts.Grid.GetSectors() {
-		numerationRandomOffsets[sector.ID] = rnd.Intn(1000)
+		sectorRnd := gen.rnd.ForGalaxySector(sector.ID)
+		numerationRandomOffsets[sector.ID] = sectorRnd.Intn(1000)
 	}
 
 	for i := 0; i < opts.NStars; i++ {
