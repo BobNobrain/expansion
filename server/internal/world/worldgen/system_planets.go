@@ -1,6 +1,8 @@
 package worldgen
 
 import (
+	"fmt"
+	"math"
 	"srv/internal/utils"
 	"srv/internal/utils/geom"
 	"srv/internal/utils/phys"
@@ -9,6 +11,7 @@ import (
 
 func (ctx *exploredSystemGenerator) generatePlanets() {
 	planetCount := 0
+	fmt.Printf("worldgen: si sublimate line is %f\n", ctx.silicateSublimationLine.AstronomicalUnits())
 	for ctx.nextFreeOrbitDistance.AstronomicalUnits() < 100 {
 		d := ctx.nextFreeOrbitDistance
 		ctx.nextFreeOrbitDistance = d.Mul(utils.Lerp(1.3, 2.1, ctx.rnd.Float64()))
@@ -62,13 +65,19 @@ func (ctx *exploredSystemGenerator) generateRockyPlanet(
 
 	orbit := generateLowEccentricityOrbit(ctx.rnd, d)
 
+	massEarths := utils.Lerp(0.01, 2.04, ctx.rnd.Float64())
+
 	planet := GeneratedCelestialData{
 		ID:    world.CreatePlanetID(aroundStar.ID, i),
 		Level: CelestialBodyLevelPlanet,
 		Params: world.CelestialBodyParams{
-			Radius:   phys.Kilometers(utils.Lerp(2000., 20000, ctx.rnd.Float64())),
-			Age:      phys.BillionYears(utils.Lerp(0.9, 0.99, ctx.rnd.Float64()) * ctx.systemAge.BillionYears()),
-			AxisTilt: geom.FullCircles(ctx.rnd.NormFloat64() * 0.2),
+			Mass:   phys.EarthMasses(massEarths),
+			Radius: phys.Kilometers(6400 * 1.008 * math.Pow(massEarths, 0.279)),
+			Class:  world.CelestialBodyClassTerrestial,
+
+			Age:       phys.BillionYears(utils.Lerp(0.9, 0.99, ctx.rnd.Float64()) * ctx.systemAge.BillionYears()),
+			AxisTilt:  geom.FullCircles(ctx.rnd.NormFloat64() * 0.2),
+			DayLength: phys.Months(utils.Lerp(0.02, 0.2, ctx.rnd.Float64())), // TODO
 		},
 	}
 
@@ -83,13 +92,26 @@ func (ctx *exploredSystemGenerator) generateGasGiantPlanet(
 
 	orbit := generateLowEccentricityOrbit(ctx.rnd, d)
 
+	massEarths := utils.Lerp(2.04, 20_000, ctx.rnd.Float64())
+	isNeptunian := massEarths < 132
+	radiusEarths := 0.0
+	if isNeptunian {
+		radiusEarths = 0.808 * math.Pow(massEarths, 0.589)
+	} else {
+		radiusEarths = 17.745 * math.Pow(massEarths, -0.044)
+	}
+
 	planet := GeneratedCelestialData{
 		ID:    world.CreatePlanetID(aroundStar.ID, i),
 		Level: CelestialBodyLevelPlanet,
 		Params: world.CelestialBodyParams{
-			Radius:   phys.Kilometers(utils.Lerp(2000., 20000, ctx.rnd.Float64())),
-			Age:      phys.BillionYears(utils.Lerp(0.85, 0.97, ctx.rnd.Float64()) * ctx.systemAge.BillionYears()),
-			AxisTilt: geom.FullCircles(ctx.rnd.NormFloat64() * 0.3),
+			Mass:   phys.EarthMasses(massEarths),
+			Radius: phys.Kilometers(6400 * radiusEarths),
+			Class:  world.CelestialBodyClassGaseous,
+
+			Age:       phys.BillionYears(utils.Lerp(0.85, 0.97, ctx.rnd.Float64()) * ctx.systemAge.BillionYears()),
+			AxisTilt:  geom.FullCircles(ctx.rnd.NormFloat64() * 0.3),
+			DayLength: phys.Months(utils.Lerp(0.005, 0.05, ctx.rnd.Float64())), // TODO
 		},
 	}
 

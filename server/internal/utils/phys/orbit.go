@@ -23,7 +23,7 @@ func (ellipse EllipticOrbit) Periapsis() Distance {
 }
 
 // Calculates distance from main focus to position on ellipse determined by theta.
-// Main focus is the one closest to point on ellipse where theta=0.
+// Main focus is the one closest to point on ellipse where theta=0, i.e. to periapsis.
 func (ellipse EllipticOrbit) DistanceAtTheta(theta geom.Angle) Distance {
 	l := ellipse.SemiMajor.Mul(1 - ellipse.Eccentricity*ellipse.Eccentricity)
 	divisor := 1 + ellipse.Eccentricity*theta.Cos()

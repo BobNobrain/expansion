@@ -1,4 +1,4 @@
-import { For, type Component } from 'solid-js';
+import { For, type Component, type JSX } from 'solid-js';
 import { Button } from '../../../components/Button/Button';
 import { TouchHeader, TouchHeaderCell, TouchHeaderTitle } from '../../components/TouchHeader/TouchHeader';
 import { type SemanticColor } from '../../../lib/appearance';
@@ -9,6 +9,7 @@ import { TouchPage } from '../../components/TouchPage/TouchPage';
 import { Container } from '../../../components/Container/Container';
 import { IconGalaxy } from '../../../icons/galaxy';
 import { A } from '@solidjs/router';
+import { IconPlanet } from '../../../icons/planet';
 
 type FeedElement = {
     label: string;
@@ -31,7 +32,7 @@ type MenuElement = {
     color?: SemanticColor;
     url: string;
     subItems: {
-        icon: string;
+        icon: JSX.Element;
         label: string;
         url: string;
     }[];
@@ -47,8 +48,8 @@ const menu: MenuElement[] = [
         subItems: [
             {
                 label: 'Kepler',
-                icon: '⊘',
-                url: '/planets/bf35-c',
+                icon: <IconPlanet />,
+                url: '/galaxy/AH-235c',
             },
         ],
     },
@@ -56,7 +57,7 @@ const menu: MenuElement[] = [
         icon: '꩜',
         label: 'Galaxy',
         description: 'Galactic map and galaxy overview',
-        url: '/map',
+        url: '/galaxy',
         subItems: [],
     },
     {

@@ -13,7 +13,7 @@ type Comms interface {
 type CommsBroadcastRequest struct {
 	Scope            DispatcherScope
 	Event            string
-	Recepients       []domain.Username
+	Recepients       []domain.UserID
 	RecipientClients []domain.ClientID
 	Payload          common.Encodable
 }

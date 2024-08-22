@@ -16,16 +16,21 @@ type WSComms struct {
 	mu         sync.Mutex
 	dispatcher components.Dispatcher
 
-	clientsByUsername map[domain.Username][]*wsClient
-	clientsById       map[domain.ClientID]*wsClient
+	clientsByUserID map[domain.UserID][]*wsClient
+	clientsById     map[domain.ClientID]*wsClient
+	users           components.UserRepo
 }
 
-func NewWebSocketComms(dispatcher components.Dispatcher, auth components.Authenticator) *WSComms {
+func NewWebSocketComms(
+	dispatcher components.Dispatcher,
+	auth components.Authenticator,
+	userRepo components.UserRepo,
+) *WSComms {
 	return &WSComms{
-		mu:                sync.Mutex{},
-		dispatcher:        dispatcher,
-		clientsByUsername: make(map[domain.Username][]*wsClient),
-		clientsById:       make(map[domain.ClientID]*wsClient),
+		mu:              sync.Mutex{},
+		dispatcher:      dispatcher,
+		clientsByUserID: make(map[domain.UserID][]*wsClient),
+		clientsById:     make(map[domain.ClientID]*wsClient),
 	}
 }
 
@@ -35,8 +40,8 @@ func (impl *WSComms) AsComms() components.Comms {
 
 const userDataScopeName = components.DispatcherScope("user")
 
-func (impl *WSComms) HandleNewConnection(conn *websocket.Conn, user *domain.User) {
-	client := newClient(conn, user.Username, impl)
+func (impl *WSComms) HandleNewConnection(conn *websocket.Conn, user domain.User) {
+	client := newClient(conn, user, impl)
 	impl.attachClient(client)
 	impl.onOnlineCountChange()
 
@@ -59,8 +64,8 @@ func (impl *WSComms) Broadcast(rq components.CommsBroadcastRequest) common.Error
 	}
 
 	if len(rq.Recepients) > 0 {
-		for _, uname := range rq.Recepients {
-			usersClients, found := impl.clientsByUsername[uname]
+		for _, uid := range rq.Recepients {
+			usersClients, found := impl.clientsByUserID[uid]
 			if !found {
 				continue
 			}
@@ -117,7 +122,7 @@ func (impl *WSComms) attachClient(c *wsClient) {
 	defer impl.mu.Unlock()
 
 	impl.clientsById[c.id] = c
-	impl.clientsByUsername[c.user] = append(impl.clientsByUsername[c.user], c)
+	impl.clientsByUserID[c.user.ID] = append(impl.clientsByUserID[c.user.ID], c)
 }
 
 func (impl *WSComms) detachClient(cid domain.ClientID) {
@@ -131,14 +136,14 @@ func (impl *WSComms) detachClient(cid domain.ClientID) {
 
 	delete(impl.clientsById, cid)
 
-	allUserClients, wasRegistered := impl.clientsByUsername[c.user]
+	allUserClients, wasRegistered := impl.clientsByUserID[c.user.ID]
 	if !wasRegistered {
 		return
 	}
 
 	if len(allUserClients) > 1 {
-		impl.clientsByUsername[c.user] = utils.FastRemove(allUserClients, c)
+		impl.clientsByUserID[c.user.ID] = utils.FastRemove(allUserClients, c)
 	} else {
-		delete(impl.clientsByUsername, c.user)
+		delete(impl.clientsByUserID, c.user.ID)
 	}
 }

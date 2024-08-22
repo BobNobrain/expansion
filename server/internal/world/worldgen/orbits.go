@@ -13,9 +13,9 @@ func generateLowEccentricityOrbit(rnd *rand.Rand, semimajor phys.Distance) world
 		Center: world.NoCelestialID,
 		Ellipse: phys.EllipticOrbit{
 			SemiMajor:    semimajor,
-			Eccentricity: rnd.Float64() * 0.15,
+			Eccentricity: rnd.Float64() * 0.1,
 		},
 		Rotation:    geom.FullCircles(rnd.Float64()),
-		Inclination: geom.FullCircles(utils.Lerp(-0.1, 0.1, rnd.Float64())),
+		Inclination: geom.FullCircles(utils.Lerp(-0.04, 0.04, rnd.Float64())),
 	}
 }

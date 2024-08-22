@@ -47,8 +47,8 @@ func NewSurfaceFromMeshBuilder(builder *mesh.MeshBuilder) world.Surface {
 
 	for i := 0; i < size; i++ {
 		result.Cells[i] = &surfaceCellImpl{
-			Id:     world.SurfaceCellID(i),
-			Biome:  world.BiomeUnknown,
+			Id: world.SurfaceCellID(i),
+			// Biome:  world.BiomeUnknown,
 			Coords: builder.GetCoords(mesh.VertexIndex(i)),
 		}
 	}

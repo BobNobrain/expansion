@@ -23,7 +23,7 @@ type DispatcherCommandHandler interface {
 type DispatcherCommand struct {
 	ID       DispatcherCommandID
 	ClientID domain.ClientID
-	OnBehalf domain.Username
+	OnBehalf domain.User
 	Scope    DispatcherScope
 	Command  string
 	Payload  json.RawMessage

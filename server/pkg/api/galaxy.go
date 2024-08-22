@@ -36,13 +36,18 @@ type WorldGetSectorContentResult struct {
 }
 
 type WorldGetSectorContentResultStarSystem struct {
-	ID          string  `json:"systemId"`
+	ID string `json:"systemId"`
+
 	CoordsR     float64 `json:"gR"`
 	CoordsTheta float64 `json:"gTheta"`
 	CoordsH     float64 `json:"gH"`
-	IsExplored  bool    `json:"isExplored"`
-	NPlanets    int     `json:"nPlanets"`
-	NAsteroids  int     `json:"nAsteroids"`
+
+	IsExplored bool   `json:"isExplored"`
+	ExploredBy string `json:"exploredBy"`
+	ExploredAt int64  `json:"exploredAt"`
+
+	NPlanets   int `json:"nPlanets"`
+	NAsteroids int `json:"nAsteroids"`
 
 	Stars []WorldGetSectorContentResultStar `json:"stars"`
 }
@@ -58,18 +63,6 @@ type WorldGetSectorContentResultStar struct {
 
 type WorldGetSectorContentResultPlanet struct {
 	ID string `json:"planetId"`
-}
-
-type WorldGetSectorContentResultBody struct {
-	ID           string `json:"bodyId"`
-	OrbitsAround string `json:"around"`
-
-	OrbitSemiMajorAxisAu float64 `json:"semiMajorAu"`
-	OrbitSemiMinorAxisAu float64 `json:"semiMinorAu"`
-	OrbitRotationXRad    float64 `json:"rotx"`
-	OrbitRotationYRad    float64 `json:"roty"`
-	OrbitRotationZRad    float64 `json:"rotz"`
-	OrbitTheta0          float64 `json:"th0"`
 }
 
 type WorldGetGalaxyOverviewPayload struct {
@@ -112,4 +105,49 @@ type WorldGetGalaxyOverviewResultGridSector struct {
 	InnerR     float64 `json:"innerR"`
 	ThetaStart float64 `json:"thetaStart"`
 	ThetaEnd   float64 `json:"thetaEnd"`
+}
+
+type WorldGetSystemContentPayload struct {
+	SystemID string `json:"systemId"`
+}
+
+type WorldGetSystemContentResult struct {
+	Stars    []WorldGetSectorContentResultStar    `json:"stars"`
+	Orbits   []WorldGetSystemContentResultOrbit   `json:"orbits"`
+	Surfaces []WorldGetSystemContentResultSurface `json:"surfaces"`
+}
+
+type WorldGetSystemContentResultOrbit struct {
+	BodyID       string `json:"bodyId"`
+	OrbitsAround string `json:"around"`
+
+	OrbitSemiMajorAxisAu float64 `json:"semiMajorAu"`
+	OrbitEccentricity    float64 `json:"ecc"`
+	OrbitRotation        float64 `json:"rot"`
+	OrbitInclination     float64 `json:"incl"`
+	TimeAtPeriapsis      int64   `json:"t0"`
+}
+
+type WorldGetSystemContentResultSurface struct {
+	SurfaceID  string  `json:"surfaceId"`
+	IsExplored bool    `json:"isExplored"`
+	MassSuns   float64 `json:"massSuns"`
+}
+
+type WorldGetSurfacePayload struct {
+	SurfaceID string `json:"surfaceId"`
+}
+
+type WorldGetSurfaceResult struct {
+	SurfaceID string `json:"surfaceId"`
+	Name      string `json:"name"`
+
+	Grid       WorldGetSurfaceResultGrid `json:"grid"`
+	Colors     [][]int                   `json:"colors"`
+	Elevations []float64
+}
+
+type WorldGetSurfaceResultGrid struct {
+	Coords []float64 `json:"coords"`
+	Edges  [][]int   `json:"edges"`
 }

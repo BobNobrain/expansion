@@ -3,6 +3,10 @@ package domain
 type Username string
 type UserID string
 
+func (uid UserID) IsEmpty() bool {
+	return len(uid) == 0
+}
+
 type User struct {
 	ID       UserID
 	Username Username

@@ -64,6 +64,7 @@ async function main() {
     });
 
     if (shouldServe) {
+        console.log(`Serving ${entryPath}`);
         await ctx.serve({
             port: 3000,
             servedir: path.resolve('out'),

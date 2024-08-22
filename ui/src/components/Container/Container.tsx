@@ -8,6 +8,7 @@ export type ContainerProps = {
     direction?: 'row' | 'column';
     threads?: 1 | 2 | 3 | 4 | '1' | '2' | '3' | '4';
     clearSelfPadding?: boolean;
+    stretch?: boolean;
 };
 
 const SIZE_CLS: Record<NonNullable<ContainerProps['size']>, string> = {
@@ -30,6 +31,7 @@ export const Container: ParentComponent<ContainerProps> = (props) => {
                 [styles[`threads` + props.threads ?? '1']]: true,
                 [styles.clearSelfPadding]: props.clearSelfPadding,
                 [styles[SIZE_CLS[props.size ?? 'm']]]: true,
+                [styles.stretch]: props.stretch,
             }}
         >
             {props.children}

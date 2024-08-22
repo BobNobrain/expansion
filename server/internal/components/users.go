@@ -27,6 +27,7 @@ type ChangeRolesRequest struct {
 
 type UserRepo interface {
 	Get(GetUserRequest) (domain.User, common.Error)
+	GetManyByIDs([]domain.UserID) ([]domain.User, common.Error)
 	GetCredentials(domain.Username) (domain.UserCredentials, common.Error)
 
 	Create(UserCreateData) (domain.User, common.Error)

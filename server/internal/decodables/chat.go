@@ -18,7 +18,7 @@ func DecodeChatPostCommand(cmd *components.DispatcherCommand) (*domain.PostChatM
 
 	return &domain.PostChatMessageData{
 		ChatID:  domain.ChatID(payload.ChatID),
-		Author:  cmd.OnBehalf,
+		Author:  cmd.OnBehalf.ID,
 		Content: payload.Content,
 	}, nil
 }

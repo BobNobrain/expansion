@@ -1,13 +1,13 @@
 import { createMemo, type Component, createEffect } from 'solid-js';
 import * as T from 'three';
 import { type RawColor, type RawVertex } from '../../lib/3d/types';
-import { Star } from '../../domain/Star';
+import { Star, type StarWithCoords } from '../../domain/Star';
 import { SceneObject } from '../../components/three/SceneObject/SceneObject';
 import { GalacticCoords } from '../../domain/GalacticCoords';
 import { useAnimatedNumber } from '../../components/three/hooks/useAnimatedValue';
 
 export type GalaxyStarsProps = {
-    stars: Pick<Star, 'coords' | 'tempK'>[];
+    stars: Pick<StarWithCoords, 'coords' | 'tempK'>[];
     withNormals?: boolean;
     dim?: boolean;
 };

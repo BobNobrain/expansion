@@ -46,7 +46,7 @@ export function iconify({ viewBox, content }: IconifyOptions): Component<IconPro
                 viewBox={viewBox}
                 class={styles.icon}
                 classList={{
-                    [colors[props.color ?? 'text']]: true,
+                    [colors[props.color ?? 'inherit']]: true,
                 }}
                 style={css()}
             >

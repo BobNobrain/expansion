@@ -41,3 +41,14 @@ func DecodeWorldGetGalaxyOverviewPayload(cmd *components.DispatcherCommand) (int
 
 	return payload.LandmarksLimit, nil
 }
+
+func DecodeWorldGetSystemContentPayload(cmd *components.DispatcherCommand) (world.StarSystemID, common.Error) {
+	var payload api.WorldGetSystemContentPayload
+	err := json.Unmarshal(cmd.Payload, &payload)
+
+	if err != nil {
+		return "", newDecodeError(err)
+	}
+
+	return world.StarSystemID(payload.SystemID), nil
+}

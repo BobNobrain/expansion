@@ -8,6 +8,14 @@ run:
 watch:
 	gow -r=false run cmd/monolith/monolith.go
 
+.PHONY: editor-api
+editor-api:
+	go run cmd/editor-api/editor-api.go
+
+.PHONY: watch-editor
+watch-editor:
+	gow -r=false run cmd/editor-api/editor-api.go
+
 .PHONY: setup
 setup: api-types assetgen galaxy-texture
 	go install github.com/gzuidhof/tygo@latest
@@ -37,3 +45,7 @@ setup-dev-db:
 	go run cmd/devdb/devdb.go -action=schema
 	go run cmd/devdb/devdb.go -action=users
 	go run cmd/devdb/devdb.go -action=galaxy
+
+.PHONY: planetgen
+planetgen:
+	EXPANSION_DEBUG=planetgen go run cmd/planetgendebug/planetgendebug.go

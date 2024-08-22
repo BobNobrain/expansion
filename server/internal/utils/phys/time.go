@@ -1,5 +1,7 @@
 package phys
 
+import "time"
+
 type PhysicalTime float64
 
 const secondsPerMonth float64 = 60 * 60 * 24 * 30
@@ -16,6 +18,11 @@ func (t PhysicalTime) Seconds() float64 {
 }
 func (t PhysicalTime) Months() float64 {
 	return float64(t)
+}
+
+func (t PhysicalTime) ToRealTime() time.Duration {
+	// 1 real week is 1 in-game year
+	return 7 * 24 * time.Hour * time.Duration(t.Months()/12)
 }
 
 type Age float64

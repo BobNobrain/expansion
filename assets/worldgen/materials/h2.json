@@ -1,0 +1,19 @@
+{
+    "$schema": "../../schemas/worldgen/material.json",
+    "id": "h2",
+    "tags": [ "wg" ],
+    "abundance": { "min": 0.001, "max": 0.01 },
+    "molar": 2,
+    "colors": {
+        "solid": { "r": 1, "g": 1, "b": 1 },
+        "liquid": { "r": 1, "g": 1, "b": 1, "a": 0.1 },
+        "gas": { "r": 1, "g": 1, "b": 1, "a": 0 }
+    },
+    "phases": {
+        "type": "triple",
+        "triple": { "P": 7042, "T": 13.81 },
+        "subl": [ { "P": 0, "T": 0.5 } ],
+        "melt": [ { "P": 10e5, "T": 12 }, { "P": 20e5, "T": 20 }, { "P": 1e8, "T": 100 }, { "P": 1e10, "T": 1000 } ],
+        "boil": [ { "P": 13e5, "T": 33.15 } ]
+    }
+}

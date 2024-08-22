@@ -1,0 +1,17 @@
+{
+    "$schema": "../../schemas/worldgen/material.json",
+    "id": "he4",
+    "tags": [ "wg" ],
+    "abundance": { "min": 0.001, "max": 0.007 },
+    "molar": 4,
+    "colors": {
+        "solid": { "r": 1, "g": 1, "b": 1 },
+        "liquid": { "r": 1, "g": 1, "b": 1, "a": 0.1 },
+        "gas": { "r": 1, "g": 1, "b": 1, "a": 0 }
+    },
+    "phases": {
+        "type": "he",
+        "melt": [ { "P": 2e6, "T": 0 }, { "P": 3e6, "T": 1.7 }, { "P": 6e6, "T": 3.5 } ],
+        "boil": [ { "P": 0, "T": 1.8 }, { "P": 5073, "T": 2.17 }, { "P": 229e3, "T": 5.2 } ]
+    }
+}

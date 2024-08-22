@@ -24,7 +24,7 @@ func (g *gameGalaxy) scheduleAutoUpdate() {
 }
 
 func (g *gameGalaxy) saveState() []common.Error {
-	g.lock.RLock()
+	// g.lock.RLock()
 
 	errors := make([]common.Error, 0)
 	blobs := make([]*domain.OpaqueBlob, 0, len(g.systemsById))
@@ -39,7 +39,7 @@ func (g *gameGalaxy) saveState() []common.Error {
 		blobs = append(blobs, blob)
 	}
 
-	g.lock.RUnlock()
+	// g.lock.RUnlock()
 
 	for _, blob := range blobs {
 		err := g.starSystems.Update(blob)

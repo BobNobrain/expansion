@@ -179,6 +179,27 @@ func (repo *userRepoImpl) Get(rq components.GetUserRequest) (domain.User, common
 	return rows[0].toUser(), nil
 }
 
+func (repo *userRepoImpl) GetManyByIDs(uids []domain.UserID) ([]domain.User, common.Error) {
+	builder := repo.users.SelectBuilder("*")
+	values := make([]interface{}, 0, len(uids))
+	for _, uid := range uids {
+		values = append(values, uid)
+	}
+	builder.Where(builder.In(userFieldID, values...))
+
+	var rows []*dbUser
+	err := repo.db.RunQuery(builder, &rows)
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]domain.User, 0, len(rows))
+	for _, row := range rows {
+		result = append(result, row.toUser())
+	}
+	return result, nil
+}
+
 func (repo *userRepoImpl) GetCredentials(uname domain.Username) (domain.UserCredentials, common.Error) {
 	builder := repo.users.SelectBuilder("*")
 	builder.Where(builder.Equal(userFieldUsername, uname))

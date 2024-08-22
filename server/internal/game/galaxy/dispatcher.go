@@ -43,6 +43,24 @@ func (h *galaxyQueryHandler) HandleCommand(cmd *components.DispatcherCommand) (c
 		beacons := h.galaxy.queryBeacons(limit)
 
 		return encodables.NewGalaxyOverviewEncodable(sectors, beacons), nil
+
+	case "getSystemContent":
+		systemId, err := decodables.DecodeWorldGetSystemContentPayload(cmd)
+		if err != nil {
+			return nil, err
+		}
+
+		sys := h.galaxy.systemsById[systemId]
+		if sys == nil {
+			return nil, common.NewError("ERR_NOT_FOUND", "star system not found")
+		}
+
+		// TODO: for testing purposes, to be removed in future
+		if !sys.IsExplored() {
+			sys.Explore(cmd.OnBehalf.ID)
+		}
+
+		return encodables.NewGetSystemContentResultEncodable(sys), nil
 	}
 
 	return nil, dispatcher.NewUnknownDispatcherCommandError(cmd)

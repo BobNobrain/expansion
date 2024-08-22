@@ -8,8 +8,9 @@ export type Star = Readonly<{
     tempK: number;
     radiusAu: number;
     ageBillionYears: number;
-    coords: GalacticCoords;
 }>;
+
+export type StarWithCoords = Star & Readonly<{ coords: GalacticCoords }>;
 
 export namespace Star {
     export function getColor(star: Pick<Star, 'tempK'>): RawColor {

@@ -1,0 +1,49 @@
+.wrapper {
+    /* ... */
+}
+
+.row {
+    display: flex;
+    align-items: stretch;
+    border-bottom: 2px solid var(--color-border);
+    margin-bottom: 1px;
+}
+
+.row.multiline {
+    flex-flow: column;
+}
+
+.name {
+    flex: 0 0 auto;
+    width: 20%;
+    min-width: 100px;
+    max-width: 250px;
+
+    background-color: var(--color-background-light);
+    padding: 8px 12px;
+}
+.multiline > .name {
+    width: 100%;
+    max-width: unset;
+    padding: 4px 16px;
+    cursor: pointer;
+}
+
+.value {
+    overflow: auto;
+    flex: 1 1 auto;
+}
+.multiline > .value {
+    margin-left: 16px;
+    margin-bottom: 8px;
+}
+
+.preview {
+    font-size: 0.8em;
+    font-family: 'JetBrains Mono', monospace;
+    margin-left: 12px;
+    padding: 1px 4px;
+    border-radius: 2px;
+    background-color: var(--color-background-dark);
+    color: var(--color-text-dim);
+}

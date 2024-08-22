@@ -138,7 +138,7 @@ export const GalaxySectorsGrid: Component<GalaxySectorsGridProps> = (props) => {
         <>
             <For each={gridMeshes()}>{(line) => <SceneObject object={line} />}</For>
             <GalaxyStars
-                stars={(sectorContent.data?.systems ?? []).map((s) => s.stars[0])}
+                stars={(sectorContent.data?.systems ?? []).map((s) => ({ ...s.stars[0], coords: s.coords }))}
                 withNormals
                 dim={!sectorContent.data}
             />

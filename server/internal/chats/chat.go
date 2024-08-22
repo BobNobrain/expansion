@@ -33,13 +33,13 @@ func NewChatRepo(comms components.Comms, dispatcher components.Dispatcher) domai
 	return repo
 }
 
-func (impl *chatRepoImpl) ListChatsForUser(uname domain.Username) ([]*domain.ChatData, common.Error) {
+func (impl *chatRepoImpl) ListChatsForUser(uid domain.UserID) ([]*domain.ChatData, common.Error) {
 	impl.mu.Lock()
 	defer impl.mu.Unlock()
 
 	result := make([]*domain.ChatData, 0)
 	for _, ch := range impl.chats {
-		if slices.Index(ch.MemberUsernames, uname) != -1 {
+		if slices.Index(ch.MemberIDs, uid) != -1 {
 			result = append(result, ch)
 		}
 	}
@@ -74,9 +74,9 @@ func (impl *chatRepoImpl) CreateChat(data *domain.ChatCreateData) (*domain.ChatD
 	defer impl.mu.Unlock()
 
 	newChat := domain.ChatData{
-		ChatID:          domain.NewChatID(),
-		Title:           data.Title,
-		MemberUsernames: data.MemberUsernames,
+		ChatID:    domain.NewChatID(),
+		Title:     data.Title,
+		MemberIDs: data.MemberIDs,
 	}
 
 	impl.chats[newChat.ChatID] = &newChat
@@ -84,7 +84,7 @@ func (impl *chatRepoImpl) CreateChat(data *domain.ChatCreateData) (*domain.ChatD
 	return &newChat, nil
 }
 
-func (impl *chatRepoImpl) InviteMember(cid domain.ChatID, username domain.Username) common.Error {
+func (impl *chatRepoImpl) InviteMember(cid domain.ChatID, uid domain.UserID) common.Error {
 	impl.mu.Lock()
 	defer impl.mu.Unlock()
 
@@ -93,11 +93,11 @@ func (impl *chatRepoImpl) InviteMember(cid domain.ChatID, username domain.Userna
 		return NewChatNotFoundError(cid)
 	}
 
-	chatData.MemberUsernames = append(chatData.MemberUsernames, username)
+	chatData.MemberIDs = append(chatData.MemberIDs, uid)
 	return nil
 }
 
-func (impl *chatRepoImpl) KickMember(cid domain.ChatID, username domain.Username) common.Error {
+func (impl *chatRepoImpl) KickMember(cid domain.ChatID, uid domain.UserID) common.Error {
 	impl.mu.Lock()
 	defer impl.mu.Unlock()
 
@@ -106,7 +106,7 @@ func (impl *chatRepoImpl) KickMember(cid domain.ChatID, username domain.Username
 		return NewChatNotFoundError(cid)
 	}
 
-	chatData.MemberUsernames = utils.FastRemove(chatData.MemberUsernames, username)
+	chatData.MemberIDs = utils.FastRemove(chatData.MemberIDs, uid)
 	return nil
 }
 
@@ -118,7 +118,7 @@ func (impl *chatRepoImpl) PostMessage(data *domain.PostChatMessageData) (*domain
 	if !found {
 		return nil, NewChatNotFoundError(data.ChatID)
 	}
-	if slices.Index(chat.MemberUsernames, data.Author) == -1 {
+	if slices.Index(chat.MemberIDs, data.Author) == -1 {
 		return nil, NewChatNotFoundError(data.ChatID)
 	}
 
@@ -141,7 +141,7 @@ func (impl *chatRepoImpl) broadcastPostedMessage(chat *domain.ChatData, msg *dom
 	impl.comms.Broadcast(components.CommsBroadcastRequest{
 		Scope:      scope,
 		Event:      "post",
-		Recepients: chat.MemberUsernames,
+		Recepients: chat.MemberIDs,
 		Payload:    encodables.NewChatPostedEvent(chat, msg),
 	})
 }

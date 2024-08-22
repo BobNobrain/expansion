@@ -21,3 +21,6 @@ func KilometersPerSecondSquared(kmpss float64) Acceleration {
 func (a Acceleration) KilometersPerSecondSquared() float64 {
 	return float64(a)
 }
+func (a Acceleration) EarthGs() float64 {
+	return float64(a) * 1e2
+}

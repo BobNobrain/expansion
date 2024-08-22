@@ -1,0 +1,21 @@
+.wrapper {
+    display: flex;
+    flex-flow: column;
+    height: 100vh;
+    align-items: stretch;
+}
+
+.main {
+    flex: 1 1 auto;
+    position: relative;
+    display: flex;
+}
+
+.sidebar {
+    flex: 0 0 auto;
+    width: 20%;
+    min-width: 250px;
+    max-width: 500px;
+
+    border-right: 2px solid var(--color-border);
+}

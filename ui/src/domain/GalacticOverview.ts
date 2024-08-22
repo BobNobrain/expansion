@@ -1,5 +1,5 @@
 import { type GalacticCoords } from './GalacticCoords';
-import { type Star } from './Star';
+import { type StarWithCoords } from './Star';
 
 export type GalacticGridSector = {
     id: string;
@@ -67,7 +67,7 @@ export class GalacticGrid {
     }
 }
 
-export type GalacticLandmark = Pick<Star, 'id' | 'coords' | 'luminositySuns' | 'tempK'>;
+export type GalacticLandmark = Pick<StarWithCoords, 'id' | 'coords' | 'luminositySuns' | 'tempK'>;
 
 export type GalacticLabelType = 'base' | 'ship' | 'market' | 'other';
 export namespace GalacticLabelType {

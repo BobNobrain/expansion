@@ -2,12 +2,27 @@ package planetgen
 
 import (
 	"math"
-	"math/rand"
 	"srv/internal/utils"
 	"srv/internal/utils/geom"
-	"srv/internal/utils/phys"
 	"srv/internal/world"
 )
+
+func (ctx *surfaceGenContext) generateTectonicElevations() {
+	nodesCount := ctx.surface.Grid.GetNodesCount()
+	opts := new(tectonicLandscapeOptions)
+	opts.NPlates = utils.Clamp(nodesCount/40, 5, 25)
+
+	opts.MinPlateSize = utils.Clamp(nodesCount/120, 3, 10)
+
+	// TODO: randomize these? or load from config?
+	opts.ElevationGap = 0.2
+	opts.OceanPercentage = 0.7
+	opts.Extremeness = 0.6
+	opts.SlopeFactor = 0.3
+
+	generateTectonicLandscape(ctx, opts)
+	noiseAndBlurElevations(ctx, (&noiseAndBlurElevationsOptions{}).defaults())
+}
 
 type tectonicLandscapeOptions struct {
 	NPlates         int
@@ -16,36 +31,6 @@ type tectonicLandscapeOptions struct {
 	Extremeness     float64
 	MinPlateSize    int
 	SlopeFactor     float64
-	ElevationScale  phys.Distance
-}
-
-func (opts *tectonicLandscapeOptions) Defaults(
-	nodesCount int,
-	planetRadius phys.Distance,
-) *tectonicLandscapeOptions {
-	opts.NPlates = nodesCount / 40
-	if opts.NPlates < 5 {
-		opts.NPlates = 5
-	} else if opts.NPlates > 25 {
-		opts.NPlates = 25
-	}
-
-	opts.MinPlateSize = nodesCount / 120
-	if opts.MinPlateSize < 3 {
-		opts.MinPlateSize = 3
-	} else if opts.MinPlateSize > 10 {
-		opts.MinPlateSize = 10
-	}
-
-	opts.MinPlateSize = 0
-	opts.ElevationGap = 0.2
-	opts.OceanPercentage = 0.7
-	opts.Extremeness = 0.6
-	opts.SlopeFactor = 0.3
-	// TODO: this is a rough approximation
-	opts.ElevationScale = planetRadius.Mul(1e-3)
-
-	return opts
 }
 
 type tectonicPlate struct {
@@ -59,10 +44,8 @@ type tectonicPlate struct {
 type tectonicPlateIndex int
 
 type tectonicLandscaper struct {
-	grid  world.PlanetaryGrid
-	tiles *solidPlanetData
-	rnd   *rand.Rand
-	opts  *tectonicLandscapeOptions
+	ctx  *surfaceGenContext
+	opts *tectonicLandscapeOptions
 
 	plates              []*tectonicPlate
 	plateIndexes        []tectonicPlateIndex
@@ -70,25 +53,14 @@ type tectonicLandscaper struct {
 }
 
 func generateTectonicLandscape(
-	rnd *rand.Rand,
-	planet *world.Planet,
+	ctx *surfaceGenContext,
 	opts *tectonicLandscapeOptions,
-) *solidPlanetData {
-	sourceGrid := planet.Grid
-	nodesCount := sourceGrid.GetNodesCount()
+) {
+	nodesCount := ctx.surface.Grid.GetNodesCount()
 	nPlates := opts.NPlates
 
-	tiles := &solidPlanetData{
-		planetRadius:       planet.Radius,
-		relativeElevations: make([]float64, nodesCount),
-		seaLevel:           0,
-		airLevel:           1,
-	}
-
 	tl := &tectonicLandscaper{
-		grid:                sourceGrid,
-		tiles:               tiles,
-		rnd:                 rnd,
+		ctx:                 ctx,
 		opts:                opts,
 		plates:              make([]*tectonicPlate, nPlates),
 		plateIndexes:        make([]tectonicPlateIndex, nodesCount),
@@ -108,10 +80,7 @@ func generateTectonicLandscape(
 	tl.calculateLocalPlateMovements()
 	tl.assignElevations()
 
-	planet.Tiles = tl.tiles
-
 	// TODO: use plates to fill in planet nameable features – oceans, continents, etc.
-	return tiles
 }
 
 func (tl *tectonicLandscaper) floodFillPlates() {
@@ -120,7 +89,7 @@ func (tl *tectonicLandscaper) floodFillPlates() {
 	floodQueues := make([]*utils.Queue[world.PlanetaryNodeIndex], nPlates)
 
 	floodFillStarts := make([]world.PlanetaryNodeIndex, 0)
-	for nodeIndex := range utils.DrawDistinctIntegers(tl.rnd, nPlates, tl.grid.GetNodesCount()) {
+	for nodeIndex := range utils.DrawDistinctIntegers(tl.ctx.rnd, nPlates, tl.ctx.surface.Grid.GetNodesCount()) {
 		floodFillStarts = append(floodFillStarts, world.PlanetaryNodeIndex(nodeIndex))
 	}
 
@@ -150,7 +119,7 @@ func (tl *tectonicLandscaper) floodFillPlates() {
 				visitedNodes.Add(*nextNode)
 			}
 
-			neighbouringNodes := tl.grid.GetConnectedNodes(*nextNode)
+			neighbouringNodes := tl.ctx.surface.Grid.GetConnectedNodes(*nextNode)
 			for _, neighbouringNode := range neighbouringNodes {
 				if visitedNodes.Has(neighbouringNode) {
 					continue
@@ -166,10 +135,10 @@ func (tl *tectonicLandscaper) generatePlateData() {
 	nPlates := len(tl.plates)
 	halfGap := tl.opts.ElevationGap / 2
 	for pi := 0; pi < nPlates; pi++ {
-		isOceanic := tl.rnd.Float64() < tl.opts.OceanPercentage
-		plateElevation := tl.rnd.Float64()*(tl.opts.Extremeness-halfGap) + halfGap
-		moveAmount := tl.rnd.Float64()
-		moveAngle := (2*tl.rnd.Float64() - 1) * math.Pi
+		isOceanic := tl.ctx.rnd.Float64() < tl.opts.OceanPercentage
+		plateElevation := tl.ctx.rnd.Float64()*(tl.opts.Extremeness-halfGap) + halfGap
+		moveAmount := tl.ctx.rnd.Float64()
+		moveAngle := (2*tl.ctx.rnd.Float64() - 1) * math.Pi
 
 		plate := tl.plates[pi]
 		plate.elevation = plateElevation
@@ -193,7 +162,7 @@ func (tl *tectonicLandscaper) eatSmallPlates() {
 
 		plateNeighbours := utils.NewSet[world.PlanetaryNodeIndex]()
 		for node := range smallPlate.nodes.Items() {
-			nodeNeighbours := tl.grid.GetConnectedNodes(node)
+			nodeNeighbours := tl.ctx.surface.Grid.GetConnectedNodes(node)
 			for _, neighbour := range nodeNeighbours {
 				plateNeighbours.Add(neighbour)
 			}
@@ -234,7 +203,7 @@ func (tl *tectonicLandscaper) calculateLocalPlateMovements() {
 
 	for nodeIndex := 0; nodeIndex < len(tl.plateIndexes); nodeIndex++ {
 		plate := tl.plates[tl.plateIndexes[nodeIndex]]
-		tileCoords := tl.grid.GetNodeCoords(world.PlanetaryNodeIndex(nodeIndex))
+		tileCoords := tl.ctx.surface.Grid.GetNodeCoords(world.PlanetaryNodeIndex(nodeIndex))
 
 		tileNormal := tileCoords.Normalized()
 		localNorth := planetNorth.Diff(tileNormal.Mul(planetNorth.Dot(tileNormal))).Normalized()
@@ -252,7 +221,7 @@ func (tl *tectonicLandscaper) assignElevations() {
 		nodeIndex := world.PlanetaryNodeIndex(vi)
 		tilePlateIndex := tl.plateIndexes[vi]
 		tilePlate := tl.plates[tilePlateIndex]
-		neighbours := tl.grid.GetConnectedNodes(nodeIndex)
+		neighbours := tl.ctx.surface.Grid.GetConnectedNodes(nodeIndex)
 
 		solidElevation := tilePlate.elevation
 
@@ -293,6 +262,6 @@ func (tl *tectonicLandscaper) assignElevations() {
 			solidElevation = 0.9999
 		}
 
-		tl.tiles.relativeElevations[nodeIndex] = solidElevation
+		tl.ctx.surface.Tiles[nodeIndex].Elevation = solidElevation
 	}
 }

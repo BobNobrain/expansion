@@ -58,6 +58,10 @@ func (s ScaledScalar[T]) ToScale(scaleValue T, scale *Scale) float64 {
 	return s.value * coeff
 }
 
+func (s ScaledScalar[T]) Multiply(factor float64) ScaledScalar[T] {
+	return ScaledScalar[T]{scaleValue: s.scaleValue, value: s.value * factor}
+}
+
 func makeCoeffsKey(from, to byte) byte {
 	key := (from << 4) | to
 	return key

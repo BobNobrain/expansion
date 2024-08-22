@@ -10,7 +10,7 @@ import (
 type chatPostedEvent struct {
 	ChatID    domain.ChatID
 	MessageID domain.MessageID
-	Author    domain.Username
+	Author    domain.UserID
 	Date      time.Time
 	Content   string
 }

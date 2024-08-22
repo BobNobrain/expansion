@@ -14,19 +14,19 @@ func NewChatID() ChatID {
 }
 
 type ChatData struct {
-	ChatID          ChatID
-	Title           string
-	MemberUsernames []Username
+	ChatID    ChatID
+	Title     string
+	MemberIDs []UserID
 }
 
 type ChatRepo interface {
-	ListChatsForUser(uname Username) ([]*ChatData, common.Error)
+	ListChatsForUser(UserID) ([]*ChatData, common.Error)
 	ListChatMessages(*ChatHistoryFilter) ([]*ChatMessageData, common.Error)
 
 	CreateChat(*ChatCreateData) (*ChatData, common.Error)
 
-	InviteMember(cid ChatID, username Username) common.Error
-	KickMember(cid ChatID, username Username) common.Error
+	InviteMember(ChatID, UserID) common.Error
+	KickMember(ChatID, UserID) common.Error
 
 	PostMessage(*PostChatMessageData) (*ChatMessageData, common.Error)
 }
@@ -39,7 +39,7 @@ func NewMessageID() MessageID {
 
 type ChatMessageData struct {
 	MessageID MessageID
-	Author    Username
+	Author    UserID
 	PostedAt  time.Time
 	Content   string
 }
@@ -51,12 +51,12 @@ type ChatHistoryFilter struct {
 }
 
 type ChatCreateData struct {
-	Title           string
-	MemberUsernames []Username
+	Title     string
+	MemberIDs []UserID
 }
 
 type PostChatMessageData struct {
 	ChatID  ChatID
-	Author  Username
+	Author  UserID
 	Content string
 }

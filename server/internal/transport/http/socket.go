@@ -23,6 +23,6 @@ func (srv *httpServerImpl) serveSocket() {
 		}
 
 		connection, _ := upgrader.Upgrade(w, r, nil)
-		srv.comms.HandleNewConnection(connection, auth.User)
+		srv.comms.HandleNewConnection(connection, *auth.User)
 	})
 }

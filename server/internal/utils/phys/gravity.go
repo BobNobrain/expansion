@@ -3,7 +3,7 @@ package phys
 import "math"
 
 // for kilometers, kilograms and seconds
-const gravityConstant float64 = 6.674e-2
+const gravityConstant float64 = 6.674e-20
 
 func CalculatePlanetGravity(m Mass, r Distance) Acceleration {
 	km := r.Kilometers()

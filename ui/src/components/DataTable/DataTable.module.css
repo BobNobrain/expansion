@@ -26,7 +26,7 @@
     composes: cell;
 }
 
-.data-row:hover {
+.data-row:hover, .data-row:active {
     background-color: var(--color-background-light);
 }
 

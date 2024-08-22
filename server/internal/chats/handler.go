@@ -35,7 +35,7 @@ func (impl *chatRepoImpl) HandleCommand(cmd *components.DispatcherCommand) (comm
 		return encodables.NewEmptyOkResponse(), nil
 
 	case "list":
-		chats, err := impl.ListChatsForUser(cmd.OnBehalf)
+		chats, err := impl.ListChatsForUser(cmd.OnBehalf.ID)
 		if err != nil {
 			return nil, err
 		}

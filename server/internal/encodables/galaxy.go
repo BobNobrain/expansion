@@ -85,21 +85,14 @@ func NewGetSectorContentResultEncodable(content pagination.Page[world.StarSystem
 			CoordsH:     float64(system.GetCoords().H),
 			Stars:       make([]api.WorldGetSectorContentResultStar, 0, len(system.GetStars())),
 			IsExplored:  system.IsExplored(),
+			ExploredBy:  string(system.GetExploredBy()),
+			ExploredAt:  system.GetExploredAt().UnixMilli(),
 			NPlanets:    system.GetNPlanets(),
 			NAsteroids:  system.GenNAsteroids(),
 		}
 
 		for _, star := range system.GetStars() {
-			encodedStar := api.WorldGetSectorContentResultStar{
-				ID:             string(star.ID),
-				TempK:          star.Params.Temperature.Kelvins(),
-				LuminositySuns: star.Params.Luminosity.Suns(),
-				RadiusAu:       star.Params.Radius.AstronomicalUnits(),
-				MassSuns:       star.Params.Mass.SolarMasses(),
-				AgeByrs:        star.Params.Age.BillionYears(),
-			}
-
-			encodedSystem.Stars = append(encodedSystem.Stars, encodedStar)
+			encodedSystem.Stars = append(encodedSystem.Stars, encodeStar(star))
 		}
 
 		encoded.Systems = append(encoded.Systems, encodedSystem)
@@ -108,23 +101,14 @@ func NewGetSectorContentResultEncodable(content pagination.Page[world.StarSystem
 	return common.AsEncodable(encoded)
 }
 
-type encodableGalaxyOverview struct {
-	sectors   []*world.GalacticSector
-	landmarks []world.GalaxyBeacon
-}
-
 func NewGalaxyOverviewEncodable(
 	sectors []*world.GalacticSector,
 	landmarks []world.GalaxyBeacon,
 ) common.Encodable {
-	return &encodableGalaxyOverview{sectors: sectors, landmarks: landmarks}
-}
+	sectorsData := make([]api.WorldGetGalaxyOverviewResultGridSector, len(sectors))
 
-func (data *encodableGalaxyOverview) Encode() any {
-	sectors := make([]api.WorldGetGalaxyOverviewResultGridSector, len(data.sectors))
-
-	for i, sector := range data.sectors {
-		sectors[i] = api.WorldGetGalaxyOverviewResultGridSector{
+	for i, sector := range sectors {
+		sectorsData[i] = api.WorldGetGalaxyOverviewResultGridSector{
 			ID:         string(sector.ID),
 			InnerR:     float64(sector.Coords.InnerR),
 			OuterR:     float64(sector.Coords.OuterR),
@@ -133,9 +117,9 @@ func (data *encodableGalaxyOverview) Encode() any {
 		}
 	}
 
-	landmarks := make([]api.WorldGetGalaxyOverviewResultLandmark, len(data.landmarks))
-	for i, star := range data.landmarks {
-		landmarks[i] = api.WorldGetGalaxyOverviewResultLandmark{
+	landmarksData := make([]api.WorldGetGalaxyOverviewResultLandmark, len(landmarks))
+	for i, star := range landmarks {
+		landmarksData[i] = api.WorldGetGalaxyOverviewResultLandmark{
 			CoordsR:        float64(star.Coords.R),
 			CoordsTheta:    float64(star.Coords.Theta),
 			CoordsH:        float64(star.Coords.H),
@@ -145,16 +129,70 @@ func (data *encodableGalaxyOverview) Encode() any {
 		}
 	}
 
-	labels := make([]api.WorldGetGalaxyOverviewResultLabel, 0)
+	labelsData := make([]api.WorldGetGalaxyOverviewResultLabel, 0)
 
-	return &api.WorldGetGalaxyOverviewResult{
+	return common.AsEncodable(api.WorldGetGalaxyOverviewResult{
 		Grid: api.WorldGetGalaxyOverviewResultGrid{
 			InnerR:  float64(world.InnerRimRadius),
 			OuterR:  float64(world.OuterRimRadius),
 			MaxH:    float64(world.MaxHeightDispacement),
-			Sectors: sectors,
+			Sectors: sectorsData,
 		},
-		Landmarks: landmarks,
-		Labels:    labels,
+		Landmarks: landmarksData,
+		Labels:    labelsData,
+	})
+}
+
+func NewGetSystemContentResultEncodable(sys world.StarSystem) common.Encodable {
+	if !sys.IsExplored() {
+		// This should not normally happen, as client should not ask for
+		// content of systems that are not explored yet.
+		return common.AsEncodable(api.WorldGetSystemContentResult{})
+	}
+
+	stars := sys.GetStars()
+	orbits := sys.GetOrbits()
+	surfaces := sys.GetSurfaces()
+
+	result := &api.WorldGetSystemContentResult{
+		Stars:    make([]api.WorldGetSectorContentResultStar, 0, len(stars)),
+		Orbits:   make([]api.WorldGetSystemContentResultOrbit, 0, len(orbits)),
+		Surfaces: make([]api.WorldGetSystemContentResultSurface, 0, len(surfaces)),
+	}
+
+	for _, star := range stars {
+		result.Stars = append(result.Stars, encodeStar(star))
+	}
+
+	for id, orbit := range orbits {
+		result.Orbits = append(result.Orbits, api.WorldGetSystemContentResultOrbit{
+			BodyID:               string(id),
+			OrbitsAround:         string(orbit.Center),
+			OrbitSemiMajorAxisAu: orbit.Ellipse.SemiMajor.AstronomicalUnits(),
+			OrbitEccentricity:    orbit.Ellipse.Eccentricity,
+			OrbitRotation:        orbit.Rotation.Radians(),
+			OrbitInclination:     orbit.Inclination.Radians(),
+			TimeAtPeriapsis:      orbit.T0.Unix(),
+		})
+	}
+
+	for _, surface := range surfaces {
+		result.Surfaces = append(result.Surfaces, api.WorldGetSystemContentResultSurface{
+			SurfaceID:  string(surface.GetID()),
+			IsExplored: false,
+		})
+	}
+
+	return common.AsEncodable(result)
+}
+
+func encodeStar(star *world.Star) api.WorldGetSectorContentResultStar {
+	return api.WorldGetSectorContentResultStar{
+		ID:             string(star.ID),
+		TempK:          star.Params.Temperature.Kelvins(),
+		LuminositySuns: star.Params.Luminosity.Suns(),
+		RadiusAu:       star.Params.Radius.AstronomicalUnits(),
+		MassSuns:       star.Params.Mass.SolarMasses(),
+		AgeByrs:        star.Params.Age.BillionYears(),
 	}
 }

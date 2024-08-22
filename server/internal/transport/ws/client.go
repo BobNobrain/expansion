@@ -8,13 +8,13 @@ import (
 
 type wsClient struct {
 	id   domain.ClientID
-	user domain.Username
+	user domain.User
 	conn *websocket.Conn
 	send chan interface{}
 	hub  *WSComms
 }
 
-func newClient(conn *websocket.Conn, user domain.Username, hub *WSComms) *wsClient {
+func newClient(conn *websocket.Conn, user domain.User, hub *WSComms) *wsClient {
 	client := &wsClient{
 		id:   domain.NewClientID(),
 		user: user,

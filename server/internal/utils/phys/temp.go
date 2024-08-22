@@ -24,10 +24,21 @@ func (t Temperature) Kelvins() float64 {
 	return float64(t) + zeroDegreesInKelvins
 }
 
+func (t Temperature) IsValid() bool {
+	return t.Kelvins() >= -1e3
+}
+
 const kBoltzmann float64 = 1.380649e-23
 
 func (t Temperature) CalcMostProbableParticleSpeed(particleMass Mass) Speed {
 	return KilometersPerSecond(math.Sqrt(2 * kBoltzmann * (t.Kelvins() / particleMass.Kilograms())))
+}
+
+const gasConstantR = 8_314.4598
+
+func (t Temperature) CalcThermalVelocity(molarMass float64) Speed {
+	mPerS := math.Sqrt(3 * gasConstantR * t.Kelvins() / molarMass)
+	return KilometersPerSecond(mPerS / 1000)
 }
 
 func (t Temperature) GetHeatColor() color.Color {

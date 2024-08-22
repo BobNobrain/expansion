@@ -64,23 +64,11 @@ func newExploredSystemGenerator(
 		combinedCenterStar.Temperature = max(combinedCenterStar.Temperature, secondary.Params.Temperature)
 	}
 
-	ctx.silicateSublimationLine = dumbIcelineEstimate(
-		combinedCenterStar.Temperature,
-		combinedCenterStar.Radius,
-		phys.Kelvins(1400),
-	)
+	icelines := EstimateIcelines(combinedCenterStar.Temperature, combinedCenterStar.Radius)
 
-	ctx.waterSnowline = dumbIcelineEstimate(
-		combinedCenterStar.Temperature,
-		combinedCenterStar.Radius,
-		phys.Kelvins(170),
-	)
-
-	ctx.coSnowline = dumbIcelineEstimate(
-		combinedCenterStar.Temperature,
-		combinedCenterStar.Radius,
-		phys.Kelvins(30),
-	)
+	ctx.silicateSublimationLine = icelines.Silicate
+	ctx.waterSnowline = icelines.Water
+	ctx.coSnowline = icelines.CO
 
 	if nStars > 1 {
 		secondaryOrbit := system.Orbits[system.Stars[1].ID]

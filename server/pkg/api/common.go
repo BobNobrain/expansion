@@ -30,3 +30,8 @@ type ServerEvent struct {
 type ServerEmptyOkResponse struct {
 	Ok bool `json:"ok"`
 }
+
+type CommonExtensions struct {
+	Debug interface{}       `json:"debug"`
+	Names map[string]string `json:"names"`
+}

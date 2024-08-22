@@ -1,0 +1,6 @@
+.menu {
+    display: flex;
+    padding: 12px;
+    height: 32px;
+    border-bottom: 1px solid var(--color-border);
+}

@@ -7,7 +7,7 @@ CAESAR = node ./tools/caesar.js
 setup:
 	@echo "Setting up the project for local development"
 	cd server && make setup && make setup-dev-db
-	cd ../ui && npm i
+	cd ../ui && npm i && npm run build:editor
 	cd ../tools && npm i
 
 api-types:
@@ -16,9 +16,12 @@ api-types:
 #
 # dev servers
 #
-.PHONY: dev-server dev-desktop-ui dev-touch-ui dev-desktop dev-touch
+.PHONY: dev-server dev-desktop-ui dev-touch-ui dev-desktop dev-touch dev-editor-api dev-editor-ui
 dev-srv:
 	cd server && SRV_STATIC="http://localhost:3000" make watch
+
+dev-editor-api:
+	cd server && SRV_STATIC="http://localhost:3000" make watch-editor
 
 dev-desktop-ui:
 	cd ui && npm run serve:desktop
@@ -26,11 +29,20 @@ dev-desktop-ui:
 dev-touch-ui:
 	cd ui && npm run serve:touch
 
+dev-editor-ui:
+	cd ui && npm run serve:editor
+
 dev-desktop:
 	$(CAESAR) client: make dev-desktop-ui server: make dev-srv
 
 dev-touch:
 	$(CAESAR) client: make dev-touch-ui server: make dev-srv
+
+dev-editor:
+	$(CAESAR) client: make dev-editor-ui server: make dev-editor-api
+
+editor:
+	cd server && make editor-api
 
 #
 # db

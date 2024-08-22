@@ -6,6 +6,7 @@ import "srv/internal/utils/phys"
 // they are obsolete
 type PlanetID string
 
+// @deprecated
 type Planet struct {
 	ID   PlanetID
 	Name string
@@ -16,11 +17,4 @@ type Planet struct {
 	Grid     PlanetaryGrid
 	Tiles    PlanetaryGridData
 	Features PlanetaryFeatures
-}
-
-func NewPlanet(id PlanetID) *Planet {
-	return &Planet{
-		ID:   id,
-		Name: string(id),
-	}
 }

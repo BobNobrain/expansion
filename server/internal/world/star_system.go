@@ -1,7 +1,9 @@
 package world
 
 import (
+	"srv/internal/domain"
 	"srv/internal/utils/phys"
+	"time"
 )
 
 type StarParams struct {
@@ -22,6 +24,8 @@ type StarSystem interface {
 	GetCoords() GalacticCoords
 
 	IsExplored() bool
+	GetExploredBy() domain.UserID
+	GetExploredAt() time.Time
 
 	GetOrbits() map[CelestialID]OrbitData
 

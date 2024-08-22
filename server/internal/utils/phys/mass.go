@@ -13,6 +13,7 @@ const (
 )
 
 const solarMassInTons = 1.989e27
+const earthMassInSuns = 3.003e-6
 
 var massScaleData = scale.MakeScale([]scale.ScaleItem[massScale]{
 	{ScaleValue: massScaleTons, CoeffToPrev: 1},
@@ -31,6 +32,11 @@ func Tons(t float64) Mass {
 		value: scale.MakeScalar(massScaleTons, t),
 	}
 }
+func EarthMasses(earths float64) Mass {
+	return Mass{
+		value: scale.MakeScalar(massScaleSuns, earths*earthMassInSuns),
+	}
+}
 func SolarMasses(suns float64) Mass {
 	return Mass{
 		value: scale.MakeScalar(massScaleSuns, suns),
@@ -43,8 +49,15 @@ func (m Mass) Kilograms() float64 {
 func (m Mass) Tons() float64 {
 	return m.value.ToScale(massScaleTons, massScaleData)
 }
+func (m Mass) EarthMasses() float64 {
+	return m.value.ToScale(massScaleSuns, massScaleData) / earthMassInSuns
+}
 func (m Mass) SolarMasses() float64 {
 	return m.value.ToScale(massScaleSuns, massScaleData)
+}
+
+func (m Mass) Multiply(factor float64) Mass {
+	return Mass{value: m.value.Multiply(factor)}
 }
 
 func FromVolumeAndDensity(v Volume, d Density) Mass {

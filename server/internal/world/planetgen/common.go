@@ -1,7 +1,6 @@
 package planetgen
 
 import (
-	"math/rand"
 	"srv/internal/world"
 )
 
@@ -17,25 +16,25 @@ func (opts *noiseAndBlurElevationsOptions) defaults() *noiseAndBlurElevationsOpt
 }
 
 func noiseAndBlurElevations(
-	rnd *rand.Rand,
-	grid world.PlanetaryGrid,
-	tiles *solidPlanetData,
+	ctx *surfaceGenContext,
 	opts *noiseAndBlurElevationsOptions,
 ) {
+	grid := ctx.surface.Grid
+	tiles := ctx.surface.Tiles
 	for vi := 0; vi < grid.GetNodesCount(); vi++ {
 		neighbours := grid.GetConnectedNodes(world.PlanetaryNodeIndex(vi))
-		elevation := tiles.relativeElevations[vi]
+		elevation := tiles[vi].Elevation
 
-		dH := opts.NoiseAmount * (rnd.Float64()*2 - 1)
+		dH := opts.NoiseAmount * (ctx.rnd.Float64()*2 - 1)
 
 		for _, neighbour := range neighbours {
-			neighbourElevation := tiles.relativeElevations[neighbour]
+			neighbourElevation := tiles[neighbour].Elevation
 			dElev := elevation - neighbourElevation
 			dH += dElev * opts.BlurAmount
 		}
 
 		dH = dH / float64(len(neighbours))
 
-		tiles.relativeElevations[vi] += dH
+		tiles[vi].Elevation += dH
 	}
 }

@@ -8,12 +8,11 @@ import (
 	"srv/internal/world"
 	"srv/internal/world/worldgen"
 	"srv/internal/world/wsm"
-	"sync"
 	"time"
 )
 
 type gameGalaxy struct {
-	lock *sync.RWMutex
+	// lock *sync.RWMutex
 
 	grid        world.GalacticGrid
 	systemsById map[world.StarSystemID]*wsm.SystemSharedState
@@ -40,7 +39,7 @@ type GameGalaxyOptions struct {
 
 func NewGameGalaxy(opts GameGalaxyOptions) components.Runner {
 	runner := &gameGalaxy{
-		lock:        new(sync.RWMutex),
+		// lock:        new(sync.RWMutex),
 		systemsById: make(map[world.StarSystemID]*wsm.SystemSharedState),
 
 		generator:   opts.WorldGen,
@@ -59,8 +58,8 @@ func (g *gameGalaxy) Start() common.Error {
 	logger.Info(logger.FromMessage("galaxy", "Starting up a galaxy runner"))
 	g.updater.Start()
 
-	g.lock.Lock()
-	defer g.lock.Unlock()
+	// g.lock.Lock()
+	// defer g.lock.Unlock()
 
 	err := g.loadGrid()
 	if err != nil {

@@ -29,7 +29,6 @@ export type RotatableCameraProps = PerspectiveCameraProps & {
     targetY?: number;
     targetZ?: number;
 
-    pitchLimit?: number;
     minDistance?: number;
     maxDistance?: number;
 

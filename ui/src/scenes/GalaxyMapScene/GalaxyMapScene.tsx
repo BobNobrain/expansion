@@ -12,6 +12,7 @@ import { GalaxySectorsGrid } from './GalaxySectorsGrid';
 import { GalaxyStars } from './GalaxyStars';
 
 export type GalaxyMapSceneProps = {
+    isActive: boolean;
     selectedSector: string | null;
     onSectorClick: (id: string | undefined) => void;
 };
@@ -61,7 +62,7 @@ export const GalaxyMapScene: Component<GalaxyMapSceneProps> = (props) => {
     const panSpeed = (d: number) => 3e-4 * d;
 
     return (
-        <>
+        <Show when={props.isActive}>
             <Show when={overview.data}>
                 <GalaxySectorsGrid
                     grid={overview.data!.grid}
@@ -104,6 +105,6 @@ export const GalaxyMapScene: Component<GalaxyMapSceneProps> = (props) => {
                     </div>
                 </FloatingHTML>
             </Show>
-        </>
+        </Show>
     );
 };

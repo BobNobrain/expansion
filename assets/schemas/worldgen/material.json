@@ -1,0 +1,124 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Material",
+    "description": "Worldgen material data",
+    "type": "object",
+    "properties": {
+        "$schema": { "type": "string" },
+        "id": {
+            "title": "ID",
+            "description": "Unique material ID",
+            "type": "string"
+        },
+        "tags": {
+            "description": "Arbitrary tags",
+            "type": "array",
+            "items": { "type": "string" }
+        },
+        "abundance": {
+            "description": "How abundant is the material when planets are formed",
+            "type": "object",
+            "required": [ "min", "max" ],
+            "properties": {
+                "min": { "type": "number" },
+                "max": { "type": "number" }
+            }
+        },
+        "molar": {
+            "description": "Molar mass",
+            "type": "number",
+            "exclusiveMinimum": 0
+        },
+        "greenhouse": {
+            "title": "Greenhouse strength",
+            "description": "How strong is `material` in its gaseous form as a greenhouse gas",
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+        },
+        "colors": {
+            "type": "object",
+            "properties": {
+                "solid": { "$ref": "#/$defs/Color" },
+                "liquid": { "$ref": "#/$defs/Color" },
+                "gas": { "$ref": "#/$defs/Color" }
+            }
+        },
+        "phases": {
+            "description": "Phase diagram of the material. Describes its behaviour with respect to temperature and pressure",
+            "oneOf": [
+                { "$ref": "#/$defs/TriplePointPhaseDiagram" },
+                { "$ref": "#/$defs/HePhaseDiagram" },
+                { "$ref": "#/$defs/MeltPhaseDiagram" }
+            ]
+        }
+    },
+    "required": [ "id", "abundance", "phases", "colors" ],
+    "additionalProperties": false,
+
+    "$defs": {
+        "Color": {
+            "type": "object",
+            "properties": {
+                "r": { "type": "number", "minimum": 0, "maximum": 1 },
+                "g": { "type": "number", "minimum": 0, "maximum": 1 },
+                "b": { "type": "number", "minimum": 0, "maximum": 1 },
+                "a": { "type": "number", "minimum": 0, "maximum": 1 }
+            },
+            "required": [ "r", "g", "b" ],
+            "editorHints": {
+                "kinds": [ "color" ]
+            }
+        },
+        "TriplePointPhaseDiagram": {
+            "type": "object",
+            "properties": {
+                "type": { "const": "triple" },
+                "triple": { "$ref": "#/$defs/PhaseDiagramPoint" },
+                "subl": { "$ref": "#/$defs/PhaseDiagramLine" },
+                "melt": { "$ref": "#/$defs/PhaseDiagramLine" },
+                "boil": { "$ref": "#/$defs/PhaseDiagramLine" }
+            },
+            "required": [ "type", "triple", "subl", "melt", "boil" ],
+            "editorHints": {
+                "component": "expansion.phys.phased"
+            }
+        },
+        "HePhaseDiagram": {
+            "type": "object",
+            "properties": {
+                "type": { "const": "he" },
+                "melt": { "$ref": "#/$defs/PhaseDiagramLine" },
+                "boil": { "$ref": "#/$defs/PhaseDiagramLine" }
+            },
+            "required": [ "type", "melt", "boil" ],
+            "editorHints": {
+                "component": "expansion.phys.phased"
+            }
+        },
+        "MeltPhaseDiagram": {
+            "type": "object",
+            "properties": {
+                "type": { "const": "melt" },
+                "melt": { "$ref": "#/$defs/PhaseDiagramLine" }
+            },
+            "required": [ "type", "melt" ],
+            "editorHints": {
+                "component": "expansion.phys.phased"
+            }
+        },
+        "PhaseDiagramLine": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/PhaseDiagramPoint" },
+            "minItems": 1
+        },
+        "PhaseDiagramPoint": {
+            "type": "object",
+            "properties": {
+                "P": { "type": "number", "minimum": 0 },
+                "T": { "type": "number", "minimum": 0 }
+            },
+            "required": [ "T", "P" ]
+        }
+    }
+}

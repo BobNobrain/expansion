@@ -8,6 +8,7 @@ import (
 	"srv/internal/world"
 	"srv/internal/world/worldgen"
 	"sync"
+	"time"
 )
 
 type SystemSharedState struct {
@@ -17,6 +18,10 @@ type SystemSharedState struct {
 	coords   world.GalacticCoords
 
 	isExplored bool
+	// TODO: this is probably a temporary solution,
+	// need to move this into a table or smth
+	exploredAt time.Time
+	exploredBy domain.UserID
 
 	orbits   map[world.CelestialID]world.OrbitData
 	stars    []*world.Star
@@ -32,6 +37,7 @@ func NewSystemSharedState(gen *worldgen.WorldGen, id world.StarSystemID) *System
 		lock:     &sync.RWMutex{},
 		systemID: id,
 
+		gen:    gen,
 		orbits: make(map[world.CelestialID]world.OrbitData),
 	}
 
@@ -69,7 +75,11 @@ func (system *SystemSharedState) SaveState() (*domain.OpaqueBlob, common.Error) 
 	w := binpack.NewWriter(buf)
 
 	binpack.Write(w, system.coords)
+
 	binpack.Write(w, system.isExplored)
+	binpack.Write(w, system.exploredAt.UnixMilli())
+	binpack.Write(w, system.exploredBy)
+
 	binpack.Write(w, system.orbits)
 	binpack.Write(w, system.stars)
 
@@ -90,8 +100,8 @@ func (state *SystemSharedState) GetNPlanets() int {
 	state.lock.RLock()
 	defer state.lock.RUnlock()
 
-	// TODO
-	return 0
+	// TODO: get only planets count, not moons
+	return len(state.surfaces)
 }
 
 // GetNStars implements world.StarSystem.
@@ -124,7 +134,8 @@ func (state *SystemSharedState) GetSurfaces() []world.CelestialSurface {
 	state.lock.RLock()
 	defer state.lock.RUnlock()
 
-	panic("unimplemented")
+	// TODO
+	return make([]world.CelestialSurface, 0)
 }
 
 // IsExplored implements world.StarSystem.
@@ -133,6 +144,18 @@ func (state *SystemSharedState) IsExplored() bool {
 	defer state.lock.RUnlock()
 
 	return state.isExplored
+}
+func (state *SystemSharedState) GetExploredBy() domain.UserID {
+	state.lock.RLock()
+	defer state.lock.RUnlock()
+
+	return state.exploredBy
+}
+func (state *SystemSharedState) GetExploredAt() time.Time {
+	state.lock.RLock()
+	defer state.lock.RUnlock()
+
+	return state.exploredAt
 }
 
 // all methods below require a write lock, because they modify the state
@@ -144,7 +167,11 @@ func (system *SystemSharedState) LoadState(from *domain.OpaqueBlob) common.Error
 	r := binpack.NewReaderFromBytes(from.Data)
 
 	system.coords = binpack.Read[world.GalacticCoords](r)
+
 	system.isExplored = binpack.Read[bool](r)
+	system.exploredAt = time.UnixMilli(binpack.Read[int64](r))
+	system.exploredBy = binpack.Read[domain.UserID](r)
+
 	system.orbits = binpack.Read[map[world.CelestialID]world.OrbitData](r)
 
 	stars := binpack.Read[[]world.Star](r)
@@ -178,7 +205,7 @@ func (system *SystemSharedState) FillFromGeneratedData(data *worldgen.GeneratedS
 	system.orbits = data.Orbits
 }
 
-func (system *SystemSharedState) Explore() {
+func (system *SystemSharedState) Explore(explorer domain.UserID) {
 	system.lock.Lock()
 	defer system.lock.Unlock()
 
@@ -187,6 +214,9 @@ func (system *SystemSharedState) Explore() {
 	}
 
 	system.isExplored = true
+	system.exploredBy = explorer
+	system.exploredAt = time.Now()
+
 	data := system.gen.Explore(worldgen.ExploreOptions{
 		SystemID: system.systemID,
 		Stars:    system.stars,

@@ -3,6 +3,7 @@ package world
 import (
 	"srv/internal/utils/common"
 	"srv/internal/utils/geom"
+	"srv/internal/utils/phys"
 )
 
 type SurfaceCellID int
@@ -25,10 +26,15 @@ type Surface interface {
 type SurfaceCell interface {
 	GetID() SurfaceCellID
 	GetLocalCoords() geom.Vec3
-	GetBiome() Biome
+	// GetBiome() Biome
 }
 
 type SurfaceConnection interface {
 	GetID() SurfaceConnectionID
 	GetCells() (SurfaceCellID, SurfaceCellID)
+}
+
+type SurfaceConditions struct {
+	Pressure phys.Pressure
+	AvgTemp  phys.Temperature
 }

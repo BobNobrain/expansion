@@ -36,7 +36,7 @@ func (m *Monolith) Start() error {
 	auth := auth.NewAuthenticator(userRepo)
 
 	missionControl := dispatcher.NewDispatcher()
-	comms := ws.NewWebSocketComms(missionControl, auth)
+	comms := ws.NewWebSocketComms(missionControl, auth, userRepo)
 	missionControl.Start(comms)
 
 	// chatRepo := chats.NewChatRepo(comms, missionControl)

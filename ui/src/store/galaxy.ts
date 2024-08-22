@@ -1,19 +1,21 @@
 import { createQuery } from '@tanstack/solid-query';
 import { GalacticGrid, GalacticLabelType, type GalacticOverview } from '../domain/GalacticOverview';
-import { type StarSystem } from '../domain/StarSystem';
+import { type StarSystemContent, type StarSystemOverview } from '../domain/StarSystem';
 import type * as api from '../lib/net/types.generated';
 import { ws } from '../lib/net/ws';
 import { GraphicsQuality, useDeviceSettings } from './settings';
+import { type Star } from '../domain/Star';
 
 const SCOPE_NAME = 'galaxy';
 
 enum GalaxyContentCommands {
     GetSectorContent = 'getSectorContent',
     GetOverview = 'getOverview',
+    GetSystemContent = 'getSystemContent',
 }
 
 export type SectorContent = {
-    systems: StarSystem[];
+    systems: StarSystemOverview[];
     total: number;
 };
 
@@ -22,7 +24,6 @@ export function useSectorContent(sectorId: () => string | null) {
         const sid = sectorId();
         return {
             queryKey: ['galaxy', 'sector-content', sid],
-            staleTime: Infinity,
             enabled: Boolean(sid),
             queryFn: async (): Promise<SectorContent> => {
                 const { systems, total } = await ws.sendCommand<
@@ -30,8 +31,8 @@ export function useSectorContent(sectorId: () => string | null) {
                     api.WorldGetSectorContentPayload
                 >(SCOPE_NAME, GalaxyContentCommands.GetSectorContent, { sectorId: sid!, limit: 0, q: '', offset: 0 });
 
-                const transformed = systems.map((data): StarSystem => {
-                    const result: StarSystem = {
+                const transformed = systems.map((data): StarSystemOverview => {
+                    const result: StarSystemOverview = {
                         id: data.systemId,
                         coords: {
                             r: data.gR,
@@ -41,21 +42,12 @@ export function useSectorContent(sectorId: () => string | null) {
                         stars: [],
                         nPlanets: data.nPlanets,
                         nAsteroids: data.nAsteroids,
+                        isExplored: data.isExplored,
+                        exploredAt: new Date(data.exploredAt),
+                        exploredBy: data.exploredBy,
                     };
                     for (const sData of data.stars) {
-                        result.stars.push({
-                            id: sData.starId,
-                            tempK: sData.tempK,
-                            ageBillionYears: sData.ageByrs,
-                            luminositySuns: sData.lumSuns,
-                            massSuns: sData.massSuns,
-                            radiusAu: sData.radiusAu,
-                            coords: {
-                                r: data.gR,
-                                theta: data.gTheta,
-                                h: data.gH,
-                            },
-                        });
+                        result.stars.push(decodeStar(sData));
                     }
                     return result;
                 });
@@ -139,4 +131,63 @@ export function useGalaxyOverview() {
             };
         },
     }));
+}
+
+export function useSystemContent(systemId: () => string) {
+    return createQuery(() => {
+        return {
+            queryKey: ['systems', systemId()],
+            enabled: Boolean(systemId()),
+            staleTime: 0,
+            queryFn: async () => {
+                const { orbits, stars, surfaces } = await ws.sendCommand<
+                    api.WorldGetSystemContentResult,
+                    api.WorldGetSystemContentPayload
+                >(SCOPE_NAME, GalaxyContentCommands.GetSystemContent, { systemId: systemId() });
+
+                const result: StarSystemContent = {
+                    id: systemId(),
+                    orbits: {},
+                    stars: stars.map(decodeStar),
+                    bodies: {},
+                };
+
+                for (const orbit of orbits) {
+                    result.orbits[orbit.bodyId] = {
+                        aroundId: orbit.around || null,
+                        bodyId: orbit.bodyId,
+                        semiMajorAu: orbit.semiMajorAu,
+                        eccentricity: orbit.ecc,
+                        inclination: orbit.incl,
+                        rotation: orbit.rot,
+                        timeAtPeriapsis: new Date(orbit.t0 * 1000),
+                    };
+                }
+
+                console.log(surfaces);
+
+                for (const body of surfaces) {
+                    result.bodies[body.surfaceId] = {
+                        id: body.surfaceId,
+                        atmosphereColor: '',
+                        massSuns: body.massSuns,
+                        radiusKm: 0,
+                    };
+                }
+
+                return result;
+            },
+        };
+    });
+}
+
+function decodeStar(data: api.WorldGetSectorContentResultStar): Star {
+    return {
+        id: data.starId,
+        tempK: data.tempK,
+        ageBillionYears: data.ageByrs,
+        luminositySuns: data.lumSuns,
+        massSuns: data.massSuns,
+        radiusAu: data.radiusAu,
+    };
 }
