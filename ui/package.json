@@ -31,6 +31,7 @@
     "dependencies": {
         "@solidjs/router": "^0.12.4",
         "@tanstack/solid-query": "^5.25.0",
+        "decimal.js": "^10.4.3",
         "lodash": "^4.17.21",
         "solid-js": "^1.8.15",
         "three": "^0.158.0"

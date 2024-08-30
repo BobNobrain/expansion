@@ -1,5 +1,6 @@
 import { type Component } from 'solid-js';
 import styles from './TextInput.module.css';
+import { registerInFormContext } from '../Form';
 
 export type TextInputProps = {
     value: string;
@@ -8,14 +9,19 @@ export type TextInputProps = {
 
     readonly?: boolean;
     password?: boolean;
-
     placeholder?: string;
+
+    formKey?: string;
 };
 
 export const TextInput: Component<TextInputProps> = (props) => {
     const updateValue = (ev: Event) => {
         props.onUpdate((ev.target as HTMLInputElement).value, ev);
     };
+
+    if (props.formKey) {
+        registerInFormContext(props, {});
+    }
 
     return (
         <div class={styles.wrapper}>

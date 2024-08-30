@@ -1,0 +1,62 @@
+.wrapper {
+    display: flex;
+    position: relative;
+}
+
+.input {
+    flex: 1 1 auto;
+
+    appearance: textfield;
+    border: 0 none;
+    background: none;
+    outline: none;
+    box-shadow: none;
+
+    color: var(--color-text);
+
+    padding: 2px 8px;
+    width: 100%;
+    max-width: 120px;
+
+    border-top: 2px solid var(--color-secondary);
+    border-bottom: 2px solid var(--color-secondary);
+    background-color: var(--color-background-dark);
+
+    text-align: right;
+}
+.input:focus {
+    color: var(--color-text-selected);
+    background-color: var(--color-background-light);
+    border-color: var(--color-primary);
+}
+
+.error .input {
+    color: var(--color-error);
+    border-color: var(--color-error);
+}
+
+.success .input {
+    background-color: var(--color-success-300);
+    color: var(--color-success-700);
+}
+
+.hint {
+    font-size: 0.8em;
+    position: absolute;
+    bottom: -14px;
+    left: 24px;
+    z-index: 10;
+    pointer-events: none;
+    padding: 1px 8px;
+}
+
+.errorMessage {
+    color: var(--color-error);
+    background-color: var(--color-error-100);
+}
+
+/* .input::-webkit-outer-spin-button,
+.input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+} */

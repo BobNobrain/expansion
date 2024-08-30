@@ -10,8 +10,12 @@ export type InformativeFields = {
 };
 
 export type EditorHints = {
-    component?: string;
-    kinds?: string[];
+    kinds?: (
+        | string
+        | {
+              kind: string;
+          }
+    )[];
 };
 
 export type ObjectSchema = {
@@ -30,7 +34,7 @@ export type ArraySchema = {
 
 export type NumberSchema = {
     type: 'number' | 'integer';
-    minumum?: number;
+    minimum?: number;
     maximum?: number;
     exclusiveMinumum?: number;
     exclusiveMaximum?: number;

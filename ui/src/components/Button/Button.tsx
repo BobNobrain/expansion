@@ -14,6 +14,7 @@ export type ButtonProps = ParentProps & {
     style?: ButtonStyle;
     size?: ButtonSize;
     square?: boolean;
+    compact?: boolean;
 
     leftWing?: ButtonWing;
     rightWing?: ButtonWing;
@@ -60,6 +61,7 @@ export const Button: Component<ButtonProps> = (props) => {
             [common[`${leftWing}`]]: true,
             [common[`${rightWing}`]]: true,
             [common.square]: props.square,
+            [common.compact]: props.compact,
             [common.disabled]: props.disabled,
             [common.loading]: props.loading && !props.disabled,
         };

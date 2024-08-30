@@ -1,20 +1,32 @@
 import { type Component } from 'solid-js';
-import { type InformativeFields, type JSONPath, type SchemaFile } from '../../../lib/jsonschema';
+import type { Schema, InformativeFields, JSONPath, SchemaFile } from '../../../lib/jsonschema';
 
-export type EditorProps = {
-    // value: unknown;
-    schemaFile: SchemaFile;
-    path: JSONPath;
-    getLens: <T>(path: JSONPath) => [() => T, (x: T) => void];
+export type EditorPlugin<S = Schema> = {
+    test: (schema: Schema) => boolean;
+    component: Component<EditorComponentProps<S>>;
 };
 
-export type EditorComponentProps<Schema> = {
-    // value: Value;
-    getLens: <T>(path: JSONPath) => [() => T, (x: T) => void];
-    schema: Schema & InformativeFields;
-    path: JSONPath;
+export type EditorProps = {
+    initialValue: unknown;
     schemaFile: SchemaFile;
+    path: JSONPath;
+    key: string;
+    controller?: (ctrl: EditorController | null) => void;
+};
+
+export type EditorController = {
+    preview: () => string;
+};
+
+export type EditorComponentProps<S> = {
+    schema: S & InformativeFields;
+    path: JSONPath;
+    key: string;
+    schemaFile: SchemaFile;
+    initialValue: unknown;
     Editor: Component<EditorProps>;
+
+    controller?: (ctrl: EditorController | null) => void;
 };
 
 export type SchemaType =

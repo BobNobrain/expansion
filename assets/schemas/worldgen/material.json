@@ -70,6 +70,16 @@
                 "kinds": [ "color" ]
             }
         },
+        "PhaseDiagram": {
+            "oneOf": [
+                { "$ref": "#/$defs/TriplePointPhaseDiagram" },
+                { "$ref": "#/$defs/HePhaseDiagram" },
+                { "$ref": "#/$defs/MeltPhaseDiagram" }
+            ],
+            "editorHints": {
+                "kinds": [ "expansion.phased" ]
+            }
+        },
         "TriplePointPhaseDiagram": {
             "type": "object",
             "properties": {
@@ -79,10 +89,7 @@
                 "melt": { "$ref": "#/$defs/PhaseDiagramLine" },
                 "boil": { "$ref": "#/$defs/PhaseDiagramLine" }
             },
-            "required": [ "type", "triple", "subl", "melt", "boil" ],
-            "editorHints": {
-                "component": "expansion.phys.phased"
-            }
+            "required": [ "type", "triple", "subl", "melt", "boil" ]
         },
         "HePhaseDiagram": {
             "type": "object",
@@ -91,10 +98,7 @@
                 "melt": { "$ref": "#/$defs/PhaseDiagramLine" },
                 "boil": { "$ref": "#/$defs/PhaseDiagramLine" }
             },
-            "required": [ "type", "melt", "boil" ],
-            "editorHints": {
-                "component": "expansion.phys.phased"
-            }
+            "required": [ "type", "melt", "boil" ]
         },
         "MeltPhaseDiagram": {
             "type": "object",
@@ -102,10 +106,7 @@
                 "type": { "const": "melt" },
                 "melt": { "$ref": "#/$defs/PhaseDiagramLine" }
             },
-            "required": [ "type", "melt" ],
-            "editorHints": {
-                "component": "expansion.phys.phased"
-            }
+            "required": [ "type", "melt" ]
         },
         "PhaseDiagramLine": {
             "type": "array",

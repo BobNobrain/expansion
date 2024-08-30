@@ -19,6 +19,9 @@
         var(--button-wing-bottom-left, 0px) 100%
     );
 }
+.button.compact {
+    padding: 0 calc(var(--button-half-size) / 2);
+}
 
 .downLeftWing {
     --button-wing-top-left: var(--button-size);
@@ -35,6 +38,15 @@
 .upRightWing {
     --button-wing-bottom-right: var(--button-size);
     padding-right: calc(var(--button-size) + var(--button-half-size));
+}
+
+.downRightWing.compact,
+.upRightWing.compact {
+    padding-right: calc(var(--button-size));
+}
+.upLeftWing.compact,
+.downLeftWing.compact {
+    padding-left: calc(var(--button-size));
 }
 
 .downRightWing + .upLeftWing,

@@ -1,0 +1,24 @@
+.wrapper {
+    display: flex;
+    align-items: center;
+}
+
+.icon {
+    display: block;
+    background-color: var(--color-input-value);
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.label {
+    padding: 4px 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.input {
+    display: none;
+}

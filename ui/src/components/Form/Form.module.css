@@ -1,8 +1,5 @@
 .form {
-    border-right: 1px solid var(--color-primary);
-
     width: 100%;
-
     position: relative;
 }
 
