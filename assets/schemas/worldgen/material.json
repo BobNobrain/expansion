@@ -46,11 +46,7 @@
         },
         "phases": {
             "description": "Phase diagram of the material. Describes its behaviour with respect to temperature and pressure",
-            "oneOf": [
-                { "$ref": "#/$defs/TriplePointPhaseDiagram" },
-                { "$ref": "#/$defs/HePhaseDiagram" },
-                { "$ref": "#/$defs/MeltPhaseDiagram" }
-            ]
+            "$ref": "#/$defs/PhaseDiagram"
         }
     },
     "required": [ "id", "abundance", "phases", "colors" ],
