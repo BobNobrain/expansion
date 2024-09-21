@@ -1,0 +1,9 @@
+.input-line {
+    display: flex;
+    margin-bottom: 8px;
+}
+
+.input-line > * {
+    flex: 0 0 250px;
+    margin-right: 16px;
+}

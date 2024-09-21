@@ -16,10 +16,12 @@ editor-api:
 watch-editor:
 	gow -r=false run cmd/editor-api/editor-api.go
 
-.PHONY: setup
-setup: api-types assetgen galaxy-texture
+.PHONY: setup install
+setup: install api-types assetgen galaxy-texture
+install:
 	go install github.com/gzuidhof/tygo@latest
 	go install github.com/mitranim/gow@latest
+
 
 .PHONY: api-types
 api-types:

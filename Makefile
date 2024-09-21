@@ -4,9 +4,9 @@ CAESAR = node ./tools/caesar.js
 # generated files
 #
 .PHONY: setup api-types assetgen
-setup:
+setup: dev-db
 	@echo "Setting up the project for local development"
-	cd server && make setup && make setup-dev-db
+	cd server && make setup setup-dev-db
 	cd ../ui && npm i && npm run build:editor
 	cd ../tools && npm i
 
@@ -56,6 +56,8 @@ dev-db:
 		-e POSTGRES_DB=expansion \
 		-p 5012:5432 \
 		-d postgres:16.2-alpine
+
+	DB_CONTAINER=expansion-dev-db DB_USER=devsrv ./tools/db/wait.sh
 
 dev-db-schema:
 	cd server && ARGS='-action=schema' make dev-db

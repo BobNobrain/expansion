@@ -86,6 +86,12 @@ html, body {
     font-variation-settings: "wght" 400;
 }
 
+input, button {
+    font-family: Raleway;
+    font-weight: 400;
+    font-variation-settings: "wght" 400;
+}
+
 * {
     box-sizing: border-box;
 }

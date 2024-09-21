@@ -1,26 +1,16 @@
 import { type Component } from 'solid-js';
 import { type OneOfSchema } from '../../../../../lib/jsonschema';
 import { type EditorPlugin, type EditorComponentProps } from '../../types';
+import { PhaseDiagramInput } from './PhaseDiagramInput';
 import { type PhaseDiagramData } from './types';
-import { PhaseDiagramCanvas, type PhaseDiagramGraph } from './PhaseDiagramCanvas';
+import { usePhaseDiagramState } from './state';
 
 export type PhaseDiagramEditorProps = EditorComponentProps<OneOfSchema>;
 
 export const PhaseDiagramEditor: Component<PhaseDiagramEditorProps> = (props) => {
-    const data = props.initialValue as PhaseDiagramData;
+    const { state, updatePoint } = usePhaseDiagramState(props.initialValue as PhaseDiagramData | null);
 
-    const lines: PhaseDiagramGraph[] = [];
-    if ('melt' in data) {
-        lines.push({ points: data.melt, color: '#2266ff' });
-    }
-    if ('boil' in data) {
-        lines.push({ points: data.boil, color: '#aa5511' });
-    }
-    if ('subl' in data) {
-        lines.push({ points: data.subl, color: '#559922' });
-    }
-
-    return <PhaseDiagramCanvas lines={lines} width={600} height={450} maxTempKelvin={500} maxPressureOrder={8} />;
+    return <PhaseDiagramInput state={state} onPointUpdate={updatePoint} />;
 };
 
 export const phaseDiagramEditorPlugin: EditorPlugin<OneOfSchema> = {
