@@ -1,8 +1,9 @@
 import { Show, type Component } from 'solid-js';
 import styles from './EditorPanel.module.css';
 import { Button } from '../../../components/Button/Button';
-import { useFileContent } from '../../../store/editor';
+import { FormContext, type FormFieldController } from '../../../components/Form';
 import { type SchemaFile, type ObjectWithSchema } from '../../../lib/jsonschema/types';
+import { useFileContent, useFileSaver } from '../../../store/editor';
 import { FileEditor } from '../FileEditor/FileEditor';
 
 export type EditorPanelProps = {
@@ -44,11 +45,60 @@ export const EditorPanel: Component<EditorPanelProps> = (props) => {
         return '';
     };
 
+    let rootController: FormFieldController | null = null;
+    const formCtx: FormContext = {
+        registerControl(key, field) {
+            if (key !== '') {
+                console.log('invalid root controller registration attempt', key, field);
+                return { initialValue: undefined };
+            }
+
+            rootController = field;
+            return {
+                initialValue: fileContent.data,
+            };
+        },
+        unregisterControl(key) {
+            if (key !== '') {
+                console.log('invalid root controller deregistration attempt', key);
+                return;
+            }
+            rootController = null;
+        },
+    };
+
+    const saveMutation = useFileSaver(() => props.activePath!);
+
+    const onSave = () => {
+        if (!rootController) {
+            return;
+        }
+
+        if (!rootController.validate()) {
+            return;
+        }
+
+        const data = rootController.retrieveValue();
+        console.log(data);
+        const json = JSON.stringify(data, null, 4);
+        saveMutation.mutate(json, {
+            onError: (error) => {
+                console.error('could not save', error);
+            },
+        });
+    };
+
     return (
         <div class={styles.panel}>
             <div class={styles.bar}>
                 <div class={styles.title}>{props.activePath || '–'}</div>
-                <Button rightWing="none" color="primary" disabled={props.activePath === null}>
+                <Button
+                    rightWing="none"
+                    color="primary"
+                    disabled={props.activePath === null}
+                    onClick={onSave}
+                    loading={saveMutation.isPending}
+                >
                     Save
                 </Button>
             </div>
@@ -57,7 +107,9 @@ export const EditorPanel: Component<EditorPanelProps> = (props) => {
                     when={fileContent.data && schemaContent.data}
                     fallback={<div class={styles.emptyMessage}>{statusMessage()}</div>}
                 >
-                    <FileEditor data={fileContent.data} schema={schemaContent.data as SchemaFile} />
+                    <FormContext.Provider value={formCtx}>
+                        <FileEditor data={fileContent.data} schema={schemaContent.data as SchemaFile} />
+                    </FormContext.Provider>
                 </Show>
             </div>
         </div>

@@ -7,10 +7,10 @@ import { type EditorComponentProps, type EditorPlugin } from '../../types';
 type ColorEditorProps = EditorComponentProps<ObjectSchema>;
 
 const ColorEditor: Component<ColorEditorProps> = (props) => {
-    const [value, setValue] = createSignal(Color.toHexString(props.initialValue as RGBColor));
+    const [value, setValue] = createSignal(props.initialValue as RGBColor);
 
     props.controller?.({
-        preview: () => untrack(value),
+        preview: () => Color.toHexString(untrack(value)),
     });
 
     return (
@@ -18,7 +18,7 @@ const ColorEditor: Component<ColorEditorProps> = (props) => {
             value={value()}
             onUpdate={setValue}
             alpha={props.schema.properties.a ? 'optional' : 'forbidden'}
-            formKey={props.path[props.path.length - 1] as string}
+            formKey={props.key}
         />
     );
 };

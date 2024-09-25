@@ -1,7 +1,7 @@
 import { For, Show, createSignal, type Component } from 'solid-js';
 import { Button } from '../../../components/Button/Button';
 import type { FileTreeEntry } from '../../../lib/net/editorapi.generated';
-import { useEditorTree } from '../../../store/editor';
+import { useEditorTree, useFileDuplicator } from '../../../store/editor';
 import styles from './EditorTree.module.css';
 import { IconCross } from '../../../icons/cross';
 import { IconText } from '../../../icons/text';
@@ -29,6 +29,22 @@ const TreeDirectory: Component<TreeEntryProps> = (props) => {
         props.onOpen(fullPath());
     };
 
+    const duper = useFileDuplicator(fullPath);
+
+    const onDuplicate = () => {
+        const newName = prompt('New name:', props.entry.name);
+        if (!newName || newName === props.entry.name) {
+            return;
+        }
+
+        const newPath = [props.parentPath, newName].filter(Boolean).join('/');
+        duper.mutate(newPath, {
+            onError: (error) => {
+                console.error(error);
+            },
+        });
+    };
+
     return (
         <div class={styles.item}>
             <div class={styles.row} classList={{ [styles.active]: isActive() }} onClick={onClick}>
@@ -45,7 +61,7 @@ const TreeDirectory: Component<TreeEntryProps> = (props) => {
                         <IconText size={12} />
                     </Button>
                     <Show when={!props.entry.isDir}>
-                        <Button size="s" style="text" square>
+                        <Button size="s" style="text" square onClick={onDuplicate}>
                             <IconCopy size={12} />
                         </Button>
                     </Show>

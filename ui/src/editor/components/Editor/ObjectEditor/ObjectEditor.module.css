@@ -2,6 +2,11 @@
     /* ... */
 }
 
+.field-input-wrapper {
+    flex: 1 1 auto;
+    display: flex;
+}
+
 .row {
     display: flex;
     align-items: stretch;

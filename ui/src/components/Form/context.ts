@@ -15,7 +15,7 @@ export const registerInFormContext = (
     },
     field: Partial<FormFieldController>,
 ): FormFieldRegistrationData => {
-    if (!props.formKey) {
+    if (props.formKey === undefined) {
         return { initialValue: undefined };
     }
 

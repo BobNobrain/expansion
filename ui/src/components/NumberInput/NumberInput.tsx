@@ -11,6 +11,7 @@ export type NumberInputProps = {
 
     placeholder?: string | number;
     readonly?: boolean;
+    disabled?: boolean;
     hint?: string;
 
     min?: number;
@@ -77,6 +78,10 @@ export const NumberInput: Component<NumberInputProps> = (props) => {
     });
 
     const onTextUpdated = (ev: InputEvent) => {
+        if (props.disabled) {
+            return;
+        }
+
         const newText = (ev.target as HTMLInputElement).value;
         setText(newText);
 
@@ -88,6 +93,10 @@ export const NumberInput: Component<NumberInputProps> = (props) => {
     };
 
     const onStep = (step: 1 | -1) => (ev: MouseEvent) => {
+        if (props.disabled) {
+            return;
+        }
+
         let initialValue = props.value;
         if (initialValue === undefined) {
             initialValue = step > 0 ? props.min : props.max;
@@ -140,7 +149,9 @@ export const NumberInput: Component<NumberInputProps> = (props) => {
                 rightWing="none"
                 leftWing="none"
                 square
-                disabled={props.value === undefined ? false : props.value <= (props.min ?? -Infinity)}
+                disabled={
+                    props.disabled || (props.value === undefined ? false : props.value <= (props.min ?? -Infinity))
+                }
                 onClick={decr}
             >
                 -
@@ -151,6 +162,7 @@ export const NumberInput: Component<NumberInputProps> = (props) => {
                 onInput={onTextUpdated}
                 onBlur={onBlur}
                 readOnly={props.readonly}
+                disabled={props.disabled}
                 type="text"
                 lang="en-US"
                 inputMode="numeric"
@@ -174,7 +186,9 @@ export const NumberInput: Component<NumberInputProps> = (props) => {
             <Button
                 leftWing="none"
                 compact
-                disabled={props.value === undefined ? false : props.value >= (props.max ?? Infinity)}
+                disabled={
+                    props.disabled || (props.value === undefined ? false : props.value >= (props.max ?? Infinity))
+                }
                 onClick={incr}
             >
                 +

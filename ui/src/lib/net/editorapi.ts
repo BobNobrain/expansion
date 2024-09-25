@@ -10,12 +10,32 @@ export class EditorAPI {
         return this.fetch<unknown>('/api/file', { query: { path } });
     }
 
+    saveFile(path: string, content: string) {
+        return this.fetch('/api/file', {
+            method: 'PUT',
+            query: { path },
+            body: content,
+            noParse: true,
+        });
+    }
+
+    async copyFile(oldPath: string, newPath: string) {
+        const content = await this.fetch<unknown>('/api/file', { query: { path: oldPath }, noParse: true });
+        return this.fetch('/api/file', {
+            method: 'POST',
+            query: { path: newPath },
+            body: content,
+            noParse: true,
+        });
+    }
+
     private async fetch<T>(
         path: string,
         opts?: {
             method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
             query?: Record<string, string>;
             body?: unknown;
+            noParse?: boolean;
         },
     ): Promise<T> {
         const { method = 'GET', query = {}, body } = opts || {};
@@ -27,10 +47,10 @@ export class EditorAPI {
 
         const resp = await fetch(url, {
             method,
-            body: body ? JSON.stringify(body) : undefined,
+            body: body ? (typeof body === 'string' ? body : JSON.stringify(body)) : undefined,
         });
 
-        const responseBody = (await resp.json()) as T | ApiError;
+        const responseBody = (await (opts?.noParse ? resp.text() : resp.json())) as T | ApiError;
 
         if (resp.ok) {
             return responseBody as T;

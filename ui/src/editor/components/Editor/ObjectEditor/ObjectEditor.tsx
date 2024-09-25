@@ -1,9 +1,10 @@
-import { type Component, For, createMemo, createSignal, onCleanup } from 'solid-js';
+import { type Component, For, Show, createMemo, createSignal, onCleanup } from 'solid-js';
 import { type EditorController, type EditorComponentProps } from '../types';
 import { getSchemaForPath, type Schema, type ObjectSchema } from '../../../../lib/jsonschema';
 import styles from './ObjectEditor.module.css';
 import { getSchemaType, isSimpleEditor } from '../utils';
 import { Form, FormField } from '../../../../components/Form';
+import { Button } from '../../../../components/Button/Button';
 
 export type ObjectEditorProps = EditorComponentProps<ObjectSchema>;
 
@@ -11,6 +12,8 @@ type RowProps = {
     schema: Schema;
     key: string;
     innerController: (key: string, c: EditorController | null) => void;
+    isOptional: boolean;
+    disabled?: boolean;
 };
 
 const ObjectEditorRow: Component<Omit<ObjectEditorProps, 'schema'> & RowProps> = (props) => {
@@ -20,10 +23,14 @@ const ObjectEditorRow: Component<Omit<ObjectEditorProps, 'schema'> & RowProps> =
     });
 
     const [collapsedPreview, setCollapsedPreview] = createSignal('');
+
+    const [isDefined, setIsDefined] = createSignal(props.isOptional ? props.initialValue !== undefined : true);
+    const setDefined = () => setIsDefined(true);
+    const setUndefined = () => setIsDefined(false);
+
     let controller: EditorController | null = null;
     const setController = (c: EditorController | null) => {
         controller = c;
-        props.innerController(props.key, c);
     };
 
     const updateCollapsedPreview = (isCollapsed: boolean) => {
@@ -44,12 +51,41 @@ const ObjectEditorRow: Component<Omit<ObjectEditorProps, 'schema'> & RowProps> =
             collapsedPreview={collapsedPreview()}
             onToggleCollapsed={updateCollapsedPreview}
         >
-            <props.Editor
-                schemaFile={props.schemaFile}
-                path={props.path}
-                initialValue={props.initialValue}
-                controller={setController}
-            />
+            <Show
+                when={props.isOptional}
+                fallback={
+                    <props.Editor
+                        schemaFile={props.schemaFile}
+                        path={props.path}
+                        initialValue={props.initialValue}
+                        controller={setController}
+                        key={props.key}
+                    />
+                }
+            >
+                <Show
+                    when={isDefined()}
+                    fallback={
+                        <Button leftWing="none" rightWing="none" color="accent" onClick={setDefined}>
+                            Add value
+                        </Button>
+                    }
+                >
+                    <div class={styles.fieldInputWrapper}>
+                        <Button leftWing="none" rightWing="none" color="error" onClick={setUndefined}>
+                            Remove value
+                        </Button>
+                        <props.Editor
+                            schemaFile={props.schemaFile}
+                            path={props.path}
+                            initialValue={props.initialValue}
+                            controller={setController}
+                            key={props.key}
+                            disabled={!isDefined()}
+                        />
+                    </div>
+                </Show>
+            </Show>
         </FormField>
     );
 };
@@ -80,11 +116,12 @@ export const ObjectEditor: Component<ObjectEditorProps> = (props) => {
 
     return (
         <div class={styles.wrapper}>
-            <Form formKey={props.path[props.path.length - 1] as string | undefined}>
+            <Form formKey={props.key}>
                 <For each={Object.keys(props.schema.properties)}>
                     {(key) => {
                         const path = [...props.path, key];
                         const propSchema = getSchemaForPath(props.schemaFile, path);
+                        const isRequired = props.schema.required ? props.schema.required.includes(key) : false;
 
                         return (
                             <ObjectEditorRow
@@ -95,6 +132,8 @@ export const ObjectEditor: Component<ObjectEditorProps> = (props) => {
                                 schemaFile={props.schemaFile}
                                 initialValue={(props.initialValue as Record<string, unknown>)[key]}
                                 innerController={setController}
+                                isOptional={!isRequired && !key.startsWith('$')}
+                                disabled={props.disabled}
                             />
                         );
                     }}

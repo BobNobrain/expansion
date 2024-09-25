@@ -41,6 +41,7 @@ func (e *editorFileTreeAccessor) Reload() error {
 	defer e.lock.Unlock()
 
 	startTime := time.Now()
+	e.tree.Root.Children = make([]editorapi.FileTreeEntry, 0)
 	total, err := recursiveLoad(config.Assets().AssetDir, &e.tree.Root)
 	if err != nil {
 		return err

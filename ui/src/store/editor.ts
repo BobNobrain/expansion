@@ -1,4 +1,4 @@
-import { createQuery, useQueryClient } from '@tanstack/solid-query';
+import { createMutation, createQuery, useQueryClient } from '@tanstack/solid-query';
 import { EditorAPI } from '../lib/net/editorapi';
 
 const api = new EditorAPI();
@@ -23,6 +23,38 @@ export function useFileContent(filepath: () => string | null) {
             queryKey: ['editor', 'file', path],
             enabled: Boolean(path),
             queryFn: () => api.getFile(path || ''),
+            staleTime: Infinity,
+        };
+    });
+}
+
+export function useFileSaver(filepath: () => string) {
+    const client = useQueryClient();
+
+    return createMutation(() => {
+        const path = filepath();
+        return {
+            mutationKey: ['editor', 'file', path, 'save'],
+            mutationFn: (content: string) => api.saveFile(path, content),
+            onSuccess: () => {
+                void client.invalidateQueries({ queryKey: ['editor', 'tree'] });
+                void client.invalidateQueries({ queryKey: ['editor', 'file', path] });
+            },
+        };
+    });
+}
+
+export function useFileDuplicator(filepath: () => string) {
+    const client = useQueryClient();
+
+    return createMutation(() => {
+        const oldPath = filepath();
+        return {
+            mutationKey: ['editor', 'file', oldPath, 'copy'],
+            mutationFn: (newPath: string) => api.copyFile(oldPath, newPath),
+            onSuccess: () => {
+                void client.invalidateQueries({ queryKey: ['editor', 'tree'] });
+            },
         };
     });
 }

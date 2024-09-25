@@ -12,6 +12,7 @@ export type EditorProps = {
     path: JSONPath;
     key: string;
     controller?: (ctrl: EditorController | null) => void;
+    disabled?: boolean;
 };
 
 export type EditorController = {
@@ -24,6 +25,7 @@ export type EditorComponentProps<S> = {
     key: string;
     schemaFile: SchemaFile;
     initialValue: unknown;
+    disabled?: boolean;
     Editor: Component<EditorProps>;
 
     controller?: (ctrl: EditorController | null) => void;

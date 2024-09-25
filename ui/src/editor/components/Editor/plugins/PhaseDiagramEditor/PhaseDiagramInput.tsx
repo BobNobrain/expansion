@@ -8,11 +8,20 @@ import {
     type PhaseDiagramInternalState,
     type PhaseDiagramPointRef,
 } from './state';
-import { type PhaseDiagramLine, type PhaseDiagramPoint } from './types';
+import {
+    type HePhaseDiagram,
+    type MeltPhaseDiagram,
+    type PhaseDiagramData,
+    type TriplePhaseDiagram,
+    type PhaseDiagramLine,
+    type PhaseDiagramPoint,
+} from './types';
 import styles from './PhaseDiagram.module.css';
+import { registerInFormContext, useValidationState } from '../../../../../components/Form';
 
 export type PhaseDiagramInputProps = {
     state: PhaseDiagramInternalState;
+    formKey: string;
     onPointUpdate: (ref: PhaseDiagramPointRef, newValue: PhaseDiagramPoint | null) => void;
 };
 
@@ -23,6 +32,8 @@ const colors: Record<PhaseDiagramLineName, string> = {
 };
 
 export const PhaseDiagramInput: Component<PhaseDiagramInputProps> = (props) => {
+    const validity = useValidationState();
+
     const lines = createMemo<PhaseDiagramGraph[]>(() => {
         const lines: PhaseDiagramGraph[] = [];
         for (const name of Object.keys(colors) as (keyof typeof colors)[]) {
@@ -141,6 +152,67 @@ export const PhaseDiagramInput: Component<PhaseDiagramInputProps> = (props) => {
 
         console.log(click.event.button);
     };
+
+    registerInFormContext(props, {
+        retrieveValue: (): PhaseDiagramData => {
+            const { state } = props;
+            switch (state.type) {
+                case 'triple': {
+                    const value: TriplePhaseDiagram = {
+                        type: state.type,
+                        triple: state.triple || { T: 0, P: 0 },
+                        boil: state.boil,
+                        melt: state.melt,
+                        subl: state.subl,
+                    };
+                    return value;
+                }
+
+                case 'he': {
+                    const value: HePhaseDiagram = {
+                        type: state.type,
+                        boil: state.boil,
+                        melt: state.melt,
+                    };
+                    return value;
+                }
+
+                case 'melt': {
+                    const value: MeltPhaseDiagram = {
+                        type: state.type,
+                        melt: state.melt,
+                    };
+                    return value;
+                }
+            }
+        },
+        validate: () => {
+            const linesToCheck = [props.state.melt];
+            switch (props.state.type) {
+                case 'triple':
+                    if (!props.state.triple) {
+                        validity.setError('triple diagram type requires a triple point');
+                        return false;
+                    }
+                    linesToCheck.push(props.state.boil);
+                    linesToCheck.push(props.state.subl);
+                    break;
+
+                case 'he':
+                    linesToCheck.push(props.state.boil);
+                    break;
+            }
+
+            for (const line of linesToCheck) {
+                if (!line.length) {
+                    validity.setError('all lines must have at least 1 point');
+                    return false;
+                }
+            }
+
+            return true;
+        },
+    });
 
     return (
         <div>
