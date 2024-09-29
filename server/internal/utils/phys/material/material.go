@@ -16,7 +16,8 @@ type Material struct {
 	tags          map[string]bool
 
 	// g/mol
-	molarMass float64
+	molarMass        float64
+	greenHouseEffect float64
 
 	wgAbundanceMin float64
 	wgAbundanceMax float64
@@ -47,6 +48,10 @@ func (m *Material) GetMolarMass() float64 {
 
 func (m *Material) GetAbundance(unitRandom float64) float64 {
 	return utils.Lerp(m.wgAbundanceMin, m.wgAbundanceMax, unitRandom)
+}
+
+func (m *Material) GetGreenhouseEffect() float64 {
+	return m.greenHouseEffect
 }
 
 func (m *Material) HasAnyTag(tags ...string) bool {
@@ -97,4 +102,8 @@ func (m *MaterialConstructor) SetMolarMass(gPerMol float64) {
 func (m *MaterialConstructor) SetAbundance(min, max float64) {
 	m.result.wgAbundanceMin = min
 	m.result.wgAbundanceMax = max
+}
+
+func (m *MaterialConstructor) SetGreenHouseEffect(coeff float64) {
+	m.result.greenHouseEffect = coeff
 }

@@ -34,11 +34,14 @@ func (t Temperature) CalcMostProbableParticleSpeed(particleMass Mass) Speed {
 	return KilometersPerSecond(math.Sqrt(2 * kBoltzmann * (t.Kelvins() / particleMass.Kilograms())))
 }
 
-const gasConstantR = 8_314.4598
+const gasConstantR = 8_314.472
 
 func (t Temperature) CalcThermalVelocity(molarMass float64) Speed {
 	mPerS := math.Sqrt(3 * gasConstantR * t.Kelvins() / molarMass)
 	return KilometersPerSecond(mPerS / 1000)
+}
+func (t Temperature) CalcAtmosphereHeight(surfaceG Acceleration, molarMass float64) Distance {
+	return Kilometers(math.Ln2 * t.Kelvins() * gasConstantR / (surfaceG.KilometersPerSecondSquared() * molarMass))
 }
 
 func (t Temperature) GetHeatColor() color.Color {

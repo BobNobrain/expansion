@@ -47,7 +47,7 @@ func (state *terrestialPlanetSimulationState) init(ctx *surfaceGenContext) {
 	state.planetMass = ctx.params.Mass
 	state.planetRadius = ctx.params.Radius
 	state.materials = ctx.availableMaterials.Clone()
-	state.surfacePressure = phys.Pascals(100)
+	state.surfacePressure = phys.Pascals(1000)
 
 	state.escapeVelocity = phys.CalculatePlanetEscapeVelocity(ctx.params.Mass, ctx.params.Radius)
 	state.surfaceGravity = phys.CalculatePlanetGravity(ctx.params.Mass, ctx.params.Radius)
@@ -61,11 +61,11 @@ func (state *terrestialPlanetSimulationState) init(ctx *surfaceGenContext) {
 
 	state.iteration = 0
 
-	state.calcTempEquilibrium(0.2)
+	state.calcTempEquilibrium(0.2, 0)
 }
 
-func (state *terrestialPlanetSimulationState) calcTempEquilibrium(surfaceEnergyAbsorbtion float64) {
-	initialAirlessEquilibrium := 278.6 * math.Pow(state.starLum*surfaceEnergyAbsorbtion/state.starDistanceSquared, 0.25)
+func (state *terrestialPlanetSimulationState) calcTempEquilibrium(surfaceEnergyAbsorbtion float64, greenhouse float64) {
+	initialAirlessEquilibrium := 278.6 * math.Pow(state.starLum*(surfaceEnergyAbsorbtion+greenhouse)/state.starDistanceSquared, 0.25)
 	state.surfaceTemp = phys.Kelvins(initialAirlessEquilibrium)
 }
 
@@ -91,20 +91,32 @@ func (state *terrestialPlanetSimulationState) runIteration() {
 		}
 	}
 
+	if atmosphere.IsEmpty() {
+		logger.Debug(logger.FromMessage("planetgen", "Whoopsie! The atmosphere has leaked out!"))
+		state.surfacePressure = phys.Pascals(0)
+		return
+	}
+
 	// 1. recalc runaway gases
+	atmosphericHeight := conditions.T.CalcAtmosphereHeight(state.surfaceGravity, atmosphere.GetAverageMolarMass())
+	escapeVelocity := phys.CalculatePlanetEscapeVelocity(state.planetMass, state.planetRadius.Add(atmosphericHeight))
 	for _, gas := range atmosphere.ListMaterials() {
 		vTherm := state.surfaceTemp.CalcThermalVelocity(gas.GetMolarMass())
-		if vTherm < state.escapeVelocity/6 {
-			logger.Debug(logger.FromMessage("planetgen", "    atmospheric gas stable").WithDetail("mat", gas.GetID()))
+		if vTherm < escapeVelocity/6 {
+			logger.Debug(logger.FromMessage("planetgen", "    atmospheric gas stable").
+				WithDetail("mat", gas.GetID()).
+				WithDetail("v rel", vTherm/escapeVelocity),
+			)
 			continue
 		}
 
-		vThermRelativeToEscape := utils.Unlerp(state.escapeVelocity/6, state.escapeVelocity, vTherm)
-		escapingShare := utils.Lerp(0.0, 0.9, utils.Clamp(vThermRelativeToEscape, 0, 1))
+		vThermRelativeToEscape := utils.Unlerp(escapeVelocity/6, escapeVelocity, vTherm)
+		escapingShare := utils.Lerp(0.0, 0.3, utils.Clamp(vThermRelativeToEscape, 0, 1)) // at most 30% of the gas will escape during a single iteration
 
 		logger.Debug(
 			logger.FromMessage("planetgen", "    atmospheric gas escaping").
 				WithDetail("mat", gas.GetID()).
+				WithDetail("v rel", vTherm/escapeVelocity).
 				WithDetail("mult", 1-escapingShare),
 		)
 		state.materials.ScaleAmountOf(gas, 1-escapingShare)
@@ -132,8 +144,16 @@ func (state *terrestialPlanetSimulationState) runIteration() {
 	)
 	// 3. recalc albedo
 	surfaceEnergyAbsorbtion := surfaceAndOceans.GetLightAbsorbtionAt(conditions)
+	greenHouseCoeff := atmosphere.GetAverageGreenhouseEffect()
+	greenHouseAdjustment := pressureValue / (pressureValue + 111.1)
+	logger.Debug(
+		logger.FromMessage("planetgen", "Energy absorbtion updated").
+			WithDetail("1-albedo", surfaceEnergyAbsorbtion).
+			WithDetail("greenhouse", greenHouseCoeff).
+			WithDetail("greenhouseAdjusted", greenHouseCoeff*greenHouseAdjustment),
+	)
 	// 4. recalc equilibrium temp
-	state.calcTempEquilibrium(surfaceEnergyAbsorbtion)
+	state.calcTempEquilibrium(surfaceEnergyAbsorbtion, greenHouseCoeff*greenHouseAdjustment)
 }
 
 func (ctx *surfaceGenContext) runSimulation() {
@@ -142,7 +162,7 @@ func (ctx *surfaceGenContext) runSimulation() {
 	state.log()
 
 	// let's run it for 10 iterations and hope that it will converge
-	for state.iteration < 10 {
+	for state.iteration < 25 {
 		state.runIteration()
 		state.log()
 	}

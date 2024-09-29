@@ -3,7 +3,7 @@
     "id": "basalt",
     "tags": [ "wg" ],
     "abundance": { "min": 0.9, "max": 0.99 },
-    "molar": 18,
+    "molar": 200,
     "colors": {
         "solid": { "r": 0.4, "g": 0.4, "b": 0.5 },
         "liquid": { "r": 0.4, "g": 0.4, "b": 0.5 },

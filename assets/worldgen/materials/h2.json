@@ -2,7 +2,7 @@
     "$schema": "../../schemas/worldgen/material.json",
     "id": "h2",
     "tags": [ "wg" ],
-    "abundance": { "min": 0.001, "max": 0.01 },
+    "abundance": { "min": 0.2, "max": 0.4 },
     "molar": 2,
     "colors": {
         "solid": { "r": 1, "g": 1, "b": 1 },

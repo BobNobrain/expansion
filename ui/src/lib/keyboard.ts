@@ -12,4 +12,6 @@ export enum KeyCodes {
     Space = 'Space',
     Enter = 'Enter',
     Esc = 'Escape',
+    Delete = 'Delete',
+    Backspace = 'Backspace',
 }

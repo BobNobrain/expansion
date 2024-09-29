@@ -1,4 +1,4 @@
-import { type Component, createMemo, createSignal } from 'solid-js';
+import { type Component, createMemo, createSignal, onCleanup, onMount } from 'solid-js';
 import { NumberInput } from '../../../../../components/NumberInput/NumberInput';
 import { MouseButton } from '../../../../../lib/mouse';
 import { PhaseDiagramCanvas, type PhaseDiagramCanvasClickEvent, type PhaseDiagramGraph } from './PhaseDiagramCanvas';
@@ -18,6 +18,7 @@ import {
 } from './types';
 import styles from './PhaseDiagram.module.css';
 import { registerInFormContext, useValidationState } from '../../../../../components/Form';
+import { KeyCodes } from '../../../../../lib/keyboard';
 
 export type PhaseDiagramInputProps = {
     state: PhaseDiagramInternalState;
@@ -214,6 +215,30 @@ export const PhaseDiagramInput: Component<PhaseDiagramInputProps> = (props) => {
         },
     });
 
+    const onKeyUp = (ev: KeyboardEvent) => {
+        const selection = selectedPoint();
+        if (!selection || selection === 'triple') {
+            return;
+        }
+        switch (ev.key) {
+            case KeyCodes.Delete:
+            case KeyCodes.Backspace:
+                props.onPointUpdate(selection, null);
+                setSelectedPoint(null);
+                break;
+
+            default:
+                return;
+        }
+    };
+
+    onMount(() => {
+        document.addEventListener('keyup', onKeyUp);
+    });
+    onCleanup(() => {
+        document.removeEventListener('keyup', onKeyUp);
+    });
+
     return (
         <div>
             <div>{props.state.type}</div>
@@ -238,8 +263,8 @@ export const PhaseDiagramInput: Component<PhaseDiagramInputProps> = (props) => {
             <PhaseDiagramCanvas
                 lines={lines()}
                 areas={[]}
-                width={600}
-                height={450}
+                width={800}
+                height={600}
                 maxTempKelvin={maxTempK()}
                 maxPressureOrder={maxPressureOrder()}
                 selectedPoint={selectedPointValue()}

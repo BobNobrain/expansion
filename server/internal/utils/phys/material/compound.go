@@ -149,6 +149,14 @@ func (mc *MaterialCompound) GetAverageMolarMass() float64 {
 	return sum / mc.totalAmount
 }
 
+func (mc *MaterialCompound) GetAverageGreenhouseEffect() float64 {
+	sum := 0.0
+	for _, component := range mc.components {
+		sum += component.material.GetGreenhouseEffect() * component.amount
+	}
+	return sum / mc.totalAmount
+}
+
 func (mc *MaterialCompound) ToString() string {
 	if mc.IsEmpty() {
 		return "(empty)"

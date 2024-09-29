@@ -1,4 +1,4 @@
-import { createSignal, type Component, createEffect } from 'solid-js';
+import { createSignal, type Component, createEffect, onMount } from 'solid-js';
 import { type PhaseDiagramPoint, type PhaseDiagramLine } from './types';
 
 export type PhaseDiagramGraph = {
@@ -139,6 +139,11 @@ export const PhaseDiagramCanvas: Component<PhaseDiagramCanvasProps> = (props) =>
 
     createEffect(() => {
         redraw();
+    });
+
+    onMount(() => {
+        // TODO: figure out why the canvas does not redraw itself now without this
+        setTimeout(redraw, 10);
     });
 
     return (

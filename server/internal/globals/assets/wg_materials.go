@@ -78,6 +78,7 @@ func LoadWGMaterials() ([]*material.Material, error) {
 		matBuilder.SetTags(data.Tags)
 		matBuilder.SetAbundance(data.Abundance.Min, data.Abundance.Max)
 		matBuilder.SetMolarMass(data.MolarMass)
+		matBuilder.SetGreenHouseEffect(data.GreenhouseCoeff)
 
 		switch data.Phases.Type {
 		case "he":

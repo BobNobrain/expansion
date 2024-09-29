@@ -4,6 +4,7 @@ import { type SchemaType, type EditorProps } from './types';
 import { NumberEditor, type NumberEditorProps } from './NumberEditor/NumberEditor';
 import { ObjectEditor, type ObjectEditorProps } from './ObjectEditor/ObjectEditor';
 import { StringEditor, type StringEditorProps } from './StringEditor/StringEditor';
+import { UnknownEditor, type UnknownEditorProps } from './UnknownEditor/UnknownEditor';
 import { getSchemaType } from './utils';
 import { allPlugins } from './plugins';
 
@@ -46,7 +47,8 @@ export const Editor: Component<EditorProps> = (props) => {
                 return <NumberEditor {...(editorProps as NumberEditorProps)} />;
 
             default:
-                return <div>No component found for '{type}' schema</div>;
+                // return <div>No component found for '{type}' schema</div>;
+                return <UnknownEditor {...(editorProps as UnknownEditorProps)} />;
         }
     }) as never;
 };

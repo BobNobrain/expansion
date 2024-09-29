@@ -33,7 +33,7 @@ func Lerp[f64 ~float64](from, to f64, amount float64) f64 {
 	return from + (to-from)*f64(amount)
 }
 func Unlerp[f64 ~float64](from, to, val f64) float64 {
-	return float64((to - val) / (to - from))
+	return float64((val - from) / (to - from))
 }
 
 // Returns value, if it is in segment [min; max] (inclusive);

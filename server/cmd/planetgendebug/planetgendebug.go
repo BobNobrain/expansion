@@ -19,7 +19,7 @@ func main() {
 	protoplanetaryDisk := material.NewMaterialCompound()
 
 	for _, mat := range allWgMats {
-		protoplanetaryDisk.Add(mat, mat.GetAbundance(0.5))
+		protoplanetaryDisk.Add(mat, mat.GetAbundance(0.5)*mat.GetMolarMass())
 	}
 
 	planet := planetgen.GeneratePlanet(planetgen.GeneratePlanetOptions{

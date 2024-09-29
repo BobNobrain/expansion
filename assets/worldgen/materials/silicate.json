@@ -1,6 +1,9 @@
 {
     "$schema": "../../schemas/worldgen/material.json",
     "id": "silicate",
+    "tags": [
+        "wg"
+    ],
     "abundance": {
         "min": 0.9,
         "max": 0.99

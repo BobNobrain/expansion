@@ -92,8 +92,8 @@ func NewTriplePointPhaseDiagram(
 	result.meltingLine = append(result.meltingLine, meltLine...)
 
 	meltingPointAtInfinity := PhaseDiagramPoint{T: phys.Kelvins(1e7)}
-	meltLineLast := meltLine[len(meltLine)-1]
-	meltLineBeforeLast := meltLine[len(meltLine)-2]
+	meltLineLast := result.meltingLine[len(result.meltingLine)-1]
+	meltLineBeforeLast := result.meltingLine[len(result.meltingLine)-2]
 	// lerping the infinity point, as it is a linear continuation of the last segment
 	meltingPointAtInfinity.P = utils.Lerp(meltLineBeforeLast.P, meltLineLast.P, utils.Unlerp(meltLineBeforeLast.T, meltLineLast.T, meltingPointAtInfinity.T))
 	result.meltingLine = append(result.meltingLine, meltingPointAtInfinity)

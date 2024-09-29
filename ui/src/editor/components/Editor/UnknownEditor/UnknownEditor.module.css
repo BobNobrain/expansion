@@ -1,0 +1,15 @@
+.wrapper {
+    width: 100%;
+}
+
+.textarea {
+    color: var(--color-text);
+    background-color: transparent;
+    border: 0 solid var(--color-primary);
+    border-width: 1px 0;
+    width: 100%;
+}
+
+.error {
+    color: var(--color-error);
+}
