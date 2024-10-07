@@ -7,7 +7,7 @@ import common from './Button.module.css';
 
 export type ButtonWing = 'none' | 'up' | 'down';
 export type ButtonStyle = 'solid' | 'text';
-export type ButtonSize = 's' | 'm' | 'l' | 'xl';
+export type ButtonSize = 's' | 'm';
 
 export type ButtonProps = ParentProps & {
     color?: SemanticColor;
@@ -15,9 +15,6 @@ export type ButtonProps = ParentProps & {
     size?: ButtonSize;
     square?: boolean;
     compact?: boolean;
-
-    leftWing?: ButtonWing;
-    rightWing?: ButtonWing;
 
     disabled?: boolean;
     loading?: boolean;
@@ -39,11 +36,6 @@ export const Button: Component<ButtonProps> = (props) => {
         const style = props.style ?? 'solid';
         const size = props.size ?? 'm';
 
-        const defaultLeftWing: ButtonWing = style === 'text' ? 'none' : 'down';
-        const leftWing = `${props.leftWing ?? defaultLeftWing}LeftWing`;
-        const defaultRightWing: ButtonWing = style === 'text' ? 'none' : 'up';
-        const rightWing = `${props.rightWing ?? defaultRightWing}RightWing`;
-
         let colorClassName: string;
         switch (style) {
             case 'solid':
@@ -58,8 +50,7 @@ export const Button: Component<ButtonProps> = (props) => {
         return {
             [colorClassName]: !props.disabled,
             [sizes[size]]: true,
-            [common[`${leftWing}`]]: true,
-            [common[`${rightWing}`]]: true,
+            [common[style]]: true,
             [common.square]: props.square,
             [common.compact]: props.compact,
             [common.disabled]: props.disabled,

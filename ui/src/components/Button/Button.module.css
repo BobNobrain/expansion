@@ -2,56 +2,34 @@
     border: 0;
     outline: none;
     cursor: pointer;
-    height: var(--button-size);
-    padding: 0 var(--button-half-size);
+    user-select: none;
+    background: none;
+
+    text-transform: capitalize;
+    font-variant: small-caps;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+
     position: relative;
-
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-
-    font-size: var(--button-half-size);
-
-    clip-path: polygon(
-        var(--button-wing-top-left, 0px) 0,
-        calc(100% - var(--button-wing-top-right, 0px)) 0,
-        calc(100% - var(--button-wing-bottom-right, 0px)) 100%,
-        var(--button-wing-bottom-left, 0px) 100%
-    );
-}
-.button.compact {
-    padding: 0 calc(var(--button-half-size) / 2);
 }
 
-.downLeftWing {
-    --button-wing-top-left: var(--button-size);
-    padding-left: calc(var(--button-size) + var(--button-half-size));
-}
-.upLeftWing {
-    --button-wing-bottom-left: var(--button-size);
-    padding-left: calc(var(--button-size) + var(--button-half-size));
-}
-.downRightWing {
-    --button-wing-top-right: var(--button-size);
-    padding-right: calc(var(--button-size) + var(--button-half-size));
-}
-.upRightWing {
-    --button-wing-bottom-right: var(--button-size);
-    padding-right: calc(var(--button-size) + var(--button-half-size));
-}
+.solid {
+    background: radial-gradient(at center 85%, var(--button-bg), transparent);
+    box-shadow: inset 0 0 8px var(--button-bg);
+    border: 1px solid var(--button-border);
+    border-right-width: 4px;
+    color: var(--button-text);
 
-.downRightWing.compact,
-.upRightWing.compact {
-    padding-right: calc(var(--button-size));
+    font-weight: 500;
+    font-variation-settings: "wght" 500;
 }
-.upLeftWing.compact,
-.downLeftWing.compact {
-    padding-left: calc(var(--button-size));
-}
+.text {
+    border: 1px solid transparent;
+    color: var(--button-text);
 
-.downRightWing + .upLeftWing,
-.upRightWing + .downLeftWing {
-    margin-left: calc(-1 * var(--button-size));
+    font-weight: 600;
+    font-variation-settings: "wght" 600;
+    letter-spacing: 1px;
 }
 
 .square {
@@ -60,65 +38,49 @@
     padding-right: 0;
 }
 
-.disabled {
-    background-color: var(--color-neutral-700);
-    color: var(--color-neutral-300);
-    cursor: not-allowed;
+.button.disabled {
+    cursor: default;
+}
+
+.solid.disabled {
+    --button-bg: transparent;
+    --button-border: var(--p-main-700);
+    --button-text: var(--p-main-700);
 }
 
 .button.loading {
     position: relative;
-    animation: loading linear infinite 1s;
+    animation: solid-loading linear infinite 0.5s alternate;
     cursor: wait;
-
-    background: repeating-linear-gradient(
-        135deg,
-        var(--button-loading-dark) 0,
-        var(--button-loading-dark) var(--button-half-size),
-        var(--button-loading-light) var(--button-half-size),
-        var(--button-loading-light) var(--button-size)
-    );
-    background-size: var(--button-diagonal-size) var(--button-diagonal-size);
 }
 
-@keyframes loading {
+@keyframes solid-loading {
     0% {
-        background-position-y: 0;
+        opacity: 1;
     }
     100% {
-        background-position-y: var(--button-diagonal-size);
+        opacity: 0.5;
     }
 }
 
 .loader {
     z-index: 1;
     position: absolute;
-    height: 1px;
-    left: 0;
-    right: 0;
-    background-color: var(--color-neutral-500);
-    animation: loader-movement ease-in-out 2s infinite normal;
+    top: 0;
+    bottom: 0;
+    background-color: var(--button-border);
+    animation: loader-movement ease-in-out 1.6s infinite normal;
 }
 
 @keyframes loader-movement {
     0% {
-        opacity: 0;
-        top: 0;
+        left: 100%;
+        width: 4px;
+        opacity: 0.1;
     }
-    10% {
-        opacity: 0.2;
-        top: 0;
-    }
-    50% {
-        opacity: 0.2;
-        top: calc(100% - 1px);
-    }
-    60% {
-        opacity: 0;
-        top: calc(100% - 1px);
-    }
-    100% {
-        opacity: 0;
-        top: calc(100% - 1px);
+    90% {
+        left: 0;
+        width: 1px;
+        opacity: 0.75;
     }
 }

@@ -3,6 +3,7 @@ package planetgen
 import (
 	"fmt"
 	"math"
+	"math/rand"
 	"srv/internal/globals/logger"
 	"srv/internal/utils"
 	"srv/internal/utils/phys"
@@ -10,6 +11,7 @@ import (
 )
 
 type terrestialPlanetSimulationState struct {
+	rnd                 *rand.Rand
 	starLum             float64
 	starDistanceSquared float64
 	planetMass          phys.Mass
@@ -40,6 +42,7 @@ func (state *terrestialPlanetSimulationState) log() {
 }
 
 func (state *terrestialPlanetSimulationState) init(ctx *surfaceGenContext) {
+	state.rnd = ctx.rnd
 	state.starLum = ctx.starParams.Luminosity.Suns()
 	distanceFromStar := ctx.nearestStarDistance.AstronomicalUnits()
 	state.starDistanceSquared = distanceFromStar * distanceFromStar
@@ -161,7 +164,7 @@ func (ctx *surfaceGenContext) runSimulation() {
 	state.init(ctx)
 	state.log()
 
-	// let's run it for 10 iterations and hope that it will converge
+	// let's run it for 25 iterations and hope that it will converge
 	for state.iteration < 25 {
 		state.runIteration()
 		state.log()

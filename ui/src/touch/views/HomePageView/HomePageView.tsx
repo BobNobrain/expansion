@@ -138,7 +138,7 @@ export const HomePageView: Component = () => {
                     <div class={styles.overviewEventsText}>
                         <Text bold>Inbox:</Text> Last notification text with whatever is in it goes here
                     </div>
-                    <Button color="primary" rightWing="none" size="l">
+                    <Button color="primary" size="l">
                         +2
                     </Button>
                 </div>

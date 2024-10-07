@@ -146,8 +146,6 @@ export const NumberInput: Component<NumberInputProps> = (props) => {
             }}
         >
             <Button
-                rightWing="none"
-                leftWing="none"
                 square
                 disabled={
                     props.disabled || (props.value === undefined ? false : props.value <= (props.min ?? -Infinity))
@@ -184,7 +182,6 @@ export const NumberInput: Component<NumberInputProps> = (props) => {
                 )}
             </Show>
             <Button
-                leftWing="none"
                 compact
                 disabled={
                     props.disabled || (props.value === undefined ? false : props.value >= (props.max ?? Infinity))

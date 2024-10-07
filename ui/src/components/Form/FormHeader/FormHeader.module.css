@@ -1,0 +1,18 @@
+.header {
+    border-bottom: 1px solid var(--p-main-500);
+    margin-bottom: 12px;
+}
+
+.inner {
+    border-bottom: 2px solid var(--p-main-500);
+    width: fit-content;
+    padding: 0 4px;
+
+    font-weight: 500;
+    font-variation-settings: "wght" 500;
+    text-transform: capitalize;
+    font-variant: small-caps;
+    letter-spacing: 2px;
+    font-size: 36px;
+    line-height: 36px;
+}

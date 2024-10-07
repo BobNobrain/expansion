@@ -19,9 +19,9 @@
     --color-border: var(--p-main-400);
     --color-border-sharp: var(--p-main-500);
 
-    --color-text: var(--p-primary-900);
+    --color-text: var(--p-main-900);
     --color-text-dim: var(--p-neutral-800);
-    --color-text-inverted: var(--p-primary-100);
+    --color-text-inverted: var(--p-main-100);
     --color-text-dim-inverted: var(--p-neutral-200);
 
     --color-text-selected: var(--p-neutral-900);
@@ -84,6 +84,8 @@ html, body {
     font-family: Raleway;
     font-weight: 400;
     font-variation-settings: "wght" 400;
+
+    background-color: var(--p-main-100);
 }
 
 input, button {

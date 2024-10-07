@@ -60,6 +60,7 @@ async function main() {
         loader: {
             '.ttf': 'file',
             '.glsl': 'text',
+            '.svg': 'file',
         },
     });
 

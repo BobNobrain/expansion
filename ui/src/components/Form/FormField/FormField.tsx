@@ -32,19 +32,21 @@ export function FormField(props: ParentProps<FormFieldProps>) {
                 [styles.collapsed]: props.multiline && props.collapsable && isCollapsed(),
             }}
         >
-            <div
-                class={styles.label}
-                classList={{
-                    [styles.empty]: !props.label,
-                    [styles.collapsable]: props.collapsable,
-                }}
-                onClick={onCollapsableLabelClick}
-            >
-                {props.label}
-                <Show when={props.collapsable && isCollapsed() && props.collapsedPreview}>
-                    <span class={styles.collapsedPreview}>{props.collapsedPreview}</span>
-                </Show>
-            </div>
+            <Show when={props.label}>
+                <div
+                    class={styles.label}
+                    classList={{
+                        [styles.empty]: !props.label,
+                        [styles.collapsable]: props.collapsable,
+                    }}
+                    onClick={onCollapsableLabelClick}
+                >
+                    {props.label}
+                    <Show when={props.collapsable && isCollapsed() && props.collapsedPreview}>
+                        <span class={styles.collapsedPreview}>{props.collapsedPreview}</span>
+                    </Show>
+                </div>
+            </Show>
             <div class={styles.input}>{props.children}</div>
         </div>
     );

@@ -66,13 +66,13 @@ const ObjectEditorRow: Component<Omit<ObjectEditorProps, 'schema'> & RowProps> =
                 <Show
                     when={isDefined()}
                     fallback={
-                        <Button leftWing="none" rightWing="none" color="accent" onClick={setDefined}>
+                        <Button color="accent" onClick={setDefined}>
                             Add value
                         </Button>
                     }
                 >
                     <div class={styles.fieldInputWrapper}>
-                        <Button leftWing="none" rightWing="none" color="error" onClick={setUndefined}>
+                        <Button color="error" onClick={setUndefined}>
                             Remove value
                         </Button>
                         <props.Editor

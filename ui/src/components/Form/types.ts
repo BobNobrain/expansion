@@ -2,6 +2,7 @@ export type ValidationState =
     | {
           type: 'ok';
           explicitSuccess?: boolean;
+          message?: string;
       }
     | {
           type: 'error';

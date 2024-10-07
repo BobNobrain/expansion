@@ -93,7 +93,6 @@ export const EditorPanel: Component<EditorPanelProps> = (props) => {
             <div class={styles.bar}>
                 <div class={styles.title}>{props.activePath || '–'}</div>
                 <Button
-                    rightWing="none"
                     color="primary"
                     disabled={props.activePath === null}
                     onClick={onSave}

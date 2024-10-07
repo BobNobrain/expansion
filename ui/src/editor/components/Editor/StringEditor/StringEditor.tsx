@@ -22,9 +22,13 @@ export const StringEditor: Component<StringEditorProps> = (props) => {
         <TextInput
             value={getValue()}
             onUpdate={setValue}
-            placeholder={String(props.schema.default) || props.schema.title}
+            placeholder={props.schema.default === undefined ? undefined : String(props.schema.default)}
             formKey={props.key}
-            readonly={props.disabled || props.key === '$schema'}
+            disabled={props.disabled || props.key === '$schema'}
+            label={props.schema.title ?? props.key}
+            hint={props.schema.description}
+            suffix="$$"
+            prefix="%%"
         />
     );
 };

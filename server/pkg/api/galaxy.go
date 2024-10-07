@@ -151,3 +151,28 @@ type WorldGetSurfaceResultGrid struct {
 	Coords []float64 `json:"coords"`
 	Edges  [][]int   `json:"edges"`
 }
+
+type WorldGetSurfaceDetailsPayload struct {
+	SurfaceID string `json:"surfaceId"`
+}
+
+type WorldGetSurfaceDetailsResult struct {
+	AverageTempK        float64            `json:"avgTempK"`
+	SeaLevelPressureBar float64            `json:"pressureBar"`
+	AtmosphereContent   map[string]float64 `json:"atmosphere"`
+
+	OceansContent map[string]float64 `json:"oceans"`
+	OceansLevel   float64            `json:"oceansLevel"`
+}
+
+type WorldGetSurfacePlotPayload struct {
+	SurfaceID string `json:"surfaceId"`
+	PlotID    int    `json:"plotId"`
+}
+
+type WorldGetSurfacePlotResult struct {
+	SurfaceID   string  `json:"surfaceId"`
+	PlotID      int     `json:"plotId"`
+	TempK       float64 `json:"tempK"`
+	PressureBar float64 `json:"pressureBar"`
+}

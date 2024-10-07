@@ -1,6 +1,11 @@
 .actions {
-    padding-left: var(--form-label-width, 100px);
-
     display: flex;
     justify-content: flex-end;
+    flex-wrap: wrap;
+
+    margin-top: 12px;
+}
+
+.actions > * {
+    margin-left: 6px;
 }

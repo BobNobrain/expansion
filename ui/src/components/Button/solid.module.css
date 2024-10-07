@@ -1,105 +1,98 @@
 .primary {
-    background-color: var(--color-primary);
-    color: var(--color-background-dark);
-
-    --button-loading-dark: var(--color-primary);
-    --button-loading-light: var(--color-primary-700);
+    --button-bg: var(--p-primary-500-25);
+    --button-border: var(--p-primary-500);
+    --button-text: var(--p-primary-700);
 }
 .primary:hover {
-    background-color: var(--color-primary-700);
+    --button-text: var(--p-primary-900);
+    --button-border: var(--p-primary-700);
 }
 .primary:active {
-    background-color: var(--color-primary-300);
+    --button-border: var(--p-primary-300);
+    --button-bg: transparent;
+    --button-text: var(--p-primary-300);
 }
 
 .secondary {
-    background-color: var(--color-secondary);
-    color: var(--color-text);
-
-    --button-loading-dark: var(--color-secondary);
-    --button-loading-light: var(--color-secondary-700);
+    --button-bg: var(--p-main-500-35);
+    --button-border: var(--p-main-700);
+    --button-text: var(--p-main-900);
 }
 .secondary:hover {
-    background-color: var(--color-secondary-700);
-    color: var(--color-primary-100);
+    --button-border: var(--p-main-900);
 }
 .secondary:active {
-    background-color: var(--color-secondary-300);
-    color: var(--color-text);
+    --button-border: var(--p-main-500);
+    --button-bg: transparent;
+    --button-text: var(--p-main-700);
 }
 
 .accent {
-    background-color: var(--color-accent);
-    color: var(--color-text);
-
-    --button-loading-dark: var(--color-accent);
-    --button-loading-light: var(--color-accent-700);
+    --button-bg: var(--p-secondary-500-25);
+    --button-border: var(--p-secondary-500);
+    --button-text: var(--p-secondary-500);
 }
 .accent:hover {
-    background-color: var(--color-accent-700);
+    --button-border: var(--p-secondary-700);
 }
 .accent:active {
-    background-color: var(--color-accent-300);
+    --button-border: var(--p-secondary-300);
+    --button-bg: transparent;
+    --button-text: var(--p-secondary-300);
 }
 
 .info {
-    background-color: var(--color-info);
-    color: var(--color-text);
-
-    --button-loading-dark: var(--color-info);
-    --button-loading-light: var(--color-info-700);
+    --button-bg: var(--p-blue-500-25);
+    --button-border: var(--p-blue-500);
+    --button-text: var(--p-blue-500);
 }
 .info:hover {
-    background-color: var(--color-info-700);
+    --button-border: var(--p-blue-700);
 }
 .info:active {
-    background-color: var(--color-info-300);
+    --button-border: var(--p-blue-300);
+    --button-bg: transparent;
+    --button-text: var(--p-blue-300);
 }
 
 .error {
-    background-color: var(--color-error);
-    color: var(--color-text);
-
-    --button-loading-dark: var(--color-error);
-    --button-loading-light: var(--color-error-700);
+    --button-bg: var(--p-red-500-25);
+    --button-border: var(--p-red-500);
+    --button-text: var(--p-red-500);
 }
 .error:hover {
-    background-color: var(--color-error-700);
-    color: var(--color-text-inverted);
+    --button-border: var(--p-red-700);
 }
 .error:active {
-    background-color: var(--color-error-300);
-    color: var(--color-text);
+    --button-border: var(--p-red-300);
+    --button-bg: transparent;
+    --button-text: var(--p-red-300);
 }
 
 .success {
-    background-color: var(--color-success);
-    color: var(--color-text);
-
-    --button-loading-dark: var(--color-success);
-    --button-loading-light: var(--color-success-700);
+    --button-bg: var(--p-green-500-25);
+    --button-border: var(--p-green-500);
+    --button-text: var(--p-green-500);
 }
 .success:hover {
-    background-color: var(--color-success-700);
-    color: var(--color-text-inverted);
+    --button-border: var(--p-green-700);
 }
 .success:active {
-    background-color: var(--color-success-300);
-    color: var(--color-text);
+    --button-border: var(--p-green-300);
+    --button-bg: transparent;
+    --button-text: var(--p-green-300);
 }
 
 .warn {
-    background-color: var(--color-warn);
-    color: var(--color-text);
-
-    --button-loading-dark: var(--color-warn);
-    --button-loading-light: var(--color-warn-700);
+    --button-bg: var(--p-orange-500-25);
+    --button-border: var(--p-orange-500);
+    --button-text: var(--p-orange-500);
 }
 .warn:hover {
-    background-color: var(--color-warn-700);
-    color: var(--color-text-inverted);
+    --button-border: var(--p-orange-700);
 }
 .warn:active {
-    background-color: var(--color-warn-300);
-    color: var(--color-text);
+    --button-border: var(--p-orange-300);
+    --button-bg: transparent;
+    --button-text: var(--p-orange-300);
 }

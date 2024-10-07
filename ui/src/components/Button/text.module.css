@@ -1,106 +1,69 @@
-.text-button {
-    background-color: transparent;
-    --button-loading-light: transparent;
-}
-
 .primary {
-    composes: text-button;
-
-    color: var(--color-primary);
-
-    --button-loading-dark: var(--color-primary);
+    --button-text: var(--p-primary-700);
 }
 .primary:hover {
-    color: var(--color-primary-700);
+    --button-text: var(--p-primary-900);
 }
 .primary:active {
-    color: var(--color-primary-300);
+    --button-text: var(--p-primary-300);
 }
 
 .secondary {
-    composes: text-button;
-
-    color: var(--color-neutral-700);
-
-    --button-loading-dark: var(--color-secondary);
+    --button-text: var(--p-main-800);
 }
 .secondary:hover {
-    color: var(--color-neutral-900);
+    --button-text: var(--p-main-900);
 }
 .secondary:active {
-    color: var(--color-secondary-900);
+    --button-text: var(--p-main-700);
 }
 
 .accent {
-    composes: text-button;
-
-    color: var(--color-accent);
-
-    --button-loading-dark: var(--color-accent);
+    --button-text: var(--p-secondary-500);
 }
 .accent:hover {
-    background-color: var(--color-accent-700);
+    --button-text: var(--p-secondary-700);
 }
 .accent:active {
-    background-color: var(--color-accent-300);
+    --button-text: var(--p-secondary-300);
 }
 
 .info {
-    composes: text-button;
-
-    color: var(--color-info);
-
-    --button-loading-dark: var(--color-info);
+    --button-text: var(--p-blue-500);
 }
 .info:hover {
-    background-color: var(--color-info-700);
+    --button-text: var(--p-blue-700);
 }
 .info:active {
-    background-color: var(--color-info-300);
+    --button-text: var(--p-blue-300);
 }
 
 .error {
-    composes: text-button;
-
-    color: var(--color-error);
-
-    --button-loading-dark: var(--color-error);
+    --button-text: var(--p-red-500);
 }
 .error:hover {
-    color: var(--color-error-700);
+    --button-text: var(--p-red-700);
 }
 .error:active {
-    color: var(--color-error-300);
+    --button-text: var(--p-red-300);
 }
 
 .success {
-    composes: text-button;
-
-    color: var(--color-success);
-
-    --button-loading-dark: var(--color-success);
+    --button-text: var(--p-green-500);
 }
 .success:hover {
-    background-color: var(--color-success-700);
-    color: var(--color-text-inverted);
+    --button-text: var(--p-green-700);
 }
 .success:active {
-    background-color: var(--color-success-300);
-    color: var(--color-text);
+    --button-text: var(--p-green-300);
 }
 
 .warn {
-    composes: text-button;
-
-    color: var(--color-warn);
-
-    --button-loading-dark: var(--color-warn);
+    --button-text: var(--p-orange-500);
 }
 .warn:hover {
-    background-color: var(--color-warn-700);
-    color: var(--color-text-inverted);
+    --button-text: var(--p-orange-700);
 }
 .warn:active {
-    background-color: var(--color-warn-300);
-    color: var(--color-text);
+    --button-text: var(--p-orange-300);
 }

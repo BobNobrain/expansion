@@ -1,12 +1,15 @@
-/* TODO: the palette should not be globally accessible in :root (and even visible for clients) */
-
 :root {
+    --p-main-100-50: #16162A80;
+    --p-main-100-75: #16162Abf;
     --p-main-100: #16162A;
     --p-main-200: #21213C;
+    --p-main-300-75: #333358;
     --p-main-300: #333358;
     --p-main-400: #464673;
+    --p-main-500-35: #59598A59;
     --p-main-500: #59598A;
     --p-main-600: #6F6F9F;
+    --p-main-700-25: #8989B840;
     --p-main-700: #8989B8;
     --p-main-800: #ACACD8;
     --p-main-900: #D4D4F9;
@@ -14,6 +17,7 @@
     --p-primary-200: #765200;
     --p-primary-300: #AC7903;
     --p-primary-400: #D79807;
+    --p-primary-500-25: #F7B21240;
     --p-primary-500: #F7B212;
     --p-primary-600: #FCBD2C;
     --p-primary-700: #FFCC55;
@@ -23,6 +27,7 @@
     --p-secondary-200: #2C1948;
     --p-secondary-300: #3B2261;
     --p-secondary-400: #4D2C7E;
+    --p-secondary-500-25: #5B349540;
     --p-secondary-500: #5B3495;
     --p-secondary-600: #7147B0;
     --p-secondary-700: #895ECA;
@@ -32,6 +37,7 @@
     --p-red-200: #4E1614;
     --p-red-300: #792421;
     --p-red-400: #AC3531;
+    --p-red-500-25: #CE413C40;
     --p-red-500: #CE413C;
     --p-red-600: #E74E48;
     --p-red-700: #F5635E;
@@ -41,6 +47,7 @@
     --p-green-200: #044015;
     --p-green-300: #086924;
     --p-green-400: #0F9535;
+    --p-green-500-25: #18B04440;
     --p-green-500: #18B044;
     --p-green-600: #27CB56;
     --p-green-700: #48E675;
@@ -50,6 +57,7 @@
     --p-orange-200: #773A00;
     --p-orange-300: #B05703;
     --p-orange-400: #D56D0A;
+    --p-orange-500-25: #F17E1240;
     --p-orange-500: #F17E12;
     --p-orange-600: #F9891F;
     --p-orange-700: #FB9A3F;
@@ -59,6 +67,7 @@
     --p-blue-200: #080E58;
     --p-blue-300: #101A87;
     --p-blue-400: #1C28AD;
+    --p-blue-500-25: #2D3BD140;
     --p-blue-500: #2D3BD1;
     --p-blue-600: #4351E8;
     --p-blue-700: #616DF3;

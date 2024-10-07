@@ -33,7 +33,7 @@ export const TouchCurtain: ParentComponent<TouchCurtainProps> = (props) => {
             >
                 <Show when={props.expandable ?? true}>
                     <div class={styles.handle}>
-                        <Button size="s" rightWing="down" onClick={toggleExpanded}>
+                        <Button size="s" onClick={toggleExpanded}>
                             :::
                         </Button>
                     </div>

@@ -118,7 +118,7 @@ export const EditorTree: Component<EditorTreeProps> = (props) => {
                     <Show when={tree.data}>{tree.data!.total} files</Show>
                 </div>
                 <div class={styles.statusActions}>
-                    <Button rightWing="none">Refresh</Button>
+                    <Button>Refresh</Button>
                 </div>
             </div>
         </div>

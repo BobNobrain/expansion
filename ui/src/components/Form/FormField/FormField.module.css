@@ -42,6 +42,7 @@
 
 .input {
     flex: 1 1 auto;
+    min-width: 0;
 }
 
 .multiline > .input {

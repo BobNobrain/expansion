@@ -66,19 +66,15 @@ export const Window: Component<WindowProps> = (props) => {
                         {props.controller.getTitle().text}
                     </div>
                     <div class={styles.controls}>
-                        <Button leftWing="none" rightWing="none" onClick={onMinimizeClick}>
-                            _
-                        </Button>
-                        <Button leftWing="none" rightWing="none" onClick={close}>
-                            X
-                        </Button>
+                        <Button onClick={onMinimizeClick}>_</Button>
+                        <Button onClick={close}>X</Button>
                     </div>
                 </header>
                 <Show when={props.controller.getWindowState() !== WindowState.Minimized}>
                     <section class={styles.content}>{props.children}</section>
                     <footer class={styles.footer}>
                         <div class={styles.footerSpacer} />
-                        <Button leftWing="none">Cancel</Button>
+                        <Button>Cancel</Button>
                         <Button loading>Wait a minute...</Button>
                         <Button color="primary" loading>
                             OK!
