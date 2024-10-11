@@ -1,4 +1,4 @@
-import { onMount, onCleanup, createEffect, createSignal, type ParentComponent } from 'solid-js';
+import { onMount, onCleanup, createEffect, createSignal, type ParentComponent, untrack } from 'solid-js';
 import { Scene, WebGLRenderer, type Camera, type ColorRepresentation } from 'three';
 import { createBoundsTracker } from '../../../lib/solid/BoundsTracker';
 import { createEvent } from '../../../lib/event';
@@ -53,9 +53,10 @@ export const SceneRenderer: ParentComponent<SceneRendererProps> = (props) => {
             const dt = lastTime === -1 ? 0 : time - lastTime;
             lastTime = time;
 
-            animation.trigger({ time, dt, renderer, canvas });
-
-            renderer.render(scene, cam);
+            if (animation.length()) {
+                animation.trigger({ time, dt, renderer, canvas });
+                renderer.render(scene, cam);
+            }
 
             requestAnimationFrame(animate);
         };
@@ -63,6 +64,11 @@ export const SceneRenderer: ParentComponent<SceneRendererProps> = (props) => {
         createEffect(() => {
             const newBounds = getBounds();
             renderer?.setSize(newBounds.width, newBounds.height);
+
+            const cam = untrack(getMainCamera);
+            if (cam && renderer) {
+                renderer.render(scene, cam);
+            }
         });
 
         createEffect(() => {

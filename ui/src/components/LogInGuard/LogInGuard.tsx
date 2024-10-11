@@ -45,8 +45,8 @@ export const LogInGuard: ParentComponent = (props) => {
 
     const logout = async () => {
         await api.logout();
-        ws.disconnect();
         setUser(null);
+        ws.disconnect();
     };
 
     const context: AuthenticatedData = {

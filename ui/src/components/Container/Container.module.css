@@ -80,3 +80,10 @@
 .stretch {
     flex: 1 1 auto;
 }
+.full-height {
+    height: 100%;
+}
+
+.spacer {
+    flex: 1 1 auto;
+}

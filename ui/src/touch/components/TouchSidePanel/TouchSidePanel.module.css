@@ -1,0 +1,30 @@
+.backdrop {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+
+    padding-left: 64px;
+
+    transition: background-color ease-in-out 500ms;
+    background-color: transparent;
+
+    z-index: 100;
+}
+.backdrop.active {
+    pointer-events: all;
+    background-color: var(--p-main-300-75);
+}
+
+.panel {
+    height: 100%;
+    background-color: var(--p-main-300-75);
+    transform: translateX(calc(100vw - 64px));
+    transition: transform ease-in-out 500ms, box-shadow ease-in-out 500ms;
+
+    border-left: solid 2px var(--p-main-800);
+    box-shadow: inset 0 0 64px var(--p-main-500), 0 0 8px transparent;
+}
+.active .panel {
+    transform: translateX(0);
+    box-shadow: inset 0 0 64px var(--p-main-500), 0 0 8px var(--p-main-700);
+}

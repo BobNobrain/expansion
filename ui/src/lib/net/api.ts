@@ -30,7 +30,7 @@ export async function login({ username, password }: LoginRequest): Promise<UserD
 }
 
 export async function logout(): Promise<void> {
-    const response = await fetch('/api/login', {
+    const response = await fetch('/api/logout', {
         method: 'POST',
         body: JSON.stringify({}),
         headers: {

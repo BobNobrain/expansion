@@ -1,4 +1,4 @@
-import { type ParentComponent } from 'solid-js';
+import { type Component, type ParentComponent } from 'solid-js';
 import styles from './Container.module.css';
 
 export type ContainerProps = {
@@ -9,6 +9,7 @@ export type ContainerProps = {
     threads?: 1 | 2 | 3 | 4 | '1' | '2' | '3' | '4';
     clearSelfPadding?: boolean;
     stretch?: boolean;
+    fullHeight?: boolean;
 };
 
 const SIZE_CLS: Record<NonNullable<ContainerProps['size']>, string> = {
@@ -16,6 +17,8 @@ const SIZE_CLS: Record<NonNullable<ContainerProps['size']>, string> = {
     m: 'sizeM',
     l: 'sizeL',
 };
+
+export const Spacer: Component = () => <div class={styles.spacer} />;
 
 export const Container: ParentComponent<ContainerProps> = (props) => {
     const isFlex = () => props.threads === undefined || props.threads === 1 || props.threads === '1';
@@ -32,6 +35,7 @@ export const Container: ParentComponent<ContainerProps> = (props) => {
                 [styles.clearSelfPadding]: props.clearSelfPadding,
                 [styles[SIZE_CLS[props.size ?? 'm']]]: true,
                 [styles.stretch]: props.stretch,
+                [styles.fullHeight]: props.fullHeight,
             }}
         >
             {props.children}

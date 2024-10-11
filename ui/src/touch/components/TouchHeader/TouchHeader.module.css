@@ -1,18 +1,27 @@
 .header {
-    height: 48px;
+    height: 64px;
 
     display: flex;
     align-items: center;
 
-    background-color: var(--color-background-light);
-    border-bottom: 1px solid var(--color-border);
+    background-color: var(--p-main-300);
+    border-bottom: 1px solid var(--p-main-900);
+    box-shadow: 0 8px 16px var(--p-main-500);
 }
 
-.cell {
+.button {
+    height: 100%;
     flex: 0 0 48px;
     display: flex;
     justify-content: center;
     align-items: center;
+
+    background: none transparent;
+    border: none;
+    border-radius: 0;
+    outline: none;
+
+    color: var(--p-main-800);
 }
 
 .text {
@@ -23,26 +32,37 @@
 .title {
     margin: 0;
     padding: 0;
-    font-weight: normal;
-    font-size: 20px;
+
+    font-size: 28px;
+    line-height: 28px;
+    font-weight: 600;
+    font-variation-settings: "wght" 600;
+    letter-spacing: 1.4px;
+    text-transform: capitalize;
+    font-variant: small-caps;
+
+    color: var(--p-main-900);
+    text-shadow: 0 0 2px solid var(--p-main-900);
 
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-}
-.title.withSubtitle {
-    font-size: 16px;
 }
 
 .subtitle {
     margin: 0;
     padding: 0;
-    font-weight: normal;
-    font-size: 12px;
+
+    font-size: 14px;
+    line-height: 14px;
+    font-weight: 400;
+    font-variation-settings: "wght" 400;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+
+    color: var(--p-main-800);
 
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-
-    color: var(--color-text-dim);
 }

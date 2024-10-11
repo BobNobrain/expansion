@@ -1,6 +1,6 @@
 import { type Component, Show } from 'solid-js';
 import { TouchPage } from '../../components/TouchPage/TouchPage';
-import { TouchHeader, TouchHeaderCell, TouchHeaderTitle } from '../../components/TouchHeader/TouchHeader';
+import { TouchHeader, TouchHeaderButton, TouchHeaderTitle } from '../../components/TouchHeader/TouchHeader';
 import { Button } from '../../../components/Button/Button';
 import { useNavigate, useParams } from '@solidjs/router';
 import { SceneRenderer } from '../../../components/three/SceneRenderer/SceneRenderer';
@@ -18,11 +18,11 @@ export const PlanetView: Component = () => {
             stretch
             header={
                 <TouchHeader>
-                    <TouchHeaderCell>
+                    <TouchHeaderButton>
                         <Button size="xl" square style="text" onClick={backToMain}>
                             &larr;
                         </Button>
-                    </TouchHeaderCell>
+                    </TouchHeaderButton>
                     <TouchHeaderTitle title={params.planetId} subtitle={params.planetId} />
                 </TouchHeader>
             }

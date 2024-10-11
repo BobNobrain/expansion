@@ -3,16 +3,28 @@
     flex-flow: column;
     align-items: stretch;
     overflow: hidden;
-    height: 100vh;
+    height: 100dvh;
 }
 
 .header {
     flex: 0 0 auto;
+    position: relative;
+    z-index: 1;
+}
+
+.footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 72px;
 }
 
 .content {
     flex: 1 1 auto;
     overflow: auto;
+
+    --content-padding-bottom: 72px;
 }
 
 .content.stretch > * {

@@ -1,15 +1,13 @@
 import { For, type Component, type JSX } from 'solid-js';
+import { A } from '@solidjs/router';
 import { Button } from '../../../components/Button/Button';
-import { TouchHeader, TouchHeaderCell, TouchHeaderTitle } from '../../components/TouchHeader/TouchHeader';
-import { type SemanticColor } from '../../../lib/appearance';
-import styles from './HomePageView.module.css';
 import { Island } from '../../../components/Island/Island';
 import { Text } from '../../../components/Text/Text';
-import { TouchPage } from '../../components/TouchPage/TouchPage';
-import { Container } from '../../../components/Container/Container';
-import { IconGalaxy } from '../../../icons/galaxy';
-import { A } from '@solidjs/router';
 import { IconPlanet } from '../../../icons/planet';
+import { type SemanticColor } from '../../../lib/appearance';
+import { Container } from '../../../components/Container/Container';
+import { usePageContextBinding } from '../../components/TouchPage';
+import styles from './HomePage.module.css';
 
 type FeedElement = {
     label: string;
@@ -26,7 +24,7 @@ const feed: FeedElement[] = [
 ];
 
 type MenuElement = {
-    icon: string;
+    icon: string | JSX.Element;
     label: string;
     description: string;
     color?: SemanticColor;
@@ -40,7 +38,7 @@ type MenuElement = {
 
 const menu: MenuElement[] = [
     {
-        icon: '⊘',
+        icon: <IconPlanet size={32} />,
         label: 'Planets',
         color: 'primary',
         description: 'Planets with branch offices',
@@ -104,25 +102,13 @@ const menu: MenuElement[] = [
     },
 ];
 
-export const HomePageView: Component = () => {
+export const HomePage: Component = () => {
+    usePageContextBinding({
+        title: 'Expansion',
+    });
+
     return (
-        <TouchPage
-            padded
-            hasGap
-            header={
-                <TouchHeader>
-                    <TouchHeaderCell>
-                        <IconGalaxy size={36} color="primary" />
-                    </TouchHeaderCell>
-                    <TouchHeaderTitle title="Expansion" />
-                    <TouchHeaderCell>
-                        <Button square style="text" size="xl">
-                            U
-                        </Button>
-                    </TouchHeaderCell>
-                </TouchHeader>
-            }
-        >
+        <Container padded direction="column" hasGap>
             <Island color="primary" style="outlined">
                 <div class={styles.overview}>
                     <div class={styles.overviewWelcome}>
@@ -138,7 +124,7 @@ export const HomePageView: Component = () => {
                     <div class={styles.overviewEventsText}>
                         <Text bold>Inbox:</Text> Last notification text with whatever is in it goes here
                     </div>
-                    <Button color="primary" size="l">
+                    <Button color="primary" size="m">
                         +2
                     </Button>
                 </div>
@@ -190,6 +176,6 @@ export const HomePageView: Component = () => {
                     }}
                 </For>
             </Container>
-        </TouchPage>
+        </Container>
     );
 };
