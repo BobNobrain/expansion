@@ -10,11 +10,14 @@ export type DataTableColumn<Row> = {
 export type DataTableProps<Row> = {
     columns: DataTableColumn<Row>[];
     rows: Row[];
+
+    /** Use this for better appearance when the table stretches for the whole screen */
+    inset?: boolean;
 };
 
 export function DataTable<Row>(props: ParentProps<DataTableProps<Row>>): JSX.Element {
     return (
-        <table class={styles.table}>
+        <table class={styles.table} classList={{ [styles.inset]: props.inset }}>
             <thead>
                 <tr class={styles.headerRow}>
                     <For each={props.columns}>

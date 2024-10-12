@@ -86,6 +86,7 @@ html, body {
     font-variation-settings: "wght" 400;
 
     background-color: var(--p-main-100);
+    color: var(--p-main-800);
 }
 
 input, button {

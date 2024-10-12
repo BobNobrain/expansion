@@ -4,30 +4,45 @@
 }
 
 .cell {
-    padding: 6px 8px;
+    padding: 4px 8px;
+
+    font-size: 16px;
+    line-height: 20px;
+
+    background-clip: padding-box;
 }
 
-.cell:first-child {
+.inset .cell:first-child {
     padding-left: 16px;
 }
-.cell:last-child {
+.inset .cell:last-child {
     padding-right: 16px;
+}
+
+.cell + .cell {
+    border-left: 2px solid transparent;
 }
 
 .header-cell {
     composes: cell;
 
-    background-color: var(--color-primary);
-    color: var(--color-text-inverted);
+    background-color: var(--p-main-500);
+    color: var(--p-main-900);
     text-align: left;
+
+    font-weight: 500;
+    font-variation-settings: "wght" 500;
+    letter-spacing: 0.05em;
 }
 
 .data-cell {
     composes: cell;
+
+    border-bottom: 1px solid var(--p-main-500);
 }
 
 .data-row:hover, .data-row:active {
-    background-color: var(--color-background-light);
+    background-color: var(--p-main-600);
 }
 
 .emptyBanner {
