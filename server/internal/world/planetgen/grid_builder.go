@@ -4,7 +4,7 @@ import (
 	"math"
 	"math/rand"
 	"srv/internal/utils/geom"
-	"srv/internal/utils/geom/mesh"
+	"srv/internal/utils/mesh"
 	"srv/internal/world"
 )
 

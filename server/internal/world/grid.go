@@ -2,8 +2,10 @@ package world
 
 import (
 	"srv/internal/utils/geom"
-	"srv/internal/utils/geom/mesh"
+	"srv/internal/utils/mesh"
 )
+
+// TODO: move all this stuff into utils.SpatialGraph or something
 
 type PlanetaryTileIndex int
 
