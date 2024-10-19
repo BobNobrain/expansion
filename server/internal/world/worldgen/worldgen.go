@@ -9,3 +9,7 @@ func NewWorldGen(seed string) *WorldGen {
 		rnd: NewWorldRandom(seed),
 	}
 }
+
+func (wg *WorldGen) GetRandom() *WorldRandom {
+	return wg.rnd
+}

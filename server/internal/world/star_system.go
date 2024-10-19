@@ -30,22 +30,8 @@ type StarSystem interface {
 	GetOrbits() map[CelestialID]OrbitData
 
 	GetStars() []*Star
-	GetSurfaces() []CelestialSurface
 
 	GetNStars() int
 	GetNPlanets() int
 	GenNAsteroids() int
-}
-
-type CelestialSurfaceParams struct {
-	Mass   phys.Mass
-	Radius phys.Distance
-	Age    phys.Age
-}
-
-type CelestialSurface interface {
-	GetID() CelestialID
-	GetParams() CelestialSurfaceParams
-
-	GetSurface() Surface
 }

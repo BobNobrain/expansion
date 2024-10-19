@@ -5,6 +5,7 @@ import type * as api from '../lib/net/types.generated';
 import { ws } from '../lib/net/ws';
 import { GraphicsQuality, useDeviceSettings } from './settings';
 import { type Star } from '../domain/Star';
+import { CelestialBodyClass } from '../domain/CelestialBody';
 
 const SCOPE_NAME = 'galaxy';
 
@@ -169,9 +170,16 @@ export function useSystemContent(systemId: () => string) {
                 for (const body of surfaces) {
                     result.bodies[body.surfaceId] = {
                         id: body.surfaceId,
-                        atmosphereColor: '',
-                        massSuns: body.massSuns,
-                        radiusKm: 0,
+                        radiusKm: body.radiusKm,
+                        ageByrs: body.ageByrs,
+                        class: CelestialBodyClass.fromString(body.class),
+                        isExplored: body.isExplored,
+                        size: body.size,
+                        surface: {
+                            tempK: body.avgTempK,
+                            pressureBar: body.surfacePressureBar,
+                            g: body.g,
+                        },
                     };
                 }
 

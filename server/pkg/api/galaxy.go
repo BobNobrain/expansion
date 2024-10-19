@@ -129,9 +129,17 @@ type WorldGetSystemContentResultOrbit struct {
 }
 
 type WorldGetSystemContentResultSurface struct {
-	SurfaceID  string  `json:"surfaceId"`
-	IsExplored bool    `json:"isExplored"`
-	MassSuns   float64 `json:"massSuns"`
+	SurfaceID  string `json:"surfaceId"`
+	IsExplored bool   `json:"isExplored"`
+	// MassSuns           float64 `json:"massSuns"`
+	RadiusKm     float64 `json:"radiusKm"`
+	AgeByrs      float64 `json:"ageByrs"`
+	Size         int     `json:"size"`
+	Class        string  `json:"class"`
+	AxisTiltRads float64 `json:"axisTiltRads"`
+	AvgTempK     float64 `json:"avgTempK"`
+	PressureBar  float64 `json:"surfacePressureBar"`
+	GravityGs    float64 `json:"g"`
 }
 
 type WorldGetSurfacePayload struct {

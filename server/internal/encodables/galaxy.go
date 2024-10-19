@@ -7,69 +7,6 @@ import (
 	"srv/pkg/api"
 )
 
-type encodablePlanetData struct {
-	planet *world.Planet
-}
-
-func NewPlanetDataEncodable(planet *world.Planet) common.Encodable {
-	return &encodablePlanetData{
-		planet: planet,
-	}
-}
-
-func (e *encodablePlanetData) Encode() interface{} {
-	nNodes := e.planet.Grid.GetNodesCount()
-	nEdges := e.planet.Grid.GetEdgesCount()
-
-	encodedCoords := make([]float64, nNodes*3)
-	for i := 0; i < nNodes; i++ {
-		pos := e.planet.Grid.GetNodeCoords(world.PlanetaryNodeIndex(i))
-		encodedCoords[i*3] = pos.X
-		encodedCoords[i*3+1] = pos.Y
-		encodedCoords[i*3+2] = pos.Z
-	}
-
-	encodedEdges := make([][]int, nNodes)
-	for i := 0; i < nNodes; i++ {
-		encodedEdges[i] = make([]int, 0)
-	}
-
-	for i := 0; i < nEdges; i++ {
-		edge := e.planet.Grid.GetEdge(world.PlanetaryGridEdgeIndex(i))
-		if edge.First() > edge.Second() {
-			continue
-		}
-
-		first := int(edge.First())
-		second := int(edge.Second())
-		encodedEdges[first] = append(encodedEdges[first], second)
-	}
-
-	encodedTiles := make([]api.WorldPlanetTile, nNodes)
-	for i := 0; i < nNodes; i++ {
-		conditions := e.planet.Tiles.GetConditions(world.PlanetaryNodeIndex(i))
-		encodedTiles[i] = api.WorldPlanetTile{
-			BiomeColor:       conditions.BiomeColor,
-			SolidElevationKm: conditions.Solid.Elevation.Kilometers(),
-		}
-	}
-
-	return &api.WorldPlanetData{
-		ID:   string(e.planet.ID),
-		Name: e.planet.Name,
-
-		RadiusKm:   e.planet.Radius.Kilometers(),
-		SeaLevelKm: e.planet.SeaLevel.Kilometers(),
-
-		Grid: api.WorldPlanetGrid{
-			Coords: encodedCoords,
-			Edges:  encodedEdges,
-		},
-
-		Tiles: encodedTiles,
-	}
-}
-
 func NewGetSectorContentResultEncodable(content pagination.Page[world.StarSystem]) common.Encodable {
 	encoded := &api.WorldGetSectorContentResult{
 		Systems: make([]api.WorldGetSectorContentResultStarSystem, 0, len(content.Items)),
@@ -143,7 +80,7 @@ func NewGalaxyOverviewEncodable(
 	})
 }
 
-func NewGetSystemContentResultEncodable(sys world.StarSystem) common.Encodable {
+func NewGetSystemContentResultEncodable(sys world.StarSystem, surfaces []world.SurfaceOverview) common.Encodable {
 	if !sys.IsExplored() {
 		// This should not normally happen, as client should not ask for
 		// content of systems that are not explored yet.
@@ -152,7 +89,6 @@ func NewGetSystemContentResultEncodable(sys world.StarSystem) common.Encodable {
 
 	stars := sys.GetStars()
 	orbits := sys.GetOrbits()
-	surfaces := sys.GetSurfaces()
 
 	result := &api.WorldGetSystemContentResult{
 		Stars:    make([]api.WorldGetSectorContentResultStar, 0, len(stars)),
@@ -178,8 +114,16 @@ func NewGetSystemContentResultEncodable(sys world.StarSystem) common.Encodable {
 
 	for _, surface := range surfaces {
 		result.Surfaces = append(result.Surfaces, api.WorldGetSystemContentResultSurface{
-			SurfaceID:  string(surface.GetID()),
-			IsExplored: false,
+			SurfaceID:    string(surface.GetID()),
+			IsExplored:   surface.IsExplored(),
+			RadiusKm:     surface.GetParams().Radius.Kilometers(),
+			AgeByrs:      surface.GetParams().Age.BillionYears(),
+			Size:         surface.GetSize(),
+			Class:        surface.GetParams().Class.String(),
+			AxisTiltRads: surface.GetParams().AxisTilt.Radians(),
+			AvgTempK:     surface.GetConditions().AvgTemp.Kelvins(),
+			PressureBar:  surface.GetConditions().Pressure.Bar(),
+			GravityGs:    surface.GetConditions().Gravity.EarthGs(),
 		})
 	}
 

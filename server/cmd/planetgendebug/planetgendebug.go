@@ -25,7 +25,7 @@ func main() {
 	planet := planetgen.GeneratePlanet(planetgen.GeneratePlanetOptions{
 		WR: *worldgen.NewWorldRandom(config.World().Seed),
 		ID: world.CreatePlanetID(world.CelestialID("AA-001"), 1),
-		Params: world.CelestialBodyParams{
+		Params: world.CelestialSurfaceParams{
 			Radius: phys.Kilometers(6400),
 			Mass:   phys.EarthMasses(1),
 			Class:  world.CelestialBodyClassTerrestial,

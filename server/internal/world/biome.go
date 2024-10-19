@@ -15,3 +15,22 @@ const (
 	BiomeSurfaceLiquid
 	BiomeSurfaceSoil
 )
+
+func (b BiomeSurface) String() string {
+	switch b {
+	case BiomeSurfaceSolid:
+		return "solid"
+
+	case BiomeSurfaceRegolith:
+		return "regolith"
+
+	case BiomeSurfaceLiquid:
+		return "liquid"
+
+	case BiomeSurfaceSoil:
+		return "soil"
+
+	default:
+		return "none"
+	}
+}

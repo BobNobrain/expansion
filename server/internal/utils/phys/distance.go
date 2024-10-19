@@ -1,9 +1,7 @@
 package phys
 
 import (
-	"bytes"
-	"fmt"
-	"math"
+	"srv/internal/utils/scale"
 )
 
 type distanceScale byte
@@ -15,147 +13,88 @@ const (
 )
 
 type Distance struct {
-	value float64
-	scale distanceScale
+	value scale.ScaledScalar[distanceScale]
 }
 
 const kmPerAu float64 = 149597870.7
-const auPerKm float64 = 1 / kmPerAu
-const kmPerLy float64 = 9460730472580.8
-const lyPerKm float64 = 1 / kmPerLy
-const auPerLy float64 = kmPerLy / kmPerAu
-const lyPerAu float64 = kmPerAu / kmPerLy
 
-func maxScale(s1, s2 distanceScale) distanceScale {
-	if s1 > s2 {
-		return s1
-	}
-	return s2
-}
+// const auPerKm float64 = 1 / kmPerAu
+const kmPerLy float64 = 9460730472580.8
+
+// const lyPerKm float64 = 1 / kmPerLy
+const auPerLy float64 = kmPerLy / kmPerAu
+
+// const lyPerAu float64 = kmPerAu / kmPerLy
+
+var distanceScaleData = scale.MakeScale([]scale.ScaleItem[distanceScale]{
+	{ScaleValue: distanceScaleKm, CoeffToPrev: 1},
+	{ScaleValue: distanceScaleAu, CoeffToPrev: kmPerAu},
+	{ScaleValue: distanceScaleLy, CoeffToPrev: auPerLy},
+})
 
 func Kilometers(km float64) Distance {
-	return Distance{value: km, scale: distanceScaleKm}
+	return Distance{value: scale.MakeScalar(distanceScaleKm, km)}
 }
 func Meters(m float64) Distance {
-	return Distance{value: m * 1e-3, scale: distanceScaleKm}
+	return Distance{value: scale.MakeScalar(distanceScaleKm, m*1e-3)}
 }
 func AstronomicalUnits(au float64) Distance {
-	return Distance{value: au, scale: distanceScaleAu}
+	return Distance{value: scale.MakeScalar(distanceScaleAu, au)}
 }
 func LightYears(ly float64) Distance {
-	return Distance{value: ly, scale: distanceScaleLy}
-}
-
-func (d Distance) rescaled(target distanceScale) float64 {
-	if d.scale == target {
-		return d.value
-	}
-
-	var coeff float64 = 1.0
-	switch d.scale {
-	case distanceScaleKm:
-		switch target {
-		case distanceScaleAu:
-			coeff = auPerKm
-
-		case distanceScaleLy:
-			coeff = lyPerKm
-		}
-
-	case distanceScaleAu:
-		switch target {
-		case distanceScaleKm:
-			coeff = kmPerAu
-
-		case distanceScaleLy:
-			coeff = lyPerAu
-		}
-
-	case distanceScaleLy:
-		switch target {
-		case distanceScaleKm:
-			coeff = kmPerLy
-
-		case distanceScaleAu:
-			coeff = auPerLy
-		}
-	}
-
-	return d.value * coeff
+	return Distance{value: scale.MakeScalar(distanceScaleLy, ly)}
 }
 
 func (d Distance) Kilometers() float64 {
-	return d.rescaled(distanceScaleKm)
+	return d.value.ToScale(distanceScaleKm, distanceScaleData)
 }
 func (d Distance) Meters() float64 {
-	return d.rescaled(distanceScaleKm) * 1e3
+	return d.value.ToScale(distanceScaleKm, distanceScaleData) * 1e3
 }
 func (d Distance) AstronomicalUnits() float64 {
-	return d.rescaled(distanceScaleAu)
+	return d.value.ToScale(distanceScaleAu, distanceScaleData)
 }
 func (d Distance) LightYears() float64 {
-	return d.rescaled(distanceScaleLy)
+	return d.value.ToScale(distanceScaleLy, distanceScaleData)
 }
 
 func (d1 Distance) Add(d2 Distance) Distance {
-	scale := maxScale(d1.scale, d2.scale)
-	v1 := d1.rescaled(scale)
-	v2 := d2.rescaled(scale)
-	return Distance{value: v1 + v2, scale: scale}
+	return Distance{value: d1.value.Add(d2.value, distanceScaleData)}
 }
 func (d1 Distance) Diff(d2 Distance) Distance {
-	scale := maxScale(d1.scale, d2.scale)
-	v1 := d1.rescaled(scale)
-	v2 := d2.rescaled(scale)
-	return Distance{value: v1 - v2, scale: scale}
+	return Distance{value: d1.value.Diff(d2.value, distanceScaleData)}
 }
 func (d Distance) Mul(m float64) Distance {
-	return Distance{value: d.value * m, scale: d.scale}
+	return Distance{value: d.value.Multiply(m)}
 }
 func (d Distance) Max(other Distance) Distance {
-	scale := maxScale(d.scale, other.scale)
-	v1 := d.rescaled(scale)
-	v2 := other.rescaled(scale)
-	if v1 >= v2 {
-		return d
-	}
-	return other
+	return Distance{value: d.value.Max(other.value, distanceScaleData)}
 }
 
 const proximityEps float64 = 1e-5
 
 func (d1 Distance) IsCloseTo(d2 Distance) bool {
-	scale := maxScale(d1.scale, d2.scale)
-	v1 := d1.rescaled(scale)
-	v2 := d2.rescaled(scale)
-	return math.Abs(v1-v2) < proximityEps
+	return d1.value.IsCloseTo(d2.value, distanceScaleData, proximityEps)
 }
 
 func (d1 Distance) IsGreaterThan(d2 Distance) bool {
-	scale := maxScale(d1.scale, d2.scale)
-	v1 := d1.rescaled(scale)
-	v2 := d2.rescaled(scale)
-	return v1 > v2
+	return d1.value.IsGreaterThan(d2.value, distanceScaleData)
 }
 
 func (d1 Distance) IsLessThan(d2 Distance) bool {
-	scale := maxScale(d1.scale, d2.scale)
-	v1 := d1.rescaled(scale)
-	v2 := d2.rescaled(scale)
-	return v1 < v2
+	return d1.value.IsLessThan(d2.value, distanceScaleData)
 }
 
 func (d Distance) MarshalBinary() ([]byte, error) {
-	var b bytes.Buffer
-	_, err := fmt.Fprintln(&b, d.scale, d.value)
-	if err != nil {
-		return nil, err
-	}
-	return b.Bytes(), nil
+	return d.value.MarshalBinary()
+}
+func (d *Distance) UnmarshalBinary(data []byte) error {
+	return d.value.UnmarshalBinary(data)
 }
 
-func (d *Distance) UnmarshalBinary(data []byte) error {
-	b := bytes.NewBuffer(data)
-	_, err := fmt.Fscanln(b, &d.scale, &d.value)
-	return err
+func (d Distance) MarshalJSON() ([]byte, error) {
+	return d.value.MarshalJSON()
+}
+func (d *Distance) UnmarshalJSON(data []byte) error {
+	return d.value.UnmarshalJSON(data)
 }

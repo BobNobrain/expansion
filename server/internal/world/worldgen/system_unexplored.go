@@ -130,7 +130,7 @@ func (ctx *unexploredSystemGenerator) generateBinaryStarsOrbits() {
 	dAu := utils.Lerp(minDAu, maxDAu, rnd.Float64())
 	// we will make double star systems have relatively low eccentricity,
 	// so they do not screw up planet orbits
-	e := utils.Lerp(0, 0.1, rnd.Float64())
+	e := utils.Lerp(0, 0.05, rnd.Float64())
 
 	mainM := mainStar.Params.Mass.SolarMasses()
 	secondaryM := secondaryStar.Params.Mass.SolarMasses()

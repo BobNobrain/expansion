@@ -22,7 +22,7 @@ func noiseAndBlurElevations(
 	grid := ctx.surface.Grid
 	tiles := ctx.surface.Tiles
 	for vi := 0; vi < grid.GetNodesCount(); vi++ {
-		neighbours := grid.GetConnectedNodes(world.PlanetaryNodeIndex(vi))
+		neighbours := grid.GetConnectedNodes(world.PlanetaryTileIndex(vi))
 		elevation := tiles[vi].Elevation
 
 		dH := opts.NoiseAmount * (ctx.rnd.Float64()*2 - 1)

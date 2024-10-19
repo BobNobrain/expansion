@@ -11,12 +11,14 @@ import (
 type blobRepoImpl struct {
 	db    *dbcore.Conn
 	table *dbcore.Table
+	json  bool
 }
 
-func newBlobRepo(db *dbcore.Conn, tableName string) *blobRepoImpl {
+func newBlobRepo(db *dbcore.Conn, tableName string, useJson bool) *blobRepoImpl {
 	return &blobRepoImpl{
 		db:    db,
 		table: dbcore.MakeTable(tableName),
+		json:  useJson,
 	}
 }
 
@@ -52,7 +54,11 @@ func (repo *blobRepoImpl) getBlobSchemaBuilder() *sqlbuilder.CreateTableBuilder 
 
 	blobs.Define(blobFieldFormat, "VARCHAR(63)", "NOT NULL")
 	blobs.Define(blobFieldVersion, "INTEGER", "NOT NULL")
-	blobs.Define(blobFieldData, "BYTEA", "NOT NULL")
+	if repo.json {
+		blobs.Define(blobFieldData, "JSONB", "NOT NULL")
+	} else {
+		blobs.Define(blobFieldData, "BYTEA", "NOT NULL")
+	}
 
 	blobs.Define(blobFieldUpdatedAt, "TIMESTAMPTZ", "NOT NULL", "DEFAULT NOW()")
 

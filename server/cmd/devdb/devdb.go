@@ -1,17 +1,19 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"srv/internal/components"
 	"srv/internal/components/auth"
 	"srv/internal/db"
 	"srv/internal/domain"
-	"srv/internal/game/galaxy"
 	"srv/internal/globals"
 	"srv/internal/globals/assets"
 	"srv/internal/globals/config"
+	"srv/internal/utils/binpack"
 	"srv/internal/utils/cmdutils"
+	"srv/internal/world"
 	"srv/internal/world/worldgen"
 	"srv/internal/world/wsm"
 )
@@ -89,7 +91,7 @@ func generateGalaxy(store *db.Storage, wgen *worldgen.WorldGen) {
 
 	fmt.Printf("  generated %d sectors\n", grid.Size())
 
-	gridBlob := cmdutils.Require(galaxy.SaveGalacticGrid(grid))
+	gridBlob := cmdutils.Require(SaveGalacticGrid(grid))
 	store.PrecalculatedBlobs().Create(gridBlob)
 
 	fmt.Println("  saved sectors to db")
@@ -112,9 +114,9 @@ func generateGalaxy(store *db.Storage, wgen *worldgen.WorldGen) {
 
 	cmdutils.Ensure(store.StaticStarSystemData().Clear())
 
-	for _, system := range starSystems {
+	for i, system := range starSystems {
 		state := wsm.NewSystemSharedState(wgen, system.SystemID)
-		state.FillFromGeneratedData(&system)
+		state.FillFromGeneratedData(system)
 		blob := cmdutils.Require(state.SaveState())
 		cmdutils.Ensure(store.StaticStarSystemData().Create(blob))
 
@@ -122,7 +124,12 @@ func generateGalaxy(store *db.Storage, wgen *worldgen.WorldGen) {
 			spectralClass := star.Params.Temperature.GetStarSpectralClass()
 			starsPerSpectralClass[spectralClass] += 1
 		}
+
+		if i%1000 == 0 {
+			fmt.Printf("%d done; ", i)
+		}
 	}
+	fmt.Println()
 
 	fmt.Println("  distribution:")
 	for spectralClass, count := range starsPerSpectralClass {
@@ -136,4 +143,28 @@ func all(store *db.Storage, wgen *worldgen.WorldGen) {
 	fmt.Println("Making everything!")
 	makeSchema(store)
 	generateGalaxy(store, wgen)
+}
+
+func SaveGalacticGrid(grid world.GalacticGrid) (*domain.OpaqueBlob, error) {
+	buf := new(bytes.Buffer)
+	w := binpack.NewWriter(buf)
+
+	n := grid.Size()
+	w.WriteUVarInt(uint64(n))
+	for _, sector := range grid.GetSectors() {
+		binpack.Write(w, sector)
+	}
+
+	if w.GetError() != nil {
+		return nil, w.GetError()
+	}
+
+	result := &domain.OpaqueBlob{
+		ID:      "global/galactic_grid",
+		Format:  "galactic_grid",
+		Version: 1,
+		Data:    buf.Bytes(),
+	}
+
+	return result, nil
 }

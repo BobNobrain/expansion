@@ -39,6 +39,10 @@ func (cid CelestialID) IsStarSystemID() bool {
 	return len(cid) == 6
 }
 
+func (cid CelestialID) GetStarSystemID() StarSystemID {
+	return StarSystemID(cid[0:6])
+}
+
 func CreateStarID(systemId StarSystemID, starIndex int, isOnlyStar bool) CelestialID {
 	if isOnlyStar {
 		return CelestialID(systemId)
@@ -82,7 +86,31 @@ func CreateMoonID(planetId CelestialID, index int) CelestialID {
 	return CelestialID(fmt.Sprintf("%s_%s", planetId, strings.ToLower(utils.ToRomanNumeral(index))))
 }
 
+func (cid CelestialID) IsMoonID() bool {
+	if len(cid) < 9 {
+		return false
+	}
+
+	if !strings.Contains(string(cid), "_") {
+		return false
+	}
+
+	if strings.Contains(string(cid), "-") {
+		return false
+	}
+
+	return true
+}
+
 func CreateAsteroidID(starID CelestialID, rnd *rand.Rand) CelestialID {
-	asterId := utils.GenerateRandomStringIDFormatted("aa-00-****", rnd) // a8bh1l8n
+	asterId := utils.GenerateRandomStringIDFormatted("aa-00-****", rnd)
 	return CelestialID(fmt.Sprintf("%s_%s", starID, asterId))
+}
+
+func (cid CelestialID) IsAsteroidID() bool {
+	if len(cid) != 17 || len(cid) != 18 {
+		return false
+	}
+
+	return true
 }

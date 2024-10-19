@@ -6,6 +6,7 @@ import { type Star } from '../../domain/Star';
 import { IconPlanet } from '../../icons/planet';
 import { A } from '@solidjs/router';
 import { IconMoon } from '../../icons/moon';
+import { type CelestialBodyClass } from '../../domain/CelestialBody';
 
 export type SystemContentTableProps = {
     systemId: string;
@@ -15,9 +16,13 @@ type BodiesTableRow = {
     id: string;
     name: string | undefined;
     type: 'planet' | 'moon';
-    age: number;
+    ageByrs: number;
     radiusKm: number;
-    massSuns: number;
+    size: number;
+    class: CelestialBodyClass;
+    pressureBar: number;
+    tempC: number;
+    g: number;
 };
 
 export const SystemContentTable: Component<SystemContentTableProps> = (props) => {
@@ -47,9 +52,13 @@ export const SystemContentTable: Component<SystemContentTableProps> = (props) =>
                 id: orbit.bodyId,
                 name: undefined,
                 type: isPlanet ? 'planet' : 'moon',
-                age: 0,
+                ageByrs: body.ageByrs,
                 radiusKm: body.radiusKm,
-                massSuns: body.massSuns,
+                class: body.class,
+                size: body.size,
+                tempC: body.surface.tempK - 273.15,
+                pressureBar: body.surface.pressureBar,
+                g: body.surface.g,
             });
         }
 
@@ -97,11 +106,13 @@ export const SystemContentTable: Component<SystemContentTableProps> = (props) =>
         },
         {
             header: 'Bodies',
-            content: ({ radiusKm, massSuns }) => {
+            content: ({ radiusKm, ageByrs, size, class: type }) => {
                 return (
                     <>
-                        <div>M {massSuns} suns</div>
+                        <div>Age {ageByrs} Byrs</div>
                         <div>R {radiusKm} km</div>
+                        <div>Size {size} plots</div>
+                        <div>Class: {type}</div>
                     </>
                 );
             },

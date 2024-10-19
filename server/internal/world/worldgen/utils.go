@@ -1,6 +1,9 @@
 package worldgen
 
-import "srv/internal/utils/phys"
+import (
+	"srv/internal/utils/phys"
+	"srv/internal/world"
+)
 
 func dumbIcelineEstimate(
 	starTemp phys.Temperature,
@@ -21,4 +24,22 @@ func dumbIcelineEstimate(
 	// starR * (starTemp / targetTemp)^2 / 2 + starR = targetDistance
 	tempRel := starTemp.Kelvins() / targetTemp.Kelvins()
 	return starR.Mul(tempRel*tempRel/2 + 1)
+}
+
+func CombinedStarForEstimates(stars []*world.Star) world.StarParams {
+	nStars := len(stars)
+
+	if nStars == 1 {
+		return stars[0].Params
+	}
+
+	combinedCenterStar := stars[0].Params
+	if nStars > 1 {
+		secondary := stars[1]
+		combinedCenterStar.Radius = combinedCenterStar.Radius.Max(secondary.Params.Radius)
+		combinedCenterStar.Temperature = max(combinedCenterStar.Temperature, secondary.Params.Temperature)
+		combinedCenterStar.Luminosity = max(combinedCenterStar.Luminosity, secondary.Params.Luminosity)
+	}
+
+	return combinedCenterStar
 }

@@ -67,9 +67,14 @@ func FromVolumeAndDensity(v Volume, d Density) Mass {
 func (m Mass) MarshalBinary() ([]byte, error) {
 	return m.value.MarshalBinary()
 }
-
 func (m *Mass) UnmarshalBinary(data []byte) error {
 	return m.value.UnmarshalBinary(data)
+}
+func (d Mass) MarshalJSON() ([]byte, error) {
+	return d.value.MarshalJSON()
+}
+func (d *Mass) UnmarshalJSON(data []byte) error {
+	return d.value.UnmarshalJSON(data)
 }
 
 type Volume float64

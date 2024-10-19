@@ -25,8 +25,8 @@ func NewDBPermastore() *Storage {
 	db.users = newUserRepo(db.conn)
 	db.orgs = newOrgRepo(db.conn)
 	db.cnr = newNamesRegistry(db.conn)
-	db.staticSystemData = newBlobRepo(db.conn, "stasys_data")
-	db.precalcs = newBlobRepo(db.conn, "precalcs")
+	db.staticSystemData = newBlobRepo(db.conn, "stasys_data", true)
+	db.precalcs = newBlobRepo(db.conn, "precalcs", false)
 
 	return db
 }

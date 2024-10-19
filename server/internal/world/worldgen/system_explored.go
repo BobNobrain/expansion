@@ -57,12 +57,7 @@ func newExploredSystemGenerator(
 	}
 	nStars := len(system.Stars)
 
-	combinedCenterStar := system.Stars[0].Params
-	if nStars > 1 {
-		secondary := system.Stars[1]
-		combinedCenterStar.Radius = combinedCenterStar.Radius.Max(secondary.Params.Radius)
-		combinedCenterStar.Temperature = max(combinedCenterStar.Temperature, secondary.Params.Temperature)
-	}
+	combinedCenterStar := CombinedStarForEstimates(system.Stars)
 
 	icelines := EstimateIcelines(combinedCenterStar.Temperature, combinedCenterStar.Radius)
 

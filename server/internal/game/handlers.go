@@ -1,4 +1,4 @@
-package galaxy
+package game
 
 import (
 	"srv/internal/components"
@@ -11,10 +11,10 @@ import (
 const galaxyDispatcherScope components.DispatcherScope = "galaxy"
 
 type galaxyQueryHandler struct {
-	galaxy *gameGalaxy
+	galaxy GalaxyMap
 }
 
-func newGalaxyHandler(g *gameGalaxy) components.DispatcherCommandHandler {
+func newGalaxyHandler(g GalaxyMap) components.DispatcherCommandHandler {
 	return &galaxyQueryHandler{galaxy: g}
 }
 
@@ -30,7 +30,7 @@ func (h *galaxyQueryHandler) HandleCommand(cmd *components.DispatcherCommand) (c
 			return nil, err
 		}
 
-		content := h.galaxy.querySectorContent(params)
+		content := h.galaxy.QuerySectorContent(params)
 		return encodables.NewGetSectorContentResultEncodable(content), nil
 
 	case "getOverview":
@@ -39,9 +39,7 @@ func (h *galaxyQueryHandler) HandleCommand(cmd *components.DispatcherCommand) (c
 			return nil, err
 		}
 
-		sectors := h.galaxy.grid.GetSectors()
-		beacons := h.galaxy.queryBeacons(limit)
-
+		sectors, beacons := h.galaxy.GetOverview(limit)
 		return encodables.NewGalaxyOverviewEncodable(sectors, beacons), nil
 
 	case "getSystemContent":
@@ -50,17 +48,15 @@ func (h *galaxyQueryHandler) HandleCommand(cmd *components.DispatcherCommand) (c
 			return nil, err
 		}
 
-		sys := h.galaxy.systemsById[systemId]
-		if sys == nil {
-			return nil, common.NewError("ERR_NOT_FOUND", "star system not found")
+		sys, surfaces, err := h.galaxy.GetSystemContent(systemId, cmd)
+		if err != nil {
+			return nil, err
 		}
 
-		// TODO: for testing purposes, to be removed in future
-		if !sys.IsExplored() {
-			sys.Explore(cmd.OnBehalf.ID)
-		}
+		return encodables.NewGetSystemContentResultEncodable(sys, surfaces), nil
 
-		return encodables.NewGetSystemContentResultEncodable(sys), nil
+	case "getSurface":
+		// TODO
 	}
 
 	return nil, dispatcher.NewUnknownDispatcherCommandError(cmd)

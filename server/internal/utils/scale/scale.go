@@ -3,6 +3,8 @@ package scale
 import (
 	"bytes"
 	"encoding/binary"
+	"encoding/json"
+	"math"
 )
 
 type ScaleItem[T ~byte] struct {
@@ -58,8 +60,65 @@ func (s ScaledScalar[T]) ToScale(scaleValue T, scale *Scale) float64 {
 	return s.value * coeff
 }
 
+func (s1 ScaledScalar[T]) Add(s2 ScaledScalar[T], scale *Scale) ScaledScalar[T] {
+	maxScale := s1.scaleValue
+	if s2.scaleValue > s1.scaleValue {
+		maxScale = s2.scaleValue
+	}
+	value := s1.ToScale(maxScale, scale) + s2.ToScale(maxScale, scale)
+	return ScaledScalar[T]{scaleValue: maxScale, value: value}
+}
+func (s1 ScaledScalar[T]) Diff(s2 ScaledScalar[T], scale *Scale) ScaledScalar[T] {
+	maxScale := s1.scaleValue
+	if s2.scaleValue > s1.scaleValue {
+		maxScale = s2.scaleValue
+	}
+	value := s1.ToScale(maxScale, scale) - s2.ToScale(maxScale, scale)
+	return ScaledScalar[T]{scaleValue: maxScale, value: value}
+}
 func (s ScaledScalar[T]) Multiply(factor float64) ScaledScalar[T] {
 	return ScaledScalar[T]{scaleValue: s.scaleValue, value: s.value * factor}
+}
+func (s1 ScaledScalar[T]) Max(s2 ScaledScalar[T], scale *Scale) ScaledScalar[T] {
+	maxScale := s1.scaleValue
+	if s2.scaleValue > s1.scaleValue {
+		maxScale = s2.scaleValue
+	}
+	value1 := s1.ToScale(maxScale, scale)
+	value2 := s2.ToScale(maxScale, scale)
+	if value1 < value2 {
+		return s2
+	}
+	return s1
+}
+func (s1 ScaledScalar[T]) IsCloseTo(s2 ScaledScalar[T], scale *Scale, eps float64) bool {
+	maxScale := s1.scaleValue
+	if s2.scaleValue > s1.scaleValue {
+		maxScale = s2.scaleValue
+	}
+	v1 := s1.ToScale(maxScale, scale)
+	v2 := s2.ToScale(maxScale, scale)
+	return math.Abs(v1-v2) < eps
+}
+
+func (s1 ScaledScalar[T]) IsGreaterThan(s2 ScaledScalar[T], scale *Scale) bool {
+	maxScale := s1.scaleValue
+	if s2.scaleValue > s1.scaleValue {
+		maxScale = s2.scaleValue
+	}
+	v1 := s1.ToScale(maxScale, scale)
+	v2 := s2.ToScale(maxScale, scale)
+	return v1 > v2
+}
+
+func (s1 ScaledScalar[T]) IsLessThan(s2 ScaledScalar[T], scale *Scale) bool {
+	maxScale := s1.scaleValue
+	if s2.scaleValue > s1.scaleValue {
+		maxScale = s2.scaleValue
+	}
+	v1 := s1.ToScale(maxScale, scale)
+	v2 := s2.ToScale(maxScale, scale)
+	return v1 < v2
 }
 
 func makeCoeffsKey(from, to byte) byte {
@@ -94,4 +153,28 @@ func (s *ScaledScalar[T]) UnmarshalBinary(data []byte) error {
 	}
 	err = binary.Read(r, binary.LittleEndian, &s.value)
 	return err
+}
+
+type scaledScalarJSON struct {
+	S int
+	V float64
+}
+
+func (s ScaledScalar[T]) MarshalJSON() ([]byte, error) {
+	return json.Marshal(scaledScalarJSON{
+		S: int(s.scaleValue),
+		V: s.value,
+	})
+}
+
+func (s *ScaledScalar[T]) UnmarshalJSON(data []byte) error {
+	var parsed scaledScalarJSON
+	err := json.Unmarshal(data, &parsed)
+	if err != nil {
+		return err
+	}
+
+	s.scaleValue = T(parsed.S)
+	s.value = parsed.V
+	return nil
 }

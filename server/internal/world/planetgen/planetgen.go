@@ -10,7 +10,7 @@ import (
 type GeneratePlanetOptions struct {
 	WR     worldgen.WorldRandom
 	ID     world.CelestialID
-	Params world.CelestialBodyParams
+	Params world.CelestialSurfaceParams
 
 	StarParams   world.StarParams
 	StarDistance phys.Distance

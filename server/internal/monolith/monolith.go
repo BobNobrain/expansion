@@ -5,9 +5,9 @@ import (
 	"srv/internal/components"
 	"srv/internal/components/auth"
 	"srv/internal/components/dispatcher"
-	"srv/internal/components/runner"
 	"srv/internal/db"
-	"srv/internal/game/galaxy"
+	"srv/internal/game"
+	"srv/internal/game/galaxymap"
 	"srv/internal/globals/config"
 	"srv/internal/globals/logger"
 	"srv/internal/transport/http"
@@ -47,15 +47,18 @@ func (m *Monolith) Start() error {
 	// })
 
 	worldGen := worldgen.NewWorldGen(config.World().Seed)
-	m.runner = runner.NewMultipleRunner([]components.Runner{
-		galaxy.NewGameGalaxy(galaxy.GameGalaxyOptions{
-			WorldGen:         worldGen,
-			StarSystems:      store.StaticStarSystemData(),
-			Precalcs:         store.PrecalculatedBlobs(),
-			Dispatcher:       missionControl,
-			AutoSaveInterval: config.World().AutoSavePeriod,
+
+	gameInstance := game.New(game.GameComponents{
+		Dispatcher: missionControl,
+		GalaxyMap: galaxymap.New(galaxymap.GalaxyMapOptions{
+			WorldGen:    worldGen,
+			StarSystems: store.StaticStarSystemData(),
+			Precalcs:    store.PrecalculatedBlobs(),
+			Dispatcher:  missionControl,
 		}),
 	})
+
+	m.runner = gameInstance
 
 	err = m.runner.Start()
 	if err != nil {

@@ -11,7 +11,7 @@ import (
 type surfaceGenContext struct {
 	rnd *rand.Rand
 
-	params world.CelestialBodyParams
+	params world.CelestialSurfaceParams
 
 	starParams          world.StarParams
 	nearestStarDistance phys.Distance

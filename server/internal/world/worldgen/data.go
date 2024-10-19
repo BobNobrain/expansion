@@ -14,7 +14,7 @@ const CelestialBodyLevelPlanet = 0
 
 type GeneratedCelestialData struct {
 	ID     world.CelestialID
-	Params world.CelestialBodyParams
+	Params world.CelestialSurfaceParams
 	Level  int
 }
 

@@ -1,8 +1,8 @@
 package worldgen
 
 import (
-	"fmt"
 	"math"
+	"srv/internal/globals/logger"
 	"srv/internal/utils"
 	"srv/internal/utils/geom"
 	"srv/internal/utils/phys"
@@ -11,7 +11,11 @@ import (
 
 func (ctx *exploredSystemGenerator) generatePlanets() {
 	planetCount := 0
-	fmt.Printf("worldgen: si sublimate line is %f\n", ctx.silicateSublimationLine.AstronomicalUnits())
+
+	logger.Debug(logger.FromMessage("worldgen", "generating planets").
+		WithDetail("si subl (au)", ctx.silicateSublimationLine.AstronomicalUnits()).
+		WithDetail("id", ctx.system.SystemID),
+	)
 	for ctx.nextFreeOrbitDistance.AstronomicalUnits() < 100 {
 		d := ctx.nextFreeOrbitDistance
 		ctx.nextFreeOrbitDistance = d.Mul(utils.Lerp(1.3, 2.1, ctx.rnd.Float64()))
@@ -30,6 +34,11 @@ func (ctx *exploredSystemGenerator) generatePlanets() {
 			planetCount++
 		}
 	}
+
+	logger.Debug(logger.FromMessage("worldgen", "generated planets").
+		WithDetail("count", planetCount).
+		WithDetail("id", ctx.system.SystemID),
+	)
 
 	if len(ctx.system.Stars) == 3 {
 		ctx.clearPlanetsFromTernaryStar()
@@ -70,7 +79,7 @@ func (ctx *exploredSystemGenerator) generateRockyPlanet(
 	planet := GeneratedCelestialData{
 		ID:    world.CreatePlanetID(aroundStar.ID, i),
 		Level: CelestialBodyLevelPlanet,
-		Params: world.CelestialBodyParams{
+		Params: world.CelestialSurfaceParams{
 			Mass:   phys.EarthMasses(massEarths),
 			Radius: phys.Kilometers(6400 * 1.008 * math.Pow(massEarths, 0.279)),
 			Class:  world.CelestialBodyClassTerrestial,
@@ -104,7 +113,7 @@ func (ctx *exploredSystemGenerator) generateGasGiantPlanet(
 	planet := GeneratedCelestialData{
 		ID:    world.CreatePlanetID(aroundStar.ID, i),
 		Level: CelestialBodyLevelPlanet,
-		Params: world.CelestialBodyParams{
+		Params: world.CelestialSurfaceParams{
 			Mass:   phys.EarthMasses(massEarths),
 			Radius: phys.Kilometers(6400 * radiusEarths),
 			Class:  world.CelestialBodyClassGaseous,

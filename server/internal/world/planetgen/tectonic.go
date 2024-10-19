@@ -34,7 +34,7 @@ type tectonicLandscapeOptions struct {
 }
 
 type tectonicPlate struct {
-	nodes             *utils.Set[world.PlanetaryNodeIndex]
+	nodes             *utils.Set[world.PlanetaryTileIndex]
 	elevation         float64
 	movementMagnitude float64
 	movementAngleSin  float64
@@ -69,7 +69,7 @@ func generateTectonicLandscape(
 
 	for i := 0; i < nPlates; i++ {
 		tl.plates[i] = &tectonicPlate{
-			nodes: utils.NewSet[world.PlanetaryNodeIndex](),
+			nodes: utils.NewSet[world.PlanetaryTileIndex](),
 		}
 	}
 
@@ -85,17 +85,17 @@ func generateTectonicLandscape(
 
 func (tl *tectonicLandscaper) floodFillPlates() {
 	nPlates := len(tl.plates)
-	visitedNodes := utils.NewSet[world.PlanetaryNodeIndex]()
-	floodQueues := make([]*utils.Queue[world.PlanetaryNodeIndex], nPlates)
+	visitedNodes := utils.NewSet[world.PlanetaryTileIndex]()
+	floodQueues := make([]*utils.Queue[world.PlanetaryTileIndex], nPlates)
 
-	floodFillStarts := make([]world.PlanetaryNodeIndex, 0)
+	floodFillStarts := make([]world.PlanetaryTileIndex, 0)
 	for nodeIndex := range utils.DrawDistinctIntegers(tl.ctx.rnd, nPlates, tl.ctx.surface.Grid.GetNodesCount()) {
-		floodFillStarts = append(floodFillStarts, world.PlanetaryNodeIndex(nodeIndex))
+		floodFillStarts = append(floodFillStarts, world.PlanetaryTileIndex(nodeIndex))
 	}
 
 	for pi := 0; pi < nPlates; pi++ {
 		plateStart := floodFillStarts[pi]
-		floodQueues[pi] = utils.NewQueue[world.PlanetaryNodeIndex]()
+		floodQueues[pi] = utils.NewQueue[world.PlanetaryTileIndex]()
 		floodQueues[pi].Push(plateStart)
 	}
 
@@ -160,7 +160,7 @@ func (tl *tectonicLandscaper) eatSmallPlates() {
 			continue
 		}
 
-		plateNeighbours := utils.NewSet[world.PlanetaryNodeIndex]()
+		plateNeighbours := utils.NewSet[world.PlanetaryTileIndex]()
 		for node := range smallPlate.nodes.Items() {
 			nodeNeighbours := tl.ctx.surface.Grid.GetConnectedNodes(node)
 			for _, neighbour := range nodeNeighbours {
@@ -203,7 +203,7 @@ func (tl *tectonicLandscaper) calculateLocalPlateMovements() {
 
 	for nodeIndex := 0; nodeIndex < len(tl.plateIndexes); nodeIndex++ {
 		plate := tl.plates[tl.plateIndexes[nodeIndex]]
-		tileCoords := tl.ctx.surface.Grid.GetNodeCoords(world.PlanetaryNodeIndex(nodeIndex))
+		tileCoords := tl.ctx.surface.Grid.GetNodeCoords(world.PlanetaryTileIndex(nodeIndex))
 
 		tileNormal := tileCoords.Normalized()
 		localNorth := planetNorth.Diff(tileNormal.Mul(planetNorth.Dot(tileNormal))).Normalized()
@@ -218,7 +218,7 @@ func (tl *tectonicLandscaper) assignElevations() {
 	slopeFactor := tl.opts.SlopeFactor
 
 	for vi := 0; vi < len(tl.plateIndexes); vi++ {
-		nodeIndex := world.PlanetaryNodeIndex(vi)
+		nodeIndex := world.PlanetaryTileIndex(vi)
 		tilePlateIndex := tl.plateIndexes[vi]
 		tilePlate := tl.plates[tilePlateIndex]
 		neighbours := tl.ctx.surface.Grid.GetConnectedNodes(nodeIndex)
