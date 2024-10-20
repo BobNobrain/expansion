@@ -1,7 +1,7 @@
 package mesh_test
 
 import (
-	"srv/internal/utils/geom/mesh"
+	"srv/internal/utils/mesh"
 	"testing"
 )
 
