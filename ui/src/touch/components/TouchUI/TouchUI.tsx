@@ -14,7 +14,7 @@ export const TouchUI: Component = () => {
             <LogInGuard>
                 <HashRouter root={TouchPageWrapper}>
                     <Route path="/" component={HomePage} />
-                    <Route path="/galaxy/*" component={CartographyPage} />
+                    <Route path="/galaxy/:id?/:tab?" component={CartographyPage} />
 
                     <Route path="*" component={NotFoundPage} />
                 </HashRouter>

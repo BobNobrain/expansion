@@ -1,14 +1,19 @@
-import { type Component, Show, createMemo } from 'solid-js';
+import { type Component, Show, createEffect, createMemo } from 'solid-js';
 import { useSystemContent } from '../../store/galaxy';
-import { Text } from '../Text/Text';
-import { DataTable, type DataTableColumn } from '../DataTable/DataTable';
-import { type Star } from '../../domain/Star';
 import { type CelestialBody } from '../../domain/CelestialBody';
+import { RouteMatcher } from '../RouteMatcher/RouteMatcher';
 import { SystemContentSurfacesList } from './SystemContentSurfacesList';
+import { SystemContentStarsList } from './SystemContentStarsList';
+import { type TabHeader, TabsList } from '../TabsList/TabsList';
+import { useNavigate } from '@solidjs/router';
+import styles from './SystemContentTable.module.css';
+import { getExploreRoute, useExploreRouteInfo } from '../../routes/explore';
 
 export type SystemContentTableProps = {
     systemId: string;
 };
+
+const ALLOWED_TABS = ['planets', 'infra', 'stars'];
 
 export const SystemContentTable: Component<SystemContentTableProps> = (props) => {
     const sc = useSystemContent(() => props.systemId);
@@ -38,34 +43,51 @@ export const SystemContentTable: Component<SystemContentTableProps> = (props) =>
         return rows;
     });
 
-    const starColumns: DataTableColumn<Star>[] = [
-        {
-            header: 'ID',
-            content: 'id',
-        },
-        {
-            header: 'r (au)',
-            content: ({ radiusAu }) => radiusAu.toFixed(3),
-        },
-        {
-            header: 'T (K)',
-            content: ({ tempK }) => tempK.toFixed(0),
-        },
-        {
-            header: 'Age (byrs)',
-            content: ({ ageBillionYears }) => ageBillionYears.toFixed(3),
-        },
-    ];
+    const navigate = useNavigate();
+    const routeInfo = useExploreRouteInfo();
+
+    const tabs = createMemo<TabHeader[]>(() => {
+        const { objectId } = routeInfo();
+        return [
+            {
+                title: 'Planets',
+                href: getExploreRoute({ objectId, tab: 'planets' }),
+            },
+            {
+                title: 'Infrastructure',
+                href: getExploreRoute({ objectId, tab: 'infra' }),
+            },
+            {
+                title: 'Stars',
+                href: getExploreRoute({ objectId, tab: 'stars' }),
+            },
+        ];
+    });
+
+    createEffect(() => {
+        const { tab, objectId } = routeInfo();
+        if (!tab || !ALLOWED_TABS.includes(tab)) {
+            navigate(getExploreRoute({ objectId, tab: 'planets' }), { replace: true });
+        }
+    });
 
     return (
-        <Show when={sc.data} fallback="Loading...">
-            <section>
-                <SystemContentSurfacesList bodies={sortedBodies()} />
-            </section>
-            <section>
-                <Text size="h2">Stars</Text>
-                <DataTable columns={starColumns} rows={sc.data!.stars} />
-            </section>
-        </Show>
+        <div class={styles.content}>
+            <nav class={styles.tabs}>
+                <TabsList tabs={tabs()} />
+            </nav>
+            <Show when={sc.data} fallback="Loading...">
+                <RouteMatcher
+                    endsWith="/planets"
+                    component={SystemContentSurfacesList}
+                    props={{ bodies: sortedBodies() }}
+                />
+                <RouteMatcher
+                    endsWith="/stars"
+                    component={SystemContentStarsList}
+                    props={{ stars: sc.data!.stars || [] }}
+                />
+            </Show>
+        </div>
     );
 };

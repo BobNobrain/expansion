@@ -51,7 +51,7 @@ export const SystemContentSurfacesList: Component<SystemContentSurfacesListProps
             }
 
             return {
-                humanId: b.id,
+                humanId: '#' + b.id,
                 title: b.id,
                 icon: iconsByPlanetType[bodyClass],
                 properties,
@@ -59,5 +59,5 @@ export const SystemContentSurfacesList: Component<SystemContentSurfacesListProps
         });
     });
 
-    return <ContentList header="Planets and Moons" items={items()} />;
+    return <ContentList items={items()} />;
 };

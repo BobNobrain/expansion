@@ -1,5 +1,5 @@
-import { createMemo, type Component, Show } from 'solid-js';
-import { useLocation, useNavigate } from '@solidjs/router';
+import { type Component, Show } from 'solid-js';
+import { useNavigate } from '@solidjs/router';
 import { SceneRenderer } from '../../../components/three/SceneRenderer/SceneRenderer';
 import { GalaxyMapScene } from '../../../scenes/GalaxyMapScene/GalaxyMapScene';
 import { TouchCurtain } from '../../components/TouchCurtain/TouchCurtain';
@@ -7,54 +7,51 @@ import { SectorContentTable } from '../../../components/SectorContentTable/Secto
 import { SystemMapScene } from '../../../scenes/SystemMapScene/SystemMapScene';
 import { SystemContentTable } from '../../../components/SystemContentTable/SystemContentTable';
 import { usePageContextBinding } from '../../components/TouchPage';
-
-type Selection = {
-    type: 'galaxy' | 'sector' | 'system' | 'planet';
-    id: string;
-    tab: string;
-};
+import { getExploreRoute, useExploreRouteInfo } from '../../../routes/explore';
 
 export const CartographyPage: Component = () => {
+    const routeInfo = useExploreRouteInfo();
     const navigate = useNavigate();
+    const onOpenSector = (sectorId: string | undefined) => navigate(getExploreRoute({ objectId: sectorId }));
+
     const backToMain = () => {
-        navigate('/');
+        const info = routeInfo();
+        switch (info.objectType) {
+            case 'galaxy':
+                navigate('/');
+                return;
+
+            case 'sector':
+                navigate(getExploreRoute({}));
+                return;
+
+            case 'system':
+                navigate(getExploreRoute({ objectId: info.objectId!.substring(0, 2) }));
+                return;
+
+            case 'surface':
+                navigate(getExploreRoute({ objectId: info.objectId!.substring(0, 7) }));
+                return;
+        }
     };
-    const location = useLocation();
-
-    const onOpenSector = (sectorId: string | undefined) => navigate(sectorId ? `/galaxy/${sectorId}` : '/galaxy');
-
-    const selection = createMemo<Selection>(() => {
-        const [id = '', tab = ''] = location.pathname.split('/').slice(2);
-
-        if (!id) {
-            return { type: 'galaxy', id, tab };
-        }
-        if (id.length === 2) {
-            return { type: 'sector', id, tab };
-        }
-        if (id.length === 6) {
-            return { type: 'system', id, tab };
-        }
-        return { type: 'planet', id, tab };
-    });
 
     usePageContextBinding(() => {
-        const s = selection();
+        const info = routeInfo();
         let title = 'Galaxy Map';
         let subtitle: string | undefined;
-        switch (s.type) {
+        switch (info.objectType) {
             case 'sector':
-                title = s.id;
+                title = info.objectId!;
                 subtitle = 'Galaxy Map';
                 break;
 
             case 'system':
-                title = s.id;
+                title = info.objectId!;
                 subtitle = 'System Map';
                 break;
 
-            case 'planet':
-                title = s.id;
+            case 'surface':
+                title = info.objectId!;
                 subtitle = 'Planet';
                 break;
         }
@@ -70,24 +67,24 @@ export const CartographyPage: Component = () => {
         <>
             <SceneRenderer>
                 <GalaxyMapScene
-                    isActive={selection().type === 'galaxy' || selection().type === 'sector'}
-                    selectedSector={selection().id}
+                    isActive={routeInfo().objectType === 'galaxy' || routeInfo().objectType === 'sector'}
+                    selectedSector={routeInfo().objectId ?? null}
                     onSectorClick={onOpenSector}
                 />
-                <SystemMapScene isActive={selection().type === 'system'} systemId={selection().id} />
+                <SystemMapScene isActive={routeInfo().objectType === 'system'} systemId={routeInfo().objectId!} />
             </SceneRenderer>
-            <TouchCurtain height={selection().type === 'galaxy' ? 's' : 'm'}>
-                <Show when={selection().type === 'galaxy'}>Galaxy Overview</Show>
+            <TouchCurtain height={routeInfo().objectType === 'galaxy' ? 's' : 'm'}>
+                <Show when={routeInfo().objectType === 'galaxy'}>Galaxy Overview</Show>
 
-                <Show when={selection().type === 'sector'}>
-                    <SectorContentTable sectorId={selection().id} />
+                <Show when={routeInfo().objectType === 'sector'}>
+                    <SectorContentTable sectorId={routeInfo().objectId!} />
                 </Show>
 
-                <Show when={selection().type === 'system'}>
-                    <SystemContentTable systemId={selection().id} />
+                <Show when={routeInfo().objectType === 'system'}>
+                    <SystemContentTable systemId={routeInfo().objectId!} />
                 </Show>
 
-                <Show when={selection().type === 'planet'}>Planet overview</Show>
+                <Show when={routeInfo().objectType === 'surface'}>Planet overview</Show>
             </TouchCurtain>
         </>
     );

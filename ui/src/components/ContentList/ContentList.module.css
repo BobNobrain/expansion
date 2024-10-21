@@ -13,7 +13,7 @@
 
 .list {
     list-style: none;
-    padding: 0 4px;
+    padding: 0;
     margin: 0;
 
     max-width: 100%;
@@ -51,7 +51,7 @@
 
 .identifier {
     color: var(--p-main-800);
-    background-color: var(--p-main-300);
+    background-color: var(--p-main-100);
     border-radius: 2px;
     padding: 1px 4px;
     font-size: 14px;
