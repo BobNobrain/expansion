@@ -1,0 +1,90 @@
+.header {
+    display: block;
+    margin: 12px 8px 6px;
+    padding: 0;
+
+    font-size: 24px;
+    line-height: 24px;
+    letter-spacing: 0.05em;
+    font-variant: small-caps;
+
+    color: var(--p-main-900);
+}
+
+.list {
+    list-style: none;
+    padding: 0 4px;
+    margin: 0;
+
+    max-width: 100%;
+    overflow: auto;
+}
+
+.item {
+    height: 64px;
+    padding: 2px 8px;
+
+    border-right: 2px solid var(--p-main-700);
+    border-radius: 4px;
+    background: radial-gradient(farthest-side circle at 100%, var(--p-main-700-25), transparent 75%)
+}
+.item + .item {
+    margin-top: 4px;
+}
+
+.title-row {
+    display: flex;
+    align-items: center;
+    height: 32px;
+}
+
+.icon {
+    margin-right: 8px;
+}
+
+.title {
+    color: var(--p-primary-500);
+    font-size: 20px;
+    line-height: 24px;
+    margin-right: 12px;
+}
+
+.identifier {
+    color: var(--p-main-800);
+    background-color: var(--p-main-300);
+    border-radius: 2px;
+    padding: 1px 4px;
+    font-size: 14px;
+    line-height: 18px;
+    width: fit-content;
+}
+
+.properties-row {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 8px;
+}
+
+.property {
+    display: flex;
+    align-items: center;
+    color: var(--p-main-800);
+
+    border: 1px solid var(--p-main-800);
+    border-radius: 2px;
+    padding: 2px 6px;
+}
+
+.property-icon {
+    margin-right: 4px;
+}
+
+.property-text {
+    font-size: 14px;
+    line-height: 18px;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 250px;
+}

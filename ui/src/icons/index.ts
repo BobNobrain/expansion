@@ -11,6 +11,7 @@ export { IconCross } from './cross';
 export { IconGalaxy } from './galaxy';
 export { IconMoon } from './moon';
 export { IconPlanet } from './planet';
+export { IconPlot } from './plot';
 export { IconStar } from './star';
 export { IconText } from './text';
 export { IconUnknown } from './unknown';

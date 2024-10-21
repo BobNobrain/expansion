@@ -9,6 +9,7 @@ export type IconProps = {
     rotate?: number;
     flipHorizontally?: boolean;
     flipVertically?: boolean;
+    block?: boolean;
 };
 
 export type IconifyOptions = {
@@ -47,6 +48,7 @@ export function iconify({ viewBox, content }: IconifyOptions): Component<IconPro
                 class={styles.icon}
                 classList={{
                     [colors[props.color ?? 'inherit']]: true,
+                    [styles.block]: props.block,
                 }}
                 style={css()}
             >
