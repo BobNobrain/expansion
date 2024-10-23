@@ -1,11 +1,13 @@
 import { createQuery } from '@tanstack/solid-query';
 import { GalacticGrid, GalacticLabelType, type GalacticOverview } from '../domain/GalacticOverview';
 import { type StarSystemContent, type StarSystemOverview } from '../domain/StarSystem';
+import { type CelestialBody, CelestialBodyClass } from '../domain/CelestialBody';
+import { type CelestialSurface } from '../domain/CelstialSurface';
+import { type Star } from '../domain/Star';
+import { Color } from '../lib/color';
 import type * as api from '../lib/net/types.generated';
 import { ws } from '../lib/net/ws';
 import { GraphicsQuality, useDeviceSettings } from './settings';
-import { type Star } from '../domain/Star';
-import { CelestialBodyClass } from '../domain/CelestialBody';
 
 const SCOPE_NAME = 'galaxy';
 
@@ -198,14 +200,36 @@ export function useSurfaceOverview(surfaceId: () => string | undefined) {
             queryKey: ['galaxy', id],
             enabled: Boolean(id),
             staleTime: 0,
-            queryFn: async () => {
+            queryFn: async (): Promise<{ body: CelestialBody; surface: CelestialSurface }> => {
                 const surface = await ws.sendCommand<api.WorldGetSurfaceResult, api.WorldGetSurfacePayload>(
                     SCOPE_NAME,
                     GalaxyContentCommands.GetSurface,
                     { surfaceId: id! },
                 );
 
-                return surface;
+                return {
+                    body: {
+                        id: surface.surfaceId,
+                        // TODO
+                        ageByrs: 0,
+                        class: 'unknown',
+                        isExplored: true,
+                        radiusKm: 0,
+                        size: surface.grid.edges.length,
+                        surface: {
+                            g: 0,
+                            pressureBar: surface.pressureBar,
+                            tempK: surface.avgTempK,
+                        },
+                    },
+                    surface: {
+                        grid: {
+                            coords: surface.grid.coords,
+                            edges: surface.grid.edges,
+                        },
+                        colors: surface.colors.map((nums) => Color.toRGB([nums[0], nums[1], nums[2]])),
+                    },
+                };
             },
         };
     });

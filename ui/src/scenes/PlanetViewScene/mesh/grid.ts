@@ -1,7 +1,7 @@
-import type { WorldPlanetData } from '../../lib/net/types.generated';
-import { MeshBuilder } from '../../lib/3d/MeshBuilder';
+import { type CelestialSurface } from '../../../domain/CelstialSurface';
+import { MeshBuilder } from '../../../lib/3d/MeshBuilder';
 
-export function restorePlanetGrid({ grid }: WorldPlanetData): MeshBuilder {
+export function restorePlanetGrid({ grid }: CelestialSurface): MeshBuilder {
     const { coords, edges } = grid;
     const builder = new MeshBuilder();
 

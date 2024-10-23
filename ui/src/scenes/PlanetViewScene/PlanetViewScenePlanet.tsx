@@ -3,12 +3,23 @@ import * as T from 'three';
 import { Mesh } from '../../components/three/Mesh/Mesh';
 import { useInScene } from '../../components/three/hooks/useInScene';
 import { useSceneRenderer } from '../../components/three/context';
+import { type CelestialBody } from '../../domain/CelestialBody';
+import { type CelestialSurface } from '../../domain/CelstialSurface';
 import { usePlanet } from './planet';
-import { scale } from './gen/utils';
+import { scale } from './mesh/utils';
+import { useEventListener } from '../../lib/solid/useEventListener';
+import { type TapGestureData } from '../../lib/gestures/types';
 // import { MeshBuilder } from '../../lib/3d/MeshBuilder';
 
-export const PlanetViewScenePlanet: Component = () => {
-    const { gridMesh, surfaceBuilder, surfaceMesh, faceIndexMap } = usePlanet();
+export type PlanetViewScenePlanetProps = {
+    body: CelestialBody | null;
+    surface: CelestialSurface | null;
+
+    showGraph?: boolean;
+};
+
+export const PlanetViewScenePlanet: Component<PlanetViewScenePlanetProps> = (props) => {
+    const { gridMesh, surfaceBuilder, surfaceMesh, faceIndexMap } = usePlanet(() => props.surface);
     const [getActiveTileIndex, setActiveTileIndex] = createSignal(-1);
 
     const activeTileMesh = createMemo(() => {
@@ -62,16 +73,17 @@ export const PlanetViewScenePlanet: Component = () => {
     });
 
     const getMeshes = createMemo(() => {
-        const grid = gridMesh();
+        const grid = props.showGraph ? gridMesh() : null;
         const surface = surfaceMesh();
 
         const result: T.Mesh[] = [];
-        if (!grid || !surface) {
-            return result;
-        }
 
-        result.push(grid);
-        result.push(surface);
+        if (grid) {
+            result.push(grid);
+        }
+        if (surface) {
+            result.push(surface);
+        }
 
         const activeTile = activeTileMesh();
         if (activeTile) {
@@ -87,10 +99,10 @@ export const PlanetViewScenePlanet: Component = () => {
     );
     useInScene(() => planetAxis);
 
-    const { canvas, getBounds, getMainCamera } = useSceneRenderer();
+    const { canvas, getBounds, getMainCamera, gestures } = useSceneRenderer();
 
     const raycaster = new T.Raycaster();
-    const handleClick = (ev: MouseEvent) => {
+    const handleClick = (ev: MouseEvent | TapGestureData) => {
         const cam = getMainCamera();
         if (!cam) {
             return;
@@ -101,8 +113,11 @@ export const PlanetViewScenePlanet: Component = () => {
             return;
         }
 
-        const { width, height } = getBounds();
-        const pointer = new T.Vector2((ev.offsetX / width) * 2 - 1, 1 - (ev.offsetY / height) * 2);
+        const { width, height, x, y } = getBounds();
+        const pointer =
+            'client' in ev
+                ? new T.Vector2(((ev.client.x - x) / width) * 2 - 1, 1 - ((ev.client.y - y) / height) * 2)
+                : new T.Vector2((ev.offsetX / width) * 2 - 1, 1 - (ev.offsetY / height) * 2);
         raycaster.setFromCamera(pointer, cam);
 
         const [closestIntersection] = raycaster.intersectObject(mesh);
@@ -140,6 +155,8 @@ export const PlanetViewScenePlanet: Component = () => {
         c.addEventListener('click', handleClick);
         onCleanup(() => c.removeEventListener('click', handleClick));
     });
+
+    useEventListener(gestures.tap, handleClick);
 
     return (
         <For each={getMeshes()}>

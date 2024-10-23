@@ -1,12 +1,13 @@
 import * as T from 'three';
 import { type MeshBuilder } from '../../lib/3d/MeshBuilder';
-import { usePlanetData } from '../../store/world';
-import { getInvertedMesh } from './gen/invert';
-import { restorePlanetGrid } from './grid';
+import { getInvertedMesh } from './mesh/invert';
+import { restorePlanetGrid } from './mesh/grid';
 import { createMemo } from 'solid-js';
-import { PlanetTileManager } from './gen/tiles';
+import { PlanetTileManager } from './mesh/tiles';
 import { type RawColor } from '../../lib/3d/types';
-import { scale } from './gen/utils';
+import { scale } from './mesh/utils';
+import { type CelestialSurface } from '../../domain/CelstialSurface';
+import { Color } from '../../lib/color';
 
 export type UsePlanetResult = {
     surfaceMesh: () => T.Mesh | null;
@@ -16,21 +17,21 @@ export type UsePlanetResult = {
     faceIndexMap: () => Record<number, number>;
 };
 
-export function usePlanet(): UsePlanetResult {
-    const { getData } = usePlanetData('testPlanet');
+export function usePlanet(getSurface: () => CelestialSurface | null): UsePlanetResult {
+    // const { getData } = usePlanetData('testPlanet');
 
     const gridBuilder = createMemo(() => {
-        const data = getData();
-        if (!data) {
+        const surface = getSurface();
+        if (!surface) {
             return null;
         }
 
-        return restorePlanetGrid(data);
+        return restorePlanetGrid(surface);
     });
 
     const tileManager = createMemo(() => {
-        const data = getData();
-        if (!data) {
+        const surface = getSurface();
+        if (!surface) {
             return null;
         }
         const grid = gridBuilder();
@@ -43,18 +44,19 @@ export function usePlanet(): UsePlanetResult {
         const palette: RawColor[] = [];
         const colorToIndex: Record<string, number> = {};
 
-        for (let tileIndex = 0; tileIndex < data.tiles.length; tileIndex++) {
-            const tileData = data.tiles[tileIndex];
-            const colorString = tileData.biomeColor;
+        for (let tileIndex = 0; tileIndex < surface.colors.length; tileIndex++) {
+            const color = surface.colors[tileIndex];
+            const colorString = Color.toHexString(color, { stripAlpha: true });
             let colorIndex = colorToIndex[colorString];
             if (colorIndex === undefined) {
                 colorIndex = colorToIndex[colorString] = palette.length;
-                palette.push(parseColor(colorString));
+                palette.push(Color.toRaw(color));
             }
 
             tiles.setTileColor(tileIndex, colorIndex);
         }
 
+        console.log('PALETTE', palette);
         tiles.setPalette(palette);
         return tiles;
     });
@@ -71,7 +73,6 @@ export function usePlanet(): UsePlanetResult {
 
         const surface = getInvertedMesh(grid);
         tiles.paintSurface(surface);
-        console.log('surface painted');
         return surface;
     });
 
@@ -81,7 +82,6 @@ export function usePlanet(): UsePlanetResult {
             return null;
         }
 
-        console.log('surface built');
         return builder.build();
     });
 
@@ -127,12 +127,4 @@ export function usePlanet(): UsePlanetResult {
         gridMesh,
         faceIndexMap,
     };
-}
-
-function parseColor(colorString: string): RawColor {
-    const rgb = [colorString.substring(0, 2), colorString.substring(2, 4), colorString.substring(4, 6)];
-    return rgb.map((hex) => {
-        const dec = Number.parseInt(hex, 16);
-        return dec / 256;
-    }) as RawColor;
 }

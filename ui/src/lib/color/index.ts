@@ -69,4 +69,9 @@ export namespace Color {
                 .join('')
         );
     }
+
+    export function toRaw(c: Color): RawColor {
+        const { r, g, b } = toRGB(c);
+        return [r, g, b];
+    }
 }

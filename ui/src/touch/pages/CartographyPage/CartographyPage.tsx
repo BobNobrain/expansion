@@ -9,6 +9,7 @@ import { SystemContentTable } from '../../../components/SystemContentTable/Syste
 import { usePageContextBinding } from '../../components/TouchPage';
 import { getExploreRoute, useExploreRouteInfo } from '../../../routes/explore';
 import { SurfaceInfo } from '../../../components/SurfaceInfo/SurfaceInfo';
+import { PlanetViewScene } from '../../../scenes/PlanetViewScene/PlanetViewScene';
 
 export const CartographyPage: Component = () => {
     const routeInfo = useExploreRouteInfo();
@@ -74,6 +75,7 @@ export const CartographyPage: Component = () => {
                     onSectorClick={onOpenSector}
                 />
                 <SystemMapScene isActive={routeInfo().objectType === 'system'} systemId={routeInfo().objectId!} />
+                <PlanetViewScene isActive={routeInfo().objectType === 'surface'} surfaceId={routeInfo().objectId!} />
             </SceneRenderer>
             <TouchCurtain height={routeInfo().objectType === 'galaxy' ? 's' : 'm'}>
                 <Show when={routeInfo().objectType === 'galaxy'}>Galaxy Overview</Show>
