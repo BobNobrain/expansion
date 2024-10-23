@@ -23,6 +23,7 @@ export const PlanetViewScene: Component<PlanetViewSceneProps> = (props) => {
                 maxDistance={2.5}
                 yawInertia={0.95}
                 pitchInertia={0.92}
+                pannable={false}
             />
             <PlanetViewSceneLight />
             <PlanetViewScenePlanet surface={surface.data?.surface ?? null} body={surface.data?.body ?? null} />

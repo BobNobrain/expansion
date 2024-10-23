@@ -162,7 +162,7 @@ export const RotatableCamera: Component<RotatableCameraProps> = (props) => {
         cameraState.hold();
     });
     useEventListener(gestures.drag, (drag) => {
-        if (drag.points > 1) {
+        if (drag.points > 1 && props.pannable) {
             let panSpeed = 1e-3;
             switch (typeof props.panSpeed) {
                 case 'function':
