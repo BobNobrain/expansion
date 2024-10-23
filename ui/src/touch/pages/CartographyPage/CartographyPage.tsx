@@ -8,6 +8,7 @@ import { SystemMapScene } from '../../../scenes/SystemMapScene/SystemMapScene';
 import { SystemContentTable } from '../../../components/SystemContentTable/SystemContentTable';
 import { usePageContextBinding } from '../../components/TouchPage';
 import { getExploreRoute, useExploreRouteInfo } from '../../../routes/explore';
+import { SurfaceInfo } from '../../../components/SurfaceInfo/SurfaceInfo';
 
 export const CartographyPage: Component = () => {
     const routeInfo = useExploreRouteInfo();
@@ -16,6 +17,7 @@ export const CartographyPage: Component = () => {
 
     const backToMain = () => {
         const info = routeInfo();
+        console.log('backToMain', info);
         switch (info.objectType) {
             case 'galaxy':
                 navigate('/');
@@ -30,7 +32,7 @@ export const CartographyPage: Component = () => {
                 return;
 
             case 'surface':
-                navigate(getExploreRoute({ objectId: info.objectId!.substring(0, 7) }));
+                navigate(getExploreRoute({ objectId: info.objectId!.substring(0, 6) }));
                 return;
         }
     };
@@ -84,7 +86,9 @@ export const CartographyPage: Component = () => {
                     <SystemContentTable systemId={routeInfo().objectId!} />
                 </Show>
 
-                <Show when={routeInfo().objectType === 'surface'}>Planet overview</Show>
+                <Show when={routeInfo().objectType === 'surface'}>
+                    <SurfaceInfo />
+                </Show>
             </TouchCurtain>
         </>
     );

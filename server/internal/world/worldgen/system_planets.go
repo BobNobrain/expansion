@@ -27,11 +27,13 @@ func (ctx *exploredSystemGenerator) generatePlanets() {
 		if d.IsLessThan(ctx.waterSnowline) {
 			ctx.generateRockyPlanet(ctx.system.Stars[0], planetCount)
 			planetCount++
+			continue
 		}
 
 		if d.IsLessThan(ctx.coSnowline) {
 			ctx.generateGasGiantPlanet(ctx.system.Stars[0], planetCount)
 			planetCount++
+			continue
 		}
 	}
 

@@ -56,7 +56,17 @@ func (h *galaxyQueryHandler) HandleCommand(cmd *components.DispatcherCommand) (c
 		return encodables.NewGetSystemContentResultEncodable(sys, surfaces), nil
 
 	case "getSurface":
-		// TODO
+		surfaceId, err := decodables.DecodeWorldGetSurfacePayload(cmd)
+		if err != nil {
+			return nil, err
+		}
+
+		surface, err := h.galaxy.GetSurfaceData(surfaceId, cmd)
+		if err != nil {
+			return nil, err
+		}
+
+		return encodables.NewGetSurfaceResultEncodable(surface), nil
 	}
 
 	return nil, dispatcher.NewUnknownDispatcherCommandError(cmd)

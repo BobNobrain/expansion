@@ -1,6 +1,7 @@
 import { type ParentComponent, createSignal, type JSX, Show } from 'solid-js';
 import styles from './TouchCurtain.module.css';
 import { Button } from '../../../components/Button/Button';
+import { IconCurtainExpand } from '../../../icons';
 
 export type TouchCurtainProps = {
     static?: JSX.Element;
@@ -60,7 +61,7 @@ export const TouchCurtain: ParentComponent<TouchCurtainProps> = (props) => {
                     <Show when={props.expandable ?? true}>
                         <div class={styles.handle}>
                             <Button size="s" onClick={toggleExpanded}>
-                                &lt;|&gt;
+                                <IconCurtainExpand size={24} />
                             </Button>
                         </div>
                     </Show>

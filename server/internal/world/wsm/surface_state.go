@@ -3,6 +3,7 @@ package wsm
 import (
 	"encoding/json"
 	"srv/internal/domain"
+	"srv/internal/utils/color"
 	"srv/internal/utils/common"
 	"srv/internal/utils/phys"
 	"srv/internal/world"
@@ -29,15 +30,16 @@ type SurfaceSharedState struct {
 }
 
 type tileData struct {
-	BiomeColor string
+	BiomeColor color.RichColor
 	Elevation  float64
 	AvgTemp    phys.Temperature
 	Pressure   phys.Pressure
 	Surface    world.BiomeSurface
 }
 
-func NewSurfaceSharedState() *SurfaceSharedState {
+func NewSurfaceSharedState(id world.CelestialID) *SurfaceSharedState {
 	state := &SurfaceSharedState{
+		id:   id,
 		lock: new(sync.RWMutex),
 	}
 
@@ -64,7 +66,7 @@ func (state *SurfaceSharedState) FromExplorationData(data *planetgen.GeneratedSu
 	state.conditions = world.SurfaceConditions{
 		Pressure: data.Atmosphere.SeaLevelPressure,
 		AvgTemp:  data.Atmosphere.AverageTemp,
-		Gravity:  phys.CalculatePlanetGravity(data.Params.Mass, data.Params.Radius),
+		Gravity:  phys.CalculatePlanetGravity(state.params.Mass, state.params.Radius),
 	}
 
 	state.elevationScale = data.RelativeElevationsScale
@@ -72,11 +74,13 @@ func (state *SurfaceSharedState) FromExplorationData(data *planetgen.GeneratedSu
 	state.tileConditions = make([]tileData, 0, len(data.Tiles))
 	for _, generatedTile := range data.Tiles {
 		state.tileConditions = append(state.tileConditions, tileData{
-			BiomeColor: "#bbb",
-			Elevation:  generatedTile.Elevation,
-			AvgTemp:    generatedTile.AverageTemp,
-			Pressure:   generatedTile.Pressure,
-			Surface:    generatedTile.SurfaceType,
+			BiomeColor: color.RichColor{
+				Reflective: color.RichColorRGB{R: 0.6, G: 0.6, B: 0.6},
+			},
+			Elevation: generatedTile.Elevation,
+			AvgTemp:   generatedTile.AverageTemp,
+			Pressure:  generatedTile.Pressure,
+			Surface:   generatedTile.SurfaceType,
 		})
 	}
 }
@@ -140,6 +144,19 @@ func (state *SurfaceSharedState) GetTileConditions() []world.SurfaceTileConditio
 			Surface:    td.Surface,
 			Elevation:  state.elevationScale.Mul(td.Elevation),
 		})
+	}
+
+	return result
+}
+
+func (state *SurfaceSharedState) GetComposition() world.SurfaceComposition {
+	state.lock.RLock()
+	defer state.lock.RUnlock()
+
+	result := world.SurfaceComposition{
+		OceanLevel: state.ocean.Level,
+		Oceans:     state.ocean.Contents,
+		Atmosphere: state.atm.Contents,
 	}
 
 	return result

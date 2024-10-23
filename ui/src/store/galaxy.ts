@@ -13,6 +13,7 @@ enum GalaxyContentCommands {
     GetSectorContent = 'getSectorContent',
     GetOverview = 'getOverview',
     GetSystemContent = 'getSystemContent',
+    GetSurface = 'getSurface',
 }
 
 export type SectorContent = {
@@ -134,20 +135,21 @@ export function useGalaxyOverview() {
     }));
 }
 
-export function useSystemContent(systemId: () => string) {
+export function useSystemContent(systemId: () => string | undefined) {
     return createQuery(() => {
+        const sysId = systemId();
         return {
-            queryKey: ['systems', systemId()],
-            enabled: Boolean(systemId()),
+            queryKey: ['galaxy', sysId],
+            enabled: Boolean(sysId),
             staleTime: 0,
             queryFn: async () => {
                 const { orbits, stars, surfaces } = await ws.sendCommand<
                     api.WorldGetSystemContentResult,
                     api.WorldGetSystemContentPayload
-                >(SCOPE_NAME, GalaxyContentCommands.GetSystemContent, { systemId: systemId() });
+                >(SCOPE_NAME, GalaxyContentCommands.GetSystemContent, { systemId: sysId! });
 
                 const result: StarSystemContent = {
-                    id: systemId(),
+                    id: sysId!,
                     orbits: {},
                     stars: stars.map(decodeStar),
                     bodies: {},
@@ -184,6 +186,26 @@ export function useSystemContent(systemId: () => string) {
                 }
 
                 return result;
+            },
+        };
+    });
+}
+
+export function useSurfaceOverview(surfaceId: () => string | undefined) {
+    return createQuery(() => {
+        const id = surfaceId();
+        return {
+            queryKey: ['galaxy', id],
+            enabled: Boolean(id),
+            staleTime: 0,
+            queryFn: async () => {
+                const surface = await ws.sendCommand<api.WorldGetSurfaceResult, api.WorldGetSurfacePayload>(
+                    SCOPE_NAME,
+                    GalaxyContentCommands.GetSurface,
+                    { surfaceId: id! },
+                );
+
+                return surface;
             },
         };
     });

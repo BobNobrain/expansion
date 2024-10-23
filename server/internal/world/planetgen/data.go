@@ -7,9 +7,9 @@ import (
 )
 
 type GeneratedSurfaceData struct {
-	Params world.CelestialSurfaceParams
-	Grid   world.PlanetaryGrid
-	Tiles  []*GeneratedTileData
+	// Params world.CelestialSurfaceParams
+	Grid  world.PlanetaryGrid
+	Tiles []*GeneratedTileData
 
 	Atmosphere GeneratedAtmosphere
 	Oceans     GeneratedOceans

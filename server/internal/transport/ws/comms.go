@@ -102,9 +102,10 @@ func (impl *WSComms) Respond(rq components.CommsRespondRequest) common.Error {
 	var message interface{} = nil
 	if rq.Error != nil {
 		message = &api.ServerCommandErrorResponse{
-			ID:    uint64(rq.ResponseTo),
-			Code:  "ERR_UNKNOWN",
-			Error: rq.Error.Error(),
+			ID:      uint64(rq.ResponseTo),
+			Code:    rq.Error.Code(),
+			Error:   rq.Error.Error(),
+			Details: rq.Error.Details().Encode(),
 		}
 	} else {
 		message = &api.ServerCommandSuccessResponse{

@@ -29,7 +29,7 @@ func (g *galaxyMap) ExploreSystem(systemID world.StarSystemID, explorer domain.U
 	system.FillFromExplorationData(explorer, gendata)
 
 	for _, body := range gendata.Bodies {
-		surfaceState := wsm.NewSurfaceSharedState()
+		surfaceState := wsm.NewSurfaceSharedState(body.ID)
 		surfaceState.FromGeneratedData(body)
 		g.surfacesByID[body.ID] = surfaceState
 	}

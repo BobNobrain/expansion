@@ -55,7 +55,7 @@ func (g *galaxyMap) loadSurfacesData() common.Error {
 
 	for _, blob := range blobs {
 		surfaceID := world.CelestialID(blob.ID)
-		surfaceState := wsm.NewSurfaceSharedState()
+		surfaceState := wsm.NewSurfaceSharedState(surfaceID)
 		err = surfaceState.LoadState(blob)
 
 		if err != nil {

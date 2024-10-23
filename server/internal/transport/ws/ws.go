@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"srv/internal/components"
+	"srv/internal/globals/logger"
 	"srv/pkg/api"
 	"time"
 
@@ -80,13 +81,16 @@ func (c *wsClient) handleOutbox() {
 			bytes, err := json.Marshal(message)
 
 			if err != nil {
-				fmt.Printf("error jsoning: %v", err)
+				if msg, ok := message.(*api.ServerCommandSuccessResponse); ok {
+					logger.Warn(logger.FromMessage("ws", "json failure").WithDetail("msg", fmt.Sprintf("%+v", msg.Result)))
+				}
+				logger.Warn(logger.FromUnknownError("ws", err).WithDetail("msg", fmt.Sprintf("%v", message)).WithDetail("source", "json"))
 				continue
 			}
 
 			err = c.conn.WriteMessage(websocket.TextMessage, bytes)
 			if err != nil {
-				fmt.Printf("error writing: %v", err)
+				logger.Info(logger.FromUnknownError("ws", err).WithDetail("msg", fmt.Sprintf("%v", message)).WithDetail("source", "write"))
 				return
 			}
 

@@ -172,3 +172,11 @@ func (mc *MaterialCompound) ToString() string {
 
 	return b.String()
 }
+
+func (mc *MaterialCompound) ToMap() map[string]float64 {
+	result := make(map[string]float64)
+	for _, entry := range mc.components {
+		result[string(entry.material.GetID())] = entry.amount
+	}
+	return result
+}

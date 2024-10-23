@@ -1,8 +1,10 @@
 package world
 
 import (
+	"srv/internal/utils/color"
 	"srv/internal/utils/geom"
 	"srv/internal/utils/phys"
+	"srv/internal/utils/phys/material"
 )
 
 type CelestialBodyClass byte
@@ -47,6 +49,7 @@ type SurfaceData interface {
 	GetID() CelestialID
 	GetGrid() PlanetaryGrid
 	GetConditions() SurfaceConditions
+	GetComposition() SurfaceComposition
 	GetParams() CelestialSurfaceParams
 	GetTileConditions() []SurfaceTileConditions
 }
@@ -57,8 +60,14 @@ type SurfaceConditions struct {
 	Gravity  phys.Acceleration
 }
 
+type SurfaceComposition struct {
+	OceanLevel float64
+	Atmosphere *material.MaterialCompound
+	Oceans     *material.MaterialCompound
+}
+
 type SurfaceTileConditions struct {
-	BiomeColor string
+	BiomeColor color.RichColor
 	Elevation  phys.Distance
 	AvgTemp    phys.Temperature
 	Pressure   phys.Pressure

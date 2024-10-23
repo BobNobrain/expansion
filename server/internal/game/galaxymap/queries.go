@@ -77,7 +77,7 @@ func (g *galaxyMap) GetSurfaceData(surfaceID world.CelestialID, cmd *components.
 	surface, found := g.surfacesByID[surfaceID]
 
 	if !found {
-		return nil, common.NewError("ERR_NOT_FOUND", "surface not found")
+		return nil, common.NewError("ERR_NOT_FOUND", "surface not found: "+string(surfaceID))
 	}
 
 	if !surface.IsExplored() {

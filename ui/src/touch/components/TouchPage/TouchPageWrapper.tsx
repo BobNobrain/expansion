@@ -1,15 +1,15 @@
 import { createSignal, Show, type ParentComponent } from 'solid-js';
+import { UserFeed } from '../../../components/UserFeed/UserFeed';
+import { IconBack, IconContext, IconFlag, IconGalaxy, IconShip, IconUser } from '../../../icons';
+import { TouchHeader, TouchHeaderButton, TouchHeaderTitle } from '../TouchHeader/TouchHeader';
+import { type TouchNavBarItem } from '../TouchNavBar/TouchNavBar';
+import { TouchSidePanel } from '../TouchSidePanel/TouchSidePanel';
 import { createPageContext, PageContext } from './context';
 import { TouchPage } from './TouchPage';
-import { TouchHeader, TouchHeaderButton, TouchHeaderTitle } from '../TouchHeader/TouchHeader';
-import { IconBack, IconContext, IconGalaxy, IconUnknown, IconUser } from '../../../icons';
-import { TouchSidePanel } from '../TouchSidePanel/TouchSidePanel';
-import { type TouchNavBarItem } from '../TouchNavBar/TouchNavBar';
-import { UserFeed } from '../../../components/UserFeed/UserFeed';
 
 const navItems: TouchNavBarItem[] = [
     {
-        icon: IconUnknown,
+        icon: IconFlag,
         title: 'Bases',
         href: '/bases',
     },
@@ -19,7 +19,7 @@ const navItems: TouchNavBarItem[] = [
         href: '/galaxy',
     },
     {
-        icon: IconUnknown,
+        icon: IconShip,
         title: 'Fleet',
         href: '/fleet',
     },

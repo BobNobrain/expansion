@@ -140,3 +140,43 @@ func encodeStar(star *world.Star) api.WorldGetSectorContentResultStar {
 		AgeByrs:        star.Params.Age.BillionYears(),
 	}
 }
+
+func NewGetSurfaceResultEncodable(surface world.SurfaceData) common.Encodable {
+	grid := surface.GetGrid()
+	rawGrid := grid.ToRawData()
+	size := len(rawGrid.Coords)
+
+	conditions := surface.GetConditions()
+	composition := surface.GetComposition()
+
+	result := &api.WorldGetSurfaceResult{
+		SurfaceID: string(surface.GetID()),
+		Grid: api.WorldGetSurfaceResultGrid{
+			Coords: make([]float64, size*3),
+			Edges:  rawGrid.Connections,
+		},
+		Colors:              make([][]float64, 0, size),
+		Elevations:          make([]float64, 0, size),
+		AverageTempK:        conditions.AvgTemp.Kelvins(),
+		SeaLevelPressureBar: conditions.Pressure.Bar(),
+		AtmosphereContent:   composition.Atmosphere.ToMap(),
+		OceansContent:       composition.Oceans.ToMap(),
+		OceansLevel:         composition.OceanLevel,
+	}
+
+	for i := 0; i < size; i++ {
+		coords := grid.GetNodeCoords(world.PlanetaryTileIndex(i))
+		result.Grid.Coords[i*3+0] = coords.X
+		result.Grid.Coords[i*3+1] = coords.Y
+		result.Grid.Coords[i*3+2] = coords.Z
+	}
+
+	tileConditions := surface.GetTileConditions()
+	for _, tile := range tileConditions {
+		reflective := tile.BiomeColor.Reflective
+		result.Colors = append(result.Colors, []float64{reflective.R, reflective.G, reflective.B})
+		result.Elevations = append(result.Elevations, tile.Elevation.Kilometers())
+	}
+
+	return common.AsEncodable(result)
+}

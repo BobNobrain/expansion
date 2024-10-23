@@ -52,3 +52,14 @@ func DecodeWorldGetSystemContentPayload(cmd *components.DispatcherCommand) (worl
 
 	return world.StarSystemID(payload.SystemID), nil
 }
+
+func DecodeWorldGetSurfacePayload(cmd *components.DispatcherCommand) (world.CelestialID, common.Error) {
+	var payload api.WorldGetSurfacePayload
+	err := json.Unmarshal(cmd.Payload, &payload)
+
+	if err != nil {
+		return "", newDecodeError(err)
+	}
+
+	return world.CelestialID(payload.SurfaceID), nil
+}
