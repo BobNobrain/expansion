@@ -10,9 +10,6 @@ type MeshBuilder struct {
 	verticies []geom.Vec3
 	faces     []Poly
 	eps       float64
-
-	connections         ConnectionMap
-	connectionsOutdated bool
 }
 
 func NewMeshBuilder() *MeshBuilder {
@@ -20,12 +17,23 @@ func NewMeshBuilder() *MeshBuilder {
 		verticies: make([]geom.Vec3, 0),
 		faces:     make([]Poly, 0),
 		eps:       1e-4,
-
-		connectionsOutdated: true,
-		connections:         make(ConnectionMap, 0),
 	}
 }
 
-func (b *MeshBuilder) topologyUpdated() {
-	b.connectionsOutdated = true
+func (b *MeshBuilder) BuildGraph() geom.SpatialGraph {
+	graph := geom.NewSpatialGraph(len(b.verticies))
+
+	for i, coords := range b.verticies {
+		graph.SetCoords(i, coords)
+	}
+
+	for _, face := range b.faces {
+		graph.Connect(int(face[0]), int(face[len(face)-1]))
+
+		for fvi := 1; fvi < len(face); fvi++ {
+			graph.Connect(int(face[fvi]), int(face[fvi-1]))
+		}
+	}
+
+	return graph
 }

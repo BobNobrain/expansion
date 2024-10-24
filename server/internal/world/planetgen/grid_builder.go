@@ -5,7 +5,6 @@ import (
 	"math/rand"
 	"srv/internal/utils/geom"
 	"srv/internal/utils/mesh"
-	"srv/internal/world"
 )
 
 type GridBuilderOptions struct {
@@ -39,28 +38,17 @@ func NewGridBuilder(rnd *rand.Rand, opts GridBuilderOptions) *GridBuilder {
 const minGridSubdivisions int = 5
 const maxGridSubdivisions int = 32
 
-func (grid *GridBuilder) GetNodesCount() int {
-	return grid.nodesCount
-}
-func (grid *GridBuilder) GetEdgesCount() int {
-	return grid.edgesCount
-}
-func (grid *GridBuilder) GetConnections() mesh.ConnectionMap {
-	return grid.builder.GetConnections()
-}
-
-func (grid *GridBuilder) Generate() world.PlanetaryGrid {
+func (grid *GridBuilder) Generate() geom.SpatialGraph {
 	subdivisions := minGridSubdivisions + int(float64(maxGridSubdivisions-minGridSubdivisions)*grid.opts.Size)
-	// subdivisions := 2
+	// subdivisions := 5
 	grid.builder = mesh.CreateSubdividedIcosahedron(1.0, subdivisions)
 	grid.nodesCount = grid.builder.VertexCount()
 	grid.edgesCount = 20*3*(subdivisions-1)*subdivisions/2 - 30*(subdivisions-1)
 
 	grid.rotateRandomEdges()
-	grid.relax()
-
-	result := world.MeshBuilderToGrid(grid.builder)
-	return result
+	// return grid.builder.BuildGraph()
+	relaxed := grid.relax()
+	return relaxed
 }
 
 func (grid *GridBuilder) rotateRandomEdges() {
@@ -147,7 +135,7 @@ func (grid *GridBuilder) rotateRandomEdges() {
 }
 
 // relaxes mesh with rotated edges so that it becomes more uniform
-func (grid *GridBuilder) relax() {
+func (grid *GridBuilder) relax() geom.SpatialGraph {
 	idealFaceArea := (4 * math.Pi) / float64(grid.builder.FaceCount())
 	idealEdgeLength := math.Sqrt((idealFaceArea * 4) / math.Sqrt(3))
 
@@ -156,7 +144,7 @@ func (grid *GridBuilder) relax() {
 	maxPasses := 100
 	eps := 1e-4
 
-	connections := grid.builder.GetConnections()
+	connections := grid.builder.BuildGraph()
 
 	// random vector with components in -1..1
 	randomShift := func() geom.Vec3 {
@@ -170,10 +158,10 @@ func (grid *GridBuilder) relax() {
 	for pass := 0; pass < maxPasses; pass++ {
 		forcesByVertex := make([]geom.Vec3, grid.nodesCount)
 
-		for vi := mesh.VertexIndex(0); int(vi) < grid.nodesCount; vi++ {
-			for connectedVertex := range connections.GetConnectedSet(vi) {
-				targetV := grid.builder.GetCoords(vi)
-				neighbourV := grid.builder.GetCoords(connectedVertex)
+		for vi := 0; vi < grid.nodesCount; vi++ {
+			for connectedVertex := range connections.GetConnections(vi).Items() {
+				targetV := connections.GetCoords(vi)
+				neighbourV := connections.GetCoords(connectedVertex)
 				edge := targetV.Diff(neighbourV)
 
 				lengthsDelta := idealEdgeLength - edge.Len()
@@ -187,13 +175,13 @@ func (grid *GridBuilder) relax() {
 		}
 
 		maxChangeDone := 0.0
-		for vi := mesh.VertexIndex(0); int(vi) < grid.nodesCount; vi++ {
+		for vi := 0; vi < grid.nodesCount; vi++ {
 			totalForce := forcesByVertex[vi]
 			totalForceLen := totalForce.Len()
 			noisedTotalForce := totalForce.Add(randomShift().Mul(totalForceLen / 10))
 
-			vertex := grid.builder.GetCoords(vi)
-			grid.builder.SetCoords(vi, vertex.Add(noisedTotalForce.Mul(changeRate)).Normalized())
+			vertex := connections.GetCoords(vi)
+			connections.SetCoords(vi, vertex.Add(noisedTotalForce.Mul(changeRate)).Normalized())
 
 			changeDone := totalForceLen * changeRate
 			if maxChangeDone < changeDone {
@@ -206,4 +194,6 @@ func (grid *GridBuilder) relax() {
 			break
 		}
 	}
+
+	return connections
 }

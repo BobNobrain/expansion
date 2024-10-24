@@ -8,11 +8,11 @@ import (
 	"image/png"
 	"math"
 	"os"
-	"srv/internal/domain"
 	"srv/internal/globals"
 	"srv/internal/globals/assets"
 	"srv/internal/utils"
 	"srv/internal/utils/cmdutils"
+	"srv/internal/world"
 )
 
 func main() {
@@ -36,9 +36,9 @@ func GenerateGalaxyTexture(size int, outputPath string, galaxy *assets.GalaxySle
 	fSize := float64(size)
 
 	for xPx := 0; xPx < size; xPx++ {
-		x := (2*float64(xPx)/fSize - 1) * float64(domain.OuterRimRadius)
+		x := (2*float64(xPx)/fSize - 1) * float64(world.OuterRimRadius)
 		for yPx := 0; yPx < size; yPx++ {
-			z := (2*float64(yPx)/fSize - 1) * float64(domain.OuterRimRadius)
+			z := (2*float64(yPx)/fSize - 1) * float64(world.OuterRimRadius)
 
 			r := math.Sqrt(x*x + z*z)
 			theta := math.Acos(x / r)
@@ -72,11 +72,11 @@ func GenerateGalaxyTexture(size int, outputPath string, galaxy *assets.GalaxySle
 func sampleScatterBrightness(r float64) float64 {
 	brightnessFromR := 0.0
 
-	if r < float64(domain.InnerRimRadius) {
+	if r < float64(world.InnerRimRadius) {
 		brightnessFromR = 1.0
-	} else if float64(domain.InnerRimRadius) <= r && r <= float64(domain.OuterRimRadius) {
-		dR := float64(domain.OuterRimRadius - domain.InnerRimRadius)
-		r0 := r - float64(domain.InnerRimRadius)
+	} else if float64(world.InnerRimRadius) <= r && r <= float64(world.OuterRimRadius) {
+		dR := float64(world.OuterRimRadius - world.InnerRimRadius)
+		r0 := r - float64(world.InnerRimRadius)
 		brightnessFromR = 1.0 - r0*r0/(dR*dR)
 	}
 
@@ -84,7 +84,7 @@ func sampleScatterBrightness(r float64) float64 {
 }
 
 func sampleSleeveBrightness(r float64, theta float64, sleeve *assets.GalaxySleeveConfig) float64 {
-	rho := (r - float64(domain.InnerRimRadius)) / (float64(domain.OuterRimRadius) - float64(domain.InnerRimRadius))
+	rho := (r - float64(world.InnerRimRadius)) / (float64(world.OuterRimRadius) - float64(world.InnerRimRadius))
 	if rho < 0.0 || rho >= 1.0 {
 		return 0.0
 	}
@@ -117,8 +117,8 @@ func sampleSleeveBrightness(r float64, theta float64, sleeve *assets.GalaxySleev
 }
 
 func sampleCenterBrightness(r float64) float64 {
-	start := float64(domain.InnerRimRadius)
-	end := float64(domain.InnerRimRadius) * 2.0
+	start := float64(world.InnerRimRadius)
+	end := float64(world.InnerRimRadius) * 2.0
 
 	if r < start {
 		return 1.0

@@ -1,9 +1,5 @@
 package planetgen
 
-import (
-	"srv/internal/world"
-)
-
 type noiseAndBlurElevationsOptions struct {
 	NoiseAmount float64
 	BlurAmount  float64
@@ -21,19 +17,19 @@ func noiseAndBlurElevations(
 ) {
 	grid := ctx.surface.Grid
 	tiles := ctx.surface.Tiles
-	for vi := 0; vi < grid.GetNodesCount(); vi++ {
-		neighbours := grid.GetConnectedNodes(world.PlanetaryTileIndex(vi))
+	for vi := 0; vi < grid.Size(); vi++ {
+		neighbours := grid.GetConnections(vi)
 		elevation := tiles[vi].Elevation
 
 		dH := opts.NoiseAmount * (ctx.rnd.Float64()*2 - 1)
 
-		for _, neighbour := range neighbours {
+		for neighbour := range neighbours.Items() {
 			neighbourElevation := tiles[neighbour].Elevation
 			dElev := elevation - neighbourElevation
 			dH += dElev * opts.BlurAmount
 		}
 
-		dH = dH / float64(len(neighbours))
+		dH = dH / float64(neighbours.Size())
 
 		tiles[vi].Elevation += dH
 	}

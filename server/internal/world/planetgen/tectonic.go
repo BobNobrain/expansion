@@ -4,11 +4,10 @@ import (
 	"math"
 	"srv/internal/utils"
 	"srv/internal/utils/geom"
-	"srv/internal/world"
 )
 
 func (ctx *surfaceGenContext) generateTectonicElevations() {
-	nodesCount := ctx.surface.Grid.GetNodesCount()
+	nodesCount := ctx.surface.Grid.Size()
 	opts := new(tectonicLandscapeOptions)
 	opts.NPlates = utils.Clamp(nodesCount/40, 5, 25)
 
@@ -34,7 +33,7 @@ type tectonicLandscapeOptions struct {
 }
 
 type tectonicPlate struct {
-	nodes             *utils.Set[world.PlanetaryTileIndex]
+	nodes             *utils.Set[int]
 	elevation         float64
 	movementMagnitude float64
 	movementAngleSin  float64
@@ -56,7 +55,7 @@ func generateTectonicLandscape(
 	ctx *surfaceGenContext,
 	opts *tectonicLandscapeOptions,
 ) {
-	nodesCount := ctx.surface.Grid.GetNodesCount()
+	nodesCount := ctx.surface.Grid.Size()
 	nPlates := opts.NPlates
 
 	tl := &tectonicLandscaper{
@@ -69,7 +68,7 @@ func generateTectonicLandscape(
 
 	for i := 0; i < nPlates; i++ {
 		tl.plates[i] = &tectonicPlate{
-			nodes: utils.NewSet[world.PlanetaryTileIndex](),
+			nodes: utils.NewSet[int](),
 		}
 	}
 
@@ -85,17 +84,17 @@ func generateTectonicLandscape(
 
 func (tl *tectonicLandscaper) floodFillPlates() {
 	nPlates := len(tl.plates)
-	visitedNodes := utils.NewSet[world.PlanetaryTileIndex]()
-	floodQueues := make([]*utils.Queue[world.PlanetaryTileIndex], nPlates)
+	visitedNodes := utils.NewSet[int]()
+	floodQueues := make([]*utils.Queue[int], nPlates)
 
-	floodFillStarts := make([]world.PlanetaryTileIndex, 0)
-	for nodeIndex := range utils.DrawDistinctIntegers(tl.ctx.rnd, nPlates, tl.ctx.surface.Grid.GetNodesCount()) {
-		floodFillStarts = append(floodFillStarts, world.PlanetaryTileIndex(nodeIndex))
+	floodFillStarts := make([]int, 0)
+	for nodeIndex := range utils.DrawDistinctIntegers(tl.ctx.rnd, nPlates, tl.ctx.surface.Grid.Size()) {
+		floodFillStarts = append(floodFillStarts, nodeIndex)
 	}
 
 	for pi := 0; pi < nPlates; pi++ {
 		plateStart := floodFillStarts[pi]
-		floodQueues[pi] = utils.NewQueue[world.PlanetaryTileIndex]()
+		floodQueues[pi] = utils.NewQueue[int]()
 		floodQueues[pi].Push(plateStart)
 	}
 
@@ -119,8 +118,8 @@ func (tl *tectonicLandscaper) floodFillPlates() {
 				visitedNodes.Add(*nextNode)
 			}
 
-			neighbouringNodes := tl.ctx.surface.Grid.GetConnectedNodes(*nextNode)
-			for _, neighbouringNode := range neighbouringNodes {
+			neighbouringNodes := tl.ctx.surface.Grid.GetConnections(*nextNode)
+			for neighbouringNode := range neighbouringNodes.Items() {
 				if visitedNodes.Has(neighbouringNode) {
 					continue
 				}
@@ -160,10 +159,10 @@ func (tl *tectonicLandscaper) eatSmallPlates() {
 			continue
 		}
 
-		plateNeighbours := utils.NewSet[world.PlanetaryTileIndex]()
+		plateNeighbours := utils.NewSet[int]()
 		for node := range smallPlate.nodes.Items() {
-			nodeNeighbours := tl.ctx.surface.Grid.GetConnectedNodes(node)
-			for _, neighbour := range nodeNeighbours {
+			nodeNeighbours := tl.ctx.surface.Grid.GetConnections(node)
+			for neighbour := range nodeNeighbours.Items() {
 				plateNeighbours.Add(neighbour)
 			}
 		}
@@ -203,7 +202,7 @@ func (tl *tectonicLandscaper) calculateLocalPlateMovements() {
 
 	for nodeIndex := 0; nodeIndex < len(tl.plateIndexes); nodeIndex++ {
 		plate := tl.plates[tl.plateIndexes[nodeIndex]]
-		tileCoords := tl.ctx.surface.Grid.GetNodeCoords(world.PlanetaryTileIndex(nodeIndex))
+		tileCoords := tl.ctx.surface.Grid.GetCoords(nodeIndex)
 
 		tileNormal := tileCoords.Normalized()
 		localNorth := planetNorth.Diff(tileNormal.Mul(planetNorth.Dot(tileNormal))).Normalized()
@@ -218,15 +217,15 @@ func (tl *tectonicLandscaper) assignElevations() {
 	slopeFactor := tl.opts.SlopeFactor
 
 	for vi := 0; vi < len(tl.plateIndexes); vi++ {
-		nodeIndex := world.PlanetaryTileIndex(vi)
+		nodeIndex := vi
 		tilePlateIndex := tl.plateIndexes[vi]
 		tilePlate := tl.plates[tilePlateIndex]
-		neighbours := tl.ctx.surface.Grid.GetConnectedNodes(nodeIndex)
+		neighbours := tl.ctx.surface.Grid.GetConnections(nodeIndex)
 
 		solidElevation := tilePlate.elevation
 
 		plateMovementAtTile := tl.localPlateMovements[vi]
-		for _, neighbour := range neighbours {
+		for neighbour := range neighbours.Items() {
 			neighbourPlateIndex := tl.plateIndexes[neighbour]
 			if neighbourPlateIndex == tilePlateIndex {
 				continue

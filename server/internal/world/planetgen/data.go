@@ -1,6 +1,7 @@
 package planetgen
 
 import (
+	"srv/internal/utils/geom"
 	"srv/internal/utils/phys"
 	"srv/internal/utils/phys/material"
 	"srv/internal/world"
@@ -8,7 +9,7 @@ import (
 
 type GeneratedSurfaceData struct {
 	// Params world.CelestialSurfaceParams
-	Grid  world.PlanetaryGrid
+	Grid  geom.SpatialGraph
 	Tiles []*GeneratedTileData
 
 	Atmosphere GeneratedAtmosphere

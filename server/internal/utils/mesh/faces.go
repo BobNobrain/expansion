@@ -11,13 +11,11 @@ func (b *MeshBuilder) GetFace(fi FaceIndex) Poly {
 }
 func (b *MeshBuilder) SetFace(fi FaceIndex, face Poly) {
 	b.faces[fi] = face
-	b.topologyUpdated()
 }
 
 func (b *MeshBuilder) CreateFace(face Poly) FaceIndex {
 	fi := FaceIndex(len(b.faces))
 	b.faces = append(b.faces, face)
-	b.topologyUpdated()
 	return fi
 }
 
@@ -27,7 +25,6 @@ func (b *MeshBuilder) Subdivide(f func(Poly, *MeshBuilder) []Poly) {
 		newFaces = append(newFaces, f(face, b)...)
 	}
 	b.faces = newFaces
-	b.topologyUpdated()
 }
 
 func (b *MeshBuilder) FindConnectedFaces(vis []VertexIndex) []FaceIndex {

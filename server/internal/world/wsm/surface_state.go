@@ -5,6 +5,7 @@ import (
 	"srv/internal/domain"
 	"srv/internal/utils/color"
 	"srv/internal/utils/common"
+	"srv/internal/utils/geom"
 	"srv/internal/utils/phys"
 	"srv/internal/world"
 	"srv/internal/world/planetgen"
@@ -21,7 +22,7 @@ type SurfaceSharedState struct {
 	params     world.CelestialSurfaceParams
 	isExplored bool
 
-	grid           world.PlanetaryGrid
+	grid           geom.SpatialGraph
 	conditions     world.SurfaceConditions
 	tileConditions []tileData
 	ocean          planetgen.GeneratedOceans
@@ -97,7 +98,7 @@ func (state *SurfaceSharedState) GetSize() int {
 	defer state.lock.RUnlock()
 
 	if state.isExplored {
-		return state.grid.GetNodesCount()
+		return state.grid.Size()
 	}
 
 	return 0
@@ -124,7 +125,7 @@ func (state *SurfaceSharedState) IsExplored() bool {
 	return state.isExplored
 }
 
-func (state *SurfaceSharedState) GetGrid() world.PlanetaryGrid {
+func (state *SurfaceSharedState) GetGrid() geom.SpatialGraph {
 	state.lock.RLock()
 	defer state.lock.RUnlock()
 
@@ -166,12 +167,17 @@ type surfaceStateSerializedData struct {
 	Params     world.CelestialSurfaceParams
 	IsExplored bool
 
-	Grid  world.PlanetaryGridRawData
+	Grid  surfaceStateSerializedGridData
 	Conds world.SurfaceConditions
 	Tiles []tileData
 	Ocean planetgen.GeneratedOceans
 	Atm   planetgen.GeneratedAtmosphere
 	Elev  phys.Distance
+}
+
+type surfaceStateSerializedGridData struct {
+	Coords      []geom.Vec3
+	Connections [][]int
 }
 
 func (state *SurfaceSharedState) LoadState(blob *domain.OpaqueBlob) common.Error {
@@ -188,7 +194,7 @@ func (state *SurfaceSharedState) LoadState(blob *domain.OpaqueBlob) common.Error
 	state.params = data.Params
 	state.isExplored = data.IsExplored
 
-	state.grid = world.NewGridFromRawData(data.Grid)
+	state.grid = geom.RestoreSpatialGraph(data.Grid.Coords, data.Grid.Connections)
 	state.conditions = data.Conds
 	state.tileConditions = data.Tiles
 	state.ocean = data.Ocean
@@ -206,7 +212,10 @@ func (state *SurfaceSharedState) SaveState() (*domain.OpaqueBlob, common.Error) 
 		Params:     state.params,
 		IsExplored: state.isExplored,
 
-		Grid:  state.grid.ToRawData(),
+		Grid: surfaceStateSerializedGridData{
+			Coords:      state.grid.GetAllCoords(),
+			Connections: state.grid.GetUnduplicatedConnections(),
+		},
 		Conds: state.conditions,
 		Tiles: state.tileConditions,
 		Ocean: state.ocean,

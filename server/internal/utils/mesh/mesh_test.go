@@ -9,7 +9,7 @@ func TestMeshBuilder(t *testing.T) {
 	t.Run("MeshBuilder connections", func(t *testing.T) {
 		icosa := mesh.CreateSubdividedIcosahedron(1, 2)
 
-		cons := icosa.GetConnections()
+		cons := icosa.BuildGraph()
 
 		shouldBeConnected := []struct {
 			a mesh.VertexIndex
@@ -38,13 +38,13 @@ func TestMeshBuilder(t *testing.T) {
 		}
 
 		for _, pair := range shouldBeConnected {
-			if !cons.AreConnected(pair.a, pair.b) {
+			if !cons.AreConnected(int(pair.a), int(pair.b)) {
 				t.Errorf("should be connected: %d-%d", pair.a, pair.b)
 			}
 		}
 
 		for _, pair := range shouldNotBeConnected {
-			if cons.AreConnected(pair.a, pair.b) {
+			if cons.AreConnected(int(pair.a), int(pair.b)) {
 				t.Errorf("should not be connected: %d-%d", pair.a, pair.b)
 			}
 		}

@@ -10,8 +10,8 @@ func (ctx *surfaceGenContext) calculateConditionsPerTile() {
 	g := phys.CalculatePlanetGravity(ctx.params.Mass, ctx.params.Radius).EarthGs()
 	atmMolarMass := 1.
 
-	for i := 0; i < grid.GetNodesCount(); i++ {
-		// coords := grid.GetNodeCoords(world.PlanetaryNodeIndex(i))
+	for i := 0; i < grid.Size(); i++ {
+		// coords := grid.GetCoords(world.PlanetaryNodeIndex(i))
 		tile := ctx.surface.Tiles[i]
 		elevation := tile.Elevation
 

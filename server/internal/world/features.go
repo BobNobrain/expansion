@@ -21,6 +21,6 @@ type PlanetaryFeatureLabel struct {
 }
 
 type PlanetaryFeatures interface {
-	GetFeaturesAt(node PlanetaryTileIndex) []PlanetaryFeature
+	GetFeaturesAt(node int) []PlanetaryFeature
 	GetLabeledFeatures() []PlanetaryFeatureLabel
 }

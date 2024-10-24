@@ -19,12 +19,12 @@ func (ctx *surfaceGenContext) generateGrid() {
 	})
 	gridBuilder.Generate()
 
-	grid := world.MeshBuilderToGrid(gridBuilder.builder)
+	grid := gridBuilder.builder.BuildGraph()
 
 	ctx.surface.Grid = grid
 	ctx.surface.RelativeElevationsScale = ctx.params.Radius.Mul(utils.Lerp(5e-4, 3e-3, ctx.rnd.Float64()))
-	ctx.surface.Tiles = make([]*GeneratedTileData, grid.GetNodesCount())
-	for i := 0; i < grid.GetNodesCount(); i++ {
+	ctx.surface.Tiles = make([]*GeneratedTileData, grid.Size())
+	for i := 0; i < grid.Size(); i++ {
 		ctx.surface.Tiles[i] = &GeneratedTileData{
 			Elevation:   0,
 			SurfaceType: world.BiomeSurfaceNone,

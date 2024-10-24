@@ -143,8 +143,7 @@ func encodeStar(star *world.Star) api.WorldGetSectorContentResultStar {
 
 func NewGetSurfaceResultEncodable(surface world.SurfaceData) common.Encodable {
 	grid := surface.GetGrid()
-	rawGrid := grid.ToRawData()
-	size := len(rawGrid.Coords)
+	size := grid.Size()
 
 	conditions := surface.GetConditions()
 	composition := surface.GetComposition()
@@ -153,7 +152,7 @@ func NewGetSurfaceResultEncodable(surface world.SurfaceData) common.Encodable {
 		SurfaceID: string(surface.GetID()),
 		Grid: api.WorldGetSurfaceResultGrid{
 			Coords: make([]float64, size*3),
-			Edges:  rawGrid.Connections,
+			Edges:  grid.GetUnduplicatedConnections(),
 		},
 		Colors:              make([][]float64, 0, size),
 		Elevations:          make([]float64, 0, size),
@@ -165,7 +164,7 @@ func NewGetSurfaceResultEncodable(surface world.SurfaceData) common.Encodable {
 	}
 
 	for i := 0; i < size; i++ {
-		coords := grid.GetNodeCoords(world.PlanetaryTileIndex(i))
+		coords := grid.GetCoords(i)
 		result.Grid.Coords[i*3+0] = coords.X
 		result.Grid.Coords[i*3+1] = coords.Y
 		result.Grid.Coords[i*3+2] = coords.Z

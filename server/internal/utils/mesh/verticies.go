@@ -22,13 +22,11 @@ func (b *MeshBuilder) SetCoords(vi VertexIndex, coords geom.Vec3) {
 func (b *MeshBuilder) Add(v geom.Vec3) VertexIndex {
 	vi := VertexIndex(len(b.verticies))
 	b.verticies = append(b.verticies, v)
-	b.topologyUpdated()
 	return vi
 }
 func (b *MeshBuilder) AddCoords(x, y, z float64) VertexIndex {
 	vi := VertexIndex(len(b.verticies))
 	b.verticies = append(b.verticies, geom.Vec3{X: x, Y: y, Z: z})
-	b.topologyUpdated()
 	return vi
 }
 func (b *MeshBuilder) AddIfNotClose(v geom.Vec3) VertexIndex {
@@ -41,7 +39,6 @@ func (b *MeshBuilder) AddIfNotClose(v geom.Vec3) VertexIndex {
 func (b *MeshBuilder) AddMany(vs []geom.Vec3) VertexIndex {
 	vi := VertexIndex(len(b.verticies))
 	b.verticies = append(b.verticies, vs...)
-	b.topologyUpdated()
 	return vi
 }
 

@@ -47,7 +47,7 @@ type SurfaceOverview interface {
 
 type SurfaceData interface {
 	GetID() CelestialID
-	GetGrid() PlanetaryGrid
+	GetGrid() geom.SpatialGraph
 	GetConditions() SurfaceConditions
 	GetComposition() SurfaceComposition
 	GetParams() CelestialSurfaceParams
