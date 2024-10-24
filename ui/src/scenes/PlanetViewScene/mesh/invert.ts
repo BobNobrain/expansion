@@ -48,9 +48,9 @@ function project(v: RawVertex, planeNormal: RawVertex): RawVertex {
 }
 
 function fullAngle(v: RawVertex, axis: RawVertex, planeNormal: RawVertex): number {
-    const cos = utils.dot(v, axis);
+    const cos = Math.max(-1, Math.min(utils.dot(v, axis), 1));
     const cross = utils.cross(axis, v);
-    const sinAbs = utils.size(cross);
+    const sinAbs = Math.min(1, utils.size(cross));
     const sinSign = Math.sign(utils.dot(planeNormal, cross));
     const sin = sinAbs * sinSign;
 
