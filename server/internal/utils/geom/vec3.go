@@ -60,3 +60,7 @@ func (a Vec3) IsCloseTo(b Vec3, eps float64) bool {
 	dz := math.Abs(a.Z - b.Z)
 	return dx < eps && dy < eps && dz < eps
 }
+
+func (a Vec3) IsEqualTo(b Vec3) bool {
+	return a.X == b.X && a.Y == b.Y && a.Z == b.Z
+}

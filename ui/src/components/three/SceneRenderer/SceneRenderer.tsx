@@ -31,6 +31,7 @@ export const SceneRenderer: ParentComponent<SceneRendererProps> = (props) => {
 
         renderer = new WebGLRenderer({
             canvas,
+            antialias: true,
         });
 
         createEffect(() => {

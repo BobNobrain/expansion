@@ -45,10 +45,19 @@ func (grid *GridBuilder) Generate() geom.SpatialGraph {
 	grid.nodesCount = grid.builder.VertexCount()
 	grid.edgesCount = 20*3*(subdivisions-1)*subdivisions/2 - 30*(subdivisions-1)
 
+	grid.inflate()
 	grid.rotateRandomEdges()
 	// return grid.builder.BuildGraph()
 	relaxed := grid.relax()
 	return relaxed
+}
+
+func (grid *GridBuilder) inflate() {
+	for i := 0; i < grid.builder.VertexCount(); i++ {
+		grid.builder.MapVerticies(func(v geom.Vec3, vi mesh.VertexIndex) geom.Vec3 {
+			return v.Normalized()
+		})
+	}
 }
 
 func (grid *GridBuilder) rotateRandomEdges() {
@@ -155,7 +164,8 @@ func (grid *GridBuilder) relax() geom.SpatialGraph {
 		}
 	}
 
-	for pass := 0; pass < maxPasses; pass++ {
+	var pass int
+	for pass = 0; pass < maxPasses; pass++ {
 		forcesByVertex := make([]geom.Vec3, grid.nodesCount)
 
 		for vi := 0; vi < grid.nodesCount; vi++ {

@@ -31,7 +31,7 @@ func (m *Material) SamplePhaseDiagram(at PhaseDiagramPoint) PhysicalState {
 	return m.phases.Sample(at)
 }
 
-func (m *Material) GetColor(state PhysicalState, t phys.Temperature) color.RichColor {
+func (m *Material) GetColorWithEmission(state PhysicalState, t phys.Temperature) color.RichColor {
 	clr := m.colorsByState[state]
 	k := t.Kelvins()
 	if k > 700 {
@@ -39,6 +39,10 @@ func (m *Material) GetColor(state PhysicalState, t phys.Temperature) color.RichC
 		clr.Emissive = color.ToRichColorRGB(t.GetHeatColor())
 	}
 
+	return clr
+}
+func (m *Material) GetColor(state PhysicalState) color.RichColor {
+	clr := m.colorsByState[state]
 	return clr
 }
 

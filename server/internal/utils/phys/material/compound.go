@@ -2,6 +2,7 @@ package material
 
 import (
 	"fmt"
+	"srv/internal/utils/color"
 	"strings"
 )
 
@@ -133,12 +134,26 @@ func (mc *MaterialCompound) GetLightAbsorbtionAt(conditions PhaseDiagramPoint) f
 	sum := 0.0
 	for _, component := range mc.components {
 		state := component.material.SamplePhaseDiagram(conditions)
-		color := component.material.GetColor(state, conditions.T)
+		color := component.material.GetColorWithEmission(state, conditions.T)
 		componentAbsorbtion := color.GetLightAbsorbtion()
 		sum += componentAbsorbtion * component.amount / mc.totalAmount
 	}
 
 	return sum
+}
+
+func (mc *MaterialCompound) GetAverageColorForState(state PhysicalState) color.RichColor {
+	result := color.RichColor{}
+	for _, component := range mc.components {
+		color := component.material.GetColor(state)
+		weight := component.amount / mc.totalAmount
+		result.Reflective.R += color.Reflective.R * weight
+		result.Reflective.G += color.Reflective.G * weight
+		result.Reflective.B += color.Reflective.B * weight
+
+		// TODO: other components too
+	}
+	return result
 }
 
 func (mc *MaterialCompound) GetAverageMolarMass() float64 {

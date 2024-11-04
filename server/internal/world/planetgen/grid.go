@@ -17,9 +17,9 @@ func (ctx *surfaceGenContext) generateGrid() {
 		Size:         planetSize,
 		ChaosPercent: 0.15,
 	})
-	gridBuilder.Generate()
+	grid := gridBuilder.Generate()
 
-	grid := gridBuilder.builder.BuildGraph()
+	// grid := gridBuilder.builder.BuildGraph()
 
 	ctx.surface.Grid = grid
 	ctx.surface.RelativeElevationsScale = ctx.params.Radius.Mul(utils.Lerp(5e-4, 3e-3, ctx.rnd.Float64()))
