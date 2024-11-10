@@ -154,6 +154,7 @@ func NewGetSurfaceResultEncodable(surface world.SurfaceData) common.Encodable {
 			Coords: make([]float64, size*3),
 			Edges:  grid.GetUnduplicatedConnections(),
 		},
+		SurfaceTypes:        make([]string, 0, size),
 		Colors:              make([][]float64, 0, size),
 		Elevations:          make([]float64, 0, size),
 		AverageTempK:        conditions.AvgTemp.Kelvins(),
@@ -172,9 +173,10 @@ func NewGetSurfaceResultEncodable(surface world.SurfaceData) common.Encodable {
 
 	tileConditions := surface.GetTileConditions()
 	for _, tile := range tileConditions {
-		reflective := tile.BiomeColor.Reflective
+		reflective := tile.BiomeColor
 		result.Colors = append(result.Colors, []float64{reflective.R, reflective.G, reflective.B})
 		result.Elevations = append(result.Elevations, tile.Elevation.Kilometers())
+		result.SurfaceTypes = append(result.SurfaceTypes, tile.Surface.String())
 	}
 
 	return common.AsEncodable(result)

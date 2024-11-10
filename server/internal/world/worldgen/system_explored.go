@@ -71,7 +71,7 @@ func newExploredSystemGenerator(
 	}
 
 	// cannot start orbits where planets cannot form
-	ctx.nextFreeOrbitDistance = ctx.nextFreeOrbitDistance.Max(ctx.silicateSublimationLine)
+	ctx.nextFreeOrbitDistance = ctx.nextFreeOrbitDistance.Max(ctx.silicateSublimationLine.Mul(2))
 
 	return ctx
 }

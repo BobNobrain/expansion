@@ -16,6 +16,8 @@ export type PlanetViewScenePlanetProps = {
     surface: CelestialSurface | null;
 
     showGraph?: boolean;
+
+    onClick?: (tile: number) => void;
 };
 
 export const PlanetViewScenePlanet: Component<PlanetViewScenePlanetProps> = (props) => {
@@ -147,6 +149,7 @@ export const PlanetViewScenePlanet: Component<PlanetViewScenePlanetProps> = (pro
         }
 
         setActiveTileIndex(originalFaceIndex);
+        props.onClick?.(originalFaceIndex);
     };
 
     onMount(() => {

@@ -12,6 +12,7 @@ export { IconCross } from './cross';
 export { IconCurtainExpand } from './curtain-expand';
 export { IconFlag } from './flag';
 export { IconGalaxy } from './galaxy';
+export { IconGasGiant } from './gas-giant';
 export { IconMoon } from './moon';
 export { IconOrbit } from './orbit';
 export { IconPeople } from './people';

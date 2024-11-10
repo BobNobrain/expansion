@@ -1,4 +1,4 @@
-import { Show, type Component } from 'solid-js';
+import { createEffect, Show, type Component } from 'solid-js';
 import { PlanetViewSceneLight } from './PlanetViewSceneLight';
 import { PlanetViewScenePlanet } from './PlanetViewScenePlanet';
 import { RotatableCamera } from '../common/RotatableCamera/RotatableCamera';
@@ -11,6 +11,32 @@ export type PlanetViewSceneProps = {
 
 export const PlanetViewScene: Component<PlanetViewSceneProps> = (props) => {
     const surface = useSurfaceOverview(() => (props.isActive ? props.surfaceId : undefined));
+
+    const logTileInfo = (tile: number) => {
+        const data = surface.data?.surface;
+        if (!data) {
+            return;
+        }
+
+        console.log({
+            color: data.colors[tile],
+            biome: data.biomes[tile],
+            elevation: data.elevations[tile],
+            oceanLevel: data.oceanLevel,
+        });
+    };
+
+    createEffect(() => {
+        const data = surface.data?.surface;
+        if (!data) {
+            return;
+        }
+
+        console.log({
+            atm: { ...data.atmosphere },
+            oceans: { ...data.oceans },
+        });
+    });
 
     return (
         <Show when={props.isActive && surface.data}>
@@ -26,7 +52,11 @@ export const PlanetViewScene: Component<PlanetViewSceneProps> = (props) => {
                 pannable={false}
             />
             <PlanetViewSceneLight />
-            <PlanetViewScenePlanet surface={surface.data?.surface ?? null} body={surface.data?.body ?? null} />
+            <PlanetViewScenePlanet
+                surface={surface.data?.surface ?? null}
+                body={surface.data?.body ?? null}
+                onClick={logTileInfo}
+            />
         </Show>
     );
 };

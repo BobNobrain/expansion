@@ -1,13 +1,13 @@
 {
     "$schema": "../../schemas/worldgen/material.json",
-    "id": "basalt",
+    "id": "corium",
     "tags": [ "wg" ],
     "abundance": { "min": 0.9, "max": 0.99 },
     "molar": 200,
     "colors": {
-        "solid": { "r": 0.4, "g": 0.4, "b": 0.5 },
-        "liquid": { "r": 0.4, "g": 0.4, "b": 0.5 },
-        "gas": { "r": 0.4, "g": 0.4, "b": 0.5 }
+        "solid": { "r": 0.6, "g": 0.6, "b": 0.5 },
+        "liquid": { "r": 0.6, "g": 0.6, "b": 0.5 },
+        "gas": { "r": 0.6, "g": 0.6, "b": 0.5 }
     },
     "phases": {
         "type": "melt",

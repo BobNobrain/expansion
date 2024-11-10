@@ -35,3 +35,11 @@ func ToRichColorRGB(c Color) RichColorRGB {
 		B: float64(c.GetB()) / 255,
 	}
 }
+
+func (rgb RichColorRGB) Multiply(amt float64) RichColorRGB {
+	result := RichColorRGB{}
+	result.R = utils.Clamp(rgb.R*amt, 0, 1)
+	result.G = utils.Clamp(rgb.G*amt, 0, 1)
+	result.B = utils.Clamp(rgb.B*amt, 0, 1)
+	return result
+}

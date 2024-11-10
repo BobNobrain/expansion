@@ -66,7 +66,7 @@ func (g *galaxyMap) ExploreSurface(surfaceID world.CelestialID, explorer domain.
 	}
 
 	rnd := g.generator.GetRandom().ForCelestial(surfaceID)
-	allWgMats := globaldata.Materials().GetAll().FilterByHasAnyTag("wg")
+	allWgMats := globaldata.Materials().GetAll().FilterByHasAnyTag("volatile")
 	protoplanetaryDisk := material.NewMaterialCompound()
 	for _, mat := range allWgMats {
 		protoplanetaryDisk.Add(mat, mat.GetAbundance(rnd.Float64())*mat.GetMolarMass())

@@ -37,11 +37,17 @@ func GeneratePlanet(opts GeneratePlanetOptions) *GeneratedSurfaceData {
 	ctx.generateGrid()
 
 	if opts.Params.Class.IsTerrestial() {
-		ctx.runSimulation()
+		// ctx.runSimulation()
 		ctx.generateTectonicElevations()
+		ctx.generateRockyConditions()
+		ctx.calculateConditionsPerTile()
+		ctx.assignBasicBiomes()
+		ctx.assignConditionalBiomes()
+		ctx.assignFertileBiomes()
+	} else {
+		ctx.generateGasGiantConditions()
+		ctx.fillGasGiantTiles()
 	}
-
-	ctx.calculateConditionsPerTile()
 
 	return ctx.surface
 }
@@ -71,10 +77,13 @@ func GenerateMoon(opts GenerateMoonOptions) *GeneratedSurfaceData {
 
 	ctx.generateGrid()
 
-	ctx.runSimulation()
+	// ctx.runSimulation()
 	ctx.generateTectonicElevations()
-
+	ctx.generateRockyConditions()
 	ctx.calculateConditionsPerTile()
+	ctx.assignBasicBiomes()
+	ctx.assignConditionalBiomes()
+	ctx.assignFertileBiomes()
 
 	return ctx.surface
 }

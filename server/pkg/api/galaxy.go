@@ -149,9 +149,10 @@ type WorldGetSurfacePayload struct {
 type WorldGetSurfaceResult struct {
 	SurfaceID string `json:"surfaceId"`
 
-	Grid       WorldGetSurfaceResultGrid `json:"grid"`
-	Colors     [][]float64               `json:"colors"`
-	Elevations []float64                 `json:"elevations"`
+	Grid         WorldGetSurfaceResultGrid `json:"grid"`
+	Colors       [][]float64               `json:"colors"`
+	Elevations   []float64                 `json:"elevations"`
+	SurfaceTypes []string                  `json:"surfaceTypes"`
 
 	AverageTempK        float64            `json:"avgTempK"`
 	SeaLevelPressureBar float64            `json:"pressureBar"`

@@ -7,7 +7,6 @@ import (
 	"srv/internal/utils/common"
 	"srv/internal/utils/geom"
 	"srv/internal/utils/phys"
-	"srv/internal/utils/phys/material"
 	"srv/internal/world"
 	"srv/internal/world/planetgen"
 	"srv/internal/world/worldgen"
@@ -32,7 +31,7 @@ type SurfaceSharedState struct {
 }
 
 type tileData struct {
-	BiomeColor color.RichColor
+	BiomeColor color.RichColorRGB
 	Elevation  float64
 	AvgTemp    phys.Temperature
 	Pressure   phys.Pressure
@@ -74,18 +73,13 @@ func (state *SurfaceSharedState) FromExplorationData(data *planetgen.GeneratedSu
 	state.elevationScale = data.RelativeElevationsScale
 
 	state.tileConditions = make([]tileData, 0, len(data.Tiles))
-	crustColor := data.Crust.GetAverageColorForState(material.StateSolid)
-	oceanColor := data.Oceans.Contents.GetAverageColorForState(material.StateLiquid)
 	for _, generatedTile := range data.Tiles {
 		td := tileData{
-			BiomeColor: crustColor,
+			BiomeColor: generatedTile.Color,
 			Elevation:  generatedTile.Elevation,
 			AvgTemp:    generatedTile.AverageTemp,
 			Pressure:   generatedTile.Pressure,
 			Surface:    generatedTile.SurfaceType,
-		}
-		if generatedTile.SurfaceType == world.BiomeSurfaceLiquid {
-			td.BiomeColor = oceanColor
 		}
 		state.tileConditions = append(state.tileConditions, td)
 	}

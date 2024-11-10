@@ -1,6 +1,9 @@
 package worldgen
 
-import "srv/internal/world"
+import (
+	"srv/internal/globals/logger"
+	"srv/internal/world"
+)
 
 type GeneratedStarSystemData struct {
 	SystemID world.StarSystemID
@@ -19,6 +22,8 @@ type GeneratedCelestialData struct {
 }
 
 func (ctx *GeneratedStarSystemData) placeCelestial(body GeneratedCelestialData, orbit world.OrbitData) {
+	logger.Debug(logger.FromMessage("worldgen", "system celestial generated").WithDetail("id", body.ID).WithDetail("avg d", orbit.Ellipse.AverageDistance().AstronomicalUnits()))
+
 	ctx.Bodies[body.ID] = body
 	ctx.Orbits[body.ID] = orbit
 }

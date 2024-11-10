@@ -12,11 +12,18 @@ import (
 func (ctx *exploredSystemGenerator) generatePlanets() {
 	planetCount := 0
 
+	// this should give us 6-18 planets
+	maxOrbitDistance := ctx.silicateSublimationLine.AstronomicalUnits() * utils.Lerp(50., 200, ctx.rnd.Float64())
+	if maxOrbitDistance > 70 {
+		maxOrbitDistance = 70
+	}
+
 	logger.Debug(logger.FromMessage("worldgen", "generating planets").
 		WithDetail("si subl (au)", ctx.silicateSublimationLine.AstronomicalUnits()).
 		WithDetail("id", ctx.system.SystemID),
 	)
-	for ctx.nextFreeOrbitDistance.AstronomicalUnits() < 100 {
+
+	for ctx.nextFreeOrbitDistance.AstronomicalUnits() < maxOrbitDistance {
 		d := ctx.nextFreeOrbitDistance
 		ctx.nextFreeOrbitDistance = d.Mul(utils.Lerp(1.3, 2.1, ctx.rnd.Float64()))
 
@@ -25,16 +32,21 @@ func (ctx *exploredSystemGenerator) generatePlanets() {
 		}
 
 		if d.IsLessThan(ctx.waterSnowline) {
-			ctx.generateRockyPlanet(ctx.system.Stars[0], planetCount)
+			ctx.generateRockyPlanet(ctx.system.Stars[0], planetCount, d)
 			planetCount++
 			continue
 		}
 
 		if d.IsLessThan(ctx.coSnowline) {
-			ctx.generateGasGiantPlanet(ctx.system.Stars[0], planetCount)
+			ctx.generateGasGiantPlanet(ctx.system.Stars[0], planetCount, d)
 			planetCount++
 			continue
 		}
+
+		logger.Debug(logger.FromMessage("worldgen", "next orbit").
+			WithDetail("was", d.AstronomicalUnits()).
+			WithDetail("next", ctx.nextFreeOrbitDistance.AstronomicalUnits()),
+		)
 	}
 
 	logger.Debug(logger.FromMessage("worldgen", "generated planets").
@@ -71,9 +83,8 @@ func (ctx *exploredSystemGenerator) clearPlanetsFromTernaryStar() {
 func (ctx *exploredSystemGenerator) generateRockyPlanet(
 	aroundStar *world.Star,
 	i int,
+	d phys.Distance,
 ) {
-	d := ctx.nextFreeOrbitDistance
-
 	orbit := generateLowEccentricityOrbit(ctx.rnd, d)
 
 	massEarths := utils.Lerp(0.01, 2.04, ctx.rnd.Float64())
@@ -98,9 +109,8 @@ func (ctx *exploredSystemGenerator) generateRockyPlanet(
 func (ctx *exploredSystemGenerator) generateGasGiantPlanet(
 	aroundStar *world.Star,
 	i int,
+	d phys.Distance,
 ) {
-	d := ctx.nextFreeOrbitDistance
-
 	orbit := generateLowEccentricityOrbit(ctx.rnd, d)
 
 	massEarths := utils.Lerp(2.04, 20_000, ctx.rnd.Float64())

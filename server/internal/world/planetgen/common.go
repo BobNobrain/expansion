@@ -1,5 +1,7 @@
 package planetgen
 
+import "srv/internal/utils"
+
 type noiseAndBlurElevationsOptions struct {
 	NoiseAmount float64
 	BlurAmount  float64
@@ -32,5 +34,6 @@ func noiseAndBlurElevations(
 		dH = dH / float64(neighbours.Size())
 
 		tiles[vi].Elevation += dH
+		tiles[vi].Elevation = utils.Clamp(tiles[vi].Elevation, 0, 1)
 	}
 }

@@ -35,6 +35,9 @@ func (mc *MaterialCompound) Add(mat *Material, amount float64) {
 	component.amount += amount
 	mc.totalAmount += amount
 }
+func (mc *MaterialCompound) AddPercentage(mat *Material, percentage float64) {
+	mc.Add(mat, percentage*mc.totalAmount)
+}
 
 func (mc *MaterialCompound) Remove(mat *Material) {
 	component, found := mc.components[mat.GetID()]
@@ -144,6 +147,10 @@ func (mc *MaterialCompound) GetLightAbsorbtionAt(conditions PhaseDiagramPoint) f
 
 func (mc *MaterialCompound) GetAverageColorForState(state PhysicalState) color.RichColor {
 	result := color.RichColor{}
+	if mc.totalAmount == 0.0 {
+		return result
+	}
+
 	for _, component := range mc.components {
 		color := component.material.GetColor(state)
 		weight := component.amount / mc.totalAmount
@@ -157,6 +164,10 @@ func (mc *MaterialCompound) GetAverageColorForState(state PhysicalState) color.R
 }
 
 func (mc *MaterialCompound) GetAverageMolarMass() float64 {
+	if mc.totalAmount == 0.0 {
+		return 0.0
+	}
+
 	sum := 0.0
 	for _, component := range mc.components {
 		sum += component.material.GetMolarMass() * component.amount
@@ -165,6 +176,10 @@ func (mc *MaterialCompound) GetAverageMolarMass() float64 {
 }
 
 func (mc *MaterialCompound) GetAverageGreenhouseEffect() float64 {
+	if mc.totalAmount == 0.0 {
+		return 0.0
+	}
+
 	sum := 0.0
 	for _, component := range mc.components {
 		sum += component.material.GetGreenhouseEffect() * component.amount

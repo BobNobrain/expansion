@@ -67,7 +67,7 @@ type SurfaceComposition struct {
 }
 
 type SurfaceTileConditions struct {
-	BiomeColor color.RichColor
+	BiomeColor color.RichColorRGB
 	Elevation  phys.Distance
 	AvgTemp    phys.Temperature
 	Pressure   phys.Pressure

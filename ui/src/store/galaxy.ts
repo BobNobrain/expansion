@@ -228,6 +228,11 @@ export function useSurfaceOverview(surfaceId: () => string | undefined) {
                             edges: surface.grid.edges,
                         },
                         colors: surface.colors.map((nums) => Color.toRGB([nums[0], nums[1], nums[2]])),
+                        elevations: surface.elevations,
+                        biomes: surface.surfaceTypes,
+                        oceanLevel: surface.oceansLevel,
+                        atmosphere: surface.atmosphere,
+                        oceans: surface.oceans,
                     },
                 };
             },

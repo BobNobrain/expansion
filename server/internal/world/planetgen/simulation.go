@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"srv/internal/globals/globaldata"
 	"srv/internal/globals/logger"
 	"srv/internal/utils"
 	"srv/internal/utils/phys"
@@ -11,18 +12,23 @@ import (
 )
 
 type terrestialPlanetSimulationState struct {
+	corium *material.Material
+
+	// inputs
 	rnd                 *rand.Rand
 	starLum             float64
 	starDistanceSquared float64
 	planetMass          phys.Mass
 	planetRadius        phys.Distance
-	materials           *material.MaterialCompound
-	surfaceTemp         phys.Temperature
-	surfacePressure     phys.Pressure
-	escapeVelocity      phys.Speed
-	surfaceGravity      phys.Acceleration
-	surfaceAreaKm2      float64
-	iteration           int
+
+	// results
+	materials       *material.MaterialCompound
+	surfaceTemp     phys.Temperature
+	surfacePressure phys.Pressure
+	escapeVelocity  phys.Speed
+	surfaceGravity  phys.Acceleration
+	surfaceAreaKm2  float64
+	iteration       int
 }
 
 func (state *terrestialPlanetSimulationState) log() {
@@ -42,6 +48,8 @@ func (state *terrestialPlanetSimulationState) log() {
 }
 
 func (state *terrestialPlanetSimulationState) init(ctx *surfaceGenContext) {
+	state.corium = globaldata.Materials().GetByID("corium")
+
 	state.rnd = ctx.rnd
 	state.starLum = ctx.starParams.Luminosity.Suns()
 	distanceFromStar := ctx.nearestStarDistance.AstronomicalUnits()
@@ -79,9 +87,16 @@ func (state *terrestialPlanetSimulationState) runIteration() {
 		T: state.surfaceTemp,
 		P: state.surfacePressure,
 	}
+
 	separated := state.materials.Separate(conditions)
-	surfaceAndOceans := material.MergeCompounds(separated[material.StateLiquid], separated[material.StateSolid])
+	oceans := separated[material.StateLiquid]
+	snow := separated[material.StateSolid]
 	atmosphere := separated[material.StateGas]
+
+	surfaceAndOceans := material.MergeCompounds(oceans, snow)
+	if snow.IsEmpty() {
+		surfaceAndOceans.AddPercentage(state.corium, 1)
+	}
 
 	// 0. if overall atmosphere mass is too big compared to the planet size, we shall rebalance it
 	relativeAtmosphereMass := atmosphere.GetAmountRelativeTo(state.materials)
@@ -184,11 +199,11 @@ func (ctx *surfaceGenContext) runSimulation() {
 		Contents: separated[material.StateLiquid],
 	}
 
-	ctx.surface.Crust = separated[material.StateSolid]
+	ctx.surface.Snow = separated[material.StateSolid]
 
 	// calculating oceans level
 	if !ctx.surface.Oceans.Contents.IsEmpty() {
-		rateOfMasses := ctx.surface.Crust.GetAmountRelativeTo(material.MergeCompounds(ctx.surface.Crust, ctx.surface.Oceans.Contents))
+		rateOfMasses := ctx.surface.Snow.GetAmountRelativeTo(material.MergeCompounds(ctx.surface.Snow, ctx.surface.Oceans.Contents))
 		solidRadius := ctx.params.Radius.Kilometers() * math.Cbrt(rateOfMasses)
 		oceanRadius := ctx.params.Radius.Kilometers() - solidRadius
 		res := ctx.surface.RelativeElevationsScale.Kilometers()

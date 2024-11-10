@@ -132,12 +132,12 @@ func (tl *tectonicLandscaper) floodFillPlates() {
 
 func (tl *tectonicLandscaper) generatePlateData() {
 	nPlates := len(tl.plates)
-	halfGap := tl.opts.ElevationGap / 2
+	rnd := tl.ctx.rnd
 	for pi := 0; pi < nPlates; pi++ {
-		isOceanic := tl.ctx.rnd.Float64() < tl.opts.OceanPercentage
-		plateElevation := tl.ctx.rnd.Float64()*(tl.opts.Extremeness-halfGap) + halfGap
-		moveAmount := tl.ctx.rnd.Float64()
-		moveAngle := (2*tl.ctx.rnd.Float64() - 1) * math.Pi
+		isOceanic := rnd.Float64() < tl.opts.OceanPercentage
+		plateElevation := utils.Lerp(tl.opts.ElevationGap/2, tl.opts.Extremeness, rnd.Float64())
+		moveAmount := rnd.Float64()
+		moveAngle := (2*rnd.Float64() - 1) * math.Pi
 
 		plate := tl.plates[pi]
 		plate.elevation = plateElevation

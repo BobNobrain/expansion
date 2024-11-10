@@ -2,6 +2,7 @@ import { createMemo, type Component } from 'solid-js';
 import { type CelestialBodyClass } from '../../domain/CelestialBody';
 import {
     type Icon,
+    IconGasGiant,
     IconMoon,
     IconOrbit,
     IconPeople,
@@ -20,6 +21,7 @@ type BodyClass = CelestialBodyClass | 'moon';
 
 const iconsByPlanetType: { [key in BodyClass]?: Icon } = {
     terrestial: IconPlanet,
+    gaseous: IconGasGiant,
     moon: IconMoon,
 };
 

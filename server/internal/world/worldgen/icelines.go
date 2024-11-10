@@ -10,7 +10,7 @@ type Icelines struct {
 
 func EstimateIcelines(t phys.Temperature, r phys.Distance) Icelines {
 	return Icelines{
-		Silicate: dumbIcelineEstimate(t, r, phys.Kelvins(1400)),
+		Silicate: dumbIcelineEstimate(t, r, phys.Kelvins(1200)),
 		Water:    dumbIcelineEstimate(t, r, phys.Kelvins(170)),
 		CO:       dumbIcelineEstimate(t, r, phys.Kelvins(30)),
 	}

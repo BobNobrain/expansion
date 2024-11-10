@@ -2,7 +2,8 @@
     "$schema": "../../schemas/worldgen/material.json",
     "id": "n2",
     "tags": [
-        "wg"
+        "wg",
+        "volatile"
     ],
     "abundance": {
         "min": 0.2,

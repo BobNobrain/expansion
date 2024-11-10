@@ -1,6 +1,7 @@
 package planetgen
 
 import (
+	"srv/internal/utils/color"
 	"srv/internal/utils/geom"
 	"srv/internal/utils/phys"
 	"srv/internal/utils/phys/material"
@@ -14,7 +15,7 @@ type GeneratedSurfaceData struct {
 
 	Atmosphere GeneratedAtmosphere
 	Oceans     GeneratedOceans
-	Crust      *material.MaterialCompound
+	Snow       *material.MaterialCompound
 	// real elevation of a tile = Params.Radius + tile.Elevation * RelativeElevationsScale
 	RelativeElevationsScale phys.Distance
 }
@@ -24,6 +25,7 @@ type GeneratedTileData struct {
 	SurfaceType world.BiomeSurface
 	AverageTemp phys.Temperature
 	Pressure    phys.Pressure
+	Color       color.RichColorRGB
 }
 
 type GeneratedAtmosphere struct {

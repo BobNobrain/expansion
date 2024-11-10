@@ -19,7 +19,7 @@ func (ellipse EllipticOrbit) Apoapsis() Distance {
 	return ellipse.SemiMajor.Mul(ellipse.Eccentricity + 1)
 }
 func (ellipse EllipticOrbit) Periapsis() Distance {
-	return ellipse.SemiMajor.Mul(ellipse.Eccentricity - 1)
+	return ellipse.SemiMajor.Mul(1 - ellipse.Eccentricity)
 }
 func (ellipse EllipticOrbit) AverageDistance() Distance {
 	return ellipse.Apoapsis().Add(ellipse.Periapsis()).Mul(0.5)

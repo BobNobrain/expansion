@@ -64,7 +64,7 @@ func (m *Material) HasAnyTag(tags ...string) bool {
 			return true
 		}
 	}
-	return true
+	return false
 }
 
 // just an utility to build a proper material object
