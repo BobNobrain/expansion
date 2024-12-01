@@ -1,12 +1,15 @@
-import { type Component, Show, createMemo, For } from 'solid-js';
-import { Star } from '../../domain/Star';
+import { type Component, Show, createMemo } from 'solid-js';
+import { useNavigate } from '@solidjs/router';
+import { type Star } from '../../domain/Star';
+import { IconAsteroid, IconFlag, IconPeople, IconPlanet, IconSpaceStation, IconSystem } from '../../icons';
+import { emulateLinkClick } from '../../lib/solid/emulateLinkClick';
+import { formatScalar } from '../../lib/strings';
+import { getExploreRoute } from '../../routes/explore';
 import { useSectorContent } from '../../store/galaxy';
-import { Link } from '../Link/Link';
+import { CelestialBodyTitle } from '../CelestialBodyTitle/CelestialBodyTitle';
+import { DataTable, type DataTableColumn } from '../DataTable/DataTable';
 import { Text } from '../Text/Text';
 import styles from './SectorContentTable.module.css';
-import { DataTable, type DataTableColumn } from '../DataTable/DataTable';
-import { IconPlanet } from '../../icons/planet';
-import { IconStar } from '../../icons/star';
 
 export type SectorContentTableProps = {
     sectorId: string;
@@ -21,21 +24,103 @@ type TableRow = {
     isExplored: boolean;
 };
 
-const StarTextLabel: Component<{ star: Star }> = (props) => {
-    const color = createMemo(
-        () =>
-            '#' +
-            Star.getColor(props.star)
-                .map((unit) => Math.floor(unit * 255).toString(16))
-                .join(''),
-    );
+const COLUMNS: DataTableColumn<TableRow>[] = [
+    {
+        header: 'System',
+        width: 120,
+        content: ({ id, name }) => {
+            return <CelestialBodyTitle id={id} name={name} icon={IconSystem} />;
+        },
+    },
+    {
+        header: { icon: IconPlanet },
+        width: 64,
+        align: 'right',
+        content: ({ nPlanets, isExplored }) => {
+            if (!isExplored) {
+                return '??';
+            }
 
-    return (
-        <span style={{ color: color() }}>
-            <IconStar size={16} />
-        </span>
-    );
-};
+            return formatScalar(nPlanets, { digits: 0, noShortenings: true });
+            // return (
+            //     <>
+            //         <div>
+            //             <For each={stars}>{(star) => <StarTextLabel star={star} />}</For>
+            //         </div>
+            //         <div>
+            //             <Show when={isExplored} fallback="Unknown">
+            //                 {nPlanets} <IconPlanet size={12} /> / ~{(nAsteroids / 1000).toFixed(1)}K ◌
+            //             </Show>
+            //         </div>
+            //     </>
+            // );
+        },
+    },
+    {
+        header: { icon: IconAsteroid },
+        width: 64,
+        align: 'right',
+        content: ({ nAsteroids, isExplored }) => {
+            if (!isExplored) {
+                return '??';
+            }
+
+            return formatScalar(nAsteroids, { digits: 0 });
+        },
+    },
+    {
+        header: { icon: IconPeople },
+        width: 64,
+        align: 'right',
+        content: ({ isExplored }) => {
+            if (!isExplored) {
+                return '--';
+            }
+
+            return formatScalar(0, { digits: 0 });
+        },
+    },
+    {
+        header: { icon: IconFlag },
+        width: 64,
+        align: 'right',
+        content: ({ isExplored }) => {
+            if (!isExplored) {
+                return '--';
+            }
+
+            return formatScalar(0, { digits: 0 });
+        },
+    },
+    {
+        header: { icon: IconSpaceStation },
+        width: 64,
+        align: 'right',
+        content: ({ isExplored }) => {
+            if (!isExplored) {
+                return '--';
+            }
+
+            return formatScalar(0, { digits: 0 });
+        },
+    },
+];
+
+// const StarTextLabel: Component<{ star: Star }> = (props) => {
+//     const color = createMemo(
+//         () =>
+//             '#' +
+//             Star.getColor(props.star)
+//                 .map((unit) => Math.floor(unit * 255).toString(16))
+//                 .join(''),
+//     );
+
+//     return (
+//         <span style={{ color: color() }}>
+//             <IconStar size={16} />
+//         </span>
+//     );
+// };
 
 export const SectorContentTable: Component<SectorContentTableProps> = (props) => {
     const systems = useSectorContent(() => props.sectorId);
@@ -55,51 +140,16 @@ export const SectorContentTable: Component<SectorContentTableProps> = (props) =>
         return mapped;
     });
 
-    const columns: DataTableColumn<TableRow>[] = [
-        {
-            header: 'System',
-            width: 100,
-            content: ({ id, name }) => {
-                return (
-                    <>
-                        <div>
-                            <Text color={name ? 'default' : 'dim'}>{name || id}</Text>
-                        </div>
-                        <div>
-                            <Link href={`/galaxy/${id}`}>{id}</Link>
-                        </div>
-                    </>
-                );
+    const navigate = useNavigate();
+    const onRowClick = (row: TableRow, ev: MouseEvent) => {
+        emulateLinkClick(
+            {
+                href: getExploreRoute({ objectId: row.id }),
+                navigate,
             },
-        },
-        {
-            header: 'Content',
-            width: 110,
-            content: ({ stars, nAsteroids, nPlanets, isExplored }) => {
-                return (
-                    <>
-                        <div>
-                            <For each={stars}>{(star) => <StarTextLabel star={star} />}</For>
-                        </div>
-                        <div>
-                            <Show when={isExplored} fallback="Unknown">
-                                {nPlanets} <IconPlanet size={12} /> / ~{(nAsteroids / 1000).toFixed(1)}K ◌
-                            </Show>
-                        </div>
-                    </>
-                );
-            },
-        },
-        {
-            header: 'Status',
-            content: ({ isExplored }) => {
-                if (isExplored) {
-                    return <Text color="secondary">Uninhabited</Text>;
-                }
-                return <Text color="dim">Unexplored</Text>;
-            },
-        },
-    ];
+            ev,
+        );
+    };
 
     return (
         <div>
@@ -108,10 +158,12 @@ export const SectorContentTable: Component<SectorContentTableProps> = (props) =>
                     {props.sectorId}
                 </Text>
                 <Text color="dim">
-                    <Show when={systems.data}>⊚ {systems.data!.total} systems</Show>
+                    <Show when={systems.data}>
+                        <IconSystem size={16} /> {systems.data!.total} systems
+                    </Show>
                 </Text>
             </header>
-            <DataTable columns={columns} rows={rows()} />
+            <DataTable columns={COLUMNS} rows={rows()} stickLeft inset onRowClick={onRowClick} />
         </div>
     );
 };

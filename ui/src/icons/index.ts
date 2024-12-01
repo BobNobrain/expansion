@@ -4,6 +4,7 @@ import { type IconProps } from './common/utils';
 export type { IconProps };
 export type Icon = Component<IconProps>;
 
+export { IconAsteroid } from './asteroid';
 export { IconBack } from './back';
 export { IconChevronRight } from './chevron-right';
 export { IconContext } from './context';
@@ -21,6 +22,7 @@ export { IconPlanet } from './planet';
 export { IconPlot } from './plot';
 export { IconPressure } from './pressure';
 export { IconShip } from './ship';
+export { IconSpaceStation } from './space-station';
 export { IconStar } from './star';
 export { IconSystem } from './system';
 export { IconTemperature } from './temperature';
