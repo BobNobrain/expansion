@@ -1,6 +1,59 @@
+.wrapper {
+    width: 100%;
+}
+.wrapper.inset {
+    margin-left: calc(-1 * var(--container-padding));
+    margin-right: calc(-1 * var(--container-padding));
+    width: calc(100% + 2 * var(--container-padding));
+}
+
+.has-scroll {
+    overflow: auto;
+}
+
 .table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: fixed;
+}
+
+.header-row {
+    position: sticky;
+    top: 0;
+}
+.header-cell {
+    composes: cell;
+
+    background-color: var(--p-main-300);
+    color: var(--p-main-800);
+    text-align: left;
+
+    font-weight: 500;
+    font-variation-settings: "wght" 500;
+    letter-spacing: 0.05em;
+}
+.stick-left .header-cell:first-child,
+.stick-right .header-cell:last-child {
+    background-color: var(--p-main-500);
+    border-left: none;
+    color: var(--p-main-900);
+}
+.stick-left .header-cell:first-child {
+    box-shadow: 4px 0 4px var(--p-main-700-25)
+}
+.stick-right .header-cell:last-child {
+    box-shadow: -4px 0 4px var(--p-main-700-25)
+}
+
+.default-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.header-cell-text {
+    flex: 1 1 auto;
 }
 
 .cell {
@@ -10,39 +63,58 @@
     line-height: 20px;
 
     background-clip: padding-box;
+    border: 0 none;
 }
-
-.inset .cell:first-child {
-    padding-left: 16px;
-}
-.inset .cell:last-child {
-    padding-right: 16px;
-}
-
 .cell + .cell {
     border-left: 2px solid transparent;
 }
+.cell.no-padding {
+    padding: 0;
+}
+.stick-right .cell.no-padding:last-child {
+    padding-right: var(--container-padding);
+}
 
-.header-cell {
-    composes: cell;
+.inset .cell:first-child {
+    padding-left: calc(var(--container-padding) + 8px);
+}
+.inset .cell:last-child {
+    padding-right: calc(var(--container-padding) + 8px);
+}
+.stick-left .cell:first-child {
+    position: sticky;
+    left: 0;
+}
+.stick-left td.cell:first-child {
+    background: fixed url('../../components/App/bg.svg');
+    border-bottom: 1px solid var(--p-main-700);
+    box-shadow: 4px 0 4px var(--p-main-700-25), inset 0 0 1000px var(--p-main-100-50);
+}
+.stick-right .cell:last-child {
+    position: sticky;
+    right: 0;
+}
+.stick-right td.cell:last-child {
+    background: fixed url('../../components/App/bg.svg');
+    box-shadow: -4px 0 4px var(--p-main-700-25), inset 0 0 1000px var(--p-main-100-50);
+}
 
-    background-color: var(--p-main-500);
-    color: var(--p-main-900);
-    text-align: left;
-
-    font-weight: 500;
-    font-variation-settings: "wght" 500;
-    letter-spacing: 0.05em;
+.align-center {
+    text-align: center;
+}
+.align-right {
+    text-align: right;
 }
 
 .data-cell {
     composes: cell;
 
     border-bottom: 1px solid var(--p-main-500);
+    color: var(--p-main-800);
 }
 
 .data-row:hover, .data-row:active {
-    background-color: var(--p-main-600);
+    background-color: var(--p-main-100);
 }
 
 .emptyBanner {

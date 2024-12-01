@@ -1,10 +1,11 @@
 import { createMemo, type Component } from 'solid-js';
-import { type CelestialBodyClass } from '../../domain/CelestialBody';
+import { type CelestialBody, type CelestialBodyClass } from '../../domain/CelestialBody';
 import {
     type Icon,
+    IconFlag,
+    IconG,
     IconGasGiant,
     IconMoon,
-    IconOrbit,
     IconPeople,
     IconPlanet,
     IconPlot,
@@ -14,10 +15,14 @@ import {
 import { formatScalar } from '../../lib/strings';
 import { getExploreRoute, useExploreRouteInfo } from '../../routes/explore';
 import { useSystemContent } from '../../store/galaxy';
-import { ContentList } from '../ContentList/ContentList';
-import { type ContentItem, type ContentItemProperty } from '../ContentList/types';
+import { DataTable, type DataTableColumn } from '../DataTable';
+import { useNavigate } from '@solidjs/router';
+import { emulateLinkClick } from '../../lib/solid/emulateLinkClick';
+import { CelestialBodyTitle } from '../CelestialBodyTitle/CelestialBodyTitle';
 
 type BodyClass = CelestialBodyClass | 'moon';
+
+type TableRow = Omit<CelestialBody, 'class'> & { class: BodyClass };
 
 const iconsByPlanetType: { [key in BodyClass]?: Icon } = {
     terrestial: IconPlanet,
@@ -25,17 +30,76 @@ const iconsByPlanetType: { [key in BodyClass]?: Icon } = {
     moon: IconMoon,
 };
 
+const fakeNames: Record<string, string | undefined> = {
+    'OT-056a': 'Sigismundo',
+    'OT-056c': 'Khasee',
+};
+
+const SURFACE_COLUMNS: DataTableColumn<TableRow>[] = [
+    {
+        header: 'Planet',
+        content: (row) => {
+            return <CelestialBodyTitle name={fakeNames[row.id]} id={row.id} icon={iconsByPlanetType[row.class]} />;
+        },
+        width: 120,
+    },
+    {
+        header: { icon: IconPlot },
+        content: (row) => (row.isExplored ? formatScalar(row.size, { digits: 0 }) : '??'),
+        width: 64,
+        align: 'right',
+    },
+    {
+        header: { icon: IconPeople },
+        content: (row) => (row.isExplored ? '0' : '--'),
+        width: 64,
+        align: 'right',
+    },
+    {
+        header: { icon: IconFlag },
+        content: (row) => (row.isExplored ? '0' : '--'),
+        width: 64,
+        align: 'right',
+    },
+    {
+        header: { icon: IconTemperature },
+        content: (row) =>
+            row.isExplored
+                ? formatScalar(row.surface.tempK - 273.15, { unit: '°C', noShortenings: true, digits: 0 })
+                : '??',
+        width: 64,
+        align: 'right',
+    },
+    {
+        header: { icon: IconPressure },
+        content: (row) =>
+            row.isExplored
+                ? formatScalar(row.surface.pressureBar, { unit: 'bar', noShortenings: true, digits: 0 })
+                : '??',
+        width: 64,
+        align: 'right',
+    },
+    {
+        header: { icon: IconG },
+        content: (row) =>
+            row.isExplored ? formatScalar(row.surface.g, { unit: 'g', noShortenings: true, digits: 1 }) : '??',
+        width: 64,
+        align: 'right',
+    },
+];
+
 export const SystemContentSurfacesList: Component = () => {
     const routeInfo = useExploreRouteInfo();
+    const navigate = useNavigate();
     const sc = useSystemContent(() => routeInfo().objectId);
 
-    const items = createMemo<ContentItem[]>(() => {
+    const items = createMemo<TableRow[]>(() => {
         if (!sc.data) {
             return [];
         }
 
         const { orbits, stars, bodies } = sc.data;
-        const rows: ContentItem[] = [];
+        const rows: TableRow[] = [];
 
         const starIds = stars.map((star) => star.id);
         const sortedOrbits = Object.values(orbits).sort((a, b) => a.bodyId.localeCompare(b.bodyId));
@@ -53,50 +117,24 @@ export const SystemContentSurfacesList: Component = () => {
             const isMoon = body.id.includes('_');
             const bodyClass = isMoon ? 'moon' : body.class;
 
-            const properties: ContentItemProperty[] = [
-                {
-                    icon: IconPlot,
-                    text: body.isExplored ? formatScalar(body.size, { digits: 0 }) : '??',
-                },
-                {
-                    icon: IconPeople,
-                    text: body.isExplored ? '0' : '--',
-                },
-                {
-                    icon: IconPlanet,
-                    text: formatScalar(body.radiusKm, { unit: 'km', noShortenings: true, digits: 0 }),
-                },
-                {
-                    icon: IconOrbit,
-                    text: formatScalar(orbit.semiMajorAu, { unit: 'au', noShortenings: true, digits: 2 }),
-                },
-            ];
-
-            if (body.isExplored) {
-                properties.push({
-                    icon: IconTemperature,
-                    text: formatScalar(body.surface.tempK - 273.15, { unit: '°C', noShortenings: true, digits: 2 }),
-                });
-                properties.push({
-                    icon: IconPressure,
-                    text: formatScalar(body.surface.pressureBar, { unit: 'bar', noShortenings: true, digits: 2 }),
-                });
-                properties.push({
-                    text: formatScalar(body.surface.g, { unit: 'g', noShortenings: true, digits: 1 }),
-                });
-            }
-
             rows.push({
-                humanId: '#' + body.id,
-                title: body.id,
-                mainAction: getExploreRoute({ objectId: body.id }),
-                icon: iconsByPlanetType[bodyClass],
-                properties,
+                ...body,
+                class: bodyClass,
             });
         }
 
         return rows;
     });
 
-    return <ContentList items={items()} />;
+    const onRowClick = (row: TableRow, ev: MouseEvent) => {
+        emulateLinkClick(
+            {
+                href: getExploreRoute({ objectId: row.id }),
+                navigate,
+            },
+            ev,
+        );
+    };
+
+    return <DataTable columns={SURFACE_COLUMNS} rows={items()} stickLeft inset onRowClick={onRowClick} />;
 };

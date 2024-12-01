@@ -1,5 +1,7 @@
 .content {
     padding: 8px 4px 64px;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 .tabs {

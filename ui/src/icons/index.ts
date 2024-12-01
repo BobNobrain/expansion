@@ -11,6 +11,7 @@ export { IconCopy } from './copy';
 export { IconCross } from './cross';
 export { IconCurtainExpand } from './curtain-expand';
 export { IconFlag } from './flag';
+export { IconG } from './g';
 export { IconGalaxy } from './galaxy';
 export { IconGasGiant } from './gas-giant';
 export { IconMoon } from './moon';

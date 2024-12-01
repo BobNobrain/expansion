@@ -131,12 +131,17 @@ func (ctx *surfaceGenContext) calculateConditionsPerTile() {
 	atmMolarMass := ctx.surface.Atmosphere.Contents.GetAverageMolarMass()
 	oceanLevel := ctx.surface.Oceans.Level
 
+	maxTemp := ctx.surface.Atmosphere.AverageTemp * 1.05
+	minTemp := ctx.surface.Atmosphere.AverageTemp * 0.95
+	axisTilt := ctx.params.AxisTilt.Radians()
+
 	for i := 0; i < grid.Size(); i++ {
 		tile := ctx.surface.Tiles[i]
 		elevation := tile.Elevation - oceanLevel
+		tileLon := math.Cos(grid.GetCoords(i).Y)
 
-		// TODO: also account for axis tilt
-		tile.AverageTemp = ctx.surface.Atmosphere.AverageTemp
+		// good enough for now
+		tile.AverageTemp = minTemp + (maxTemp-minTemp)*phys.Temperature(math.Cos(axisTilt)*math.Sin(tileLon))
 
 		if ctx.surface.Atmosphere.SeaLevelPressure > 0 {
 			coeff := math.Exp(-g * ctx.surface.RelativeElevationsScale.Kilometers() * 1e-3 * elevation * atmMolarMass / 21500)

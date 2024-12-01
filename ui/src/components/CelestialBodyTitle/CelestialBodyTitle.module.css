@@ -1,0 +1,38 @@
+.wrapper {
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.title {
+    color: var(--p-primary-500);
+    font-size: 18px;
+    line-height: 22px;
+
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.title.no-name {
+    color: var(--p-main-900);
+}
+
+.badge {
+    background-color: var(--p-main-300);
+    border-radius: 2px;
+    padding: 1px 4px;
+    width: fit-content;
+
+    font-size: 14px;
+    line-height: 18px;
+    font-weight: 500;
+    font-variation-settings: "wght" 500;
+
+    display: flex;
+    align-items: center;
+}
+
+.id {
+    margin-left: 2px;
+}
