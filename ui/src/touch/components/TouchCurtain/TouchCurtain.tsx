@@ -1,13 +1,21 @@
-import { type ParentComponent, createSignal, type JSX, Show } from 'solid-js';
-import styles from './TouchCurtain.module.css';
+import { type ParentComponent, createSignal, type JSX, Show, For } from 'solid-js';
+import { A } from '@solidjs/router';
 import { Button } from '../../../components/Button/Button';
-import { IconCurtainExpand } from '../../../icons';
+import { type Icon, IconCurtainExpand } from '../../../icons';
+import styles from './TouchCurtain.module.css';
+import { Dynamic } from 'solid-js/web';
+
+export type TouchCurtainTab = {
+    icon: Icon;
+    href: string;
+};
 
 export type TouchCurtainProps = {
     static?: JSX.Element;
     initiallyExpanded?: boolean;
     expandable?: boolean;
     height?: 's' | 'm' | 'l';
+    tabs?: TouchCurtainTab[];
 };
 
 const SIZE_CLS: Record<NonNullable<TouchCurtainProps['height']>, string> = {
@@ -58,6 +66,21 @@ export const TouchCurtain: ParentComponent<TouchCurtainProps> = (props) => {
                         [styles.expanded]: getIsExpanded(),
                     }}
                 >
+                    <Show when={props.tabs?.length}>
+                        <div class={styles.tabs}>
+                            <div class={styles.tabsContainer}>
+                                <For each={props.tabs}>
+                                    {(tab) => {
+                                        return (
+                                            <A href={tab.href} class={styles.tab} activeClass={styles.active}>
+                                                <Dynamic component={tab.icon} size={32} />
+                                            </A>
+                                        );
+                                    }}
+                                </For>
+                            </div>
+                        </div>
+                    </Show>
                     <Show when={props.expandable ?? true}>
                         <div class={styles.handle}>
                             <Button size="s" onClick={toggleExpanded}>

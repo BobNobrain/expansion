@@ -1,0 +1,65 @@
+.badge {
+    display: flex;
+    padding: 1px 5px;
+    border-radius: 2px;
+    border: 1px solid transparent;
+    width: fit-content;
+}
+
+.label {
+    font-size: 16px;
+    line-height: 20px;
+}
+
+.icon-left {
+    margin-right: 4px;
+}
+.icon-right {
+    margin-left: 4px;
+}
+.icon-left > svg, .icon-right > svg {
+    display: block;
+}
+
+.primary {
+    --badge-color: var(--p-primary-500);
+    --badge-text-color: var(--p-primary-100);
+}
+.secondary {
+    --badge-color: var(--p-main-900);
+    --badge-text-color: var(--p-main-300);
+}
+.error {
+    --badge-color: var(--p-red-500);
+    --badge-text-color: var(--p-red-100);
+}
+.success {
+    --badge-color: var(--p-green-500);
+    --badge-text-color: var(--p-green-100);
+}
+.info {
+    --badge-color: var(--p-blue-500);
+    --badge-text-color: var(--p-blue-100);
+}
+.warn {
+    --badge-color: var(--p-yellow-500);
+    --badge-text-color: var(--p-yellow-100);
+}
+.accent {
+    --badge-color: var(--p-secondary-500);
+    --badge-text-color: var(--p-secondary-100);
+}
+
+.default {
+    background-color: var(--badge-color);
+    color: var(--badge-text-color);
+    font-weight: 600;
+    font-variation-settings: "wght" 600;
+}
+.transparent {
+    color: var(--badge-color);
+}
+
+.secondary.transparent {
+    color: var(--p-main-800);
+}

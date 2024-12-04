@@ -1,13 +1,12 @@
 import { type Component, Show, createEffect, createMemo } from 'solid-js';
-import { useSystemContent } from '../../store/galaxy';
+import { useNavigate } from '@solidjs/router';
 import { type CelestialBody } from '../../domain/CelestialBody';
+import { getExploreRoute, useExploreRouteInfo } from '../../routes/explore';
+import { useSystemContent } from '../../store/galaxy';
 import { RouteMatcher } from '../RouteMatcher/RouteMatcher';
 import { SystemContentSurfacesList } from './SystemContentSurfacesList';
 import { SystemContentStarsList } from './SystemContentStarsList';
-import { type TabHeader, TabsList } from '../TabsList/TabsList';
-import { useNavigate } from '@solidjs/router';
 import styles from './SystemContentTable.module.css';
-import { getExploreRoute, useExploreRouteInfo } from '../../routes/explore';
 
 export type SystemContentTableProps = {
     systemId: string;
@@ -46,24 +45,6 @@ export const SystemContentTable: Component<SystemContentTableProps> = (props) =>
     const navigate = useNavigate();
     const routeInfo = useExploreRouteInfo();
 
-    const tabs = createMemo<TabHeader[]>(() => {
-        const { objectId } = routeInfo();
-        return [
-            {
-                title: 'Planets',
-                href: getExploreRoute({ objectId, tab: 'planets' }),
-            },
-            {
-                title: 'Infrastructure',
-                href: getExploreRoute({ objectId, tab: 'infra' }),
-            },
-            {
-                title: 'Stars',
-                href: getExploreRoute({ objectId, tab: 'stars' }),
-            },
-        ];
-    });
-
     createEffect(() => {
         const { tab, objectId } = routeInfo();
         if (!tab || !ALLOWED_TABS.includes(tab)) {
@@ -73,9 +54,6 @@ export const SystemContentTable: Component<SystemContentTableProps> = (props) =>
 
     return (
         <div class={styles.content}>
-            <nav class={styles.tabs}>
-                <TabsList tabs={tabs()} />
-            </nav>
             <Show when={sc.data} fallback="Loading...">
                 <RouteMatcher
                     endsWith="/planets"

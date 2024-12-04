@@ -22,6 +22,34 @@
     overflow: visible;
 }
 
+.tabs {
+    position: absolute;
+    bottom: calc(100%);
+    left: 12px;
+    right: 64px;
+    overflow: visible;
+}
+.tabs-container {
+    display: flex;
+    gap: 4px;
+}
+.tab {
+    padding: 4px 12px;
+    border: 0 solid var(--p-main-700);
+    border-top-width: 1px;
+    border-bottom-width: 2px;
+    background: var(--p-main-300-50);
+    display: block;
+    color: var(--p-main-800);
+    box-shadow: inset 0 -4px 12px var(--p-main-900-25);
+}
+.tab.active {
+    background: var(--p-main-300-75);
+    border-top-color: var(--p-main-900);
+    border-bottom-color: var(--p-primary-500);
+    color: var(--p-main-900);
+}
+
 .static {
     flex: 1 1 auto;
 }
