@@ -3,7 +3,7 @@
     right: 8px;
     width: fit-content;
     height: fit-content;
-    top: 16px;
+    top: 8px;
 
     display: flex;
     flex-flow: column;
@@ -23,8 +23,4 @@
 }
 .button.active {
     color: var(--p-primary-500);
-}
-.button:active {
-    color: var(--p-main-300);
-    box-shadow: none;
 }
