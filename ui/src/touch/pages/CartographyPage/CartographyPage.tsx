@@ -103,6 +103,9 @@ export const CartographyPage: Component = () => {
                 ];
 
             case 'surface':
+                if (info.plotId) {
+                    return [];
+                }
                 return [
                     {
                         icon: IconPlanet,
@@ -143,6 +146,7 @@ export const CartographyPage: Component = () => {
                 <PlanetViewScene
                     isActive={routeInfo().objectType === 'surface'}
                     surfaceId={routeInfo().objectId!}
+                    selectedPlotId={routeInfo().plotId}
                     onPlotSelected={(plot) => {
                         if (!plot) {
                             navigate(getExploreRoute({ objectId: routeInfo().objectId, tab: SurfaceContentTab.Info }));
@@ -173,7 +177,7 @@ export const CartographyPage: Component = () => {
                 </Show>
 
                 <Show when={routeInfo().objectType === 'surface'}>
-                    <Switch fallback={<div>Plot info: #{routeInfo().tab}</div>}>
+                    <Switch fallback={<div>Plot info: #{routeInfo().plotId}</div>}>
                         <Match when={routeInfo().tab === SurfaceContentTab.Info}>
                             <SurfaceInfo />
                         </Match>
@@ -182,7 +186,7 @@ export const CartographyPage: Component = () => {
                         <Match when={routeInfo().tab === SurfaceContentTab.Infra}>Infra...</Match>
                         <Match when={routeInfo().tab === SurfaceContentTab.Bases}>Bases...</Match>
 
-                        <Match when={!routeInfo().tab}>
+                        <Match when={!routeInfo().tab && !routeInfo().plotId}>
                             <RedirectToTab tab={SurfaceContentTab.Info} />
                         </Match>
                     </Switch>

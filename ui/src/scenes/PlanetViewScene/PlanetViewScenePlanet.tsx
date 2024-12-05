@@ -1,4 +1,4 @@
-import { type Component, For, createMemo, onMount, onCleanup, createSignal } from 'solid-js';
+import { type Component, For, createMemo, onMount, onCleanup } from 'solid-js';
 import * as T from 'three';
 import { Mesh } from '../../components/three/Mesh/Mesh';
 import { useInScene } from '../../components/three/hooks/useInScene';
@@ -17,12 +17,12 @@ export type PlanetViewScenePlanetProps = {
 
     showGraph?: boolean;
 
-    onClick?: (tile: number | undefined) => void;
+    activeTileIndex?: number | undefined;
+    onTileClick?: (tile: number | undefined) => void;
 };
 
 export const PlanetViewScenePlanet: Component<PlanetViewScenePlanetProps> = (props) => {
     const { gridMesh, surfaceBuilder, surfaceMesh, faceIndexMap } = usePlanet(() => props.surface);
-    const [getActiveTileIndex, setActiveTileIndex] = createSignal(-1);
 
     const activeTileMesh = createMemo(() => {
         const surface = surfaceBuilder();
@@ -30,7 +30,7 @@ export const PlanetViewScenePlanet: Component<PlanetViewScenePlanetProps> = (pro
             return null;
         }
 
-        const index = getActiveTileIndex();
+        const index = props.activeTileIndex ?? -1;
         if (index === -1) {
             return null;
         }
@@ -124,6 +124,7 @@ export const PlanetViewScenePlanet: Component<PlanetViewScenePlanetProps> = (pro
 
         const [closestIntersection] = raycaster.intersectObject(mesh);
         if (!closestIntersection) {
+            props.onTileClick?.(undefined);
             return;
         }
 
@@ -131,12 +132,11 @@ export const PlanetViewScenePlanet: Component<PlanetViewScenePlanetProps> = (pro
         const originalFaceIndex = faceIndexMap()[triangleIndex] ?? -1;
 
         if (originalFaceIndex === -1) {
-            props.onClick?.(undefined);
+            props.onTileClick?.(undefined);
             return;
         }
 
-        setActiveTileIndex(originalFaceIndex);
-        props.onClick?.(originalFaceIndex);
+        props.onTileClick?.(originalFaceIndex);
     };
 
     onMount(() => {

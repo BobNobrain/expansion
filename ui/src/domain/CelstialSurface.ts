@@ -18,7 +18,7 @@ export type CelestialSurfaceGrid = {
 
 export namespace CelestialSurface {
     export function parsePlotId(id: string): number | undefined {
-        const n = Number.parseInt(id, 6);
+        const n = Number.parseInt(id, 16);
         if (Number.isNaN(n)) {
             return undefined;
         }

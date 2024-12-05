@@ -11,6 +11,7 @@ export type ExploreRouteInfo = {
     objectId?: string;
     objectType: ExploreObjectType;
     tab?: string;
+    plotId?: string;
 };
 
 export enum SystemContentTab {
@@ -28,6 +29,14 @@ export enum SurfaceContentTab {
     Bases = 'bases',
 }
 
+const surfaceContentTabs: Record<string, true> = {
+    [SurfaceContentTab.Info]: true,
+    [SurfaceContentTab.Population]: true,
+    [SurfaceContentTab.Resources]: true,
+    [SurfaceContentTab.Infra]: true,
+    [SurfaceContentTab.Bases]: true,
+};
+
 export function useExploreRouteInfo(): () => ExploreRouteInfo {
     const params = useParams<ExploreRouteParams>();
 
@@ -36,6 +45,7 @@ export function useExploreRouteInfo(): () => ExploreRouteInfo {
             objectId: params.id,
             objectType: 'galaxy',
             tab: params.tab,
+            plotId: undefined,
         };
 
         const id = params.id;
@@ -47,6 +57,11 @@ export function useExploreRouteInfo(): () => ExploreRouteInfo {
             } else {
                 result.objectType = 'surface';
             }
+        }
+
+        if (result.objectType === 'surface' && result.tab && !surfaceContentTabs[result.tab]) {
+            result.tab = undefined;
+            result.plotId = params.tab;
         }
 
         return result;

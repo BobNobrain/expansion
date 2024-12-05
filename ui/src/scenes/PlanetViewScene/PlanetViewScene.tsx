@@ -1,4 +1,4 @@
-import { createEffect, Show, type Component } from 'solid-js';
+import { createEffect, createMemo, Show, type Component } from 'solid-js';
 import { PlanetViewSceneLight } from './PlanetViewSceneLight';
 import { PlanetViewScenePlanet } from './PlanetViewScenePlanet';
 import { RotatableCamera } from '../common/RotatableCamera/RotatableCamera';
@@ -15,6 +15,10 @@ export type PlanetViewSceneProps = {
 
 export const PlanetViewScene: Component<PlanetViewSceneProps> = (props) => {
     const surface = useSurfaceOverview(() => (props.isActive ? props.surfaceId : undefined));
+
+    const activeTileIndex = createMemo(
+        () => (props.selectedPlotId && CelestialSurface.parsePlotId(props.selectedPlotId)) || undefined,
+    );
 
     const onTileClick = (tile: number | undefined) => {
         if (props.onPlotSelected) {
@@ -68,7 +72,8 @@ export const PlanetViewScene: Component<PlanetViewSceneProps> = (props) => {
             <PlanetViewScenePlanet
                 surface={surface.data?.surface ?? null}
                 body={surface.data?.body ?? null}
-                onClick={onTileClick}
+                activeTileIndex={activeTileIndex()}
+                onTileClick={onTileClick}
             />
         </Show>
     );
