@@ -17,7 +17,7 @@ export type PlanetViewScenePlanetProps = {
 
     showGraph?: boolean;
 
-    onClick?: (tile: number) => void;
+    onClick?: (tile: number | undefined) => void;
 };
 
 export const PlanetViewScenePlanet: Component<PlanetViewScenePlanetProps> = (props) => {
@@ -130,21 +130,8 @@ export const PlanetViewScenePlanet: Component<PlanetViewScenePlanetProps> = (pro
         const triangleIndex = closestIntersection.faceIndex ?? -1;
         const originalFaceIndex = faceIndexMap()[triangleIndex] ?? -1;
 
-        const vis = [closestIntersection.face!.a, closestIntersection.face!.b, closestIntersection.face!.c];
-        const actualCoords = vis.map((vi) => surfaceBuilder()?.coords(vi));
-        const expectedCoords = surfaceBuilder()
-            ?.face(originalFaceIndex)
-            ?.map((vi) => surfaceBuilder()?.coords(vi));
-
-        console.log({
-            triangleIndex,
-            originalFaceIndex,
-            face: surfaceBuilder()?.face(originalFaceIndex),
-            f: closestIntersection.face,
-            actualCoords,
-            expectedCoords,
-        });
         if (originalFaceIndex === -1) {
+            props.onClick?.(undefined);
             return;
         }
 

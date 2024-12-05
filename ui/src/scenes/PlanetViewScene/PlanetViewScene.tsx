@@ -3,16 +3,29 @@ import { PlanetViewSceneLight } from './PlanetViewSceneLight';
 import { PlanetViewScenePlanet } from './PlanetViewScenePlanet';
 import { RotatableCamera } from '../common/RotatableCamera/RotatableCamera';
 import { useSurfaceOverview } from '../../store/galaxy';
+import { CelestialSurface } from '../../domain/CelstialSurface';
 
 export type PlanetViewSceneProps = {
     isActive: boolean;
     surfaceId: string;
+
+    selectedPlotId?: string;
+    onPlotSelected?: (plotId: string | undefined) => void;
 };
 
 export const PlanetViewScene: Component<PlanetViewSceneProps> = (props) => {
     const surface = useSurfaceOverview(() => (props.isActive ? props.surfaceId : undefined));
 
-    const logTileInfo = (tile: number) => {
+    const onTileClick = (tile: number | undefined) => {
+        if (props.onPlotSelected) {
+            props.onPlotSelected(tile === undefined ? undefined : CelestialSurface.makePlotId(tile));
+        }
+
+        // log stuff
+        if (tile === undefined) {
+            return;
+        }
+
         const data = surface.data?.surface;
         if (!data) {
             return;
@@ -55,7 +68,7 @@ export const PlanetViewScene: Component<PlanetViewSceneProps> = (props) => {
             <PlanetViewScenePlanet
                 surface={surface.data?.surface ?? null}
                 body={surface.data?.body ?? null}
-                onClick={logTileInfo}
+                onClick={onTileClick}
             />
         </Show>
     );

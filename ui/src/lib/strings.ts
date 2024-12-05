@@ -32,6 +32,13 @@ export function formatScalar(scalar: number, { digits = 3, unit, noShortenings }
     return num + suffix;
 }
 
+export function formatDegreesCelsius(temp: number, options: { unit?: 'K' | 'C' } = {}): string {
+    if (options.unit === 'K') {
+        temp -= 273.15;
+    }
+    return formatScalar(temp, { digits: 0, unit: '°C', noShortenings: true });
+}
+
 export type FormatIntegerOptions = {
     /** How many digits after decimal separator when integer is shortened */
     digits?: number;

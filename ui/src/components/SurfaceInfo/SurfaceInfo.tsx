@@ -13,7 +13,7 @@ import {
     IconRadius,
     IconTemperature,
 } from '../../icons';
-import { formatInteger, formatScalar } from '../../lib/strings';
+import { formatDegreesCelsius, formatInteger, formatScalar } from '../../lib/strings';
 import { Button } from '../Button/Button';
 import { Badge } from '../Badge/Badge';
 import { useNavigate } from '@solidjs/router';
@@ -82,7 +82,7 @@ const defProps: DefinitionListProperties<DefListValue> = {
         render: (v) => (
             <div class={styles.badgeList}>
                 <Badge iconLeft={IconTemperature} style="trasparent">
-                    {formatScalar(v.environment.tK, { unit: 'K', digits: 0, noShortenings: true })}
+                    {formatDegreesCelsius(v.environment.tK, { unit: 'K' })}
                 </Badge>
                 <Badge iconLeft={IconPressure} style="trasparent">
                     {formatScalar(v.environment.pBar, { unit: 'bar', digits: 0, noShortenings: true })}

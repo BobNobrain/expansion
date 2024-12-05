@@ -13,6 +13,21 @@ export type ExploreRouteInfo = {
     tab?: string;
 };
 
+export enum SystemContentTab {
+    Planets = 'planets',
+    Infra = 'infra',
+    Asteroids = 'asteroids',
+    Stars = 'stars',
+}
+
+export enum SurfaceContentTab {
+    Info = 'info',
+    Population = 'population',
+    Resources = 'resources',
+    Infra = 'infra',
+    Bases = 'bases',
+}
+
 export function useExploreRouteInfo(): () => ExploreRouteInfo {
     const params = useParams<ExploreRouteParams>();
 

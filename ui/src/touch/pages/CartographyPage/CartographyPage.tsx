@@ -1,16 +1,27 @@
-import { type Component, createMemo, Show } from 'solid-js';
+import { type Component, createMemo, Match, onMount, Show, Switch } from 'solid-js';
 import { useNavigate } from '@solidjs/router';
 import { SceneRenderer } from '../../../components/three/SceneRenderer/SceneRenderer';
 import { SectorContentTable } from '../../../components/SectorContentTable/SectorContentTable';
-import { SystemContentTable } from '../../../components/SystemContentTable/SystemContentTable';
-import { IconCity, IconPlanet, IconRocks, IconSpaceStation, IconStar } from '../../../icons';
+import { SurfaceInfo } from '../../../components/SurfaceInfo/SurfaceInfo';
+import { IconAsteroid, IconFlag, IconPeople, IconPlanet, IconRocks, IconSpaceStation, IconStar } from '../../../icons';
+import { getExploreRoute, SurfaceContentTab, SystemContentTab, useExploreRouteInfo } from '../../../routes/explore';
 import { PlanetViewScene } from '../../../scenes/PlanetViewScene/PlanetViewScene';
 import { SystemMapScene } from '../../../scenes/SystemMapScene/SystemMapScene';
-import { SurfaceInfo } from '../../../components/SurfaceInfo/SurfaceInfo';
-import { getExploreRoute, useExploreRouteInfo } from '../../../routes/explore';
 import { GalaxyMapScene } from '../../../scenes/GalaxyMapScene/GalaxyMapScene';
 import { TouchCurtain, type TouchCurtainTab } from '../../components/TouchCurtain/TouchCurtain';
 import { usePageContextBinding } from '../../components/TouchPage';
+import { SystemContentPlanets } from './tabs/SystemContentPlanets';
+import { SystemContentStars } from './tabs/SystemContentStars';
+
+const RedirectToTab: Component<{ tab: string }> = (props) => {
+    const navigate = useNavigate();
+    const routeInfo = useExploreRouteInfo();
+    onMount(() => {
+        const info = routeInfo();
+        navigate(getExploreRoute({ objectId: info.objectId, tab: props.tab }), { replace: true });
+    });
+    return null;
+};
 
 export const CartographyPage: Component = () => {
     const routeInfo = useExploreRouteInfo();
@@ -75,15 +86,19 @@ export const CartographyPage: Component = () => {
                 return [
                     {
                         icon: IconPlanet,
-                        href: getExploreRoute({ objectId: info.objectId, tab: 'planets' }),
+                        href: getExploreRoute({ objectId: info.objectId, tab: SystemContentTab.Planets }),
                     },
                     {
                         icon: IconSpaceStation,
-                        href: getExploreRoute({ objectId: info.objectId, tab: 'infra' }),
+                        href: getExploreRoute({ objectId: info.objectId, tab: SystemContentTab.Infra }),
+                    },
+                    {
+                        icon: IconAsteroid,
+                        href: getExploreRoute({ objectId: info.objectId, tab: SystemContentTab.Asteroids }),
                     },
                     {
                         icon: IconStar,
-                        href: getExploreRoute({ objectId: info.objectId, tab: 'stars' }),
+                        href: getExploreRoute({ objectId: info.objectId, tab: SystemContentTab.Stars }),
                     },
                 ];
 
@@ -91,15 +106,23 @@ export const CartographyPage: Component = () => {
                 return [
                     {
                         icon: IconPlanet,
-                        href: getExploreRoute({ objectId: info.objectId, tab: 'info' }),
+                        href: getExploreRoute({ objectId: info.objectId, tab: SurfaceContentTab.Info }),
                     },
                     {
-                        icon: IconCity,
-                        href: getExploreRoute({ objectId: info.objectId, tab: 'cities' }),
+                        icon: IconPeople,
+                        href: getExploreRoute({ objectId: info.objectId, tab: SurfaceContentTab.Population }),
                     },
                     {
                         icon: IconRocks,
-                        href: getExploreRoute({ objectId: info.objectId, tab: 'resources' }),
+                        href: getExploreRoute({ objectId: info.objectId, tab: SurfaceContentTab.Resources }),
+                    },
+                    {
+                        icon: IconSpaceStation,
+                        href: getExploreRoute({ objectId: info.objectId, tab: SurfaceContentTab.Infra }),
+                    },
+                    {
+                        icon: IconFlag,
+                        href: getExploreRoute({ objectId: info.objectId, tab: SurfaceContentTab.Bases }),
                     },
                 ];
 
@@ -117,7 +140,17 @@ export const CartographyPage: Component = () => {
                     onSectorClick={onOpenSector}
                 />
                 <SystemMapScene isActive={routeInfo().objectType === 'system'} systemId={routeInfo().objectId!} />
-                <PlanetViewScene isActive={routeInfo().objectType === 'surface'} surfaceId={routeInfo().objectId!} />
+                <PlanetViewScene
+                    isActive={routeInfo().objectType === 'surface'}
+                    surfaceId={routeInfo().objectId!}
+                    onPlotSelected={(plot) => {
+                        if (!plot) {
+                            navigate(getExploreRoute({ objectId: routeInfo().objectId, tab: SurfaceContentTab.Info }));
+                            return;
+                        }
+                        navigate(getExploreRoute({ objectId: routeInfo().objectId, tab: plot }));
+                    }}
+                />
             </SceneRenderer>
             <TouchCurtain height={routeInfo().objectType === 'galaxy' ? 's' : 'm'} tabs={tabs()}>
                 <Show when={routeInfo().objectType === 'galaxy'}>Galaxy Overview</Show>
@@ -127,11 +160,32 @@ export const CartographyPage: Component = () => {
                 </Show>
 
                 <Show when={routeInfo().objectType === 'system'}>
-                    <SystemContentTable systemId={routeInfo().objectId!} />
+                    <Switch fallback={<RedirectToTab tab={SystemContentTab.Planets} />}>
+                        <Match when={routeInfo().tab === SystemContentTab.Planets}>
+                            <SystemContentPlanets />
+                        </Match>
+                        <Match when={routeInfo().tab === SystemContentTab.Infra}>No infra yet</Match>
+                        <Match when={routeInfo().tab === SystemContentTab.Asteroids}>No asteroids yet</Match>
+                        <Match when={routeInfo().tab === SystemContentTab.Stars}>
+                            <SystemContentStars />
+                        </Match>
+                    </Switch>
                 </Show>
 
                 <Show when={routeInfo().objectType === 'surface'}>
-                    <SurfaceInfo />
+                    <Switch fallback={<div>Plot info: #{routeInfo().tab}</div>}>
+                        <Match when={routeInfo().tab === SurfaceContentTab.Info}>
+                            <SurfaceInfo />
+                        </Match>
+                        <Match when={routeInfo().tab === SurfaceContentTab.Population}>Population...</Match>
+                        <Match when={routeInfo().tab === SurfaceContentTab.Resources}>Resources...</Match>
+                        <Match when={routeInfo().tab === SurfaceContentTab.Infra}>Infra...</Match>
+                        <Match when={routeInfo().tab === SurfaceContentTab.Bases}>Bases...</Match>
+
+                        <Match when={!routeInfo().tab}>
+                            <RedirectToTab tab={SurfaceContentTab.Info} />
+                        </Match>
+                    </Switch>
                 </Show>
             </TouchCurtain>
         </>

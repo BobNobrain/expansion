@@ -1,5 +1,6 @@
 import { createMemo, type Component } from 'solid-js';
-import { type CelestialBody, type CelestialBodyClass } from '../../domain/CelestialBody';
+import { useNavigate } from '@solidjs/router';
+import { type CelestialBody, type CelestialBodyClass } from '../../../../domain/CelestialBody';
 import {
     type Icon,
     IconFlag,
@@ -11,14 +12,13 @@ import {
     IconPlot,
     IconPressure,
     IconTemperature,
-} from '../../icons';
-import { formatScalar } from '../../lib/strings';
-import { getExploreRoute, useExploreRouteInfo } from '../../routes/explore';
-import { useSystemContent } from '../../store/galaxy';
-import { DataTable, type DataTableColumn } from '../DataTable';
-import { useNavigate } from '@solidjs/router';
-import { emulateLinkClick } from '../../lib/solid/emulateLinkClick';
-import { CelestialBodyTitle } from '../CelestialBodyTitle/CelestialBodyTitle';
+} from '../../../../icons';
+import { emulateLinkClick } from '../../../../lib/solid/emulateLinkClick';
+import { formatDegreesCelsius, formatScalar } from '../../../../lib/strings';
+import { getExploreRoute, useExploreRouteInfo } from '../../../../routes/explore';
+import { useSystemContent } from '../../../../store/galaxy';
+import { CelestialBodyTitle } from '../../../../components/CelestialBodyTitle/CelestialBodyTitle';
+import { DataTable, type DataTableColumn } from '../../../../components/DataTable';
 
 type BodyClass = CelestialBodyClass | 'moon';
 
@@ -63,10 +63,7 @@ const SURFACE_COLUMNS: DataTableColumn<TableRow>[] = [
     },
     {
         header: { icon: IconTemperature },
-        content: (row) =>
-            row.isExplored
-                ? formatScalar(row.surface.tempK - 273.15, { unit: '°C', noShortenings: true, digits: 0 })
-                : '??',
+        content: (row) => (row.isExplored ? formatDegreesCelsius(row.surface.tempK, { unit: 'K' }) : '??'),
         width: 64,
         align: 'right',
     },
@@ -88,7 +85,7 @@ const SURFACE_COLUMNS: DataTableColumn<TableRow>[] = [
     },
 ];
 
-export const SystemContentSurfacesList: Component = () => {
+export const SystemContentPlanets: Component = () => {
     const routeInfo = useExploreRouteInfo();
     const navigate = useNavigate();
     const sc = useSystemContent(() => routeInfo().objectId);
@@ -136,5 +133,5 @@ export const SystemContentSurfacesList: Component = () => {
         );
     };
 
-    return <DataTable columns={SURFACE_COLUMNS} rows={items()} stickLeft inset onRowClick={onRowClick} />;
+    return <DataTable columns={SURFACE_COLUMNS} rows={items()} stickLeft onRowClick={onRowClick} />;
 };

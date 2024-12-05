@@ -15,3 +15,17 @@ export type CelestialSurfaceGrid = {
     coords: number[];
     edges: number[][];
 };
+
+export namespace CelestialSurface {
+    export function parsePlotId(id: string): number | undefined {
+        const n = Number.parseInt(id, 6);
+        if (Number.isNaN(n)) {
+            return undefined;
+        }
+        return n;
+    }
+
+    export function makePlotId(tileNumber: number): string {
+        return tileNumber.toString(16).padStart(3, '0');
+    }
+}
