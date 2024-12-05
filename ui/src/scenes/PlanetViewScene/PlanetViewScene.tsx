@@ -1,9 +1,12 @@
-import { createEffect, createMemo, Show, type Component } from 'solid-js';
+import { createEffect, createMemo, createSignal, Show, type Component } from 'solid-js';
+import { SceneControls, SceneControlsButton } from '../../components/SceneControls';
+import { CelestialSurface } from '../../domain/CelstialSurface';
+import { IconPeople, IconPlanet, IconPlot, IconRadius, IconRocks } from '../../icons';
+import { useSurfaceOverview } from '../../store/galaxy';
+import { RotatableCamera } from '../common/RotatableCamera/RotatableCamera';
+import { type TileRenderMode } from './colors';
 import { PlanetViewSceneLight } from './PlanetViewSceneLight';
 import { PlanetViewScenePlanet } from './PlanetViewScenePlanet';
-import { RotatableCamera } from '../common/RotatableCamera/RotatableCamera';
-import { useSurfaceOverview } from '../../store/galaxy';
-import { CelestialSurface } from '../../domain/CelstialSurface';
 
 export type PlanetViewSceneProps = {
     isActive: boolean;
@@ -15,6 +18,7 @@ export type PlanetViewSceneProps = {
 
 export const PlanetViewScene: Component<PlanetViewSceneProps> = (props) => {
     const surface = useSurfaceOverview(() => (props.isActive ? props.surfaceId : undefined));
+    const [getTileRenderMode, setTileRenderMode] = createSignal<TileRenderMode>('natural');
 
     const activeTileIndex = createMemo(
         () => (props.selectedPlotId && CelestialSurface.parsePlotId(props.selectedPlotId)) || undefined,
@@ -55,6 +59,12 @@ export const PlanetViewScene: Component<PlanetViewSceneProps> = (props) => {
         });
     });
 
+    const setTRMNatural = () => setTileRenderMode('natural');
+    const setTRMBiomes = () => setTileRenderMode('biomes');
+    const setTRMPopulation = () => setTileRenderMode('population');
+    const setTRMResources = () => setTileRenderMode('resources');
+    const setTRMElevations = () => setTileRenderMode('elevations');
+
     return (
         <Show when={props.isActive && surface.data}>
             <RotatableCamera
@@ -68,13 +78,41 @@ export const PlanetViewScene: Component<PlanetViewSceneProps> = (props) => {
                 pitchInertia={0.92}
                 pannable={false}
             />
-            <PlanetViewSceneLight />
+            <PlanetViewSceneLight isNatural={getTileRenderMode() === 'natural'} />
             <PlanetViewScenePlanet
                 surface={surface.data?.surface ?? null}
                 body={surface.data?.body ?? null}
                 activeTileIndex={activeTileIndex()}
                 onTileClick={onTileClick}
+                tileRenderMode={getTileRenderMode()}
             />
+            <SceneControls>
+                <SceneControlsButton
+                    icon={IconPlanet}
+                    isActive={getTileRenderMode() === 'natural'}
+                    onClick={setTRMNatural}
+                />
+                <SceneControlsButton
+                    icon={IconPlot}
+                    isActive={getTileRenderMode() === 'biomes'}
+                    onClick={setTRMBiomes}
+                />
+                <SceneControlsButton
+                    icon={IconPeople}
+                    isActive={getTileRenderMode() === 'population'}
+                    onClick={setTRMPopulation}
+                />
+                <SceneControlsButton
+                    icon={IconRocks}
+                    isActive={getTileRenderMode() === 'resources'}
+                    onClick={setTRMResources}
+                />
+                <SceneControlsButton
+                    icon={IconRadius}
+                    isActive={getTileRenderMode() === 'elevations'}
+                    onClick={setTRMElevations}
+                />
+            </SceneControls>
         </Show>
     );
 };

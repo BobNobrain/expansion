@@ -24,7 +24,7 @@ export const Badge: ParentComponent<BadgeProps> = (props) => {
         >
             <Show when={props.iconLeft}>
                 <div class={styles.iconLeft}>
-                    <Dynamic component={props.iconLeft} size={20} />
+                    <Dynamic component={props.iconLeft} size={20} block />
                 </div>
             </Show>
 
@@ -32,7 +32,7 @@ export const Badge: ParentComponent<BadgeProps> = (props) => {
 
             <Show when={props.iconRight}>
                 <div class={styles.iconRight}>
-                    <Dynamic component={props.iconRight} size={20} />
+                    <Dynamic component={props.iconRight} size={20} block />
                 </div>
             </Show>
         </div>

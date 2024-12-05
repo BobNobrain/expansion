@@ -1,13 +1,14 @@
+import { createMemo } from 'solid-js';
 import * as T from 'three';
+import { type CelestialSurface } from '../../domain/CelstialSurface';
 import { type MeshBuilder } from '../../lib/3d/MeshBuilder';
+import { type RawColor } from '../../lib/3d/types';
+import { Color } from '../../lib/color';
+import { pickRenderer, type TileRenderMode } from './colors';
 import { getInvertedMesh } from './mesh/invert';
 import { restorePlanetGrid } from './mesh/grid';
-import { createMemo } from 'solid-js';
 import { PlanetTileManager } from './mesh/tiles';
-import { type RawColor } from '../../lib/3d/types';
 import { scale } from './mesh/utils';
-import { type CelestialSurface } from '../../domain/CelstialSurface';
-import { Color } from '../../lib/color';
 
 export type UsePlanetResult = {
     surfaceMesh: () => T.Mesh | null;
@@ -17,9 +18,7 @@ export type UsePlanetResult = {
     faceIndexMap: () => Record<number, number>;
 };
 
-export function usePlanet(getSurface: () => CelestialSurface | null): UsePlanetResult {
-    // const { getData } = usePlanetData('testPlanet');
-
+export function usePlanet(getSurface: () => CelestialSurface | null, getMode: () => TileRenderMode): UsePlanetResult {
     const gridBuilder = createMemo(() => {
         const surface = getSurface();
         if (!surface) {
@@ -43,9 +42,11 @@ export function usePlanet(getSurface: () => CelestialSurface | null): UsePlanetR
 
         const palette: RawColor[] = [];
         const colorToIndex: Record<string, number> = {};
+        const renderer = pickRenderer(getMode());
+        const colors = renderer(surface);
 
-        for (let tileIndex = 0; tileIndex < surface.colors.length; tileIndex++) {
-            const color = surface.colors[tileIndex];
+        for (let tileIndex = 0; tileIndex < colors.length; tileIndex++) {
+            const color = colors[tileIndex];
             const colorString = Color.toHexString(color, { stripAlpha: true });
             let colorIndex = colorToIndex[colorString];
             if (colorIndex === undefined) {

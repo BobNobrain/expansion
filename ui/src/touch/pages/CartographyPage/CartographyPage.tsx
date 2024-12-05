@@ -136,7 +136,7 @@ export const CartographyPage: Component = () => {
 
     return (
         <>
-            <SceneRenderer>
+            <SceneRenderer clearColor="#000000">
                 <GalaxyMapScene
                     isActive={routeInfo().objectType === 'galaxy' || routeInfo().objectType === 'sector'}
                     selectedSector={routeInfo().objectId ?? null}

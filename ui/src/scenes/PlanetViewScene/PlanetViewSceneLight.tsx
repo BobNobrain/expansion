@@ -1,3 +1,4 @@
+import { type Component } from 'solid-js';
 import type * as T from 'three';
 import { DirectionalLight } from '../../components/three/DirectionalLight/DirectionalLight';
 import { createRef } from '../../lib/solid/ref';
@@ -8,7 +9,11 @@ const SUN_Y = 0.3;
 const SUN_ROTATION_PERIOD = 30000;
 const SUN_ROTATION_FACTOR = (Math.PI * 2) / SUN_ROTATION_PERIOD;
 
-export const PlanetViewSceneLight = () => {
+export type PlanetViewSceneLightProps = {
+    isNatural: boolean;
+};
+
+export const PlanetViewSceneLight: Component<PlanetViewSceneLightProps> = (props) => {
     const light = createRef<T.DirectionalLight>();
 
     useAnimation(({ time }) => {
@@ -22,8 +27,8 @@ export const PlanetViewSceneLight = () => {
 
     return (
         <>
-            <DirectionalLight ref={light.ref} color={0xffffff} intensity={1} />
-            <AmbientLight color={0xffffff} intensity={0.2} />
+            <DirectionalLight ref={light.ref} color={0xffffff} intensity={props.isNatural ? 1 : 0.6} />
+            <AmbientLight color={0xffffff} intensity={props.isNatural ? 0.01 : 0.7} />
         </>
     );
 };

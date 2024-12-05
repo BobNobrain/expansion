@@ -17,9 +17,6 @@
 .icon-right {
     margin-left: 4px;
 }
-.icon-left > svg, .icon-right > svg {
-    display: block;
-}
 
 .primary {
     --badge-color: var(--p-primary-500);
