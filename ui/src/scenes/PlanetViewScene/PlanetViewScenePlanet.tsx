@@ -57,6 +57,7 @@ export const PlanetViewScenePlanet: Component<PlanetViewScenePlanetProps> = (pro
                 linewidth: 3,
             }),
         );
+        borderLine.renderOrder = -1;
         // const activeTileBuilder = new MeshBuilder();
         // for (const v of verticies) {
         //     activeTileBuilder.add(...v);

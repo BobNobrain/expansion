@@ -7,6 +7,7 @@ import { RotatableCamera } from '../common/RotatableCamera/RotatableCamera';
 import { type TileRenderMode } from './colors';
 import { PlanetViewSceneLight } from './PlanetViewSceneLight';
 import { PlanetViewScenePlanet } from './PlanetViewScenePlanet';
+import { PlanetViewSceneAtmosphere } from './PlanetViewSceneAtmosphere';
 
 export type PlanetViewSceneProps = {
     isActive: boolean;
@@ -86,6 +87,8 @@ export const PlanetViewScene: Component<PlanetViewSceneProps> = (props) => {
                 onTileClick={onTileClick}
                 tileRenderMode={getTileRenderMode()}
             />
+            <PlanetViewSceneAtmosphere isNatural={getTileRenderMode() === 'natural'} density={0.6} />
+
             <SceneControls>
                 <SceneControlsButton
                     icon={IconPlanet}
