@@ -7,8 +7,8 @@ CAESAR = node ./tools/caesar.js
 setup: dev-db
 	@echo "Setting up the project for local development"
 	cd server && make setup setup-dev-db
-	cd ../ui && npm i && npm run build:editor
-	cd ../tools && npm i
+	cd ui && npm i && npm run build:editor
+	cd tools && npm i
 
 api-types:
 	cd server && make api-types

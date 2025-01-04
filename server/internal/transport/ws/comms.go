@@ -4,6 +4,8 @@ import (
 	"srv/internal/components"
 	"srv/internal/domain"
 	"srv/internal/encodables"
+	"srv/internal/events"
+	"srv/internal/globals/eb"
 	"srv/internal/utils"
 	"srv/internal/utils/common"
 	"srv/pkg/api"
@@ -51,6 +53,8 @@ func (impl *WSComms) HandleNewConnection(conn *websocket.Conn, user domain.User)
 		RecipientClients: []domain.ClientID{client.id},
 		Payload:          encodables.NewUserDataUpdatePayload(user.Username),
 	})
+
+	eb.PublishNew("comms", "online", events.ClientConnected{User: user, CliendID: client.id})
 }
 
 func (impl *WSComms) Broadcast(rq components.CommsBroadcastRequest) common.Error {
@@ -147,4 +151,6 @@ func (impl *WSComms) detachClient(cid domain.ClientID) {
 	} else {
 		delete(impl.clientsByUserID, c.user.ID)
 	}
+
+	eb.PublishNew("comms", "offline", events.ClientConnected{User: c.user, CliendID: cid})
 }
