@@ -21,5 +21,9 @@
             "username": "devsrv",
             "password": "dev"
         }
-    ]
+    ],
+    "sqltools.format": {
+        "language": "pl/sql",
+        "linesBetweenQueries": 2
+    }
 }

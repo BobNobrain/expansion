@@ -54,6 +54,31 @@ type SurfaceData interface {
 	GetTileConditions() []SurfaceTileConditions
 }
 
+type WorldOverview struct {
+	ID         CelestialID
+	IsExplored bool
+	Size       int
+	Conditions SurfaceConditions
+	Params     CelestialSurfaceParams
+}
+
+type WorldData struct {
+	ID          CelestialID
+	Explored    *ExplorationData
+	Grid        geom.SpatialGraph
+	Conditions  SurfaceConditions
+	Composition SurfaceComposition
+
+	TileElevationsScale phys.Distance
+
+	TileColors     []color.RichColorRGB
+	TileElevations []float64
+	TileTemps      []phys.Temperature
+	TilePressures  []phys.Pressure
+	TileSurfaces   []BiomeSurface
+	TileResources  map[int]ResourceDeposit
+}
+
 type SurfaceConditions struct {
 	Pressure phys.Pressure
 	AvgTemp  phys.Temperature

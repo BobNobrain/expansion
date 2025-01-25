@@ -49,7 +49,7 @@ func getAssetFileName(w http.ResponseWriter, r *http.Request, v assetFileNameOpt
 		isDir = stat.IsDir()
 	}
 
-	details := common.DictEncodable().Set("path", path)
+	details := common.NewDictEncodable().Set("path", path)
 
 	if v.shouldExist && !exists {
 		respondError(w, 404, common.NewErrorWithDetails("ERR_BAD_REQUEST", "file does not exist", details))

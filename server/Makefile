@@ -17,7 +17,7 @@ watch-editor:
 	gow -r=false run cmd/editor-api/editor-api.go
 
 .PHONY: setup install
-setup: install api-types assetgen galaxy-texture
+setup: install sqlc api-types assetgen galaxy-texture
 install:
 	go install github.com/gzuidhof/tygo@latest
 	go install github.com/mitranim/gow@latest
@@ -51,3 +51,7 @@ setup-dev-db:
 .PHONY: planetgen
 planetgen:
 	EXPANSION_DEBUG=planetgen go run cmd/planetgendebug/planetgendebug.go
+
+.PHONY: sqlc
+sqlc:
+	sqlc generate

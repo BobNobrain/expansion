@@ -6,6 +6,13 @@ and gradually bendthe galaxy to mankind needs.
 
 ## Development
 
+Prerequisites:
+- go 1.22.6
+- node 20
+- Docker
+- make
+- [sqlc](https://github.com/sqlc-dev/sqlc)
+
 To install all needed deps and make all generated files, run:
 
 ```bash

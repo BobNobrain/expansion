@@ -18,3 +18,13 @@ packages:
       null.Bool: "null | boolean"
       uuid.UUID: "string /* uuid */"
       uuid.NullUUID: "null | string /* uuid */"
+
+  - path: "srv/pkg/dfapi"
+    fallback_type: "unknown"
+    output_path: "../ui/src/lib/net/datafront.generated.ts"
+    type_mappings:
+      time.Time: "string /* RFC3339 */"
+      null.String: "null | string"
+      null.Bool: "null | boolean"
+      uuid.UUID: "string /* uuid */"
+      uuid.NullUUID: "null | string /* uuid */"

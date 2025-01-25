@@ -1,37 +1,31 @@
 package datafront
 
 import (
-	"srv/internal/domain"
-	"srv/internal/utils/common"
+	"srv/internal/components"
+	"srv/internal/datafront/dfcore"
 )
 
-type ReactiveDataListener interface {
-	NotifyUpdated()
+const gameDataFrontScope components.DispatcherScope = "gdf"
+
+type GameDataFront struct {
+	df *dfcore.DataFront
+
+	users  *usersTable
+	online *onlineSingleton
+	galaxy *galaxyMapSingleton
 }
 
-type ReactiveData interface {
-	GetValue() common.Encodable
+func NewDataFront(disp components.Dispatcher, comms components.Comms) *GameDataFront {
+	result := &GameDataFront{
+		df: dfcore.NewDataFront(disp, comms, gameDataFrontScope),
+	}
 
-	Listen(ReactiveDataListener)
-	Unlisten(ReactiveDataListener)
-
-	Subscribe(domain.ClientID)
-	Unsubscribe(domain.ClientID)
-
-	Attach(*DataFront, DFPath)
-	Dispose()
+	return result
 }
 
-type ReactiveTable interface {
-	Query(DFRequest) common.Encodable
-	Attach(*DataFront, DFPath)
-	Dispose()
+func (gdf *GameDataFront) Dispose() {
+	gdf.users.dispose()
+	gdf.online.dispose()
+
+	gdf.df.Dispose()
 }
-
-// type DataFront interface {
-// 	CreateSubtree(DFPath)
-// 	RemoveSubtree(DFPath) common.Error
-// 	RemoveValue(DFPath) common.Error
-
-// 	Dispose()
-// }

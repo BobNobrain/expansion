@@ -1,289 +1,192 @@
 package db
 
 import (
-	"fmt"
+	"context"
 	"srv/internal/components"
-	"srv/internal/db/dbcore"
+	"srv/internal/db/dbq"
 	"srv/internal/domain"
 	"srv/internal/utils/common"
-	"time"
-
-	"github.com/huandu/go-sqlbuilder"
 )
 
 type userRepoImpl struct {
-	db *dbcore.Conn
-
-	users *dbcore.Table
-	roles *dbcore.Table
+	q *dbq.Queries
 }
 
-func newUserRepo(db *dbcore.Conn) *userRepoImpl {
-	return &userRepoImpl{
-		db:    db,
-		users: dbcore.MakeTable("users"),
-		roles: dbcore.MakeTable("user_roles"),
+func (db *userRepoImpl) CheckRoles(uid domain.UserID, roles []domain.UserRole) (map[domain.UserRole]bool, common.Error) {
+	uuid, parseErr := parseUUID(string(uid))
+	if parseErr != nil {
+		return nil, parseErr
 	}
-}
-
-const (
-	userFieldID           = "uid"
-	userFieldUsername     = "username"
-	userFieldEmail        = "email"
-	userFieldPasswordHash = "password_hash"
-	userFieldCreatedAt    = "created_at"
-	userFieldUpdatedAt    = "updated_at"
-
-	userRolesFieldID        = "id"
-	userRolesFieldUserID    = "uid"
-	userRolesFieldRole      = "role"
-	userRolesFieldGrantedAt = "granted_at"
-	userRolesFieldGrantedBy = "granted_by"
-)
-
-type dbUser struct {
-	ID           string    `db:"uid"`
-	Username     string    `db:"username"`
-	Email        string    `db:"email"`
-	PasswordHash string    `db:"password_hash"`
-	CreatedAt    time.Time `db:"created_at"`
-	UpdatedAt    time.Time `db:"updated_at"`
-	Roles        []string  `db:"roles"`
-}
-
-type dbUserRole struct {
-	ID        int       `db:"id"`
-	UserID    string    `db:"uid"`
-	Role      string    `db:"role"`
-	GrantedAt time.Time `db:"granted_at"`
-	GrantedBy string    `db:"granted_by"`
-}
-
-type dbUserInsert struct {
-	Username     string `db:"username"`
-	Email        string `db:"email"`
-	PasswordHash string `db:"password_hash"`
-}
-
-type dbUserRoleInsert struct {
-	UserID    string `db:"uid"`
-	Role      string `db:"role"`
-	GrantedBy string `db:"granted_by"`
-}
-
-func (data *dbUser) toUser() domain.User {
-	if data == nil {
-		return domain.User{}
-	}
-
-	roles := make([]domain.UserRole, len(data.Roles))
-	for _, role := range data.Roles {
-		roles = append(roles, domain.UserRole(role))
-	}
-
-	return domain.User{
-		ID:       domain.UserID(data.ID),
-		Username: domain.Username(data.Username),
-		Email:    data.Email,
-		Roles:    roles,
-	}
-}
-func (data *dbUser) toCredentials() domain.UserCredentials {
-	if data == nil {
-		return domain.UserCredentials{}
-	}
-	return domain.UserCredentials{
-		Username:     domain.Username(data.Username),
-		PasswordHash: data.PasswordHash,
-	}
-}
-
-func (repo *userRepoImpl) getUsersSchemaBuilder() *sqlbuilder.CreateTableBuilder {
-	users := repo.users.CreateTableBuilder()
-	users.Define(userFieldID, "UUID", "PRIMARY KEY", "DEFAULT gen_random_uuid()")
-	users.Define(userFieldUsername, "TEXT", "UNIQUE", "NOT NULL")
-	users.Define(userFieldEmail, "TEXT", "UNIQUE", "NOT NULL")
-	users.Define(userFieldPasswordHash, "TEXT", "NOT NULL")
-	users.Define(userFieldCreatedAt, "TIMESTAMPTZ", "NOT NULL", "DEFAULT NOW()")
-	users.Define(userFieldUpdatedAt, "TIMESTAMPTZ", "NOT NULL", "DEFAULT NOW()")
-	return users
-}
-func (repo *userRepoImpl) getRolesSchemaBuilder() *sqlbuilder.CreateTableBuilder {
-	roles := repo.roles.CreateTableBuilder()
-	roles.Define(userRolesFieldID, "SERIAL", "PRIMARY KEY")
-	roles.Define(userRolesFieldUserID, "UUID", "NOT NULL")
-	roles.Define(userRolesFieldRole, "TEXT", "NOT NULL")
-	roles.Define(userRolesFieldGrantedAt, "TIMESTAMPTZ", "NOT NULL", "DEFAULT NOW()")
-	roles.Define(userRolesFieldGrantedBy, "UUID", "NOT NULL")
-	return roles
-}
-
-func (repo *userRepoImpl) List() ([]domain.User, common.Error) {
-	builder := repo.users.SelectBuilder("*")
-	var rows []*dbUser
-	err := repo.db.RunQuery(builder, &rows)
-
+	// TODO: also include list of roles to check in query
+	userRoles, err := db.q.GetUserRoles(context.Background(), uuid)
 	if err != nil {
-		return nil, err
+		return nil, makeDBError(err, "UserRepo::CheckRoles")
 	}
 
-	result := make([]domain.User, len(rows))
-	for i := 0; i < len(rows); i++ {
-		result[i] = rows[i].toUser()
+	rolesMap := make(map[domain.UserRole]bool, len(userRoles))
+	for _, role := range userRoles {
+		rolesMap[domain.UserRole(role.Role)] = true
 	}
 
-	return result, nil
+	return rolesMap, nil
 }
 
-func (repo *userRepoImpl) Get(rq components.GetUserRequest) (domain.User, common.Error) {
-	fields := []string{repo.users.Qualified(userFieldID), userFieldUsername, userFieldEmail}
-	if rq.WithRoles {
-		fields = append(fields, fmt.Sprintf("json_agg(%s)", userRolesFieldRole))
-	}
-
-	builder := repo.users.SelectBuilder(fields...)
-
-	if rq.WithRoles {
-		builder.JoinWithOption(
-			sqlbuilder.LeftJoin,
-			repo.roles.TableName,
-			fmt.Sprintf("%s.%s = %s.%s", repo.users.TableName, userFieldID, repo.roles.TableName, userRolesFieldUserID),
-		)
-	}
-
-	if rq.UserID != "" {
-		builder.Where(builder.Equal(repo.users.Qualified(userFieldID), rq.UserID))
-	}
-	if rq.Username != "" {
-		builder.Where(builder.Equal(userFieldUsername, rq.Username))
-	}
-	if rq.Email != "" {
-		builder.Where(builder.Equal(userFieldEmail, rq.Email))
-	}
-
-	if rq.WithRoles {
-		builder.GroupBy(repo.users.Qualified(userFieldID), userFieldUsername, userFieldEmail)
-	}
-
-	var rows []*dbUser
-
-	err := repo.db.RunQuery(builder, &rows)
-	if err != nil {
-		return domain.User{}, err
-	}
-
-	if len(rows) < 1 {
-		return domain.User{}, makeNotFoundError("user not found")
-	}
-
-	return rows[0].toUser(), nil
-}
-
-func (repo *userRepoImpl) GetManyByIDs(uids []domain.UserID) ([]domain.User, common.Error) {
-	builder := repo.users.SelectBuilder("*")
-	values := make([]interface{}, 0, len(uids))
-	for _, uid := range uids {
-		values = append(values, uid)
-	}
-	builder.Where(builder.In(userFieldID, values...))
-
-	var rows []*dbUser
-	err := repo.db.RunQuery(builder, &rows)
-	if err != nil {
-		return nil, err
-	}
-
-	result := make([]domain.User, 0, len(rows))
-	for _, row := range rows {
-		result = append(result, row.toUser())
-	}
-	return result, nil
-}
-
-func (repo *userRepoImpl) GetCredentials(uname domain.Username) (domain.UserCredentials, common.Error) {
-	builder := repo.users.SelectBuilder("*")
-	builder.Where(builder.Equal(userFieldUsername, uname))
-
-	var rows []*dbUser
-
-	err := repo.db.RunQuery(builder, &rows)
-	if err != nil {
-		return domain.UserCredentials{}, err
-	}
-
-	if len(rows) < 1 {
-		return domain.UserCredentials{}, makeNotFoundError(fmt.Sprintf("user '%s' not found", uname))
-	}
-
-	return rows[0].toCredentials(), nil
-}
-
-func (c *userRepoImpl) Create(data components.UserCreateData) (domain.User, common.Error) {
-	builder := c.users.InsertBuilderFromSingleValue(dbUserInsert{
+func (db *userRepoImpl) Create(data components.UserCreateData) (domain.User, common.Error) {
+	created, err := db.q.CreateUser(context.Background(), dbq.CreateUserParams{
 		Username:     string(data.Username),
 		Email:        data.Email,
 		PasswordHash: data.PasswordHash,
 	})
 
-	err := c.db.RunStatement(builder)
 	if err != nil {
-		return domain.User{}, err
+		return domain.User{}, makeDBError(err, "UserRepo::Create")
 	}
 
-	return c.Get(components.GetUserRequest{Username: data.Username})
+	return domain.User{
+		ID:       domain.UserID(created.Uid.String()),
+		Username: domain.Username(created.Username),
+		Email:    created.Email,
+		Created:  created.CreatedAt.Time,
+		Roles:    nil,
+	}, nil
 }
 
-func (c *userRepoImpl) GrantRoles(rq components.ChangeRolesRequest) common.Error {
-	newEntries := make([]interface{}, len(rq.Roles))
+func (db *userRepoImpl) Get(rq components.GetUserRequest) (domain.User, common.Error) {
+	var dbUser dbq.User
+	var err error
+	user := domain.User{}
 
-	for _, role := range rq.Roles {
-		newEntries = append(newEntries, &dbUserRoleInsert{
-			UserID:    string(rq.Target),
-			Role:      string(role),
-			GrantedBy: string(rq.Author),
+	if !rq.UserID.IsEmpty() {
+		uuid, parseErr := parseUUID(string(rq.UserID))
+		if parseErr != nil {
+			return user, parseErr
+		}
+		dbUser, err = db.q.GetUserByID(context.Background(), uuid)
+		if err != nil {
+			return user, makeDBError(err, "UserRepo::Get(UserID)")
+		}
+	} else if rq.Username != "" {
+		dbUser, err = db.q.GetUserByUsername(context.Background(), string(rq.Username))
+		if err != nil {
+			return user, makeDBError(err, "UserRepo::Get(Username)")
+		}
+	} else if rq.Email != "" {
+		dbUser, err = db.q.GetUserByUsername(context.Background(), rq.Email)
+		if err != nil {
+			return user, makeDBError(err, "UserRepo::Get(Email)")
+		}
+	}
+
+	if rq.WithRoles {
+		roles, err := db.q.GetUserRoles(context.Background(), dbUser.Uid)
+		if err != nil {
+			return user, makeDBError(err, "UserRepo::Get(WithRoles)")
+		}
+		for _, role := range roles {
+			user.Roles = append(user.Roles, domain.UserRole(role.Role))
+		}
+	}
+
+	return user, nil
+}
+
+func (db *userRepoImpl) GetCredentials(username domain.Username) (domain.UserCredentials, common.Error) {
+	dbCreds, err := db.q.GetCredentials(context.Background(), string(username))
+	if err != nil {
+		return domain.UserCredentials{}, makeDBError(err, "UserRepo::GetCredentials")
+	}
+
+	return domain.UserCredentials{
+		Username:     domain.Username(dbCreds.Username),
+		PasswordHash: dbCreds.PasswordHash,
+	}, nil
+}
+
+func (db *userRepoImpl) GetManyByIDs(uids []domain.UserID) ([]domain.User, common.Error) {
+	ids := make([]string, 0, len(uids))
+	for _, uid := range uids {
+		ids = append(ids, string(uid))
+	}
+
+	dbUsers, err := db.q.ResolveUsers(context.Background(), ids)
+	if err != nil {
+		return nil, makeDBError(err, "UserRepo::GetManyByIDs")
+	}
+
+	users := make([]domain.User, 0, len(dbUsers))
+	for _, dbUser := range dbUsers {
+		users = append(users, domain.User{
+			ID:       domain.UserID(dbUser.Uid.String()),
+			Username: domain.Username(dbUser.Username),
+			Email:    dbUser.Email,
+			Created:  dbUser.CreatedAt.Time,
+			Roles:    nil,
 		})
 	}
 
-	builder := c.roles.InsertBuilderFromValues(newEntries)
-	return c.db.RunStatement(builder)
+	return users, nil
 }
 
-func (c *userRepoImpl) RevokeRoles(rq components.ChangeRolesRequest) common.Error {
-	builder := c.roles.DeleteBuilder()
-	builder.Where(builder.Equal(userRolesFieldUserID, rq.Target))
+func (db *userRepoImpl) GetManyByUsernames([]domain.Username) ([]domain.User, common.Error) {
+	// TODO: do we really need it?
+	panic("unimplemented")
+}
 
-	roleEquations := make([]string, len(rq.Roles))
+func (db *userRepoImpl) GrantRoles(rq components.ChangeRolesRequest) common.Error {
+	targetUUID, parseError := parseUUID(string(rq.Target))
+	if parseError != nil {
+		return parseError
+	}
+
+	authorUUID, parseError := parseUUID(string(rq.Author))
+	if parseError != nil {
+		return parseError
+	}
+
 	for _, role := range rq.Roles {
-		roleEquations = append(roleEquations, builder.Equal(userRolesFieldRole, role))
+		err := db.q.GrantRole(context.Background(), dbq.GrantRoleParams{
+			Uid:       targetUUID,
+			GrantedBy: authorUUID,
+			Role:      string(role),
+		})
+
+		if err != nil {
+			return makeDBErrorWithDetails(
+				err,
+				"UserRepo::GrantRoles",
+				common.NewDictEncodable().
+					Set("role", role).
+					Set("target", rq.Target).
+					Set("author", rq.Author),
+			)
+		}
 	}
 
-	builder.Where(builder.Or(roleEquations...))
-
-	return c.db.RunStatement(builder)
+	return nil
 }
 
-func (c *userRepoImpl) CheckRoles(uid domain.UserID, roles []domain.UserRole) (map[domain.UserRole]bool, common.Error) {
-	builder := c.roles.SelectBuilder(userRolesFieldRole)
-	builder.Where(builder.Equal(userRolesFieldUserID, uid))
-
-	roleEquations := make([]string, len(roles))
-	for _, role := range roles {
-		roleEquations = append(roleEquations, builder.Equal(userRolesFieldRole, role))
-	}
-	builder.Where(builder.Or(roleEquations...))
-
-	result := make(map[domain.UserRole]bool)
-	var rows []*dbUserRole
-
-	err := c.db.RunQuery(builder, &rows)
-	if err != nil {
-		return nil, err
+func (db *userRepoImpl) RevokeRoles(rq components.ChangeRolesRequest) common.Error {
+	targetUUID, parseError := parseUUID(string(rq.Target))
+	if parseError != nil {
+		return parseError
 	}
 
-	for _, row := range rows {
-		role := domain.UserRole(row.Role)
-		result[role] = true
+	for _, role := range rq.Roles {
+		err := db.q.RevokeRole(context.Background(), dbq.RevokeRoleParams{
+			Uid:  targetUUID,
+			Role: string(role),
+		})
+
+		if err != nil {
+			return makeDBErrorWithDetails(
+				err,
+				"UserRepo::RevokeRoles",
+				common.NewDictEncodable().
+					Set("role", role).
+					Set("target", rq.Target),
+			)
+		}
 	}
 
-	return result, nil
+	return nil
 }

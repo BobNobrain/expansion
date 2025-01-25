@@ -48,6 +48,15 @@ func NewWrapperError(code string, inner error) Error {
 	}
 }
 
+func NewWrapperErrorWithDetails(code string, inner error, details Encodable) Error {
+	return &customError{
+		code:    code,
+		msg:     inner.Error(),
+		inner:   inner,
+		details: details,
+	}
+}
+
 func NewErrorWithDetails(code string, msg string, details Encodable) Error {
 	return &customError{
 		code:    code,

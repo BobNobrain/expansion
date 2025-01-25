@@ -3,7 +3,7 @@ CAESAR = node ./tools/caesar.js
 #
 # generated files
 #
-.PHONY: setup api-types assetgen
+.PHONY: setup api-types sqlc
 setup: dev-db
 	@echo "Setting up the project for local development"
 	cd server && make setup setup-dev-db
@@ -12,6 +12,9 @@ setup: dev-db
 
 api-types:
 	cd server && make api-types
+
+sqlc:
+	cd server && make sqlc
 
 #
 # dev servers

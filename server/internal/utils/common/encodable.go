@@ -26,21 +26,21 @@ func AsEncodable(anything any) Encodable {
 	return &customEncodable{value: anything}
 }
 
-type dictEncodable struct {
+type DictEncodable struct {
 	props map[string]any
 }
 
-func DictEncodable() *dictEncodable {
-	return &dictEncodable{
+func NewDictEncodable() *DictEncodable {
+	return &DictEncodable{
 		props: make(map[string]any),
 	}
 }
 
-func (dict *dictEncodable) Encode() interface{} {
+func (dict *DictEncodable) Encode() interface{} {
 	return dict.props
 }
 
-func (dict *dictEncodable) Set(prop string, value any) *dictEncodable {
+func (dict *DictEncodable) Set(prop string, value any) *DictEncodable {
 	dict.props[prop] = value
 	return dict
 }

@@ -10,17 +10,24 @@ type NamesRegistryEntryID int
 type NamesRegistryEntryStatus byte
 
 const (
-	NamesRegistryEntryStatusSuggested NamesRegistryEntryStatus = iota
-	NamesRegistryEntryStatusApproved  NamesRegistryEntryStatus = iota
-	NamesRegistryEntryStatusRejected  NamesRegistryEntryStatus = iota
+	NamesRegistryEntryStatusUnknown NamesRegistryEntryStatus = iota
+	NamesRegistryEntryStatusSuggested
+	NamesRegistryEntryStatusApproved
+	NamesRegistryEntryStatusDeclined
 )
+
+type NamesRegistryEntryShort struct {
+	ObjectID string
+	Name     string
+	NamedBy  UserID
+	NamedAt  time.Time
+}
 
 type NamesRegistryEntry struct {
 	EntryID  NamesRegistryEntryID
 	ObjectID string
 
-	Name   string
-	Locale locale.Locale
+	Name string
 
 	NamedBy UserID
 	NamedAt time.Time

@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS precalcs (
+    blob_id VARCHAR(31) PRIMARY KEY NOT NULL,
+    format VARCHAR(63) NOT NULL,
+    version INTEGER NOT NULL,
+    blob_data JSONB NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

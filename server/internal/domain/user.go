@@ -1,5 +1,7 @@
 package domain
 
+import "time"
+
 type Username string
 type UserID string
 
@@ -12,6 +14,7 @@ type User struct {
 	Username Username
 	Email    string
 	Roles    []UserRole
+	Created  time.Time
 }
 
 type UserCredentials struct {

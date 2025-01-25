@@ -19,6 +19,28 @@ type Star struct {
 	Params StarParams
 }
 
+type StarSystemOverview struct {
+	ID     StarSystemID
+	Coords GalacticCoords
+
+	IsExplored bool
+	Stars      []Star
+	NPlanets   int
+	NMoons     int
+	NAsteroids int
+	PopInfo    PopulationOverview
+}
+
+type StarSystemContent struct {
+	ID StarSystemID
+
+	Explored ExplorationData
+
+	Orbits map[CelestialID]OrbitData
+	Stars  []Star
+	Worlds []WorldOverview
+}
+
 type StarSystem interface {
 	GetSystemID() StarSystemID
 	GetCoords() GalacticCoords

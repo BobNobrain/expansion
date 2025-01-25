@@ -1,24 +1,18 @@
-package datafront
+package dfcore
 
 import (
 	"srv/internal/utils/common"
 )
 
 type pathNotFoundError struct {
-	msg          string
-	Path         DFPath
-	ValidSubpath DFPath
+	msg  string
+	Path DFPath
 }
 
-func newPathNotFoundError(path DFPath, faultIndex int) *pathNotFoundError {
-	var valudSubpath DFPath
-	if faultIndex > 0 {
-		valudSubpath = path[0:faultIndex]
-	}
+func newPathNotFoundError(path DFPath) *pathNotFoundError {
 	return &pathNotFoundError{
-		msg:          "path not found",
-		Path:         path,
-		ValidSubpath: valudSubpath,
+		msg:  "path not found",
+		Path: path,
 	}
 }
 
