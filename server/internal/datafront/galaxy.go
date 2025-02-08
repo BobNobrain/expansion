@@ -1,38 +1,35 @@
 package datafront
 
 import (
-	"srv/internal/components"
 	"srv/internal/datafront/dfcore"
-	"srv/internal/utils/binpack"
+	"srv/internal/globals/assets"
 	"srv/internal/utils/common"
 	"srv/internal/world"
 	"srv/pkg/api"
 )
 
 type galaxyMapSingleton struct {
-	value    dfcore.QueryableSingleton
-	precalcs components.BlobsRepo
+	value dfcore.QueryableSingleton
 
 	grid      world.GalacticGrid
 	valueData *api.DFGalaxyValue
 }
 
-func (gdf *GameDataFront) InitGalaxyMap(precalcs components.BlobsRepo) {
-	gmap := &galaxyMapSingleton{
-		precalcs: precalcs,
-	}
+func (gdf *GameDataFront) InitGalaxyMap() {
+	gmap := &galaxyMapSingleton{}
 
 	gmap.value = dfcore.NewQueryableSingleton(gmap.getValue)
+	gmap.init()
 
 	gdf.df.AttachSingleton("galaxy", gmap.value)
 	gdf.galaxy = gmap
 }
 
-func (gmap *galaxyMapSingleton) getValue() (common.Encodable, common.Error) {
+func (gmap *galaxyMapSingleton) getValue(_ dfcore.DFRequestContext) (common.Encodable, common.Error) {
 	return common.AsEncodable(gmap.valueData), nil
 }
 
-func (gmap *galaxyMapSingleton) init() common.Error {
+func (gmap *galaxyMapSingleton) init() {
 	valueData := &api.DFGalaxyValue{
 		OuterR: float64(world.OuterRimRadius),
 		InnerR: float64(world.InnerRimRadius),
@@ -40,28 +37,12 @@ func (gmap *galaxyMapSingleton) init() common.Error {
 	}
 
 	if gmap.grid == nil {
-		gridBlob, err := gmap.precalcs.Get("global/galactic_grid")
+		grid, err := assets.LoadGalacticGrid()
 		if err != nil {
-			return err
+			panic(err)
 		}
 
-		sectors := make([]*world.GalacticSector, 0)
-		r := binpack.NewReaderFromBytes(gridBlob.Data)
-		len := int(r.ReadUVarInt())
-		for i := 0; i < len; i++ {
-			sector := binpack.Read[world.GalacticSector](r)
-			sectors = append(sectors, &sector)
-		}
-
-		if r.GetError() != nil {
-			return common.NewWrapperErrorWithDetails(
-				"ERR_DECODE",
-				r.GetError(),
-				common.NewDictEncodable().Set("operation", "df.galaxy.init"),
-			)
-		}
-
-		gmap.grid = world.BuildGalacticGridFromSectorsList(sectors)
+		gmap.grid = grid
 	}
 
 	for _, sector := range gmap.grid.GetSectors() {
@@ -78,5 +59,4 @@ func (gmap *galaxyMapSingleton) init() common.Error {
 	// TODO: waypoints
 
 	gmap.valueData = valueData
-	return nil
 }

@@ -36,13 +36,13 @@ func (t TileOccupation) IsOccupied() bool {
 }
 
 type TileOverview struct {
-	ID         TileID
 	Occupation TileOccupation
 	Resource   ResourceDeposit
 	Surface    BiomeSurface
 }
 
 type TileData struct {
+	ID        TileID
 	Color     color.RichColorRGB
 	Elevation phys.Distance
 	AvgTemp   phys.Temperature

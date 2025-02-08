@@ -3,8 +3,8 @@ import * as T from 'three';
 import { Mesh } from '../../components/three/Mesh/Mesh';
 import { useInScene } from '../../components/three/hooks/useInScene';
 import { useSceneRenderer } from '../../components/three/context';
-import { type CelestialBody } from '../../domain/CelestialBody';
-import { type CelestialSurface } from '../../domain/CelstialSurface';
+import { type WorldOverview } from '../../domain/WorldOverview';
+import { type CelestialSurface } from '../../domain/World';
 import { type TapGestureData } from '../../lib/gestures/types';
 import { useEventListener } from '../../lib/solid/useEventListener';
 import { type TileRenderMode } from './colors';
@@ -12,7 +12,7 @@ import { usePlanet } from './planet';
 import { scale } from './mesh/utils';
 
 export type PlanetViewScenePlanetProps = {
-    body: CelestialBody | null;
+    body: WorldOverview | null;
     surface: CelestialSurface | null;
 
     showGraph?: boolean;

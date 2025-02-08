@@ -1,13 +1,3 @@
--- CREATE TABLE IF NOT EXISTS stars (
---     star_id VARCHAR(8) PRIMARY KEY NOT NULL,
---     system_id CHAR(6) NOT NULL,
---     -- params
---     age_byrs DOUBLE PRECISION NOT NULL,
---     lum_suns DOUBLE PRECISION NOT NULL,
---     radius_au DOUBLE PRECISION NOT NULL,
---     temp_k DOUBLE PRECISION NOT NULL,
---     mass_suns DOUBLE PRECISION NOT NULL
--- );
 CREATE TABLE IF NOT EXISTS star_systems (
     system_id CHAR(6) PRIMARY KEY NOT NULL,
     -- coords
@@ -38,7 +28,7 @@ CREATE TABLE IF NOT EXISTS worlds (
     radius_km DOUBLE PRECISION NOT NULL,
     mass_earths DOUBLE PRECISION NOT NULL,
     axis_tilt DOUBLE PRECISION NOT NULL DEFAULT 0.0,
-    day_length_real_s DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+    day_length_game_days DOUBLE PRECISION NOT NULL DEFAULT 0.0,
     grid_size INTEGER NOT NULL DEFAULT 0,
     -- exploration data
     explored_at TIMESTAMPTZ DEFAULT NULL,

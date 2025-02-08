@@ -13,7 +13,7 @@ type getTreeHandler struct {
 func (g *getTreeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	tree := g.fileTree.GetTree()
 	if tree == nil {
-		respondError(w, 500, common.NewError("ERR_UNKNOWN", "tree is nil"))
+		respondError(w, 500, common.NewError(common.WithMessage("tree is nil")))
 		return
 	}
 

@@ -18,6 +18,7 @@ type User struct {
 }
 
 type UserCredentials struct {
+	ID           UserID
 	Username     Username
 	PasswordHash string
 }

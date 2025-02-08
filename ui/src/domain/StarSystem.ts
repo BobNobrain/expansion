@@ -1,7 +1,7 @@
-import { type CelestialBody } from './CelestialBody';
 import { type GalacticCoords } from './GalacticCoords';
 import { type Orbit } from './Orbit';
 import { type Star } from './Star';
+import { type ExplorationData } from './misc';
 
 export type StarSystemOverview = {
     id: string;
@@ -10,19 +10,11 @@ export type StarSystemOverview = {
     nPlanets: number;
     nAsteroids: number;
     isExplored: boolean;
-    exploredBy: string;
-    exploredAt: Date;
 };
 
 export type StarSystemContent = {
     id: string;
     orbits: Record<string, Orbit>;
     stars: Star[];
-    bodies: Record<string, CelestialBody>;
+    explored: ExplorationData | null;
 };
-
-// export namespace StarSystemContent {
-//     export function empty(): StarSystemContent {
-
-//     }
-// }

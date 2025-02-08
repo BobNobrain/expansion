@@ -24,6 +24,7 @@ export type ButtonProps = ParentProps & {
 
 export const Button: Component<ButtonProps> = (props) => {
     const onClick = (ev: MouseEvent) => {
+        console.log(props.onClick, props.loading, props.disabled);
         if (!props.onClick || props.loading || props.disabled) {
             return;
         }

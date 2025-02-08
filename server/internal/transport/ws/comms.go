@@ -3,34 +3,29 @@ package ws
 import (
 	"srv/internal/components"
 	"srv/internal/domain"
-	"srv/internal/encodables"
 	"srv/internal/events"
 	"srv/internal/globals/eb"
 	"srv/internal/utils"
 	"srv/internal/utils/common"
-	"srv/pkg/api"
+	"srv/pkg/dfapi"
 	"sync"
 
 	"github.com/gorilla/websocket"
 )
 
 type WSComms struct {
-	mu         sync.Mutex
-	dispatcher components.Dispatcher
+	mu *sync.Mutex
+	df components.DataFront
 
 	clientsByUserID map[domain.UserID][]*wsClient
 	clientsById     map[domain.ClientID]*wsClient
 	users           components.UserRepo
 }
 
-func NewWebSocketComms(
-	dispatcher components.Dispatcher,
-	auth components.Authenticator,
-	userRepo components.UserRepo,
-) *WSComms {
+func NewWebSocketComms(df components.DataFront) *WSComms {
 	return &WSComms{
-		mu:              sync.Mutex{},
-		dispatcher:      dispatcher,
+		mu:              new(sync.Mutex),
+		df:              df,
 		clientsByUserID: make(map[domain.UserID][]*wsClient),
 		clientsById:     make(map[domain.ClientID]*wsClient),
 	}
@@ -40,29 +35,18 @@ func (impl *WSComms) AsComms() components.Comms {
 	return impl
 }
 
-const userDataScopeName = components.DispatcherScope("user")
-
 func (impl *WSComms) HandleNewConnection(conn *websocket.Conn, user domain.User) {
 	client := newClient(conn, user, impl)
 	impl.attachClient(client)
-	impl.onOnlineCountChange()
 
-	impl.Broadcast(components.CommsBroadcastRequest{
-		Scope:            userDataScopeName,
-		Event:            "login",
-		RecipientClients: []domain.ClientID{client.id},
-		Payload:          encodables.NewUserDataUpdatePayload(user.Username),
-	})
-
-	eb.PublishNew("comms", "online", events.ClientConnected{User: user, CliendID: client.id})
+	eb.PublishNew(events.SourceComms, events.EventClientOnline, events.ClientConnected{User: user, CliendID: client.id})
 }
 
 func (impl *WSComms) Broadcast(rq components.CommsBroadcastRequest) common.Error {
 	impl.mu.Lock()
 	defer impl.mu.Unlock()
 
-	message := &api.ServerEvent{
-		Scope:   string(rq.Scope),
+	message := dfapi.DFGenericEvent{
 		Event:   rq.Event,
 		Payload: rq.Payload.Encode(),
 	}
@@ -91,34 +75,6 @@ func (impl *WSComms) Broadcast(rq components.CommsBroadcastRequest) common.Error
 		}
 	}
 
-	return nil
-}
-
-func (impl *WSComms) Respond(rq components.CommsRespondRequest) common.Error {
-	impl.mu.Lock()
-	defer impl.mu.Unlock()
-
-	client, found := impl.clientsById[rq.ClientID]
-	if !found {
-		return nil
-	}
-
-	var message interface{} = nil
-	if rq.Error != nil {
-		message = &api.ServerCommandErrorResponse{
-			ID:      uint64(rq.ResponseTo),
-			Code:    rq.Error.Code(),
-			Error:   rq.Error.Error(),
-			Details: rq.Error.Details().Encode(),
-		}
-	} else {
-		message = &api.ServerCommandSuccessResponse{
-			ID:     uint64(rq.ResponseTo),
-			Result: rq.Result.Encode(),
-		}
-	}
-
-	client.send <- message
 	return nil
 }
 
@@ -152,5 +108,5 @@ func (impl *WSComms) detachClient(cid domain.ClientID) {
 		delete(impl.clientsByUserID, c.user.ID)
 	}
 
-	eb.PublishNew("comms", "offline", events.ClientConnected{User: c.user, CliendID: cid})
+	eb.PublishNew(events.SourceComms, events.EventClientOffline, events.ClientConnected{User: c.user, CliendID: cid})
 }

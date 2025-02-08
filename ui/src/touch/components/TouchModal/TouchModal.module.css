@@ -1,0 +1,29 @@
+.backdrop {
+    background-color: var(--p-main-100-75);
+
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity ease-in-out 0.2s;
+}
+.backdrop.visible {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.content {
+    height: fit-content;
+    max-height: calc(100% - 64px);
+    overflow: auto;
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}

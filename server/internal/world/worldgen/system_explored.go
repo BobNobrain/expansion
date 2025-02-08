@@ -8,7 +8,7 @@ import (
 
 type ExploreOptions struct {
 	SystemID world.StarSystemID
-	Stars    []*world.Star
+	Stars    []world.Star
 	Orbits   map[world.CelestialID]world.OrbitData
 }
 

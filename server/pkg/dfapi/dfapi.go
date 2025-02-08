@@ -2,10 +2,35 @@ package dfapi
 
 import "encoding/json"
 
+type DFGenericRequest struct {
+	ID      int             `json:"id"`
+	Type    string          `json:"type"`
+	Request json.RawMessage `json:"request"`
+}
+
+type DFGenericResponse struct {
+	RequestID int      `json:"requestId"`
+	Result    any      `json:"result,omitempty"`
+	Error     *DFError `json:"error,omitempty"`
+}
+type DFError struct {
+	Code        string `json:"code"`
+	Message     string `json:"message"`
+	IsRetriable bool   `json:"isRetriable"`
+	Details     any    `json:"details"`
+}
+
+func (v DFGenericResponse) Encode() any {
+	return v
+}
+
+// type DFUnsubscribe
+
 type DFTableRequest struct {
 	Path         string          `json:"path"`
 	JustBrowsing bool            `json:"justBrowsing"`
-	Query        json.RawMessage `json:"query"`
+	QueryType    string          `json:"query"`
+	Payload      json.RawMessage `json:"payload"`
 }
 
 type DFSingletonRequest struct {
@@ -13,20 +38,15 @@ type DFSingletonRequest struct {
 	JustBrowsing bool   `json:"justBrowsing"`
 }
 
-type DFTableResponse struct {
-	Values []any `json:"values"`
+type DFActionRequest struct {
+	Name             string          `json:"name"`
+	IdempotencyToken string          `json:"token"`
+	Payload          json.RawMessage `json:"payload"`
 }
 
-func (v DFTableResponse) Encode() any {
-	return v
-}
-
-type DFSingletonResponse struct {
-	Value any `json:"value"`
-}
-
-func (v DFSingletonResponse) Encode() any {
-	return v
+type DFGenericEvent struct {
+	Event   string `json:"event"`
+	Payload any    `json:"payload"`
 }
 
 type DFUpdateEvent struct {
@@ -52,4 +72,8 @@ type DFSingletonUpdatePatch struct {
 type DFTableUnsubscribeRequest struct {
 	Path string   `json:"path"`
 	IDs  []string `json:"ids"`
+}
+
+type DFSingletonUnsubscribeRequest struct {
+	Path string `json:"path"`
 }

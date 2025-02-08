@@ -64,6 +64,7 @@ func (s *starsRepoImpl) GetContent(id world.StarSystemID) (world.StarSystemConte
 		return system, jsonErr
 	}
 
+	system.Orbits = make(map[world.CelestialID]world.OrbitData)
 	for bodyId, orbitData := range systemData.Orbits {
 		system.Orbits[world.CelestialID(bodyId)] = world.OrbitData{
 			Center: world.CelestialID(orbitData.Center),
@@ -219,12 +220,18 @@ func (s *starsRepoImpl) CreateGalaxy(payload components.CreateGalaxyPayload) com
 			return makeDBError(err, "CreateGalaxy(Stars.ToJSON)")
 		}
 
+		starSystemData, err := encodeStarSystemData(sysData.Orbits)
+		if err != nil {
+			return makeDBError(err, "CreateGalaxy(SystemData.ToJSON)")
+		}
+
 		createData = append(createData, dbq.CreateSystemParams{
 			SystemID:      string(sysData.ID),
 			CoordsR:       float64(sysData.Coords.R),
 			CoordsH:       float64(sysData.Coords.H),
 			CoordsTh:      sysData.Coords.Theta.Radians(),
 			SystemStars:   starsJson,
+			SystemData:    starSystemData,
 			NStars:        int32(len(sysData.Stars)),
 			MapBrightness: mapBrightness,
 		})
@@ -244,21 +251,7 @@ func (s *starsRepoImpl) ExploreSystem(payload components.ExploreSystemPayload) c
 		return err
 	}
 
-	systemData := starSystemData{
-		Orbits: make(map[string]starSystemDataOrbit),
-	}
-	for bodyID, orbit := range payload.Orbits {
-		systemData.Orbits[string(bodyID)] = starSystemDataOrbit{
-			Center:          string(orbit.Center),
-			SemiMajorAu:     orbit.Ellipse.SemiMajor.AstronomicalUnits(),
-			Eccentricity:    orbit.Ellipse.Eccentricity,
-			InclinationRads: orbit.Inclination.Radians(),
-			RotationRads:    orbit.Rotation.Radians(),
-			T0:              orbit.T0,
-		}
-	}
-
-	systemDataJSON, jerr := json.Marshal(systemData)
+	systemDataJSON, jerr := encodeStarSystemData(payload.Orbits)
 	if jerr != nil {
 		return makeDBError(jerr, "ExploreSystem(Data.ToJSON)")
 	}
@@ -299,4 +292,22 @@ func decodeStars(json []byte) ([]world.Star, common.Error) {
 	}
 
 	return result, nil
+}
+
+func encodeStarSystemData(orbits map[world.CelestialID]world.OrbitData) ([]byte, error) {
+	jsonOrbits := make(map[string]starSystemDataOrbit)
+	for bodyID, orbit := range orbits {
+		jsonOrbits[string(bodyID)] = starSystemDataOrbit{
+			Center:          string(orbit.Center),
+			SemiMajorAu:     orbit.Ellipse.SemiMajor.AstronomicalUnits(),
+			Eccentricity:    orbit.Ellipse.Eccentricity,
+			InclinationRads: orbit.Inclination.Radians(),
+			RotationRads:    orbit.Rotation.Radians(),
+			T0:              orbit.T0,
+		}
+	}
+
+	return json.Marshal(starSystemData{
+		Orbits: jsonOrbits,
+	})
 }

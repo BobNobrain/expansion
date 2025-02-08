@@ -2,7 +2,9 @@ import { createSignal, Show, type ParentComponent } from 'solid-js';
 import { UserFeed } from '../../../components/UserFeed/UserFeed';
 import { IconBack, IconContext, IconFlag, IconGalaxy, IconShip, IconUser } from '../../../icons';
 import { TouchHeader, TouchHeaderButton, TouchHeaderTitle } from '../TouchHeader/TouchHeader';
+import { TouchLoginModal } from '../TouchLoginModal/TouchLoginModal';
 import { type TouchNavBarItem } from '../TouchNavBar/TouchNavBar';
+import { TouchOfflineIndicator } from '../TouchOfflineIndicator/TouchOfflineIndicator';
 import { TouchSidePanel } from '../TouchSidePanel/TouchSidePanel';
 import { createPageContext, PageContext } from './context';
 import { TouchPage } from './TouchPage';
@@ -63,6 +65,8 @@ export const TouchPageWrapper: ParentComponent = (props) => {
             <TouchSidePanel side="right" active={isUserPanelVisible()} onClose={closeUserPanel}>
                 <UserFeed />
             </TouchSidePanel>
+            <TouchLoginModal />
+            <TouchOfflineIndicator />
         </TouchPage>
     );
 };

@@ -2,6 +2,7 @@ package dfcore
 
 import (
 	"encoding/json"
+	"fmt"
 	"slices"
 	"srv/internal/domain"
 	"srv/internal/utils"
@@ -12,7 +13,7 @@ import (
 
 type EntityID string
 
-type queryableTableImpl[Query any] struct {
+type QueryableTable struct {
 	df   *DataFront
 	path DFPath
 
@@ -20,74 +21,53 @@ type queryableTableImpl[Query any] struct {
 	// TODO: map[ID]map[domain.ClientID]int ? To count all the subs from different queries?
 	idSubs        map[EntityID][]domain.ClientID
 	idSubsReverse map[domain.ClientID][]EntityID
-	// qSubs         map[Query][]domain.ClientID
-	ds QueryableTableDataSource[Query]
+	dataSources   map[string]func(dfapi.DFTableRequest, DFRequestContext) (*TableResponse, common.Error)
 }
 
 type QueryableTableFrontend interface {
-	Query(dfapi.DFTableRequest, domain.ClientID) ([]any, common.Error)
+	Query(dfapi.DFTableRequest, DFRequestContext) (map[string]any, common.Error)
 	UnsubscribeFromIDs(dfapi.DFTableUnsubscribeRequest, domain.ClientID)
 	UnsubscribeFromAll(domain.ClientID)
 	Attach(*DataFront, DFPath)
 	Dispose()
 }
 
-type QueryableTableController[Query any] interface {
-	PublishEntities(map[EntityID]common.Encodable)
-	PublishQuery(q Query, added map[EntityID]common.Encodable, removed map[EntityID]common.Encodable)
-}
-
-type QueryableTable[Query any] interface {
-	QueryableTableFrontend
-	QueryableTableController[Query]
-}
-
-type DataSourceResult struct {
-	Results map[EntityID]common.Encodable
-	// TODO: this should be some LiveQueryKey that will somehow allow us to use
-	// PublishQuery(liveQueryKey) and update the queries on the client
-	IsLive bool
-}
-
-type QueryableTableDataSource[Q any] func(Q) (DataSourceResult, common.Error)
-
-func NewQueryableTable[Query any](
-	ds QueryableTableDataSource[Query],
-) QueryableTable[Query] {
-	table := &queryableTableImpl[Query]{
-		lock:   new(sync.RWMutex),
-		idSubs: make(map[EntityID][]domain.ClientID),
-		// qSubs:  make(map[Query][]domain.ClientID),
-		ds: ds,
+func NewQueryableTable() *QueryableTable {
+	table := &QueryableTable{
+		lock:          new(sync.RWMutex),
+		idSubs:        make(map[EntityID][]domain.ClientID),
+		idSubsReverse: make(map[domain.ClientID][]EntityID),
+		dataSources:   make(map[string]func(dfapi.DFTableRequest, DFRequestContext) (*TableResponse, common.Error)),
 	}
 
 	return table
 }
 
-func (q *queryableTableImpl[Query]) Attach(df *DataFront, path DFPath) {
+func (q *QueryableTable) Attach(df *DataFront, path DFPath) {
 	q.df = df
 	q.path = path
 }
 
-func (q *queryableTableImpl[Query]) Dispose() {
+func (q *QueryableTable) Dispose() {
 	q.lock.Lock()
 	defer q.lock.Unlock()
 
 	q.idSubs = nil
-	// q.qSubs = nil
 }
 
-func (table *queryableTableImpl[Query]) Query(
+func (table *QueryableTable) Query(
 	req dfapi.DFTableRequest,
-	client domain.ClientID,
-) ([]any, common.Error) {
-	var query Query
-	jerr := json.Unmarshal(req.Query, &query)
-	if jerr != nil {
-		return nil, common.NewWrapperError("ERR_DECODE", jerr)
+	ctx DFRequestContext,
+) (map[string]any, common.Error) {
+	handler, found := table.dataSources[req.QueryType]
+	if !found {
+		return nil, common.NewValidationError(
+			"DFTableRequest::QueryType",
+			fmt.Sprintf("unknown query type '%s'", req.QueryType),
+		)
 	}
 
-	rows, err := table.ds(query)
+	rows, err := handler(req, ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -95,16 +75,16 @@ func (table *queryableTableImpl[Query]) Query(
 	table.lock.Lock()
 	defer table.lock.Unlock()
 
-	encodedRows := make([]any, 0, len(rows.Results))
-	for id, row := range rows.Results {
-		table.subscribeForID(id, client)
-		encodedRows = append(encodedRows, row.Encode())
+	encodedRows := make(map[string]any, len(rows.results))
+	for id, row := range rows.results {
+		table.subscribeForID(id, ctx.ClientID)
+		encodedRows[string(id)] = row.Encode()
 	}
 
 	return encodedRows, nil
 }
 
-func (table *queryableTableImpl[Query]) UnsubscribeFromAll(cid domain.ClientID) {
+func (table *QueryableTable) UnsubscribeFromAll(cid domain.ClientID) {
 	table.lock.Lock()
 	defer table.lock.Unlock()
 
@@ -119,7 +99,7 @@ func (table *queryableTableImpl[Query]) UnsubscribeFromAll(cid domain.ClientID) 
 	}
 }
 
-func (table *queryableTableImpl[Query]) UnsubscribeFromIDs(req dfapi.DFTableUnsubscribeRequest, cid domain.ClientID) {
+func (table *QueryableTable) UnsubscribeFromIDs(req dfapi.DFTableUnsubscribeRequest, cid domain.ClientID) {
 	table.lock.Lock()
 	defer table.lock.Unlock()
 
@@ -130,7 +110,7 @@ func (table *queryableTableImpl[Query]) UnsubscribeFromIDs(req dfapi.DFTableUnsu
 	}
 }
 
-func (table *queryableTableImpl[Query]) PublishEntities(entities map[EntityID]common.Encodable) {
+func (table *QueryableTable) PublishEntities(entities map[EntityID]common.Encodable) {
 	table.lock.RLock()
 	defer table.lock.RUnlock()
 
@@ -144,18 +124,48 @@ func (table *queryableTableImpl[Query]) PublishEntities(entities map[EntityID]co
 	}
 }
 
-func (table *queryableTableImpl[Query]) PublishQuery(
-	q Query,
-	added map[EntityID]common.Encodable,
-	removed map[EntityID]common.Encodable,
+func AddTypedTableDataSource[Payload any](
+	table *QueryableTable,
+	queryType string,
+	ds func(Payload, dfapi.DFTableRequest, DFRequestContext) (*TableResponse, common.Error),
 ) {
-	// TODO: live queries (coming whenever we'll need them)
+	table.lock.Lock()
+	defer table.lock.Unlock()
+
+	table.dataSources[queryType] = func(rq dfapi.DFTableRequest, ctx DFRequestContext) (*TableResponse, common.Error) {
+		var decoded Payload
+		err := json.Unmarshal(rq.Payload, &decoded)
+		if err != nil {
+			return EmptyTableResponse(), common.NewDecodingError(err)
+		}
+
+		return ds(decoded, rq, ctx)
+	}
 }
 
-func (table *queryableTableImpl[Query]) subscribeForID(id EntityID, client domain.ClientID) {
+func (table *QueryableTable) subscribeForID(id EntityID, client domain.ClientID) {
 	cids := table.idSubs[id]
 	if slices.Index(cids, client) == -1 {
 		table.idSubs[id] = append(cids, client)
 		table.idSubsReverse[client] = append(table.idSubsReverse[client], id)
 	}
+}
+
+type TableResponse struct {
+	results map[EntityID]common.Encodable
+	// TODO: here should be some LiveQueryKey that will somehow allow us to use
+	// PublishQuery(liveQueryKey) and update the queries on the client
+}
+
+func SingleEntityTableResponse(eid EntityID, data common.Encodable) *TableResponse {
+	results := make(map[EntityID]common.Encodable)
+	results[eid] = data
+	return &TableResponse{results: results}
+}
+func EmptyTableResponse() *TableResponse {
+	return &TableResponse{results: make(map[EntityID]common.Encodable)}
+}
+
+func (t TableResponse) Add(eid EntityID, data common.Encodable) {
+	t.results[eid] = data
 }

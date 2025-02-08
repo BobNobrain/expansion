@@ -11,13 +11,14 @@ type authenticationError struct {
 func (e *authenticationError) Error() string {
 	return e.msg
 }
-
 func (e *authenticationError) Code() string {
 	return "ERR_AUTH"
 }
-
 func (e *authenticationError) Details() common.Encodable {
 	return nil
+}
+func (e *authenticationError) IsRetriable() bool {
+	return false
 }
 
 func newInvalidLoginError() *authenticationError {

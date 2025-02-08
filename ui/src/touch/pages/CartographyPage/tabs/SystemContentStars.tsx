@@ -1,11 +1,11 @@
 import { type Component, createMemo } from 'solid-js';
 import { DataTable, type DataTableColumn } from '../../../../components/DataTable';
 import { useExploreRouteInfo } from '../../../../routes/explore';
-import { useSystemContent } from '../../../../store/galaxy';
 import { type Star } from '../../../../domain/Star';
 import { CelestialBodyTitle } from '../../../../components/CelestialBodyTitle/CelestialBodyTitle';
 import { IconRadius, IconStar, IconTemperature, IconUnknown } from '../../../../icons';
 import { formatScalar } from '../../../../lib/strings';
+import gameDataFront from '../../../../store/datafront';
 
 const COLUMNS: DataTableColumn<Star>[] = [
     {
@@ -42,9 +42,9 @@ const COLUMNS: DataTableColumn<Star>[] = [
 
 export const SystemContentStars: Component = () => {
     const routeInfo = useExploreRouteInfo();
-    const sc = useSystemContent(() => routeInfo().objectId);
+    const systemInfo = gameDataFront.systems.useQuerySingle('byId', () => ({ systemId: routeInfo().objectId! }));
 
-    const rows = createMemo(() => sc.data?.stars ?? []);
+    const rows = createMemo(() => systemInfo.result()?.stars ?? []);
 
     return <DataTable rows={rows()} columns={COLUMNS} stickLeft defaultColumnWidth={64} />;
 };

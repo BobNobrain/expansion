@@ -67,16 +67,42 @@ type WorldData struct {
 	Explored    *ExplorationData
 	Grid        geom.SpatialGraph
 	Conditions  SurfaceConditions
+	Params      CelestialSurfaceParams
 	Composition SurfaceComposition
 
+	Tiles               []WorldDataTile
+	TileResources       map[int]ResourceDeposit
 	TileElevationsScale phys.Distance
+}
 
-	TileColors     []color.RichColorRGB
-	TileElevations []float64
-	TileTemps      []phys.Temperature
-	TilePressures  []phys.Pressure
-	TileSurfaces   []BiomeSurface
-	TileResources  map[int]ResourceDeposit
+type WorldDataTile struct {
+	Color     color.RichColorRGB
+	AvgTemp   phys.Temperature
+	Surface   BiomeSurface
+	Pressure  phys.Pressure
+	Elevation float64
+}
+
+type WorldExplorationData struct {
+	Grid       geom.SpatialGraph
+	Conditions SurfaceConditions
+	Params     CelestialSurfaceParams
+	OceanLevel float64
+	Atmosphere *material.MaterialCompound
+	Oceans     *material.MaterialCompound
+	Snow       *material.MaterialCompound
+
+	Tiles               []WorldExplorationDataTile
+	TileResources       map[int]ResourceDeposit
+	TileElevationsScale phys.Distance
+}
+
+type WorldExplorationDataTile struct {
+	Color     color.RichColorRGB
+	AvgTemp   phys.Temperature
+	Pressure  phys.Pressure
+	Surface   BiomeSurface
+	Elevation float64
 }
 
 type SurfaceConditions struct {
@@ -89,6 +115,7 @@ type SurfaceComposition struct {
 	OceanLevel float64
 	Atmosphere *material.MaterialCompound
 	Oceans     *material.MaterialCompound
+	Snow       *material.MaterialCompound
 }
 
 type SurfaceTileConditions struct {

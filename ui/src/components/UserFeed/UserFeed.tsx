@@ -1,18 +1,17 @@
-import { type Component } from 'solid-js';
-import { Container, Spacer } from '../Container/Container';
+import { createEffect, Show, type Component } from 'solid-js';
 import { IconCross, IconUser } from '../../icons';
-import { Text } from '../Text/Text';
-import { useAuthenticated } from '../LogInGuard';
+import gameDataFront from '../../store/datafront';
 import { Button } from '../Button/Button';
-import { useNavigate } from '@solidjs/router';
+import { Container, Spacer } from '../Container/Container';
+import { SkeletonText } from '../Skeleton';
+import { Text } from '../Text/Text';
+import { useAuth } from '../../store/auth';
 
 export const UserFeed: Component = () => {
-    const { user, logout } = useAuthenticated();
-    const navigate = useNavigate();
+    const { logout } = useAuth();
+    const me = gameDataFront.me.use();
 
-    const onLogoutClick = () => {
-        void logout().then(() => navigate('/'));
-    };
+    createEffect(() => console.log(me.value()));
 
     return (
         <Container hasGap padded fullHeight direction="column">
@@ -20,11 +19,18 @@ export const UserFeed: Component = () => {
                 <IconUser size={32} />
                 <Container hasGap direction="column" stretch>
                     <Text bold size="h3">
-                        {user()?.username}
+                        <Show when={me.value()} fallback={<SkeletonText />}>
+                            {me.value()?.user.username}
+                        </Show>
                     </Text>
-                    <Text>Registered some time ago</Text>
+                    <Text>
+                        Registered{' '}
+                        <Show when={me.value()} fallback={<SkeletonText />}>
+                            {me.value()?.user.created.toLocaleDateString()}
+                        </Show>
+                    </Text>
                 </Container>
-                <Button style="text" onClick={onLogoutClick}>
+                <Button style="text" onClick={logout}>
                     <IconCross size={16} />
                 </Button>
             </Container>

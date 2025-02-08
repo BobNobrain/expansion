@@ -42,18 +42,18 @@ func (ctx *unexploredSystemGenerator) generate() {
 		nStars = 3
 	}
 
-	system.Stars = make([]*world.Star, nStars)
+	system.Stars = make([]world.Star, nStars)
 	isSingular := nStars == 1
 
 	for i := 0; i < nStars; i++ {
 		data := generateStarData(ctx.rnd)
-		system.Stars[i] = &world.Star{
+		system.Stars[i] = world.Star{
 			Params: data,
 		}
 	}
 
 	// we should sort the stars by their mass
-	slices.SortFunc(system.Stars, func(a, b *world.Star) int {
+	slices.SortFunc(system.Stars, func(a, b world.Star) int {
 		al := a.Params.Mass.SolarMasses()
 		bl := b.Params.Mass.SolarMasses()
 		if al < bl {

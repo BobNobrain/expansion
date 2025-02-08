@@ -1,4 +1,4 @@
-import { type CelestialSurface } from '../../domain/CelstialSurface';
+import { type CelestialSurface } from '../../domain/World';
 import { type RGBColor } from '../../lib/color';
 
 export type TileRenderMode = 'natural' | 'biomes' | 'population' | 'elevations' | 'temp' | 'infra' | 'resources';

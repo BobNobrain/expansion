@@ -61,7 +61,7 @@ func (q *dfUpdatesQueue) pushSingleton(update dfapi.DFSingletonUpdatePatch, clie
 }
 
 // Internal queue method that publishes all the content of the queue to respective clients (batched up)
-func (q *dfUpdatesQueue) flush(comms components.Comms, scope components.DispatcherScope) {
+func (q *dfUpdatesQueue) flush(comms components.Comms) {
 	q.lock.Lock()
 	defer q.lock.Unlock()
 
@@ -78,7 +78,6 @@ func (q *dfUpdatesQueue) flush(comms components.Comms, scope components.Dispatch
 		singletonPatches := q.singletonQueue[cid]
 
 		comms.Broadcast(components.CommsBroadcastRequest{
-			Scope:            scope,
 			Event:            "update",
 			RecipientClients: []domain.ClientID{cid},
 			Payload: dfapi.DFUpdateEvent{
@@ -94,7 +93,7 @@ func (q *dfUpdatesQueue) flush(comms components.Comms, scope components.Dispatch
 }
 
 // Starts the queue watching process. Should be run in its own goroutine.
-func (q *dfUpdatesQueue) run(comms components.Comms, scope components.DispatcherScope) {
+func (q *dfUpdatesQueue) run(comms components.Comms) {
 	for {
 		select {
 		case <-q.stopCh:
@@ -114,7 +113,7 @@ func (q *dfUpdatesQueue) run(comms components.Comms, scope components.Dispatcher
 				return
 
 			case <-timer.C:
-				q.flush(comms, scope)
+				q.flush(comms)
 			}
 		}
 	}

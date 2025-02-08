@@ -5,10 +5,11 @@ INSERT INTO star_systems (
         coords_h,
         coords_th,
         system_stars,
+        system_data,
         n_stars,
         map_brightness
     )
-VALUES ($1, $2, $3, $4, $5, $6, $7);
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
 
 -- name: SetExploredSystemData :exec
 UPDATE star_systems
@@ -40,14 +41,13 @@ FROM star_systems
             COUNT(*) AS n_cities,
             SUM(cities.population) AS n_pops
         FROM cities
-        WHERE cities.system_id = star_systems.system_id
         GROUP BY cities.system_id
     ) AS system_cities ON system_cities.system_id = star_systems.system_id
     LEFT JOIN (
         SELECT bases.system_id,
             COUNT(*) AS n_bases
         FROM bases
-        WHERE bases.system_id = star_systems.system_id
+        GROUP BY bases.system_id
     ) AS system_bases ON system_bases.system_id = star_systems.system_id
 WHERE star_systems.system_id LIKE sqlc.arg(system_id) || '%';
 

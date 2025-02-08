@@ -1,4 +1,4 @@
-import { type CelestialSurface } from '../../../domain/CelstialSurface';
+import { type CelestialSurface } from '../../../domain/World';
 import { MeshBuilder } from '../../../lib/3d/MeshBuilder';
 
 export function restorePlanetGrid({ grid }: CelestialSurface): MeshBuilder {

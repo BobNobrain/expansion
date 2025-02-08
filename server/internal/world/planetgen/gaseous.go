@@ -53,6 +53,10 @@ func (ctx *surfaceGenContext) generateGasGiantConditions() {
 		Level:    -1,
 		Contents: material.NewMaterialCompound(),
 	}
+
+	// TODO: calculate a "settling radius" for gas giants (where the pressure will be ~1atm or a bit higher)
+	surfaceGravity := phys.CalculatePlanetGravity(ctx.params.Mass, ctx.params.Radius.Mul(0.9))
+	ctx.surface.SurfaceGravity = surfaceGravity
 }
 
 func (ctx *surfaceGenContext) fillGasGiantTiles() {

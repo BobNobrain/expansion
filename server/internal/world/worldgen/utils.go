@@ -26,7 +26,7 @@ func dumbIcelineEstimate(
 	return starR.Mul(tempRel*tempRel/2 + 1)
 }
 
-func CombinedStarForEstimates(stars []*world.Star) world.StarParams {
+func CombinedStarForEstimates(stars []world.Star) world.StarParams {
 	nStars := len(stars)
 
 	if nStars == 1 {

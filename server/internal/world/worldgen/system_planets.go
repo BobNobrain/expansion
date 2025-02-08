@@ -81,33 +81,35 @@ func (ctx *exploredSystemGenerator) clearPlanetsFromTernaryStar() {
 }
 
 func (ctx *exploredSystemGenerator) generateRockyPlanet(
-	aroundStar *world.Star,
+	aroundStar world.Star,
 	i int,
 	d phys.Distance,
 ) {
 	orbit := generateLowEccentricityOrbit(ctx.rnd, d)
 
 	massEarths := utils.Lerp(0.01, 2.04, ctx.rnd.Float64())
+	rKm := 6400 * 1.008 * math.Pow(massEarths, 0.279)
 
 	planet := GeneratedCelestialData{
 		ID:    world.CreatePlanetID(aroundStar.ID, i),
 		Level: CelestialBodyLevelPlanet,
 		Params: world.CelestialSurfaceParams{
 			Mass:   phys.EarthMasses(massEarths),
-			Radius: phys.Kilometers(6400 * 1.008 * math.Pow(massEarths, 0.279)),
+			Radius: phys.Kilometers(rKm),
 			Class:  world.CelestialBodyClassTerrestial,
 
 			Age:       phys.BillionYears(utils.Lerp(0.9, 0.99, ctx.rnd.Float64()) * ctx.systemAge.BillionYears()),
 			AxisTilt:  geom.FullCircles(ctx.rnd.NormFloat64() * 0.2),
 			DayLength: phys.Months(utils.Lerp(0.02, 0.2, ctx.rnd.Float64())), // TODO
 		},
+		Size: estimateGridSize(rKm),
 	}
 
 	ctx.system.placeCelestial(planet, orbit)
 }
 
 func (ctx *exploredSystemGenerator) generateGasGiantPlanet(
-	aroundStar *world.Star,
+	aroundStar world.Star,
 	i int,
 	d phys.Distance,
 ) {
@@ -134,7 +136,23 @@ func (ctx *exploredSystemGenerator) generateGasGiantPlanet(
 			AxisTilt:  geom.FullCircles(ctx.rnd.NormFloat64() * 0.3),
 			DayLength: phys.Months(utils.Lerp(0.005, 0.05, ctx.rnd.Float64())), // TODO
 		},
+		Size: estimateGridSize(6400 * radiusEarths),
 	}
 
 	ctx.system.placeCelestial(planet, orbit)
+}
+
+func estimateGridSize(rKm float64) int {
+	const minGridSubdivisions int = 5
+	const maxGridSubdivisions int = 16
+	planetSize := rKm / 50_000
+	if planetSize < 0.1 {
+		planetSize = 0.1
+	} else if planetSize > 1 {
+		planetSize = 1
+	}
+	subdivisions := minGridSubdivisions + int(float64(maxGridSubdivisions-minGridSubdivisions)*planetSize)
+	nVerticies := 20*(subdivisions+1)*subdivisions/2 - 30*(subdivisions-2) - 12*5
+	estimate := (nVerticies / 10) * 10
+	return estimate
 }

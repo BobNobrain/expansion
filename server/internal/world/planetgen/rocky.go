@@ -19,6 +19,7 @@ func (ctx *surfaceGenContext) generateRockyConditions() {
 	planetRadius := ctx.params.Radius
 
 	surfaceGravity := phys.CalculatePlanetGravity(ctx.params.Mass, ctx.params.Radius)
+	ctx.surface.SurfaceGravity = surfaceGravity
 	surfaceAreaKm2 := 4 * math.Pi * ctx.params.Radius.Kilometers() * ctx.params.Radius.Kilometers()
 
 	initialAirlessEquilibrium := 278.6 * math.Pow(starLum*0.2/starDistanceSquared, 0.25)

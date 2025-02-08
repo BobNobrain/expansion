@@ -18,14 +18,16 @@ type CreateGalaxyPayloadSystem struct {
 	ID     world.StarSystemID
 	Coords world.GalacticCoords
 	Stars  []world.Star
+	Orbits map[world.CelestialID]world.OrbitData
 }
 
 type ExploreSystemPayload struct {
-	ID       world.StarSystemID
-	Explorer domain.UserID
-	Orbits   map[world.CelestialID]world.OrbitData
-	NPlanets int
-	NMoons   int
+	ID         world.StarSystemID
+	Explorer   domain.UserID
+	Orbits     map[world.CelestialID]world.OrbitData
+	NPlanets   int
+	NMoons     int
+	NAsteroids int
 }
 
 type StarSystemsRepo interface {
@@ -43,10 +45,16 @@ type CreateWorldPayload struct {
 	Size   int
 }
 
+type ExploreWorldPayload struct {
+	ID         world.CelestialID
+	ExploredBy domain.UserID
+	Data       world.WorldExplorationData
+}
+
 type WorldsRepo interface {
 	GetOverviews(world.StarSystemID) ([]world.WorldOverview, common.Error)
 	GetData(world.CelestialID) (world.WorldData, common.Error)
 
 	CreateWorlds([]CreateWorldPayload) common.Error
-	ExploreWorld(world.WorldData) common.Error
+	ExploreWorld(ExploreWorldPayload) common.Error
 }

@@ -33,7 +33,6 @@ func (wsc *wsClient) kick() error {
 	errC := wsc.conn.Close()
 
 	wsc.hub.detachClient(wsc.id)
-	wsc.hub.onOnlineCountChange()
 
 	if errW != nil {
 		return errW

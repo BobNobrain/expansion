@@ -5,7 +5,7 @@ import { FloatingHTML } from '../../components/three/FloatingHTML/FloatingHTML';
 import { Text } from '../../components/Text/Text';
 import { type GalacticGridSector } from '../../domain/GalacticOverview';
 import { type RawVertex } from '../../lib/3d/types';
-import { useGalaxyOverview } from '../../store/galaxy';
+import gameDataFront from '../../store/datafront';
 
 import { GalaxyFog } from './GalaxyFog';
 import { GalaxySectorsGrid } from './GalaxySectorsGrid';
@@ -18,14 +18,15 @@ export type GalaxyMapSceneProps = {
 };
 
 export const GalaxyMapScene: Component<GalaxyMapSceneProps> = (props) => {
-    const overview = useGalaxyOverview();
+    const overview = gameDataFront.galaxy.use();
 
     const selectedSector = createMemo(() => {
         const selectedSectorId = props.selectedSector;
-        if (!selectedSectorId || !overview.data) {
+        const data = overview.value();
+        if (!selectedSectorId || !data) {
             return null;
         }
-        return overview.data.grid.getSectorById(selectedSectorId);
+        return data.grid.getSectorById(selectedSectorId);
     });
 
     const onSectorClick = (sector: GalacticGridSector | null) => {
@@ -45,7 +46,7 @@ export const GalaxyMapScene: Component<GalaxyMapSceneProps> = (props) => {
     });
 
     const panLimits = createMemo<PanLimits>(() => {
-        const grid = overview.data?.grid;
+        const grid = overview.value()?.grid;
         if (!grid) {
             return { x: { min: 0, max: 0 }, y: { min: 0, max: 0 }, z: { min: 0, max: 0 } };
         }
@@ -63,22 +64,22 @@ export const GalaxyMapScene: Component<GalaxyMapSceneProps> = (props) => {
 
     return (
         <Show when={props.isActive}>
-            <Show when={overview.data}>
+            <Show when={overview.value()}>
                 <GalaxySectorsGrid
-                    grid={overview.data!.grid}
+                    grid={overview.value()!.grid}
                     activeSectorId={props.selectedSector}
                     onClick={onSectorClick}
                 />
                 <GalaxyFog
-                    innerR={overview.data!.grid.innerR}
-                    outerR={overview.data!.grid.outerR}
-                    maxH={overview.data!.grid.maxH}
+                    innerR={overview.value()!.grid.innerR}
+                    outerR={overview.value()!.grid.outerR}
+                    maxH={overview.value()!.grid.maxH}
                 />
             </Show>
             <GalaxyStars
-                stars={overview.data?.landmarks ?? []}
+                stars={overview.value()?.landmarks ?? []}
                 withNormals
-                dim={Boolean(!overview.data || props.selectedSector)}
+                dim={Boolean(!overview.value() || props.selectedSector)}
             />
             <RotatableCamera
                 main

@@ -97,7 +97,7 @@ func (n *namesRegistryImpl) GetEntriesByAuthor(authorID domain.UserID, page pagi
 		return pagination.EmptyPage[domain.NamesRegistryEntry](), err
 	}
 
-	rows, dberr := n.q.ListNameEntriesByAuthor(context.Background(), dbq.ListNameEntriesByAuthorParams{
+	rows, dberr := n.q.ListNameSubmissionsByAuthor(context.Background(), dbq.ListNameSubmissionsByAuthorParams{
 		Limit:    int32(page.Limit),
 		Offset:   int32(page.Offset),
 		AuthorID: authorUUID,
@@ -106,7 +106,7 @@ func (n *namesRegistryImpl) GetEntriesByAuthor(authorID domain.UserID, page pagi
 		return pagination.EmptyPage[domain.NamesRegistryEntry](), makeDBError(dberr, "CNR::GetEntriesByAuthor")
 	}
 
-	entries := decodeCNRRows(rows)
+	entries := decodeNameSuggestions(rows)
 
 	total, dberr := n.q.ListNameEntriesByAuthorTotal(context.Background(), authorUUID)
 	if dberr != nil {
@@ -131,7 +131,7 @@ func (n *namesRegistryImpl) GetSuggestionsBacklog(page pagination.PageParams) (p
 		return pagination.EmptyPage[domain.NamesRegistryEntry](), makeDBError(dberr, "CNR::GetSuggestionsBacklog")
 	}
 
-	entries := decodeCNRRows(rows)
+	entries := decodeNameSuggestions(rows)
 	total, dberr := n.q.ListPendingNameSubmissionsTotal(context.Background())
 	if dberr != nil {
 		return pagination.EmptyPage[domain.NamesRegistryEntry](), makeDBError(dberr, "CNR::GetSuggestionsBacklog(Total)")
@@ -146,33 +146,23 @@ func (n *namesRegistryImpl) GetSuggestionsBacklog(page pagination.PageParams) (p
 	}, nil
 }
 
-func decodeNameEntryStatus(status string) domain.NamesRegistryEntryStatus {
-	switch status {
-	case "S":
-		return domain.NamesRegistryEntryStatusSuggested
-	case "A":
-		return domain.NamesRegistryEntryStatusApproved
-	case "D":
-		return domain.NamesRegistryEntryStatusDeclined
-	default:
-		return domain.NamesRegistryEntryStatusUnknown
-	}
-}
-
-func decodeCNRRows(rows []dbq.CelestialNamesRegistry) []domain.NamesRegistryEntry {
+func decodeNameSuggestions(rows []dbq.CelestialNamesSubmission) []domain.NamesRegistryEntry {
 	entries := make([]domain.NamesRegistryEntry, 0, len(rows))
 	for _, row := range rows {
 		var reviewerID domain.UserID
+		status := domain.NamesRegistryEntryStatusSuggested
 		if row.ReviewerID.Valid {
 			reviewerID = domain.UserID(row.ReviewerID.String())
+			status = domain.NamesRegistryEntryStatusDeclined
 		}
+
 		entries = append(entries, domain.NamesRegistryEntry{
 			EntryID:       domain.NamesRegistryEntryID(row.EntryID),
 			ObjectID:      row.CelestialID,
 			Name:          row.Name,
 			NamedBy:       domain.UserID(row.AuthorID.String()),
 			NamedAt:       row.CreatedAt.Time,
-			Status:        decodeNameEntryStatus(row.Status),
+			Status:        status,
 			ReviewedBy:    reviewerID,
 			ReviewedAt:    row.ReviewedAt.Time,
 			ReviewComment: row.ReviewComment,

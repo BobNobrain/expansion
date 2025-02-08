@@ -1,36 +1,45 @@
-import {
-    type ClientCommand,
-    type ServerCommandErrorResponse,
-    type ServerCommandSuccessResponse,
-    type ServerEvent,
-} from './types.generated';
+import type {} from './types.generated';
+import type { DFGenericResponse, DFGenericEvent, DFError, DFGenericRequest } from './datafront.generated';
+import { createSignal } from 'solid-js';
 
-type PendingCommand = {
+type PendingRequests = {
     id: number;
     resolve: (result: unknown) => void;
     reject: (err: WSError) => void;
 };
 
-type EventSubscriber = (event: ServerEvent) => void;
+type EventSubscriber = (event: DFGenericEvent) => void;
+type OutboxItem = { payload: string };
+
+export type RequestType = 'table' | '-table' | 'singleton' | '-singleton' | 'log' | '-log' | 'action';
 
 class WSClient {
+    public readonly isOnline: () => boolean;
+    private setIsOnline: (value: boolean) => void;
+
     private sock?: WebSocket;
 
     private commandSeq = 1;
-    private pendingCommands: Record<number, PendingCommand> = {};
+    private pendingCommands: Record<number, PendingRequests> = {};
     private subs: Record<string, EventSubscriber[]> = {};
+
+    private outbox: OutboxItem[] = [];
+    private shouldReconnect = true;
+
+    constructor() {
+        const [getIsOnline, setIsOnline] = createSignal(false);
+        this.isOnline = getIsOnline;
+        this.setIsOnline = setIsOnline;
+    }
 
     connect(): Promise<void> {
         this.sock = new WebSocket(`ws://${window.location.host}/sock`);
 
         this.sock.addEventListener('message', (ev) => {
-            const parsed = JSON.parse(ev.data as string) as
-                | ServerCommandSuccessResponse
-                | ServerCommandErrorResponse
-                | ServerEvent;
+            const parsed = JSON.parse(ev.data as string) as DFGenericEvent | DFGenericResponse;
 
-            if ('id' in parsed) {
-                const id = parsed.id;
+            if ('requestId' in parsed) {
+                const id = parsed.requestId;
                 const pendingCmd = this.pendingCommands[id];
                 if (!pendingCmd) {
                     console.error('no pending cmd found with id', id);
@@ -38,16 +47,41 @@ class WSClient {
                     return;
                 }
 
-                if ('result' in parsed) {
-                    pendingCmd.resolve(parsed.result);
+                console.debug('[server response]', parsed);
+
+                if (parsed.error) {
+                    pendingCmd.reject(new WSError(parsed.error));
                 } else {
-                    pendingCmd.reject(new WSError(parsed));
+                    pendingCmd.resolve(parsed.result);
                 }
                 return;
             }
 
             this.handleEvent(parsed);
         });
+
+        this.sock.addEventListener('open', () => {
+            this.setIsOnline(true);
+            this.flushOutbox();
+        });
+        this.sock.addEventListener('close', (ev) => {
+            console.error('ws close: ' + ev.reason, ev);
+            this.setIsOnline(false);
+            this.sock?.close();
+            this.sock = undefined;
+
+            this.tryReconnecting();
+        });
+        this.sock.addEventListener('error', (error) => {
+            console.error('ws error', error);
+            this.setIsOnline(false);
+            this.sock?.close();
+            this.sock = undefined;
+
+            this.tryReconnecting();
+        });
+
+        this.shouldReconnect = true;
 
         return new Promise((resolve, reject) => {
             this.sock!.addEventListener('open', () => resolve());
@@ -57,70 +91,125 @@ class WSClient {
 
     disconnect() {
         this.sock?.close();
+        this.sock = undefined;
+        this.shouldReconnect = false;
     }
 
-    sendCommand<T, P = unknown>(scope: string, command: string, payload?: P): Promise<T> {
+    sendRequest<T, P = unknown>(type: RequestType, payload?: P): Promise<T> {
         const commandId = this.commandSeq++;
 
         return new Promise<unknown>((resolve, reject) => {
-            if (!this.sock) {
-                reject(new Error('not connected'));
-                return;
-            }
-
             this.pendingCommands[commandId] = {
                 id: commandId,
                 resolve: resolve,
                 reject,
             };
 
-            const cmd: ClientCommand = {
+            const cmd: DFGenericRequest = {
                 id: commandId,
-                scope,
-                cmd: command,
-                payload,
+                type,
+                request: payload,
             };
-            this.sock.send(JSON.stringify(cmd));
+            console.debug('[client request]', cmd);
+            this.outbox.push({ payload: JSON.stringify(cmd) });
+            this.flushOutbox();
         }) as Promise<T>;
     }
+    sendNotification<P = unknown>(type: RequestType, payload?: P): void {
+        const commandId = this.commandSeq++;
 
-    subscribe(scope: string, handler: EventSubscriber) {
-        if (!this.subs[scope]) {
-            this.subs[scope] = [];
+        if (!this.sock) {
+            return;
         }
-        this.subs[scope].push(handler);
+
+        const cmd: DFGenericRequest = {
+            id: commandId,
+            type,
+            request: payload,
+        };
+        console.debug('[client notification]', cmd);
+        this.outbox.push({ payload: JSON.stringify(cmd) });
+        this.flushOutbox();
     }
-    unsubscribe(scope: string, handler: EventSubscriber) {
-        const handlers = this.subs[scope] ?? [];
+
+    subscribe(event: string, handler: EventSubscriber) {
+        if (!this.subs[event]) {
+            this.subs[event] = [];
+        }
+        this.subs[event].push(handler);
+    }
+    unsubscribe(event: string, handler: EventSubscriber) {
+        const handlers = this.subs[event] ?? [];
         const removed = handlers.filter((h) => h !== handler);
         if (removed.length) {
-            this.subs[scope] = removed;
+            this.subs[event] = removed;
         } else {
-            delete this.subs[scope];
+            delete this.subs[event];
         }
     }
 
-    private handleEvent(evt: ServerEvent) {
-        console.log(`[server event] ${evt.scope}/${evt.event}`, evt.payload);
+    private handleEvent(evt: DFGenericEvent) {
+        console.debug(`[server event] ${evt.event}`, evt.payload);
 
-        const scope = evt.scope;
-        const handlers = this.subs[scope] ?? [];
+        const handlers = this.subs[evt.event] ?? [];
         for (const handler of handlers) {
             handler(evt);
         }
     }
+
+    private flushOutbox() {
+        if (!this.sock || this.sock.readyState !== this.sock.OPEN) {
+            return;
+        }
+
+        const failed: OutboxItem[] = [];
+        for (const item of this.outbox) {
+            try {
+                this.sock.send(item.payload);
+            } catch (error) {
+                console.error('[ws flush]', error);
+                failed.push(item);
+            }
+        }
+
+        this.outbox = failed;
+    }
+
+    private tryReconnecting() {
+        setTimeout(() => {
+            if (!this.shouldReconnect || this.sock) {
+                return;
+            }
+
+            this.connect().catch(() => {
+                this.tryReconnecting();
+            });
+        }, 1000);
+    }
 }
 
 export const ws = new WSClient();
+export type { WSClient };
 
 // @ts-expect-error temporary global variable for testing purposes
 window.ws = ws;
 
 export class WSError extends Error {
     readonly code: string;
+    readonly details: unknown;
+    readonly isRetriable: boolean;
 
-    constructor(response: ServerCommandErrorResponse) {
-        super(response.error);
+    constructor(
+        response: DFError = {
+            code: '--',
+            message: '--',
+            isRetriable: false,
+            details: undefined,
+        },
+    ) {
+        super(response.message);
         this.code = response.code;
+        this.details = response.details;
+        this.isRetriable = response.isRetriable;
     }
 }

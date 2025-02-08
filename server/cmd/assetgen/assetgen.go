@@ -1,29 +1,23 @@
 package main
 
 import (
-	"fmt"
+	"srv/internal/globals"
+	"srv/internal/globals/assets"
+	"srv/internal/globals/config"
+	"srv/internal/utils/cmdutils"
+	"srv/internal/world/worldgen"
 )
 
 func main() {
-	fmt.Println("no assets to generate rn")
-	// cwd, err := os.Getwd()
-	// if err != nil {
-	// 	panic(err)
-	// }
+	globals.Init()
 
-	// assets, err := assets.Configure(filepath.Join(cwd, "..", "assets"))
-	// if err != nil {
-	// 	panic(err)
-	// }
+	wgen := worldgen.NewWorldGen(config.World().Seed)
 
-	// grid := worldgen.GenerateGalacticGrid(&worldgen.GalacticGridGeneratorOptions{
-	// 	NRings:            12,
-	// 	MinSectors:        16,
-	// 	NSectorsIncrement: 2,
-	// })
+	grid := wgen.GenerateGrid(&worldgen.GalacticGridGeneratorOptions{
+		NRings:            12,
+		MinSectors:        16,
+		NSectorsIncrement: 2,
+	})
 
-	// err = assets.SaveGalacticGrid(grid)
-	// if err != nil {
-	// 	panic(err)
-	// }
+	cmdutils.Ensure(assets.SaveGalacticGrid(grid))
 }

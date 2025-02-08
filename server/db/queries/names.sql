@@ -3,49 +3,59 @@ SELECT celestial_id,
     name,
     author_id,
     created_at
-FROM celestial_names_registry
-WHERE celestial_id = ANY(sqlc.arg(ids)::VARCHAR(15) [ ])
-    AND status = 'A';
+FROM celestial_names
+WHERE celestial_id = ANY(sqlc.arg(ids)::VARCHAR(15) [ ]);
 
 -- name: SubmitName :exec
-INSERT INTO celestial_names_registry (celestial_id, author_id, name)
+INSERT INTO celestial_names_submissions (celestial_id, author_id, name)
 VALUES ($1, $2, $3);
 
 -- name: ApproveName :exec
-UPDATE celestial_names_registry
-SET status = 'A',
-    reviewer_id = $2,
-    reviewed_at = NOW()
+INSERT INTO celestial_names (
+        celestial_id,
+        name,
+        author_id,
+        created_at,
+        reviewer_id
+    )
+SELECT celestial_id,
+    name,
+    author_id,
+    created_at,
+    $2
+FROM celestial_names_submissions
+WHERE celestial_names_submissions.entry_id = $1;
+
+DELETE FROM celestial_names_submissions
 WHERE entry_id = $1;
 
 -- name: DeclineName :exec
-UPDATE celestial_names_registry
-SET status = 'D',
-    reviewer_id = $2,
+UPDATE celestial_names_submissions
+SET reviewer_id = $2,
     reviewed_at = NOW(),
     review_comment = $3
 WHERE entry_id = $1;
 
 -- name: ListPendingNameSubmissions :many
 SELECT *
-FROM celestial_names_registry
-WHERE status = 'S'
+FROM celestial_names_submissions
+WHERE reviewer_id = NULL
 ORDER BY created_at DESC
 LIMIT $1 OFFSET $2;
 
 -- name: ListPendingNameSubmissionsTotal :one
 SELECT COUNT(*)
-FROM celestial_names_registry
-WHERE status = 'S';
+FROM celestial_names_submissions
+WHERE reviewer_id = NULL;
 
--- name: ListNameEntriesByAuthor :many
+-- name: ListNameSubmissionsByAuthor :many
 SELECT *
-FROM celestial_names_registry
+FROM celestial_names_submissions
 WHERE author_id = $3
 ORDER BY created_at DESC
 LIMIT $1 OFFSET $2;
 
 -- name: ListNameEntriesByAuthorTotal :one
 SELECT COUNT(*)
-FROM celestial_names_registry
+FROM celestial_names_submissions
 WHERE author_id = $1;

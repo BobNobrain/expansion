@@ -5,11 +5,11 @@ import { IconAsteroid, IconFlag, IconPeople, IconPlanet, IconSpaceStation, IconS
 import { emulateLinkClick } from '../../lib/solid/emulateLinkClick';
 import { formatScalar } from '../../lib/strings';
 import { getExploreRoute } from '../../routes/explore';
-import { useSectorContent } from '../../store/galaxy';
 import { CelestialBodyTitle } from '../CelestialBodyTitle/CelestialBodyTitle';
 import { DataTable, type DataTableColumn } from '../DataTable/DataTable';
 import { Text } from '../Text/Text';
 import styles from './SectorContentTable.module.css';
+import gameDataFront from '../../store/datafront';
 
 export type SectorContentTableProps = {
     sectorId: string;
@@ -123,10 +123,13 @@ const COLUMNS: DataTableColumn<TableRow>[] = [
 // };
 
 export const SectorContentTable: Component<SectorContentTableProps> = (props) => {
-    const systems = useSectorContent(() => props.sectorId);
+    const systems = gameDataFront.sysOverviews.useQuery('bySectorId', () => ({
+        sectorId: props.sectorId,
+        limit: 200,
+    }));
 
     const rows = createMemo(() => {
-        const mapped = (systems.data?.systems ?? []).map((system): TableRow => {
+        const mapped = Object.values(systems.result()).map((system): TableRow => {
             return {
                 id: system.id,
                 name: undefined,
@@ -158,12 +161,12 @@ export const SectorContentTable: Component<SectorContentTableProps> = (props) =>
                     {props.sectorId}
                 </Text>
                 <Text color="dim">
-                    <Show when={systems.data}>
-                        <IconSystem size={16} /> {systems.data!.total} systems
+                    <Show when={!systems.isLoading()}>
+                        <IconSystem size={16} /> {rows().length} systems
                     </Show>
                 </Text>
             </header>
-            <DataTable columns={COLUMNS} rows={rows()} stickLeft inset onRowClick={onRowClick} />
+            <DataTable columns={COLUMNS} rows={rows()} stickLeft onRowClick={onRowClick} />
         </div>
     );
 };

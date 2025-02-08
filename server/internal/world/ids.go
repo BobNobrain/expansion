@@ -19,6 +19,11 @@ func (id StarSystemID) GetSectorID() GalacticSectorID {
 	return GalacticSectorID(id[0:2])
 }
 
+func (id StarSystemID) IsValid() bool {
+	// TODO: improve validation
+	return len(string(id)) == 6 && id[2] == '-'
+}
+
 type CelestialID string
 
 func (cid CelestialID) IsNone() bool {

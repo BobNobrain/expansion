@@ -45,7 +45,7 @@ func (impl *authenticator) Login(request components.AuthenticatorLoginRequest) (
 		return nil, newInvalidLoginError()
 	}
 
-	user, err := impl.userRepo.Get(components.GetUserRequest{Username: request.Username})
+	user, err := impl.userRepo.Get(components.GetUserRequest{UserID: creds.ID})
 	if err != nil {
 		return nil, err
 	}

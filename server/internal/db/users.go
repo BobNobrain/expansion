@@ -54,29 +54,29 @@ func (db *userRepoImpl) Create(data components.UserCreateData) (domain.User, com
 func (db *userRepoImpl) Get(rq components.GetUserRequest) (domain.User, common.Error) {
 	var dbUser dbq.User
 	var err error
-	user := domain.User{}
 
 	if !rq.UserID.IsEmpty() {
 		uuid, parseErr := parseUUID(string(rq.UserID))
 		if parseErr != nil {
-			return user, parseErr
+			return domain.User{}, parseErr
 		}
 		dbUser, err = db.q.GetUserByID(context.Background(), uuid)
 		if err != nil {
-			return user, makeDBError(err, "UserRepo::Get(UserID)")
+			return domain.User{}, makeDBError(err, "UserRepo::Get(UserID)")
 		}
 	} else if rq.Username != "" {
 		dbUser, err = db.q.GetUserByUsername(context.Background(), string(rq.Username))
 		if err != nil {
-			return user, makeDBError(err, "UserRepo::Get(Username)")
+			return domain.User{}, makeDBError(err, "UserRepo::Get(Username)")
 		}
 	} else if rq.Email != "" {
 		dbUser, err = db.q.GetUserByUsername(context.Background(), rq.Email)
 		if err != nil {
-			return user, makeDBError(err, "UserRepo::Get(Email)")
+			return domain.User{}, makeDBError(err, "UserRepo::Get(Email)")
 		}
 	}
 
+	user := decodeUser(dbUser)
 	if rq.WithRoles {
 		roles, err := db.q.GetUserRoles(context.Background(), dbUser.Uid)
 		if err != nil {
@@ -97,6 +97,7 @@ func (db *userRepoImpl) GetCredentials(username domain.Username) (domain.UserCre
 	}
 
 	return domain.UserCredentials{
+		ID:           domain.UserID(dbCreds.Uid.String()),
 		Username:     domain.Username(dbCreds.Username),
 		PasswordHash: dbCreds.PasswordHash,
 	}, nil
@@ -115,13 +116,7 @@ func (db *userRepoImpl) GetManyByIDs(uids []domain.UserID) ([]domain.User, commo
 
 	users := make([]domain.User, 0, len(dbUsers))
 	for _, dbUser := range dbUsers {
-		users = append(users, domain.User{
-			ID:       domain.UserID(dbUser.Uid.String()),
-			Username: domain.Username(dbUser.Username),
-			Email:    dbUser.Email,
-			Created:  dbUser.CreatedAt.Time,
-			Roles:    nil,
-		})
+		users = append(users, decodeUser(dbUser))
 	}
 
 	return users, nil
@@ -189,4 +184,14 @@ func (db *userRepoImpl) RevokeRoles(rq components.ChangeRolesRequest) common.Err
 	}
 
 	return nil
+}
+
+func decodeUser(dbUser dbq.User) domain.User {
+	return domain.User{
+		ID:       domain.UserID(dbUser.Uid.String()),
+		Username: domain.Username(dbUser.Username),
+		Email:    dbUser.Email,
+		Created:  dbUser.CreatedAt.Time,
+		Roles:    nil,
+	}
 }

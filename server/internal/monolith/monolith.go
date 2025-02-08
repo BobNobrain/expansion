@@ -3,9 +3,9 @@ package monolith
 import (
 	"fmt"
 	"srv/internal/components/auth"
-	"srv/internal/components/dispatcher"
 	"srv/internal/datafront"
 	"srv/internal/db"
+	"srv/internal/game/galaxymap"
 	"srv/internal/globals/config"
 	"srv/internal/globals/logger"
 	"srv/internal/transport/http"
@@ -30,24 +30,32 @@ func (m *Monolith) Start() error {
 	userRepo := store.UserRepo()
 	auth := auth.NewAuthenticator(userRepo)
 
-	missionControl := dispatcher.NewDispatcher()
-	comms := ws.NewWebSocketComms(missionControl, auth, userRepo)
-	missionControl.Start(comms)
-
 	worldGen := worldgen.NewWorldGen(config.World().Seed)
+	gmap := galaxymap.New(galaxymap.GalaxyMapOptions{
+		WorldGen:    worldGen,
+		StarSystems: store.StarSystemsRepo(),
+		Worlds:      store.WorldsRepo(),
+	})
 
-	gdf := datafront.NewDataFront(missionControl, comms)
+	gdf := datafront.NewDataFront()
 	m.gdf = gdf
+	comms := ws.NewWebSocketComms(gdf)
+	gdf.Run(comms)
+
 	gdf.InitGalaxyMap()
-	gdf.InitOnline(comms)
+	gdf.InitMeSingleton(userRepo)
+
+	gdf.InitSysOverviews(store.StarSystemsRepo())
+	gdf.InitSystems(store.StarSystemsRepo())
+	gdf.InitWorldOverviews(store.WorldsRepo())
+	gdf.InitWorlds(store.WorldsRepo())
+
 	gdf.InitUsers(userRepo, comms)
+	gdf.InitOnline(comms)
 
-	// m.runner = gameInstance
-
-	// err := m.runner.Start()
-	// if err != nil {
-	// 	return err
-	// }
+	gdf.InitExploreActions(gmap)
+	// gdf.InitCityActions(store.CitiesRepo())
+	// gdf.InitBaseActions(...)
 
 	srv, herr := http.NewHTTPServer(auth, comms)
 	if herr != nil {
@@ -61,11 +69,6 @@ func (m *Monolith) Start() error {
 
 func (m *Monolith) Stop() {
 	logger.Warn(logger.FromMessage("monolith", "Stopping the server..."))
-
-	// err := m.runner.Stop()
-	// if err != nil {
-	// 	logger.Error(logger.FromError("monolith", err))
-	// }
 
 	m.gdf.Dispose()
 	m.store.Dispose()

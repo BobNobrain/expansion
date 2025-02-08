@@ -1,0 +1,40 @@
+.wrapper {
+    position: fixed;
+    top: -24px;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    pointer-events: none;
+
+    display: flex;
+    justify-content: center;
+    opacity: 0;
+
+    transition: all 0.5s ease-in-out;
+}
+.wrapper.visible {
+    top: 0;
+    opacity: 1;
+}
+
+.bar {
+    border-radius: 0 0 8px 8px;
+
+    font-size: 14px;
+    line-height: 16px;
+    padding: 4px 16px;
+
+    animation: bar-blinking alternate infinite 1s ease-in-out;
+    opacity: 0.8;
+}
+
+@keyframes bar-blinking {
+    0% {
+        background-color: var(--p-red-300);
+        color: var(--p-red-900);
+    }
+    100% {
+        background-color: var(--p-red-500);
+        color: var(--p-neutral-900);
+    }
+}

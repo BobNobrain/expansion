@@ -17,15 +17,11 @@ watch-editor:
 	gow -r=false run cmd/editor-api/editor-api.go
 
 .PHONY: setup install
-setup: install sqlc api-types assetgen galaxy-texture
+setup: install codegen assetgen galaxy-texture
+
 install:
 	go install github.com/gzuidhof/tygo@latest
 	go install github.com/mitranim/gow@latest
-
-
-.PHONY: api-types
-api-types:
-	tygo generate
 
 .PHONY: assetgen
 assetgen:
@@ -38,19 +34,27 @@ galaxy-texture:
 	go run cmd/galaxytex/galaxytex.go -size=256
 	go run cmd/galaxytex/galaxytex.go -size=128
 
-.PHONY: dev-db
-dev-db:
-	go run cmd/devdb/devdb.go $(ARGS)
+.PHONY: setup-dev-db db-tables generate-galaxy fixtures
+setup-dev-db: db-tables generate-galaxy fixtures
 
-.PHONY: setup-dev-db
-setup-dev-db:
-	go run cmd/devdb/devdb.go -action=schema
-	go run cmd/devdb/devdb.go -action=users
-	go run cmd/devdb/devdb.go -action=galaxy
+db-tables:
+	cat ./db/schema/*.sql | docker exec -i expansion-dev-db psql postgresql://devsrv:dev@localhost:5432/expansion
+
+generate-galaxy:
+	go run cmd/generate-galaxy/generate-galaxy.go
+
+fixtures:
+	go run cmd/fixtures/fixtures.go
 
 .PHONY: planetgen
 planetgen:
 	EXPANSION_DEBUG=planetgen go run cmd/planetgendebug/planetgendebug.go
+
+.PHONY: codegen api-types sqlc
+codegen: api-types sqlc
+
+api-types:
+	tygo generate
 
 .PHONY: sqlc
 sqlc:

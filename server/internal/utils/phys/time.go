@@ -5,9 +5,13 @@ import "time"
 type PhysicalTime float64
 
 const secondsPerMonth float64 = 60 * 60 * 24 * 30
+const daysPerMonth float64 = 30
 
 func Seconds(s float64) PhysicalTime {
 	return PhysicalTime(s / secondsPerMonth)
+}
+func Days(d float64) PhysicalTime {
+	return PhysicalTime(d / daysPerMonth)
 }
 func Months(m float64) PhysicalTime {
 	return PhysicalTime(m)
@@ -15,6 +19,9 @@ func Months(m float64) PhysicalTime {
 
 func (t PhysicalTime) Seconds() float64 {
 	return float64(t) * secondsPerMonth
+}
+func (t PhysicalTime) Days() float64 {
+	return float64(t) * daysPerMonth
 }
 func (t PhysicalTime) Months() float64 {
 	return float64(t)

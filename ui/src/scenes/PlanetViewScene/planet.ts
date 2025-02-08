@@ -1,6 +1,6 @@
 import { createMemo } from 'solid-js';
 import * as T from 'three';
-import { type CelestialSurface } from '../../domain/CelstialSurface';
+import { type CelestialSurface } from '../../domain/World';
 import { type MeshBuilder } from '../../lib/3d/MeshBuilder';
 import { type RawColor } from '../../lib/3d/types';
 import { Color } from '../../lib/color';

@@ -6,20 +6,20 @@ import (
 	"srv/internal/components"
 	"srv/internal/db/dbq"
 	"srv/internal/globals/config"
-	"srv/internal/globals/logger"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/lib/pq"
 )
 
 type Storage struct {
-	conn *pgx.Conn
+	conn *pgxpool.Pool
 	q    *dbq.Queries
 
-	users *userRepoImpl
-	orgs  *orgRepoImpl
-	stars *starsRepoImpl
-	cnr   *namesRegistryImpl
+	users  *userRepoImpl
+	orgs   *orgRepoImpl
+	stars  *starsRepoImpl
+	worlds *worldsRepoImpl
+	cnr    *namesRegistryImpl
 }
 
 func NewDBPermastore() *Storage {
@@ -27,20 +27,22 @@ func NewDBPermastore() *Storage {
 	cfg := config.DB()
 
 	pgUrl := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s", cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.Database)
-	conn, err := pgx.Connect(ctx, pgUrl)
+	// conn, err := pgx.Connect(ctx, pgUrl)
+	pool, err := pgxpool.New(ctx, pgUrl)
 
 	if err != nil {
 		panic(err)
 	}
 
 	db := &Storage{
-		conn: conn,
-		q:    dbq.New(conn),
+		conn: pool,
+		q:    dbq.New(pool),
 	}
 
 	db.users = &userRepoImpl{q: db.q}
 	db.orgs = &orgRepoImpl{q: db.q}
 	db.stars = &starsRepoImpl{q: db.q}
+	db.worlds = &worldsRepoImpl{q: db.q}
 	db.cnr = &namesRegistryImpl{q: db.q}
 
 	return db
@@ -48,10 +50,10 @@ func NewDBPermastore() *Storage {
 
 func (db *Storage) Dispose() {
 	if db.conn != nil {
-		err := db.conn.Close(context.Background())
-		if err != nil {
-			logger.Error(logger.FromUnknownError("db", err).WithDetail("operation", "Dispose"))
-		}
+		db.conn.Close()
+		// if err != nil {
+		// 	logger.Error(logger.FromUnknownError("db", err).WithDetail("operation", "Dispose"))
+		// }
 	}
 }
 
@@ -69,4 +71,8 @@ func (db *Storage) NamesRegistry() components.NamesRegistry {
 
 func (db *Storage) StarSystemsRepo() components.StarSystemsRepo {
 	return db.stars
+}
+
+func (db *Storage) WorldsRepo() components.WorldsRepo {
+	return db.worlds
 }

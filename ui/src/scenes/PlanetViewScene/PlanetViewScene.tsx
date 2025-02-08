@@ -1,6 +1,6 @@
 import { createEffect, createMemo, createSignal, Show, type Component } from 'solid-js';
 import { SceneControls, SceneControlsButton } from '../../components/SceneControls';
-import { CelestialSurface } from '../../domain/CelstialSurface';
+import { World } from '../../domain/World';
 import { IconPeople, IconPlanet, IconPlot, IconRadius, IconRocks } from '../../icons';
 import { useSurfaceOverview } from '../../store/galaxy';
 import { RotatableCamera } from '../common/RotatableCamera/RotatableCamera';
@@ -22,12 +22,12 @@ export const PlanetViewScene: Component<PlanetViewSceneProps> = (props) => {
     const [getTileRenderMode, setTileRenderMode] = createSignal<TileRenderMode>('natural');
 
     const activeTileIndex = createMemo(
-        () => (props.selectedPlotId && CelestialSurface.parsePlotId(props.selectedPlotId)) || undefined,
+        () => (props.selectedPlotId && World.parseTileId(props.selectedPlotId)) || undefined,
     );
 
     const onTileClick = (tile: number | undefined) => {
         if (props.onPlotSelected) {
-            props.onPlotSelected(tile === undefined ? undefined : CelestialSurface.makePlotId(tile));
+            props.onPlotSelected(tile === undefined ? undefined : World.makeTileId(tile));
         }
 
         // log stuff

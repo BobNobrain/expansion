@@ -36,7 +36,7 @@ func NewGridBuilder(rnd *rand.Rand, opts GridBuilderOptions) *GridBuilder {
 }
 
 const minGridSubdivisions int = 5
-const maxGridSubdivisions int = 32
+const maxGridSubdivisions int = 16
 
 func (grid *GridBuilder) Generate() geom.SpatialGraph {
 	subdivisions := minGridSubdivisions + int(float64(maxGridSubdivisions-minGridSubdivisions)*grid.opts.Size)

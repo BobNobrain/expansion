@@ -3,11 +3,10 @@ import * as api from '../../lib/net/api';
 import { ws } from '../../lib/net/ws';
 import { LogInForm } from './LogInForm/LogInForm';
 import { AuthenticatedContext, type AuthenticatedData } from './context';
-import { type UserDataUpdateEventPayload } from '../../lib/net/types.generated';
 import { SplashScreen } from './SplashScreen/SplashScreen';
 
 export const LogInGuard: ParentComponent = (props) => {
-    const [getUser, setUser] = createSignal<api.UserData | null>(null);
+    const [isAuthenticated, setAuthenticated] = createSignal<boolean>(false);
     const [getIsSubmitting, setIsSubmitting] = createSignal(false);
     const [getIsConnecting, setIsConnecting] = createSignal(true);
 
@@ -16,7 +15,8 @@ export const LogInGuard: ParentComponent = (props) => {
         try {
             const userData = await api.login(creds);
             await ws.connect();
-            setUser(userData);
+            console.log(userData);
+            setAuthenticated(true);
         } catch (error) {
             console.error(error);
         }
@@ -24,33 +24,18 @@ export const LogInGuard: ParentComponent = (props) => {
     };
 
     onMount(() => {
-        void ws
-            .connect()
-            .then(() => {
-                ws.subscribe('user', (evt) => {
-                    switch (evt.event) {
-                        case 'login': {
-                            const { username } = evt.payload as UserDataUpdateEventPayload;
-                            setUser({ username });
-                            setIsConnecting(false);
-                            break;
-                        }
-                    }
-                });
-            })
-            .catch(() => {
-                setIsConnecting(false);
-            });
+        void ws.connect().catch(() => {
+            setIsConnecting(false);
+        });
     });
 
     const logout = async () => {
         await api.logout();
-        setUser(null);
+        setAuthenticated(false);
         ws.disconnect();
     };
 
     const context: AuthenticatedData = {
-        user: getUser,
         logout,
     };
 
@@ -59,12 +44,12 @@ export const LogInGuard: ParentComponent = (props) => {
             when={getIsConnecting()}
             fallback={
                 <Show
-                    when={getUser() === null}
+                    when={!isAuthenticated()}
                     fallback={
                         <AuthenticatedContext.Provider value={context}>{props.children}</AuthenticatedContext.Provider>
                     }
                 >
-                    <LogInForm loading={getIsSubmitting()} onSubmit={(creds) => void submit(creds)} />
+                    <LogInForm loading={getIsSubmitting()} onSubmit={(creds) => void submit(creds)} error={null} />
                 </Show>
             }
         >

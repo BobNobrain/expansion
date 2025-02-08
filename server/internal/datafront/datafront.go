@@ -3,29 +3,49 @@ package datafront
 import (
 	"srv/internal/components"
 	"srv/internal/datafront/dfcore"
+	"srv/internal/utils/common"
 )
-
-const gameDataFrontScope components.DispatcherScope = "gdf"
 
 type GameDataFront struct {
 	df *dfcore.DataFront
 
-	users  *usersTable
 	online *onlineSingleton
 	galaxy *galaxyMapSingleton
+	me     *meSingleton
+
+	systems *systemsTable
+	users   *usersTable
+	worlds  *worldsTable
+
+	sysOverviews   *sysOverviewsTable
+	worldOverviews *worldOverviewsTable
+
+	actions *gameActions
 }
 
-func NewDataFront(disp components.Dispatcher, comms components.Comms) *GameDataFront {
+func NewDataFront() *GameDataFront {
 	result := &GameDataFront{
-		df: dfcore.NewDataFront(disp, comms, gameDataFrontScope),
+		df: dfcore.NewDataFront(),
 	}
 
 	return result
+}
+
+func (gdf *GameDataFront) Run(comms components.Comms) {
+	gdf.df.Run(comms)
 }
 
 func (gdf *GameDataFront) Dispose() {
 	gdf.users.dispose()
 	gdf.online.dispose()
 
+	gdf.systems.dispose()
+	gdf.sysOverviews.dispose()
+	gdf.worldOverviews.dispose()
+
 	gdf.df.Dispose()
+}
+
+func (gdf *GameDataFront) HandleRequest(rq components.DataFrontRequest) (common.Encodable, common.Error) {
+	return gdf.df.HandleRequest(rq)
 }

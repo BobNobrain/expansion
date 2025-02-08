@@ -3,66 +3,16 @@ package common
 type Error interface {
 	Code() string
 	Error() string
+	IsRetriable() bool
 	Details() Encodable
 }
 
-type unknownError struct {
-	inner error
-}
-
-func NewUnknownError(e error) Error {
-	return &unknownError{inner: e}
-}
-
-func (e *unknownError) Error() string {
-	return e.inner.Error()
-}
-func (e *unknownError) Code() string {
-	return "ERR_UNKNOWN"
-}
-func (e *unknownError) Details() Encodable {
-	return EmptyEncodable()
-}
-
 type customError struct {
-	msg     string
-	code    string
-	details Encodable
-	inner   error
-}
-
-func NewError(code string, msg string) Error {
-	return &customError{
-		code:    code,
-		msg:     msg,
-		details: EmptyEncodable(),
-	}
-}
-
-func NewWrapperError(code string, inner error) Error {
-	return &customError{
-		code:    code,
-		msg:     inner.Error(),
-		inner:   inner,
-		details: EmptyEncodable(),
-	}
-}
-
-func NewWrapperErrorWithDetails(code string, inner error, details Encodable) Error {
-	return &customError{
-		code:    code,
-		msg:     inner.Error(),
-		inner:   inner,
-		details: details,
-	}
-}
-
-func NewErrorWithDetails(code string, msg string, details Encodable) Error {
-	return &customError{
-		code:    code,
-		msg:     msg,
-		details: details,
-	}
+	msg         string
+	code        string
+	details     Encodable
+	inner       error
+	isRetriable bool
 }
 
 func (e *customError) Error() string {
@@ -71,6 +21,60 @@ func (e *customError) Error() string {
 func (e *customError) Code() string {
 	return e.code
 }
+func (e *customError) IsRetriable() bool {
+	return e.isRetriable
+}
 func (e *customError) Details() Encodable {
 	return e.details
+}
+
+type errorConstructor func(*customError)
+
+func NewError(options ...errorConstructor) Error {
+	err := &customError{
+		code:        "ERR_UNKNOWN",
+		msg:         "something terribly wrong happened",
+		inner:       nil,
+		details:     EmptyEncodable(),
+		isRetriable: false,
+	}
+	for _, opt := range options {
+		opt(err)
+	}
+	return err
+}
+
+func WithCode(code string) errorConstructor {
+	return func(ce *customError) {
+		ce.code = code
+	}
+}
+func WithMessage(msg string) errorConstructor {
+	return func(ce *customError) {
+		ce.msg = msg
+	}
+}
+func WithDetails(details Encodable) errorConstructor {
+	return func(ce *customError) {
+		ce.details = details
+	}
+}
+func WithInnerError(inner error) errorConstructor {
+	return func(ce *customError) {
+		ce.inner = inner
+		ce.msg = inner.Error()
+	}
+}
+func WithRetriable(ce *customError) {
+	ce.isRetriable = true
+}
+
+func NewUnknownError(e error) Error {
+	return NewError(WithInnerError(e))
+}
+func NewValidationError(field string, msg string, opts ...errorConstructor) Error {
+	return NewError(WithCode("ERR_VALIDATION"), WithMessage(msg), WithDetails(NewDictEncodable().Set("field", field)))
+}
+func NewDecodingError(inner error) Error {
+	return NewError(WithCode("ERR_DECODE"), WithInnerError(inner))
 }

@@ -8,8 +8,11 @@ import (
 	"srv/internal/world"
 )
 
+//
+// TODO: either get rid of these structures or make them private
+//
+
 type GeneratedSurfaceData struct {
-	// Params world.CelestialSurfaceParams
 	Grid  geom.SpatialGraph
 	Tiles []*GeneratedTileData
 
@@ -18,6 +21,7 @@ type GeneratedSurfaceData struct {
 	Snow       *material.MaterialCompound
 	// real elevation of a tile = Params.Radius + tile.Elevation * RelativeElevationsScale
 	RelativeElevationsScale phys.Distance
+	SurfaceGravity          phys.Acceleration
 }
 
 type GeneratedTileData struct {
@@ -38,4 +42,37 @@ type GeneratedAtmosphere struct {
 type GeneratedOceans struct {
 	Level    float64
 	Contents *material.MaterialCompound
+}
+
+func (d GeneratedSurfaceData) ToWorldExplorationData(params world.CelestialSurfaceParams) world.WorldExplorationData {
+	tiles := make([]world.WorldExplorationDataTile, 0, len(d.Tiles))
+	for _, tile := range d.Tiles {
+		tiles = append(tiles, world.WorldExplorationDataTile{
+			Color:     tile.Color,
+			AvgTemp:   tile.AverageTemp,
+			Pressure:  tile.Pressure,
+			Surface:   tile.SurfaceType,
+			Elevation: tile.Elevation,
+		})
+	}
+
+	resources := make(map[int]world.ResourceDeposit)
+
+	return world.WorldExplorationData{
+		Grid: d.Grid,
+		Conditions: world.SurfaceConditions{
+			Pressure: d.Atmosphere.SeaLevelPressure,
+			AvgTemp:  d.Atmosphere.AverageTemp,
+			Gravity:  d.SurfaceGravity,
+		},
+		Params:     params,
+		OceanLevel: d.Oceans.Level,
+		Atmosphere: d.Atmosphere.Contents,
+		Oceans:     d.Oceans.Contents,
+		Snow:       d.Snow,
+
+		Tiles:               tiles,
+		TileResources:       resources,
+		TileElevationsScale: d.RelativeElevationsScale,
+	}
 }

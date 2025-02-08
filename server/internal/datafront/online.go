@@ -22,9 +22,10 @@ func (gdf *GameDataFront) InitOnline(tracker components.OnlinePresenceTracker) {
 	}
 	online.value = dfcore.NewQueryableSingleton(online.getValue)
 
-	eb.SubscribeTyped(online.sub, "comms", "online", online.onOnlineChanged)
-	eb.SubscribeTyped(online.sub, "comms", "offline", online.onOnlineChanged)
+	eb.SubscribeTyped(online.sub, events.SourceComms, events.EventClientOffline, online.onOnlineChanged)
+	eb.SubscribeTyped(online.sub, events.SourceComms, events.EventClientOffline, online.onOnlineChanged)
 
+	gdf.online = online
 	gdf.df.AttachSingleton(dfcore.DFPath("online"), online.value)
 }
 
@@ -32,7 +33,7 @@ func (oc *onlineSingleton) dispose() {
 	oc.sub.UnsubscribeAll()
 }
 
-func (oc *onlineSingleton) getValue() (common.Encodable, common.Error) {
+func (oc *onlineSingleton) getValue(_ dfcore.DFRequestContext) (common.Encodable, common.Error) {
 	onlineCount, err := oc.tracker.GetOnlineCount()
 	if err != nil {
 		return nil, err

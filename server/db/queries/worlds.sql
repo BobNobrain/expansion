@@ -1,4 +1,4 @@
--- name: CreateWorld :exec
+-- name: CreateWorlds :copyfrom
 INSERT INTO worlds (
         body_id,
         system_id,
@@ -7,9 +7,10 @@ INSERT INTO worlds (
         mass_earths,
         class,
         axis_tilt,
-        day_length_real_s
+        day_length_game_days,
+        grid_size
     )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
 
 -- name: ExploreWorld :exec
 UPDATE worlds
@@ -34,18 +35,23 @@ SELECT worlds.body_id,
     worlds.surface_avg_temp_k,
     worlds.surface_gravity_g,
     worlds.grid_size,
-    (
-        SELECT COUNT(*) AS n_cities,
+    COALESCE(world_cities.n_cities, 0),
+    COALESCE(world_cities.population, 0),
+    COALESCE(world_bases.n_bases, 0)
+FROM worlds
+    LEFT JOIN (
+        SELECT cities.world_id,
+            COUNT(*) AS n_cities,
             SUM(cities.population) AS population
         FROM cities
-        WHERE cities.world_id = worlds.body_id
-    ),
-    (
-        SELECT COUNT(*)
+        GROUP BY cities.world_id
+    ) AS world_cities ON world_cities.world_id = worlds.body_id
+    LEFT JOIN (
+        SELECT bases.world_id,
+            COUNT(*) AS n_bases
         FROM bases
-        WHERE bases.world_id = worlds.body_id
-    ) AS n_bases
-FROM worlds
+        GROUP BY bases.world_id
+    ) AS world_bases ON world_cities.world_id = worlds.body_id
 WHERE worlds.system_id = $1;
 
 -- name: GetWorld :one

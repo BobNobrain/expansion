@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"srv/internal/components"
 	"srv/internal/globals/logger"
-	"srv/pkg/api"
+	"srv/internal/utils/common"
+	"srv/pkg/dfapi"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -38,12 +39,12 @@ func (c *wsClient) handleInbox() {
 		_, message, err := c.conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				fmt.Printf("error: %v", err)
+				logger.Error(logger.FromError("ws", common.NewUnknownError(err)))
 			}
 			break
 		}
 
-		var parsed = api.ClientCommand{}
+		var parsed dfapi.DFGenericRequest
 		err = json.Unmarshal(message, &parsed)
 
 		if err != nil {
@@ -51,14 +52,39 @@ func (c *wsClient) handleInbox() {
 			break
 		}
 
-		c.hub.dispatcher.EnqueueForDispatching(&components.DispatcherCommand{
-			ID:       components.DispatcherCommandID(parsed.ID),
+		result, dferr := c.hub.df.HandleRequest(components.DataFrontRequest{
+			ID:       components.DataFrontRequestID(parsed.ID),
 			ClientID: c.id,
-			OnBehalf: c.user,
-			Scope:    components.DispatcherScope(parsed.Scope),
-			Command:  parsed.Command,
-			Payload:  parsed.Payload,
+			OnBehalf: c.user.ID,
+			Type:     parsed.Type,
+			Request:  parsed.Request,
 		})
+
+		if dferr != nil {
+			var detailsEncoded any
+			if details := dferr.Details(); details != nil {
+				detailsEncoded = details.Encode()
+			}
+			c.send <- dfapi.DFGenericResponse{
+				RequestID: parsed.ID,
+				Error: &dfapi.DFError{
+					Code:        dferr.Code(),
+					Message:     dferr.Error(),
+					IsRetriable: dferr.IsRetriable(),
+					Details:     detailsEncoded,
+				},
+			}
+			continue
+		}
+
+		if result != nil {
+			c.send <- dfapi.DFGenericResponse{
+				RequestID: parsed.ID,
+				Result:    result.Encode(),
+			}
+		}
+
+		// otherwise no action is needed
 	}
 }
 
@@ -81,16 +107,21 @@ func (c *wsClient) handleOutbox() {
 			bytes, err := json.Marshal(message)
 
 			if err != nil {
-				if msg, ok := message.(*api.ServerCommandSuccessResponse); ok {
-					logger.Warn(logger.FromMessage("ws", "json failure").WithDetail("msg", fmt.Sprintf("%+v", msg.Result)))
-				}
-				logger.Warn(logger.FromUnknownError("ws", err).WithDetail("msg", fmt.Sprintf("%v", message)).WithDetail("source", "json"))
+				logger.Warn(
+					logger.FromUnknownError("ws", err).
+						WithDetail("msg", fmt.Sprintf("%v", message)).
+						WithDetail("source", "json"),
+				)
 				continue
 			}
 
 			err = c.conn.WriteMessage(websocket.TextMessage, bytes)
 			if err != nil {
-				logger.Info(logger.FromUnknownError("ws", err).WithDetail("msg", fmt.Sprintf("%v", message)).WithDetail("source", "write"))
+				logger.Info(
+					logger.FromUnknownError("ws", err).
+						WithDetail("msg", fmt.Sprintf("%v", message)).
+						WithDetail("source", "write"),
+				)
 				return
 			}
 

@@ -1,0 +1,32 @@
+.skeleton {
+    background: var(--p-main-900);
+    border-radius: 4px;
+    animation: skeleton-opacity ease-in-out infinite alternate 1s;
+}
+
+.skeleton-text {
+    composes: skeleton;
+    color: transparent;
+}
+
+.skeleton-block {
+    composes: skeleton;
+    width: var(--skeleton-text-width);
+    height: var(--skeleton-text-height);
+}
+
+.skeleton-block.auto-width {
+    width: auto;
+}
+.skeleton-block.auto-height {
+    height: auto;
+}
+
+@keyframes skeleton-opacity {
+    0% {
+        opacity: 0.2;
+    }
+    100% {
+        opacity: 0.4;
+    }
+}

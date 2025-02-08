@@ -2,7 +2,6 @@ package dfcore
 
 import (
 	"srv/internal/components"
-	"srv/internal/components/dispatcher"
 	"srv/internal/domain"
 	"srv/internal/events"
 	"srv/internal/globals/eb"
@@ -11,46 +10,36 @@ import (
 )
 
 type DataFront struct {
-	dispatcher components.Dispatcher
-	// comms      components.Comms
-	// scope      components.DispatcherScope
+	lock *sync.RWMutex
 
-	lock       *sync.RWMutex
 	tables     map[DFPath]QueryableTableFrontend
 	singletons map[DFPath]QueryableSingletonFrontend
+	actions    map[DFPath]ActionFrontend
 
-	ebs          eb.Subscription
-	updatesQueue *dfUpdatesQueue
+	ebs                   eb.Subscription
+	updatesQueue          *dfUpdatesQueue
+	actionsCleanupStopper chan bool
 }
 
-func NewDataFront(
-	disp components.Dispatcher,
-	comms components.Comms,
-	scope components.DispatcherScope,
-) *DataFront {
+func NewDataFront() *DataFront {
 	result := &DataFront{
-		dispatcher: disp,
-		// comms:      comms,
-		// scope:      scope,
-
 		lock:       new(sync.RWMutex),
 		tables:     make(map[DFPath]QueryableTableFrontend),
 		singletons: make(map[DFPath]QueryableSingletonFrontend),
+		actions:    make(map[DFPath]ActionFrontend),
 
-		updatesQueue: newDFUpdatesQueue(),
+		updatesQueue:          newDFUpdatesQueue(),
+		actionsCleanupStopper: make(chan bool, 1),
 	}
 
-	handler := dispatcher.NewDispatcherHandlerBuilder(scope)
-	handler.AddHandler("table", result.handleTableQuery)
-	handler.AddHandler("singleton", result.handleSingletonQuery)
-	disp.RegisterHandler(handler)
-
 	result.ebs = eb.CreateSubscription()
-	eb.SubscribeTyped(result.ebs, "comms", "offline", result.handleClientOffline)
-
-	go result.updatesQueue.run(comms, scope)
-
+	eb.SubscribeTyped(result.ebs, events.SourceComms, events.EventClientOffline, result.handleClientOffline)
 	return result
+}
+
+func (df *DataFront) Run(comms components.Comms) {
+	go df.updatesQueue.run(comms)
+	go df.runTokensCleanup()
 }
 
 func (df *DataFront) AttachTable(fullPath DFPath, table QueryableTableFrontend) {
@@ -60,14 +49,13 @@ func (df *DataFront) AttachTable(fullPath DFPath, table QueryableTableFrontend) 
 	df.tables[fullPath] = table
 	table.Attach(df, fullPath)
 }
-
 func (df *DataFront) RemoveTable(fullPath DFPath) common.Error {
 	df.lock.Lock()
 	defer df.lock.Unlock()
 
 	table, found := df.tables[fullPath]
 	if !found {
-		return newPathNotFoundError(fullPath)
+		return common.NewValidationError("fullPath", "table path does not exist")
 	}
 
 	delete(df.tables, fullPath)
@@ -82,14 +70,13 @@ func (df *DataFront) AttachSingleton(fullPath DFPath, singleton QueryableSinglet
 	df.singletons[fullPath] = singleton
 	singleton.Attach(df, fullPath)
 }
-
 func (df *DataFront) RemoveSingleton(fullPath DFPath) common.Error {
 	df.lock.Lock()
 	defer df.lock.Unlock()
 
 	singleton, found := df.singletons[fullPath]
 	if !found {
-		return newPathNotFoundError(fullPath)
+		return common.NewValidationError("fullPath", "singleton path does not exist")
 	}
 
 	delete(df.singletons, fullPath)
@@ -97,7 +84,29 @@ func (df *DataFront) RemoveSingleton(fullPath DFPath) common.Error {
 	return nil
 }
 
+func (df *DataFront) AttachAction(fullPath DFPath, action ActionFrontend) {
+	df.lock.Lock()
+	defer df.lock.Unlock()
+
+	df.actions[fullPath] = action
+}
+func (df *DataFront) RemoveAction(fullPath DFPath) common.Error {
+	df.lock.Lock()
+	defer df.lock.Unlock()
+
+	action, found := df.actions[fullPath]
+	if !found {
+		return common.NewValidationError("fullPath", "action path does not exist")
+	}
+
+	delete(df.actions, fullPath)
+	action.Dispose()
+	return nil
+}
+
 func (df *DataFront) Dispose() {
+	df.actionsCleanupStopper <- true
+
 	df.lock.Lock()
 	defer df.lock.Unlock()
 
@@ -106,11 +115,19 @@ func (df *DataFront) Dispose() {
 	}
 	df.tables = nil
 
+	for _, s := range df.singletons {
+		s.Dispose()
+	}
+	df.singletons = nil
+
+	for _, a := range df.actions {
+		a.Dispose()
+	}
+	df.actions = nil
+
 	df.ebs.UnsubscribeAll()
 
 	df.updatesQueue.stop()
-
-	// TODO: detach dispatcher listener ??
 }
 
 func (d *DataFront) handleClientOffline(payload events.ClientConnected, evt eb.Event) {

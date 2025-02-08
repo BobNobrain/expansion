@@ -19,6 +19,9 @@ func (e *notFoundError) Code() string {
 func (e *notFoundError) Details() common.Encodable {
 	return common.EmptyEncodable()
 }
+func (d *notFoundError) IsRetriable() bool {
+	return false
+}
 
 type dbError struct {
 	inner   error
@@ -43,4 +46,8 @@ func (d *dbError) Details() common.Encodable {
 
 func (d *dbError) Error() string {
 	return d.inner.Error()
+}
+
+func (d *dbError) IsRetriable() bool {
+	return true
 }

@@ -6,11 +6,14 @@ import (
 )
 
 type GeneratedStarSystemData struct {
-	SystemID world.StarSystemID
-	Coords   world.GalacticCoords
-	Stars    []*world.Star
-	Orbits   map[world.CelestialID]world.OrbitData
-	Bodies   map[world.CelestialID]GeneratedCelestialData
+	SystemID   world.StarSystemID
+	Coords     world.GalacticCoords
+	Stars      []world.Star
+	Orbits     map[world.CelestialID]world.OrbitData
+	Bodies     map[world.CelestialID]GeneratedCelestialData
+	NPlanets   int
+	NMoons     int
+	NAsteroids int
 }
 
 const CelestialBodyLevelPlanet = 0
@@ -19,6 +22,7 @@ type GeneratedCelestialData struct {
 	ID     world.CelestialID
 	Params world.CelestialSurfaceParams
 	Level  int
+	Size   int
 }
 
 func (ctx *GeneratedStarSystemData) placeCelestial(body GeneratedCelestialData, orbit world.OrbitData) {
@@ -26,6 +30,12 @@ func (ctx *GeneratedStarSystemData) placeCelestial(body GeneratedCelestialData, 
 
 	ctx.Bodies[body.ID] = body
 	ctx.Orbits[body.ID] = orbit
+
+	if body.ID.IsPlanetID() {
+		ctx.NPlanets++
+	} else if body.ID.IsMoonID() {
+		ctx.NMoons++
+	}
 }
 
 func (ctx *GeneratedStarSystemData) removeCelestial(cid world.CelestialID) {
