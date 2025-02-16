@@ -9,7 +9,7 @@ import (
 	"srv/internal/world"
 )
 
-func (ctx *surfaceGenContext) generateGasGiantConditions() {
+func (ctx *planetGenContext) generateGasGiantConditions() {
 	// TODO: look up some physics and make this somewhat more realistic
 	starLum := ctx.starParams.Luminosity.Suns()
 	distanceFromStar := ctx.nearestStarDistance.AstronomicalUnits()
@@ -59,7 +59,7 @@ func (ctx *surfaceGenContext) generateGasGiantConditions() {
 	ctx.surface.SurfaceGravity = surfaceGravity
 }
 
-func (ctx *surfaceGenContext) fillGasGiantTiles() {
+func (ctx *planetGenContext) fillGasGiantTiles() {
 	grid := ctx.surface.Grid
 	n := grid.Size()
 

@@ -10,16 +10,22 @@ import (
 func (df *DataFront) HandleRequest(rq components.DataFrontRequest) (common.Encodable, common.Error) {
 	switch rq.Type {
 	case "table":
-		return df.handleTableQuery(rq)
+		return df.handleTableRequest(rq)
 
 	case "-table":
 		return nil, df.handleTableUnsubscribe(rq)
 
 	case "singleton":
-		return df.handleSingletonQuery(rq)
+		return df.handleSingletonRequest(rq)
 
 	case "-singleton":
 		return nil, df.handleSingletonUnsubscribe(rq)
+
+	case "query":
+		return df.handleQueryRequest(rq)
+
+	case "-query":
+		return nil, df.handleQueryUnsubscribe(rq)
 
 	case "log":
 		// TODO
@@ -30,7 +36,6 @@ func (df *DataFront) HandleRequest(rq components.DataFrontRequest) (common.Encod
 		panic("not implemented")
 
 	case "action":
-		// TODO
 		return df.handleAction(rq)
 
 	default:
@@ -38,7 +43,7 @@ func (df *DataFront) HandleRequest(rq components.DataFrontRequest) (common.Encod
 	}
 }
 
-func (df *DataFront) handleTableQuery(rq components.DataFrontRequest) (common.Encodable, common.Error) {
+func (df *DataFront) handleTableRequest(rq components.DataFrontRequest) (common.Encodable, common.Error) {
 	df.lock.RLock()
 	defer df.lock.RUnlock()
 
@@ -79,7 +84,48 @@ func (df *DataFront) handleTableUnsubscribe(rq components.DataFrontRequest) comm
 	return nil
 }
 
-func (df *DataFront) handleSingletonQuery(rq components.DataFrontRequest) (common.Encodable, common.Error) {
+func (df *DataFront) handleQueryRequest(rq components.DataFrontRequest) (common.Encodable, common.Error) {
+	df.lock.RLock()
+	defer df.lock.RUnlock()
+
+	query, err := decodeJSONPayload[dfapi.DFTableQueryRequest](rq)
+	if err != nil {
+		return nil, err
+	}
+
+	q, found := df.tableQueries[DFPath(query.Path)]
+	if !found {
+		return nil, common.NewValidationError("DFTableRequest::Path", "table query path does not exist")
+	}
+
+	result, err := q.Query(query, MakeDFRequestContext(rq))
+	if err != nil {
+		return nil, err
+	}
+
+	return common.AsEncodable(result), nil
+}
+
+func (df *DataFront) handleQueryUnsubscribe(rq components.DataFrontRequest) common.Error {
+	df.lock.RLock()
+	defer df.lock.RUnlock()
+
+	query, err := decodeJSONPayload[dfapi.DFTableQueryUnsubscribeRequest](rq)
+	if err != nil {
+		return err
+	}
+
+	q, found := df.tableQueries[DFPath(query.Path)]
+	if !found {
+		return common.NewValidationError("DFTableRequest::Path", "table query path does not exist")
+	}
+
+	q.Unsubscribe(query, rq.ClientID)
+
+	return nil
+}
+
+func (df *DataFront) handleSingletonRequest(rq components.DataFrontRequest) (common.Encodable, common.Error) {
 	df.lock.RLock()
 	defer df.lock.RUnlock()
 

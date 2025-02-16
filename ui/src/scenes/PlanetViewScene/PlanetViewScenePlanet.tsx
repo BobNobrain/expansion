@@ -1,19 +1,17 @@
 import { type Component, For, createMemo, onMount, onCleanup } from 'solid-js';
 import * as T from 'three';
 import { Mesh } from '../../components/three/Mesh/Mesh';
-import { useInScene } from '../../components/three/hooks/useInScene';
+import { SceneObject } from '../../components/three/SceneObject/SceneObject';
 import { useSceneRenderer } from '../../components/three/context';
-import { type WorldOverview } from '../../domain/WorldOverview';
-import { type CelestialSurface } from '../../domain/World';
+import { type World } from '../../domain/World';
 import { type TapGestureData } from '../../lib/gestures/types';
 import { useEventListener } from '../../lib/solid/useEventListener';
 import { type TileRenderMode } from './colors';
-import { usePlanet } from './planet';
 import { scale } from './mesh/utils';
+import { usePlanet } from './planet';
 
 export type PlanetViewScenePlanetProps = {
-    body: WorldOverview | null;
-    surface: CelestialSurface | null;
+    world: World | null;
 
     showGraph?: boolean;
     tileRenderMode: TileRenderMode;
@@ -24,7 +22,7 @@ export type PlanetViewScenePlanetProps = {
 
 export const PlanetViewScenePlanet: Component<PlanetViewScenePlanetProps> = (props) => {
     const { gridMesh, surfaceBuilder, surfaceMesh, faceIndexMap } = usePlanet(
-        () => props.surface,
+        () => props.world,
         () => props.tileRenderMode,
     );
 
@@ -90,6 +88,9 @@ export const PlanetViewScenePlanet: Component<PlanetViewScenePlanetProps> = (pro
         }
         if (surface) {
             result.push(surface);
+        } else {
+            // unexplored planet gray mesh
+            result.push(new T.Mesh(new T.SphereGeometry(1), new T.MeshBasicMaterial({ color: 0x101010 })));
         }
 
         const activeTile = activeTileMesh();
@@ -104,7 +105,6 @@ export const PlanetViewScenePlanet: Component<PlanetViewScenePlanetProps> = (pro
         new T.BufferGeometry().setFromPoints([new T.Vector3(0, -1.12, 0), new T.Vector3(0, 1.12, 0)]),
         new T.LineBasicMaterial({ color: 0xffffff }),
     );
-    useInScene(() => planetAxis);
 
     const { canvas, getBounds, getMainCamera, gestures } = useSceneRenderer();
 
@@ -154,10 +154,13 @@ export const PlanetViewScenePlanet: Component<PlanetViewScenePlanetProps> = (pro
     useEventListener(gestures.tap, handleClick);
 
     return (
-        <For each={getMeshes()}>
-            {(mesh) => {
-                return <Mesh mesh={mesh} />;
-            }}
-        </For>
+        <>
+            <For each={getMeshes()}>
+                {(mesh) => {
+                    return <Mesh mesh={mesh} />;
+                }}
+            </For>
+            <SceneObject object={planetAxis} />
+        </>
     );
 };

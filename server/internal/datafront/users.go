@@ -28,9 +28,7 @@ func (gdf *GameDataFront) InitUsers(repo components.UserRepo, tracker components
 		tracker: tracker,
 		sub:     eb.CreateSubscription(),
 	}
-	users.table = dfcore.NewQueryableTable()
-	dfcore.AddTypedTableDataSource(users.table, api.UsersQueryTypeByID, users.queryByIds)
-	dfcore.AddTypedTableDataSource(users.table, api.UsersQueryTypeByUsername, users.queryByUsernames)
+	users.table = dfcore.NewQueryableTable(users.queryByIds)
 
 	eb.SubscribeTyped(users.sub, events.SourceUsers, events.EventUserCreate, users.onUserCreated)
 	eb.SubscribeTyped(users.sub, events.SourceUsers, events.EventUserUpdate, users.onUserUpdated)
@@ -77,16 +75,11 @@ func (u *usersTable) onUserOffline(payload events.ClientConnected, _ eb.Event) {
 }
 
 func (u *usersTable) queryByIds(
-	payload api.UsersQueryByIDPayload,
-	_ dfapi.DFTableRequest,
+	req dfapi.DFTableRequest,
 	_ dfcore.DFRequestContext,
 ) (*dfcore.TableResponse, common.Error) {
-	if len(payload.IDs) == 0 {
-		return nil, common.NewValidationError("UsersQueryByIDPayload::IDs", "no ids specified")
-	}
-
-	uids := make([]domain.UserID, 0, len(payload.IDs))
-	for _, uid := range payload.IDs {
+	uids := make([]domain.UserID, 0, len(req.IDs))
+	for _, uid := range req.IDs {
 		uids = append(uids, domain.UserID(uid))
 	}
 
@@ -95,7 +88,7 @@ func (u *usersTable) queryByIds(
 		return nil, err
 	}
 
-	result := dfcore.EmptyTableResponse()
+	result := dfcore.NewTableResponse()
 	for _, user := range fetchedUsersById {
 		isOnline, err := u.tracker.IsOnline(user.ID)
 		var isOnlineNullable *bool
@@ -108,37 +101,37 @@ func (u *usersTable) queryByIds(
 	return result, nil
 }
 
-func (u *usersTable) queryByUsernames(
-	payload api.UsersQueryByUsernamePayload,
-	_ dfapi.DFTableRequest,
-	_ dfcore.DFRequestContext,
-) (*dfcore.TableResponse, common.Error) {
-	if len(payload.Usernames) == 0 {
-		return nil, common.NewValidationError("UsersQueryByUsernamePayload::Usernames", "no usernames specified")
-	}
+// func (u *usersTable) queryByUsernames(
+// 	payload api.UsersQueryByUsernamePayload,
+// 	_ dfapi.DFTableRequest,
+// 	_ dfcore.DFRequestContext,
+// ) (*dfcore.TableResponse, common.Error) {
+// 	if len(payload.Usernames) == 0 {
+// 		return nil, common.NewValidationError("UsersQueryByUsernamePayload::Usernames", "no usernames specified")
+// 	}
 
-	unames := make([]domain.Username, 0, len(payload.Usernames))
-	for _, uname := range payload.Usernames {
-		unames = append(unames, domain.Username(uname))
-	}
+// 	unames := make([]domain.Username, 0, len(payload.Usernames))
+// 	for _, uname := range payload.Usernames {
+// 		unames = append(unames, domain.Username(uname))
+// 	}
 
-	fetchedUsersByUsername, err := u.repo.GetManyByUsernames(unames)
-	if err != nil {
-		return nil, err
-	}
+// 	fetchedUsersByUsername, err := u.repo.GetManyByUsernames(unames)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	result := dfcore.EmptyTableResponse()
-	for _, user := range fetchedUsersByUsername {
-		isOnline, err := u.tracker.IsOnline(user.ID)
-		var isOnlineNullable *bool
-		if err != nil {
-			isOnlineNullable = &isOnline
-		}
-		result.Add(dfcore.EntityID(user.ID), encodeUser(user, isOnlineNullable))
-	}
+// 	result := dfcore.EmptyTableResponse()
+// 	for _, user := range fetchedUsersByUsername {
+// 		isOnline, err := u.tracker.IsOnline(user.ID)
+// 		var isOnlineNullable *bool
+// 		if err != nil {
+// 			isOnlineNullable = &isOnline
+// 		}
+// 		result.Add(dfcore.EntityID(user.ID), encodeUser(user, isOnlineNullable))
+// 	}
 
-	return result, nil
-}
+// 	return result, nil
+// }
 
 func encodeUser(user domain.User, isOnline *bool) common.Encodable {
 	return common.AsEncodable(api.UsersTableRow{

@@ -14,7 +14,7 @@ func (opts *noiseAndBlurElevationsOptions) defaults() *noiseAndBlurElevationsOpt
 }
 
 func noiseAndBlurElevations(
-	ctx *surfaceGenContext,
+	ctx *planetGenContext,
 	opts *noiseAndBlurElevationsOptions,
 ) {
 	grid := ctx.surface.Grid

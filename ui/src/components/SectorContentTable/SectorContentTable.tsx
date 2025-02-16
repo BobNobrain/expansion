@@ -5,11 +5,11 @@ import { IconAsteroid, IconFlag, IconPeople, IconPlanet, IconSpaceStation, IconS
 import { emulateLinkClick } from '../../lib/solid/emulateLinkClick';
 import { formatScalar } from '../../lib/strings';
 import { getExploreRoute } from '../../routes/explore';
+import { dfSysOverviewsBySectorId } from '../../store/datafront';
 import { CelestialBodyTitle } from '../CelestialBodyTitle/CelestialBodyTitle';
 import { DataTable, type DataTableColumn } from '../DataTable/DataTable';
 import { Text } from '../Text/Text';
 import styles from './SectorContentTable.module.css';
-import gameDataFront from '../../store/datafront';
 
 export type SectorContentTableProps = {
     sectorId: string;
@@ -123,7 +123,7 @@ const COLUMNS: DataTableColumn<TableRow>[] = [
 // };
 
 export const SectorContentTable: Component<SectorContentTableProps> = (props) => {
-    const systems = gameDataFront.sysOverviews.useQuery('bySectorId', () => ({
+    const systems = dfSysOverviewsBySectorId.use(() => ({
         sectorId: props.sectorId,
         limit: 200,
     }));

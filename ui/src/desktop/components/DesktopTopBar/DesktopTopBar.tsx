@@ -2,19 +2,19 @@ import { type Component } from 'solid-js';
 import { useAuthenticated } from '../../../components/LogInGuard';
 import { Text } from '../../../components/Text/Text';
 import { TopBar } from '../../../components/TopBar/TopBar';
-import gameDataFront from '../../../store/datafront';
+import { dfOnline } from '../../../store/datafront';
 // import { useWindowManager } from '../../window/context';
 
 export const DesktopTopBar: Component = () => {
     const { logout } = useAuthenticated();
     // const wm = useWindowManager();
-    const onlineCount = gameDataFront.online.use();
+    const onlineCount = dfOnline.use();
 
     return (
         <TopBar
             left={['14 CREDITS', '6 PENNY', '1 APPLE']}
             right={[
-                <Text color="success">&bull; {onlineCount.value()?.count ?? '??'}</Text>,
+                <Text color="success">&bull; {onlineCount.value() ?? '??'}</Text>,
                 <span
                     onClick={() => {
                         // console.log(wm);

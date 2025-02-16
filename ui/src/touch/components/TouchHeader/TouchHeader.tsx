@@ -1,12 +1,9 @@
-import { type ParentComponent, type Component, createEffect } from 'solid-js';
+import { type ParentComponent, type Component } from 'solid-js';
 import styles from './TouchHeader.module.css';
 
 export const TouchHeaderButton: ParentComponent<{
     onClick?: () => void;
 }> = (props) => {
-    createEffect(() => {
-        console.log('fx', props.onClick);
-    });
     const onClick = () => {
         props.onClick?.();
     };

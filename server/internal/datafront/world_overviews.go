@@ -13,9 +13,11 @@ import (
 )
 
 type worldOverviewsTable struct {
-	repo  components.WorldsRepo
-	table *dfcore.QueryableTable
-	sub   eb.Subscription
+	repo components.WorldsRepo
+	sub  eb.Subscription
+
+	table       *dfcore.QueryableTable
+	qBySystemID *dfcore.TrackableTableQuery[api.WorldOverviewsQueryBySystemID]
 }
 
 func (gdf *GameDataFront) InitWorldOverviews(repo components.WorldsRepo) {
@@ -27,21 +29,28 @@ func (gdf *GameDataFront) InitWorldOverviews(repo components.WorldsRepo) {
 		repo: repo,
 		sub:  eb.CreateSubscription(),
 	}
-	overviews.table = dfcore.NewQueryableTable()
-	dfcore.AddTypedTableDataSource(overviews.table, api.WorldOverviewsQueryTypeBySystemID, overviews.queryBySystemID)
+	overviews.table = dfcore.NewQueryableTable(overviews.queryByIDs)
+	overviews.qBySystemID = dfcore.NewTrackableTableQuery(overviews.queryBySystemID, overviews.table)
 
+	eb.SubscribeTyped(overviews.sub, events.SourceGalaxy, events.EventGalaxySystemUpdate, overviews.onSystemUpdated)
 	eb.SubscribeTyped(overviews.sub, events.SourceGalaxy, events.EventGalaxyWorldUpdate, overviews.onWorldUpdated)
 
 	gdf.worldOverviews = overviews
-	gdf.df.AttachTable(dfcore.DFPath("world_overviews"), overviews.table)
+	gdf.df.AttachTable("world_overviews", overviews.table)
+	gdf.df.AttachTableQuery("world_overviews/bySystemId", overviews.qBySystemID)
 }
 
 func (t *worldOverviewsTable) dispose() {
 	t.sub.UnsubscribeAll()
 }
 
-func (t *worldOverviewsTable) queryBySystemID(payload api.WorldOverviewsQueryBySystemID,
-	_ dfapi.DFTableRequest,
+func (t *worldOverviewsTable) queryByIDs(req dfapi.DFTableRequest, ctx dfcore.DFRequestContext) (*dfcore.TableResponse, common.Error) {
+	return nil, common.NewError(common.WithCode("ERR_TODO"), common.WithMessage("world_overviews[id] is not implemented yet"))
+}
+
+func (t *worldOverviewsTable) queryBySystemID(
+	payload api.WorldOverviewsQueryBySystemID,
+	_ dfapi.DFTableQueryRequest,
 	_ dfcore.DFRequestContext,
 ) (*dfcore.TableResponse, common.Error) {
 	systemID := world.StarSystemID(payload.SystemID)
@@ -54,7 +63,7 @@ func (t *worldOverviewsTable) queryBySystemID(payload api.WorldOverviewsQueryByS
 		return nil, err
 	}
 
-	result := dfcore.EmptyTableResponse()
+	result := dfcore.NewTableResponse()
 	for _, overview := range overviews {
 		result.Add(dfcore.EntityID(overview.ID), encodeWorldOverview(overview))
 	}
@@ -62,8 +71,11 @@ func (t *worldOverviewsTable) queryBySystemID(payload api.WorldOverviewsQueryByS
 	return result, nil
 }
 
-func (t *worldOverviewsTable) onWorldUpdated(payload events.GalaxyWorldUpdate, ev eb.Event) {
+func (t *worldOverviewsTable) onSystemUpdated(payload events.GalaxySystemUpdate, _ eb.Event) {
+	t.qBySystemID.PublishChangedNotification(api.WorldOverviewsQueryBySystemID{SystemID: string(payload.SystemID)})
+}
 
+func (t *worldOverviewsTable) onWorldUpdated(payload events.GalaxyWorldUpdate, ev eb.Event) {
 	worldData, err := t.repo.GetData(payload.WorldID)
 	if err != nil {
 		logger.Error(logger.FromError("DF/world_overviews", err).WithDetail("event", ev))
@@ -97,5 +109,9 @@ func encodeWorldOverview(overview world.WorldOverview) common.Encodable {
 		AvgTempK:    overview.Conditions.AvgTemp.Kelvins(),
 		PressureBar: overview.Conditions.Pressure.Bar(),
 		GravityGs:   overview.Conditions.Gravity.EarthGs(),
+
+		NPops:   overview.Population.NPops,
+		NBases:  overview.Population.NBases,
+		NCities: overview.Population.NCities,
 	})
 }

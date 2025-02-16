@@ -39,4 +39,8 @@ type WorldsTableRow struct {
 	SnowContent       map[string]float64 `json:"snow,omitempty"`
 	OceansContent     map[string]float64 `json:"oceans,omitempty"`
 	AtmosphereContent map[string]float64 `json:"atmosphere,omitempty"`
+
+	NPops   int `json:"nPops"`
+	NBases  int `json:"nBases"`
+	NCities int `json:"nCities"`
 }

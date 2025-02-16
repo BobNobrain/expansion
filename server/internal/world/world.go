@@ -34,41 +34,23 @@ func (c CelestialBodyClass) String() string {
 	}
 }
 
-type SurfaceCellID int
-type SurfaceConnectionID int
-
-type SurfaceOverview interface {
-	GetID() CelestialID
-	IsExplored() bool
-	GetSize() int
-	GetConditions() SurfaceConditions
-	GetParams() CelestialSurfaceParams
-}
-
-type SurfaceData interface {
-	GetID() CelestialID
-	GetGrid() geom.SpatialGraph
-	GetConditions() SurfaceConditions
-	GetComposition() SurfaceComposition
-	GetParams() CelestialSurfaceParams
-	GetTileConditions() []SurfaceTileConditions
-}
-
 type WorldOverview struct {
 	ID         CelestialID
 	IsExplored bool
 	Size       int
-	Conditions SurfaceConditions
-	Params     CelestialSurfaceParams
+	Conditions WorldConditions
+	Params     WorldParams
+	Population WorldPopulationOverview
 }
 
 type WorldData struct {
 	ID          CelestialID
 	Explored    *ExplorationData
 	Grid        geom.SpatialGraph
-	Conditions  SurfaceConditions
-	Params      CelestialSurfaceParams
-	Composition SurfaceComposition
+	Conditions  WorldConditions
+	Params      WorldParams
+	Composition WorldComposition
+	Population  WorldPopulationOverview
 
 	Tiles               []WorldDataTile
 	TileResources       map[int]ResourceDeposit
@@ -85,8 +67,8 @@ type WorldDataTile struct {
 
 type WorldExplorationData struct {
 	Grid       geom.SpatialGraph
-	Conditions SurfaceConditions
-	Params     CelestialSurfaceParams
+	Conditions WorldConditions
+	Params     WorldParams
 	OceanLevel float64
 	Atmosphere *material.MaterialCompound
 	Oceans     *material.MaterialCompound
@@ -105,28 +87,20 @@ type WorldExplorationDataTile struct {
 	Elevation float64
 }
 
-type SurfaceConditions struct {
+type WorldConditions struct {
 	Pressure phys.Pressure
 	AvgTemp  phys.Temperature
 	Gravity  phys.Acceleration
 }
 
-type SurfaceComposition struct {
+type WorldComposition struct {
 	OceanLevel float64
 	Atmosphere *material.MaterialCompound
 	Oceans     *material.MaterialCompound
 	Snow       *material.MaterialCompound
 }
 
-type SurfaceTileConditions struct {
-	BiomeColor color.RichColorRGB
-	Elevation  phys.Distance
-	AvgTemp    phys.Temperature
-	Pressure   phys.Pressure
-	Surface    BiomeSurface
-}
-
-type CelestialSurfaceParams struct {
+type WorldParams struct {
 	Radius phys.Distance
 	Mass   phys.Mass
 	Age    phys.Age
@@ -134,4 +108,10 @@ type CelestialSurfaceParams struct {
 
 	AxisTilt  geom.Angle
 	DayLength phys.PhysicalTime
+}
+
+type WorldPopulationOverview struct {
+	NPops   int
+	NCities int
+	NBases  int
 }

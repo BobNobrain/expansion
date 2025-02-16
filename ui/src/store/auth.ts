@@ -1,12 +1,13 @@
 import { createSignal } from 'solid-js';
-import { type DatafrontError, toDatafrontError } from '../lib/datafront/error';
+import { toDatafrontError } from '../lib/datafront/error';
+import { type DatafrontError } from '../lib/datafront/types';
 import * as api from '../lib/net/api';
 import { ws } from '../lib/net/ws';
 
 export type UseAuthResult = {
     login: (payload: api.LoginRequest) => void;
     logout: () => void;
-    tryInitialAuth: () => void;
+    connect: () => void;
     isLoggedIn: () => boolean;
     isLoading: () => boolean;
     error: () => DatafrontError | null;
@@ -26,6 +27,7 @@ function login(payload: api.LoginRequest) {
     setError(null);
 
     (initialAuthProgress ?? Promise.resolve())
+        .catch(() => {})
         .then(() => api.login(payload))
         .then((userData) => {
             console.debug('[login]', userData);
@@ -63,7 +65,7 @@ function logout() {
         });
 }
 
-function tryInitialAuth() {
+function connect() {
     if (isLoading() || isLoggedIn() || initialAuthProgress) {
         return;
     }
@@ -93,6 +95,6 @@ export function useAuth(): UseAuthResult {
 
         login,
         logout,
-        tryInitialAuth,
+        connect,
     };
 }

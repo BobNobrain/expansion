@@ -12,9 +12,10 @@ import (
 type DataFront struct {
 	lock *sync.RWMutex
 
-	tables     map[DFPath]QueryableTableFrontend
-	singletons map[DFPath]QueryableSingletonFrontend
-	actions    map[DFPath]ActionFrontend
+	tables       map[DFPath]QueryableTableFrontend
+	tableQueries map[DFPath]TrackableTableQueryFrontend
+	singletons   map[DFPath]QueryableSingletonFrontend
+	actions      map[DFPath]ActionFrontend
 
 	ebs                   eb.Subscription
 	updatesQueue          *dfUpdatesQueue
@@ -23,10 +24,11 @@ type DataFront struct {
 
 func NewDataFront() *DataFront {
 	result := &DataFront{
-		lock:       new(sync.RWMutex),
-		tables:     make(map[DFPath]QueryableTableFrontend),
-		singletons: make(map[DFPath]QueryableSingletonFrontend),
-		actions:    make(map[DFPath]ActionFrontend),
+		lock:         new(sync.RWMutex),
+		tables:       make(map[DFPath]QueryableTableFrontend),
+		tableQueries: make(map[DFPath]TrackableTableQueryFrontend),
+		singletons:   make(map[DFPath]QueryableSingletonFrontend),
+		actions:      make(map[DFPath]ActionFrontend),
 
 		updatesQueue:          newDFUpdatesQueue(),
 		actionsCleanupStopper: make(chan bool, 1),
@@ -60,6 +62,27 @@ func (df *DataFront) RemoveTable(fullPath DFPath) common.Error {
 
 	delete(df.tables, fullPath)
 	table.Dispose()
+	return nil
+}
+
+func (df *DataFront) AttachTableQuery(fullPath DFPath, query TrackableTableQueryFrontend) {
+	df.lock.Lock()
+	defer df.lock.Unlock()
+
+	df.tableQueries[fullPath] = query
+	query.Attach(df, fullPath)
+}
+func (df *DataFront) RemoveTableQuery(fullPath DFPath) common.Error {
+	df.lock.Lock()
+	defer df.lock.Unlock()
+
+	query, found := df.tableQueries[fullPath]
+	if !found {
+		return common.NewValidationError("fullPath", "table query path does not exist")
+	}
+
+	delete(df.tableQueries, fullPath)
+	query.Dispose()
 	return nil
 }
 
@@ -110,10 +133,15 @@ func (df *DataFront) Dispose() {
 	df.lock.Lock()
 	defer df.lock.Unlock()
 
-	for _, q := range df.tables {
-		q.Dispose()
+	for _, t := range df.tables {
+		t.Dispose()
 	}
 	df.tables = nil
+
+	for _, q := range df.tableQueries {
+		q.Dispose()
+	}
+	df.tableQueries = nil
 
 	for _, s := range df.singletons {
 		s.Dispose()
@@ -138,7 +166,11 @@ func (df *DataFront) unsubscribeFromAll(cid domain.ClientID) {
 	df.lock.RLock()
 	defer df.lock.RUnlock()
 
-	for _, q := range df.tables {
+	for _, t := range df.tables {
+		t.UnsubscribeFromAll(cid)
+	}
+
+	for _, q := range df.tableQueries {
 		q.UnsubscribeFromAll(cid)
 	}
 

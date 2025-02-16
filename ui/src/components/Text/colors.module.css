@@ -30,6 +30,10 @@
     color: var(--color-text-dim);
 }
 
+.bright {
+    color: var(--p-main-900);
+}
+
 .dim.inverted {
     color: var(--color-text-dim-inverted);
 }

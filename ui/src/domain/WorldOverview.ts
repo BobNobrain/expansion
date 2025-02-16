@@ -28,11 +28,17 @@ export type WorldSurfaceConditions = {
     g: number;
 };
 
+export type WorldPopulationOverview = {
+    cities: number;
+    bases: number;
+    pops: number;
+};
+
 export type WorldOverview = {
     id: string;
     params: WorldParams;
     surface: WorldSurfaceConditions;
-
+    population: WorldPopulationOverview;
     isExplored: boolean;
     size: number;
 };

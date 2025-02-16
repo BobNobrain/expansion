@@ -27,8 +27,7 @@ func (gdf *GameDataFront) InitSystems(repo components.StarSystemsRepo) {
 		repo: repo,
 		sub:  eb.CreateSubscription(),
 	}
-	systems.table = dfcore.NewQueryableTable()
-	dfcore.AddTypedTableDataSource(systems.table, api.SystemsQueryTypeByID, systems.queryByID)
+	systems.table = dfcore.NewQueryableTable(systems.queryByIDs)
 
 	eb.SubscribeTyped(systems.sub, events.SourceGalaxy, events.EventGalaxySystemUpdate, systems.onSystemUpdated)
 
@@ -40,23 +39,31 @@ func (t *systemsTable) dispose() {
 	t.sub.UnsubscribeAll()
 }
 
-func (t *systemsTable) queryByID(
-	payload api.SystemsQueryByID,
-	_ dfapi.DFTableRequest,
+func (t *systemsTable) queryByIDs(
+	req dfapi.DFTableRequest,
 	_ dfcore.DFRequestContext,
 ) (*dfcore.TableResponse, common.Error) {
-	systemID := world.StarSystemID(payload.SystemID)
+	systemIDs := make([]world.StarSystemID, 0, len(req.IDs))
+	for _, id := range req.IDs {
+		systemID := world.StarSystemID(id)
+		if !systemID.IsValid() {
+			return nil, common.NewValidationError("SystemsQueryByID::SystemID", "wrong system id")
+		}
 
-	if !systemID.IsValid() {
-		return nil, common.NewValidationError("SystemsQueryByID::SystemID", "wrong system id")
+		systemIDs = append(systemIDs, systemID)
 	}
 
-	system, err := t.repo.GetContent(systemID)
+	systems, err := t.repo.GetContentMany(systemIDs)
 	if err != nil {
 		return nil, err
 	}
 
-	return dfcore.SingleEntityTableResponse(dfcore.EntityID(system.ID), encodeSystem(system)), nil
+	response := dfcore.NewTableResponse()
+	for _, system := range systems {
+		response.Add(dfcore.EntityID(system.ID), encodeSystem(system))
+	}
+
+	return response, nil
 }
 
 func (t *systemsTable) onSystemUpdated(payload events.GalaxySystemUpdate, _ eb.Event) {

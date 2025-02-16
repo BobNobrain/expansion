@@ -11,11 +11,23 @@ type PendingRequests = {
 type EventSubscriber = (event: DFGenericEvent) => void;
 type OutboxItem = { payload: string };
 
-export type RequestType = 'table' | '-table' | 'singleton' | '-singleton' | 'log' | '-log' | 'action';
+export type RequestType =
+    | 'table'
+    | '-table'
+    | 'query'
+    | '-query'
+    | 'singleton'
+    | '-singleton'
+    | 'log'
+    | '-log'
+    | 'action';
 
 class WSClient {
     public readonly isOnline: () => boolean;
     private setIsOnline: (value: boolean) => void;
+
+    public readonly isConnecting: () => boolean;
+    private setIsConnecting: (value: boolean) => void;
 
     private sock?: WebSocket;
 
@@ -30,10 +42,23 @@ class WSClient {
         const [getIsOnline, setIsOnline] = createSignal(false);
         this.isOnline = getIsOnline;
         this.setIsOnline = setIsOnline;
+
+        const [getIsConnecting, setIsConnecting] = createSignal(false);
+        this.isConnecting = getIsConnecting;
+        this.setIsConnecting = setIsConnecting;
     }
 
     connect(): Promise<void> {
+        if (this.sock) {
+            console.debug('[ws] connection already in progress');
+            return new Promise((resolve, reject) => {
+                this.sock!.addEventListener('open', () => resolve());
+                this.sock!.addEventListener('error', reject);
+            });
+        }
         this.sock = new WebSocket(`ws://${window.location.host}/sock`);
+        console.debug('[ws] connecting...');
+        this.setIsConnecting(true);
 
         this.sock.addEventListener('message', (ev) => {
             const parsed = JSON.parse(ev.data as string) as DFGenericEvent | DFGenericResponse;
@@ -47,7 +72,7 @@ class WSClient {
                     return;
                 }
 
-                console.debug('[server response]', parsed);
+                console.debug('[>res]', `#${parsed.requestId}`, parsed.error ?? parsed.result ?? '<empty>');
 
                 if (parsed.error) {
                     pendingCmd.reject(new WSError(parsed.error));
@@ -62,10 +87,11 @@ class WSClient {
 
         this.sock.addEventListener('open', () => {
             this.setIsOnline(true);
+            this.setIsConnecting(false);
             this.flushOutbox();
         });
         this.sock.addEventListener('close', (ev) => {
-            console.error('ws close: ' + ev.reason, ev);
+            console.error('[ws] close: ' + ev.reason, ev);
             this.setIsOnline(false);
             this.sock?.close();
             this.sock = undefined;
@@ -73,8 +99,9 @@ class WSClient {
             this.tryReconnecting();
         });
         this.sock.addEventListener('error', (error) => {
-            console.error('ws error', error);
+            console.error('[ws] error', error);
             this.setIsOnline(false);
+            this.setIsConnecting(false);
             this.sock?.close();
             this.sock = undefined;
 
@@ -110,7 +137,7 @@ class WSClient {
                 type,
                 request: payload,
             };
-            console.debug('[client request]', cmd);
+            console.debug('[req>]', `#${cmd.id} ${cmd.type}`, cmd.request);
             this.outbox.push({ payload: JSON.stringify(cmd) });
             this.flushOutbox();
         }) as Promise<T>;
@@ -127,7 +154,7 @@ class WSClient {
             type,
             request: payload,
         };
-        console.debug('[client notification]', cmd);
+        console.debug('[not>]', `#${cmd.id} ${cmd.type}`, cmd);
         this.outbox.push({ payload: JSON.stringify(cmd) });
         this.flushOutbox();
     }
@@ -149,7 +176,7 @@ class WSClient {
     }
 
     private handleEvent(evt: DFGenericEvent) {
-        console.debug(`[server event] ${evt.event}`, evt.payload);
+        console.debug(`[>evt] ${evt.event}`, evt.payload);
 
         const handlers = this.subs[evt.event] ?? [];
         for (const handler of handlers) {

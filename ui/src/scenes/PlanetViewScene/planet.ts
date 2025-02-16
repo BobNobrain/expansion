@@ -1,6 +1,6 @@
 import { createMemo } from 'solid-js';
 import * as T from 'three';
-import { type CelestialSurface } from '../../domain/World';
+import { type World } from '../../domain/World';
 import { type MeshBuilder } from '../../lib/3d/MeshBuilder';
 import { type RawColor } from '../../lib/3d/types';
 import { Color } from '../../lib/color';
@@ -18,19 +18,19 @@ export type UsePlanetResult = {
     faceIndexMap: () => Record<number, number>;
 };
 
-export function usePlanet(getSurface: () => CelestialSurface | null, getMode: () => TileRenderMode): UsePlanetResult {
+export function usePlanet(getWorld: () => World | null, getMode: () => TileRenderMode): UsePlanetResult {
     const gridBuilder = createMemo(() => {
-        const surface = getSurface();
-        if (!surface) {
+        const world = getWorld();
+        if (!world || !world.grid.coords.length) {
             return null;
         }
 
-        return restorePlanetGrid(surface);
+        return restorePlanetGrid(world);
     });
 
     const tileManager = createMemo(() => {
-        const surface = getSurface();
-        if (!surface) {
+        const world = getWorld();
+        if (!world) {
             return null;
         }
         const grid = gridBuilder();
@@ -43,7 +43,7 @@ export function usePlanet(getSurface: () => CelestialSurface | null, getMode: ()
         const palette: RawColor[] = [];
         const colorToIndex: Record<string, number> = {};
         const renderer = pickRenderer(getMode());
-        const colors = renderer(surface);
+        const colors = renderer(world);
 
         for (let tileIndex = 0; tileIndex < colors.length; tileIndex++) {
             const color = colors[tileIndex];

@@ -99,6 +99,11 @@ FROM star_systems
 WHERE system_id = $1
 LIMIT 1;
 
+-- name: ResolveStarSystems :many
+SELECT *
+FROM star_systems
+WHERE system_id = ANY($1::TEXT [ ]);
+
 -- -- name: GetStarsInSystem :many
 -- SELECT *
 -- FROM stars

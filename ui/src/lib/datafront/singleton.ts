@@ -1,18 +1,9 @@
 import { createMemo, createSignal } from 'solid-js';
 import type { DFSingletonRequest } from '../net/datafront.generated';
 import type { WSClient } from '../net/ws';
-import { toDatafrontError, type DatafrontError } from './error';
+import { toDatafrontError } from './error';
+import { type UseSingletonQueryResult, type DatafrontError, type DatafrontSingleton } from './types';
 import type { DataFrontUpdater } from './updater';
-
-export type UseSingletonQueryResult<Value> = {
-    value: () => Value | null;
-    isLoading: () => boolean;
-    error: () => DatafrontError | null;
-};
-
-export type DatafrontSingleton<Value> = {
-    use: () => UseSingletonQueryResult<Value>;
-};
 
 export type DatafrontSingletonOptions<ApiValue, Value> = {
     name: string;

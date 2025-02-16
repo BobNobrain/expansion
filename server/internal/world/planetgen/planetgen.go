@@ -10,7 +10,7 @@ import (
 type GeneratePlanetOptions struct {
 	WR     worldgen.WorldRandom
 	ID     world.CelestialID
-	Params world.CelestialSurfaceParams
+	Params world.WorldParams
 
 	StarParams   world.StarParams
 	StarDistance phys.Distance
@@ -22,7 +22,7 @@ type GeneratePlanetOptions struct {
 }
 
 func GeneratePlanet(opts GeneratePlanetOptions) *GeneratedSurfaceData {
-	ctx := &surfaceGenContext{
+	ctx := &planetGenContext{
 		rnd:    opts.WR.ForCelestial(opts.ID),
 		params: opts.Params,
 
@@ -60,7 +60,7 @@ type GenerateMoonOptions struct {
 }
 
 func GenerateMoon(opts GenerateMoonOptions) *GeneratedSurfaceData {
-	ctx := &surfaceGenContext{
+	ctx := &planetGenContext{
 		rnd:    opts.WR.ForCelestial(opts.ID),
 		params: opts.Params,
 

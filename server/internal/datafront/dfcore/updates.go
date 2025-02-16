@@ -12,6 +12,7 @@ type dfUpdatesQueue struct {
 	lock           *sync.Mutex
 	tableQueue     map[domain.ClientID][]dfapi.DFTableUpdatePatch
 	singletonQueue map[domain.ClientID][]dfapi.DFSingletonUpdatePatch
+	queriesQueue   map[domain.ClientID][]dfapi.DFTableQueryUpdateNotification
 
 	stopCh     chan bool
 	nonEmptyCh chan bool
@@ -23,6 +24,7 @@ func newDFUpdatesQueue() *dfUpdatesQueue {
 		lock:           new(sync.Mutex),
 		tableQueue:     make(map[domain.ClientID][]dfapi.DFTableUpdatePatch),
 		singletonQueue: make(map[domain.ClientID][]dfapi.DFSingletonUpdatePatch),
+		queriesQueue:   make(map[domain.ClientID][]dfapi.DFTableQueryUpdateNotification),
 
 		stopCh:     make(chan bool),
 		nonEmptyCh: make(chan bool, 1),
@@ -39,10 +41,7 @@ func (q *dfUpdatesQueue) pushTable(update dfapi.DFTableUpdatePatch, clients []do
 		q.tableQueue[cid] = append(q.tableQueue[cid], update)
 	}
 
-	if q.empty {
-		q.empty = false
-		q.nonEmptyCh <- true
-	}
+	q.notifyNotEmpty()
 }
 
 // Pushes a new update to the queue for future publishing to all designated clients
@@ -54,10 +53,19 @@ func (q *dfUpdatesQueue) pushSingleton(update dfapi.DFSingletonUpdatePatch, clie
 		q.singletonQueue[cid] = append(q.singletonQueue[cid], update)
 	}
 
-	if q.empty {
-		q.empty = false
-		q.nonEmptyCh <- true
+	q.notifyNotEmpty()
+}
+
+// Pushes a new update to the queue for future publishing to all designated clients
+func (q *dfUpdatesQueue) pushQueryNotification(not dfapi.DFTableQueryUpdateNotification, clients []domain.ClientID) {
+	q.lock.Lock()
+	defer q.lock.Unlock()
+
+	for _, cid := range clients {
+		q.queriesQueue[cid] = append(q.queriesQueue[cid], not)
 	}
+
+	q.notifyNotEmpty()
 }
 
 // Internal queue method that publishes all the content of the queue to respective clients (batched up)
@@ -72,17 +80,22 @@ func (q *dfUpdatesQueue) flush(comms components.Comms) {
 	for cid := range q.singletonQueue {
 		clients[cid] = true
 	}
+	for cid := range q.queriesQueue {
+		clients[cid] = true
+	}
 
 	for cid := range clients {
 		tablePatches := q.tableQueue[cid]
 		singletonPatches := q.singletonQueue[cid]
+		queryNots := q.queriesQueue[cid]
 
 		comms.Broadcast(components.CommsBroadcastRequest{
 			Event:            "update",
 			RecipientClients: []domain.ClientID{cid},
 			Payload: dfapi.DFUpdateEvent{
-				TablePatches:     tablePatches,
-				SingletonPatches: singletonPatches,
+				TablePatches:       tablePatches,
+				SingletonPatches:   singletonPatches,
+				QueryNotifications: queryNots,
 			},
 		})
 
@@ -90,6 +103,14 @@ func (q *dfUpdatesQueue) flush(comms components.Comms) {
 	}
 
 	q.empty = true
+}
+
+// internal queue method that notifies the flushing thread that it is not empty anymore
+func (q *dfUpdatesQueue) notifyNotEmpty() {
+	if q.empty {
+		q.empty = false
+		q.nonEmptyCh <- true
+	}
 }
 
 // Starts the queue watching process. Should be run in its own goroutine.

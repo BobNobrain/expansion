@@ -1,128 +1,81 @@
-import { createEffect, createMemo, createSignal, onCleanup, type Setter } from 'solid-js';
+import { createEffect, createMemo, createSignal, onCleanup } from 'solid-js';
 import type { DFTableRequest, DFTableUnsubscribeRequest } from '../net/datafront.generated';
 import type { WSClient } from '../net/ws';
-import { toDatafrontError, type DatafrontError } from './error';
+import { type DatafrontCleaner } from './cleaner';
+import { toDatafrontError } from './error';
+import { DatafrontTableCache } from './table-cache';
+import { createTableQuery } from './table-query';
+import {
+    type DatafrontError,
+    type DatafrontTable,
+    type DatafrontTableQuery,
+    type UseTableResult,
+    type UseTableSingleResult,
+} from './types';
 import type { DataFrontUpdater } from './updater';
-
-export type UseTableQueryResult<Entity> = {
-    result: () => Record<string, Entity>;
-    isLoading: () => boolean;
-    error: () => DatafrontError | null;
-};
-
-export type UseTableQuerySingleResult<Entity> = {
-    result: () => Entity | null;
-    isLoading: () => boolean;
-    error: () => DatafrontError | null;
-};
-
-export type DatafrontTable<Entity, Queries extends Record<string, unknown>> = {
-    useQuery<Type extends keyof Queries>(type: Type, payload: () => Queries[Type]): UseTableQueryResult<Entity>;
-    useQuerySingle<Type extends keyof Queries>(
-        type: Type,
-        payload: () => Queries[Type],
-    ): UseTableQuerySingleResult<Entity>;
-};
-
-type LocalDataEntry<ApiEntity, Entity> = {
-    getter: () => { apiValue: ApiEntity; value: Entity };
-    setter: Setter<{ apiValue: ApiEntity; value: Entity }>;
-    uses: number;
-};
 
 export type DatafrontTableOptions<ApiEntity, Entity> = {
     name: string;
     ws: WSClient;
     updater: DataFrontUpdater;
+    cleaner: DatafrontCleaner;
     map: (data: ApiEntity) => Entity;
 };
 
-export function createDatafrontTable<ApiEntity, Entity, Queries extends Record<string, unknown>>({
+export function createDatafrontTable<ApiEntity, Entity>({
     name,
     ws,
     updater,
+    cleaner,
     map,
-}: DatafrontTableOptions<ApiEntity, Entity>): DatafrontTable<Entity, Queries> {
-    const localData: Record<string, LocalDataEntry<ApiEntity, Entity>> = {};
+}: DatafrontTableOptions<ApiEntity, Entity>): DatafrontTable<Entity> {
+    const cache = new DatafrontTableCache(map);
 
-    const cleanupUnusedSignals = () => {
-        for (const id of Object.keys(localData)) {
-            if (localData[id].uses <= 0) {
-                delete localData[id];
-            }
+    cleaner.addCleanup(() => {
+        const unusedIds = cache.cleanup();
+        if (!unusedIds.length) {
+            return;
         }
-    };
+        ws.sendNotification<DFTableUnsubscribeRequest>('-table', {
+            ids: unusedIds,
+            path: name,
+        });
+        console.debug('[cleanup]', name, unusedIds.length);
+    });
 
     // subscribing for lifetime, because there are not that much singletons
     // maybe cleanup will be made later, if it makes sense
     updater.subscribeToTableUpdates(name, (update) => {
-        if (!localData[update.eid]) {
-            return;
-        }
-
         const patch = update.update as Partial<ApiEntity>;
-        localData[update.eid].setter((old) => {
-            const apiValue = { ...old.apiValue, ...patch };
-            return {
-                apiValue,
-                value: map(apiValue),
-            };
-        });
+        cache.patch(update.eid, patch);
     });
 
-    const useQuery = <Type extends keyof Queries>(
-        type: Type,
-        payload: () => Queries[Type],
-    ): UseTableQueryResult<Entity> => {
+    const useMany = (ids: () => string[]): UseTableResult<Entity> => {
         let latestRequestId = 0;
         const [isLoading, setIsLoading] = createSignal(false);
         const [error, setError] = createSignal<DatafrontError | null>(null);
-        const [resultIds, setResultIds] = createSignal<string[]>([]);
 
-        createEffect(() => {
-            resultIds(); // whenever result ids array changes
-            cleanupUnusedSignals();
-        });
+        const goFetchEntities = (ids: string[]) => {
+            if (!ids.length) {
+                return;
+            }
 
-        const retry = () => {
             const requestId = ++latestRequestId;
             setIsLoading(true);
             setError(null);
+            cache.markLoading(ids, true);
 
             ws.sendRequest<Record<string, ApiEntity>, DFTableRequest>('table', {
                 path: name,
-                query: type as string,
-                payload: payload(),
                 justBrowsing: false,
+                ids,
             })
                 .then((entities) => {
                     if (requestId != latestRequestId) {
                         return;
                     }
 
-                    const ids = Object.keys(entities);
-
-                    for (const id of ids) {
-                        if (!localData[id]) {
-                            const [getter, setter] = createSignal<{ apiValue: ApiEntity; value: Entity }>({
-                                apiValue: entities[id],
-                                value: map(entities[id]),
-                            });
-                            localData[id] = {
-                                getter,
-                                setter,
-                                uses: 1,
-                            };
-                        } else {
-                            localData[id].setter({
-                                apiValue: entities[id],
-                                value: map(entities[id]),
-                            });
-                            ++localData[id].uses;
-                        }
-                    }
-
-                    setResultIds(ids);
+                    cache.putAll(entities);
                     setIsLoading(false);
                 })
                 .catch((err: unknown) => {
@@ -131,47 +84,51 @@ export function createDatafrontTable<ApiEntity, Entity, Queries extends Record<s
                     }
 
                     setIsLoading(false);
-                    setResultIds((old) => (old.length ? [] : old));
-
-                    setError(toDatafrontError(err, retry));
+                    cache.markLoading(ids, false);
+                    setError(toDatafrontError(err, () => goFetchEntities(ids)));
                 });
         };
 
-        createEffect(retry);
+        createEffect<string[]>((prevIds) => {
+            const requestedIds = ids();
+            goFetchEntities(requestedIds.filter((id) => !cache.hasDataFor(id)));
+
+            cache.useIds(requestedIds);
+            cache.releaseIds(prevIds);
+            // cleanupUnusedSignals();
+
+            return requestedIds;
+        }, []);
 
         onCleanup(() => {
-            ws.sendNotification<DFTableUnsubscribeRequest>('-table', {
-                ids: resultIds(),
-                path: name,
-            });
-            setError(null);
-            setResultIds([]);
+            console.log(name, 'table cleanup: releasing', ids());
+            cache.releaseIds(ids());
+            // cleanupUnusedSignals();
         });
 
         return {
             isLoading,
             error,
             result: createMemo(() => {
-                const ids = resultIds();
-                if (!ids.length) {
+                const requestedIds = ids();
+                if (!requestedIds.length) {
                     return {};
                 }
 
-                const result: Record<string, Entity> = {};
-                for (const id of ids) {
-                    result[id] = localData[id].getter().value;
-                }
-
-                return result;
+                return cache.get(requestedIds);
             }),
         };
     };
 
-    const useQuerySingle = <Type extends keyof Queries>(
-        type: Type,
-        payload: () => Queries[Type],
-    ): UseTableQuerySingleResult<Entity> => {
-        const { isLoading, error, result } = useQuery(type, payload);
+    const useSingle = (id: () => string | null): UseTableSingleResult<Entity> => {
+        const { isLoading, error, result } = useMany(() => {
+            const resolved = id();
+            if (resolved === null) {
+                return [];
+            }
+            return [resolved];
+        });
+
         return {
             isLoading,
             error,
@@ -187,5 +144,18 @@ export function createDatafrontTable<ApiEntity, Entity, Queries extends Record<s
         };
     };
 
-    return { useQuery, useQuerySingle };
+    const createQuery = <Payload>(
+        name: string,
+        payloadHasher: (p: Payload) => string = JSON.stringify,
+    ): DatafrontTableQuery<Entity, Payload> => {
+        return createTableQuery({ name, hash: payloadHasher, tableCache: cache, updater, ws, cleaner });
+    };
+
+    return {
+        useMany,
+        useSingle,
+        createQuery,
+        // @ts-expect-error Cache is exported for debugging
+        cache,
+    };
 }

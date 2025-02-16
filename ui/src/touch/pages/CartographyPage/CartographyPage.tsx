@@ -2,9 +2,16 @@ import { type Component, createMemo, Match, onMount, Show, Switch } from 'solid-
 import { useNavigate } from '@solidjs/router';
 import { SceneRenderer } from '../../../components/three/SceneRenderer/SceneRenderer';
 import { SectorContentTable } from '../../../components/SectorContentTable/SectorContentTable';
-import { SurfaceInfo } from '../../../components/SurfaceInfo/SurfaceInfo';
+import { WorldInfo } from '../../../components/WorldInfo/WorldInfo';
+import { WorldTileInfo } from '../../../components/WorldTileInfo/WorldTileInfo';
 import { IconAsteroid, IconFlag, IconPeople, IconPlanet, IconRocks, IconSpaceStation, IconStar } from '../../../icons';
-import { getExploreRoute, SurfaceContentTab, SystemContentTab, useExploreRouteInfo } from '../../../routes/explore';
+import {
+    getExploreRoute,
+    WorldContentTab,
+    SystemContentTab,
+    useExploreRouteInfo,
+    getUpperRoute,
+} from '../../../routes/explore';
 import { PlanetViewScene } from '../../../scenes/PlanetViewScene/PlanetViewScene';
 import { SystemMapScene } from '../../../scenes/SystemMapScene/SystemMapScene';
 import { GalaxyMapScene } from '../../../scenes/GalaxyMapScene/GalaxyMapScene';
@@ -30,24 +37,7 @@ export const CartographyPage: Component = () => {
 
     const backToMain = () => {
         const info = routeInfo();
-        console.log('backToMain', info);
-        switch (info.objectType) {
-            case 'galaxy':
-                navigate('/');
-                return;
-
-            case 'sector':
-                navigate(getExploreRoute({}));
-                return;
-
-            case 'system':
-                navigate(getExploreRoute({ objectId: info.objectId!.substring(0, 2) }));
-                return;
-
-            case 'surface':
-                navigate(getExploreRoute({ objectId: info.objectId!.substring(0, 6) }));
-                return;
-        }
+        navigate(getUpperRoute(info));
     };
 
     usePageContextBinding(() => {
@@ -65,9 +55,13 @@ export const CartographyPage: Component = () => {
                 subtitle = 'System Map';
                 break;
 
-            case 'surface':
+            case 'world':
                 title = info.objectId!;
-                subtitle = 'Planet';
+                if (info.plotId) {
+                    subtitle = `Planetary tile #${info.plotId}`;
+                } else {
+                    subtitle = 'Planet';
+                }
                 break;
         }
 
@@ -102,30 +96,30 @@ export const CartographyPage: Component = () => {
                     },
                 ];
 
-            case 'surface':
+            case 'world':
                 if (info.plotId) {
                     return [];
                 }
                 return [
                     {
                         icon: IconPlanet,
-                        href: getExploreRoute({ objectId: info.objectId, tab: SurfaceContentTab.Info }),
+                        href: getExploreRoute({ objectId: info.objectId, tab: WorldContentTab.Info }),
                     },
                     {
                         icon: IconPeople,
-                        href: getExploreRoute({ objectId: info.objectId, tab: SurfaceContentTab.Population }),
+                        href: getExploreRoute({ objectId: info.objectId, tab: WorldContentTab.Population }),
                     },
                     {
                         icon: IconRocks,
-                        href: getExploreRoute({ objectId: info.objectId, tab: SurfaceContentTab.Resources }),
+                        href: getExploreRoute({ objectId: info.objectId, tab: WorldContentTab.Resources }),
                     },
                     {
                         icon: IconSpaceStation,
-                        href: getExploreRoute({ objectId: info.objectId, tab: SurfaceContentTab.Infra }),
+                        href: getExploreRoute({ objectId: info.objectId, tab: WorldContentTab.Infra }),
                     },
                     {
                         icon: IconFlag,
-                        href: getExploreRoute({ objectId: info.objectId, tab: SurfaceContentTab.Bases }),
+                        href: getExploreRoute({ objectId: info.objectId, tab: WorldContentTab.Bases }),
                     },
                 ];
 
@@ -144,12 +138,12 @@ export const CartographyPage: Component = () => {
                 />
                 <SystemMapScene isActive={routeInfo().objectType === 'system'} systemId={routeInfo().objectId!} />
                 <PlanetViewScene
-                    isActive={routeInfo().objectType === 'surface'}
-                    surfaceId={routeInfo().objectId!}
+                    isActive={routeInfo().objectType === 'world'}
+                    worldId={routeInfo().objectId!}
                     selectedPlotId={routeInfo().plotId}
                     onPlotSelected={(plot) => {
                         if (!plot) {
-                            navigate(getExploreRoute({ objectId: routeInfo().objectId, tab: SurfaceContentTab.Info }));
+                            navigate(getExploreRoute({ objectId: routeInfo().objectId, tab: WorldContentTab.Info }));
                             return;
                         }
                         navigate(getExploreRoute({ objectId: routeInfo().objectId, tab: plot }));
@@ -176,18 +170,18 @@ export const CartographyPage: Component = () => {
                     </Switch>
                 </Show>
 
-                <Show when={routeInfo().objectType === 'surface'}>
-                    <Switch fallback={<div>Plot info: #{routeInfo().plotId}</div>}>
-                        <Match when={routeInfo().tab === SurfaceContentTab.Info}>
-                            <SurfaceInfo />
+                <Show when={routeInfo().objectType === 'world'}>
+                    <Switch fallback={<WorldTileInfo />}>
+                        <Match when={routeInfo().tab === WorldContentTab.Info}>
+                            <WorldInfo />
                         </Match>
-                        <Match when={routeInfo().tab === SurfaceContentTab.Population}>Population...</Match>
-                        <Match when={routeInfo().tab === SurfaceContentTab.Resources}>Resources...</Match>
-                        <Match when={routeInfo().tab === SurfaceContentTab.Infra}>Infra...</Match>
-                        <Match when={routeInfo().tab === SurfaceContentTab.Bases}>Bases...</Match>
+                        <Match when={routeInfo().tab === WorldContentTab.Population}>Population...</Match>
+                        <Match when={routeInfo().tab === WorldContentTab.Resources}>Resources...</Match>
+                        <Match when={routeInfo().tab === WorldContentTab.Infra}>Infra...</Match>
+                        <Match when={routeInfo().tab === WorldContentTab.Bases}>Bases...</Match>
 
                         <Match when={!routeInfo().tab && !routeInfo().plotId}>
-                            <RedirectToTab tab={SurfaceContentTab.Info} />
+                            <RedirectToTab tab={WorldContentTab.Info} />
                         </Match>
                     </Switch>
                 </Show>

@@ -93,7 +93,7 @@ func (ctx *exploredSystemGenerator) generateRockyPlanet(
 	planet := GeneratedCelestialData{
 		ID:    world.CreatePlanetID(aroundStar.ID, i),
 		Level: CelestialBodyLevelPlanet,
-		Params: world.CelestialSurfaceParams{
+		Params: world.WorldParams{
 			Mass:   phys.EarthMasses(massEarths),
 			Radius: phys.Kilometers(rKm),
 			Class:  world.CelestialBodyClassTerrestial,
@@ -127,7 +127,7 @@ func (ctx *exploredSystemGenerator) generateGasGiantPlanet(
 	planet := GeneratedCelestialData{
 		ID:    world.CreatePlanetID(aroundStar.ID, i),
 		Level: CelestialBodyLevelPlanet,
-		Params: world.CelestialSurfaceParams{
+		Params: world.WorldParams{
 			Mass:   phys.EarthMasses(massEarths),
 			Radius: phys.Kilometers(6400 * radiusEarths),
 			Class:  world.CelestialBodyClassGaseous,

@@ -1,10 +1,10 @@
-import { type Component, createMemo, For, Show, createEffect } from 'solid-js';
+import { type Component, createMemo, For, Show } from 'solid-js';
 import { type PanLimits, RotatableCamera } from '../common/RotatableCamera/RotatableCamera';
 import { type RawVertex } from '../../lib/3d/types';
-import { useSystemContent } from '../../store/galaxy';
 import { SystemMapSceneOrbit } from './SystemMapSceneOrbit';
 import { SystemMapSceneStar } from './SystemMapSceneStar';
 import { SystemMapSceneGrid } from './SystemMapSceneGrid';
+import { dfSystems } from '../../store/datafront';
 
 export type SystemMapSceneProps = {
     isActive: boolean;
@@ -12,12 +12,10 @@ export type SystemMapSceneProps = {
 };
 
 export const SystemMapScene: Component<SystemMapSceneProps> = (props) => {
-    const systemContent = useSystemContent(() => (props.isActive ? props.systemId : ''));
-
-    createEffect(() => console.log({ ...systemContent.data }));
+    const systemContent = dfSystems.useSingle(() => (props.isActive ? props.systemId : null));
 
     const systemSize = createMemo<number>(() => {
-        const content = systemContent.data;
+        const content = systemContent.result();
         if (!content) {
             return 0;
         }
@@ -60,15 +58,17 @@ export const SystemMapScene: Component<SystemMapSceneProps> = (props) => {
                 panSpeed={panSpeed}
             />
 
-            <Show when={systemContent.data}>
+            <Show when={systemContent.result()}>
                 <SystemMapSceneGrid outsideBorder={systemSize()} />
 
-                <For each={Object.values(systemContent.data!.orbits)}>
+                <For each={Object.values(systemContent.result()!.orbits)}>
                     {(orbit) => <SystemMapSceneOrbit orbit={orbit} />}
                 </For>
 
-                <For each={systemContent.data!.stars}>
-                    {(star) => <SystemMapSceneStar star={star} orbit={systemContent.data!.orbits[star.id] ?? null} />}
+                <For each={systemContent.result()!.stars}>
+                    {(star) => (
+                        <SystemMapSceneStar star={star} orbit={systemContent.result()!.orbits[star.id] ?? null} />
+                    )}
                 </For>
             </Show>
         </Show>

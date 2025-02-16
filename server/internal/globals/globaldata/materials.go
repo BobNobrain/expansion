@@ -27,6 +27,20 @@ func (r *MaterialRegistry) GetAll() MaterialsList {
 	return mats
 }
 
+func (r *MaterialRegistry) RestoreCompoundFromMap(data map[string]float64) *material.MaterialCompound {
+	mc := material.NewMaterialCompound()
+
+	for id, amount := range data {
+		mat := r.byId[material.MaterialID(id)]
+		if mat == nil {
+			continue
+		}
+		mc.Add(mat, amount)
+	}
+
+	return mc
+}
+
 type MaterialsList []*material.Material
 
 func (l MaterialsList) FilterByStateAt(conditions material.PhaseDiagramPoint, allowedStates ...material.PhysicalState) MaterialsList {

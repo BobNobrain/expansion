@@ -44,3 +44,11 @@ func (set *Set[T]) Size() int {
 func (set *Set[T]) Items() map[T]bool {
 	return set.items
 }
+
+func (set *Set[T]) ToSlice() []T {
+	slice := make([]T, 0, len(set.items))
+	for item := range set.items {
+		slice = append(slice, item)
+	}
+	return slice
+}

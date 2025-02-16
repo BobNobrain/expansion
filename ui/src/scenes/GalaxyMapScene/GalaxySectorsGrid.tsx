@@ -9,8 +9,8 @@ import { SceneObject } from '../../components/three/SceneObject/SceneObject';
 import { useAnimatedNumber } from '../../components/three/hooks/useAnimatedValue';
 import { useCanvasListener } from '../../components/three/hooks/useCanvasListener';
 import { GalaxyStars } from './GalaxyStars';
-import { useSectorContent } from '../../store/galaxy';
 import { GraphicsQuality, useDeviceSettings } from '../../store/settings';
+import { dfSysOverviewsBySectorId } from '../../store/datafront';
 
 export type GalaxySectorsGridProps = {
     grid: GalacticGrid;
@@ -132,15 +132,17 @@ export const GalaxySectorsGrid: Component<GalaxySectorsGridProps> = (props) => {
     useEventListener(gestures.tap, (tap) => onClick(tap.client.x, tap.client.y));
     useCanvasListener('click', (ev) => onClick(ev.clientX, ev.clientY));
 
-    const sectorContent = useSectorContent(() => props.activeSectorId);
+    const sectorContent = dfSysOverviewsBySectorId.use(() =>
+        props.activeSectorId ? { sectorId: props.activeSectorId, limit: 200 } : null,
+    );
 
     return (
         <>
             <For each={gridMeshes()}>{(line) => <SceneObject object={line} />}</For>
             <GalaxyStars
-                stars={(sectorContent.data?.systems ?? []).map((s) => ({ ...s.stars[0], coords: s.coords }))}
+                stars={Object.values(sectorContent.result() ?? {}).map((s) => ({ ...s.stars[0], coords: s.coords }))}
                 withNormals
-                dim={!sectorContent.data}
+                // dim={!sectorContent.result()}
             />
         </>
     );

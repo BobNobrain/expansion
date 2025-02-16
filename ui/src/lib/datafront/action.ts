@@ -1,18 +1,8 @@
 import { createMemo, createSignal } from 'solid-js';
-import { type WSClient } from '../net/ws';
-import { type DatafrontError, toDatafrontError } from './error';
 import { type DFActionRequest } from '../net/datafront.generated';
-
-export type UseActionResult<Payload, Result> = {
-    run: (payload: Payload) => void;
-    result: () => Result | null;
-    isLoading: () => boolean;
-    error: () => DatafrontError | null;
-};
-
-export type DatafrontAction<Payload, Result> = {
-    use: (idempotencyToken: () => string) => UseActionResult<Payload, Result>;
-};
+import { type WSClient } from '../net/ws';
+import { toDatafrontError } from './error';
+import { type DatafrontAction, type DatafrontError } from './types';
 
 export type DatafrontActionOptions = {
     name: string;
@@ -34,7 +24,6 @@ function createRunningAction<P, R>(impl: (payload: P) => Promise<R>): RunningAct
 
     const action: RunningAction<P, R> = {
         run: (payload) => {
-            console.log('running action', canRun, payload);
             if (!canRun) {
                 return;
             }
@@ -75,10 +64,8 @@ export function createDatafrontAction<Payload, Result = void>({
         use(idempotencyToken) {
             const getAction = () => {
                 const token = idempotencyToken();
-                console.log('getAction', token, runningActions[token]);
                 if (!runningActions[token]) {
                     runningActions[token] = createRunningAction((payload) => {
-                        console.log('FFFUUUU');
                         return ws.sendRequest<Result, DFActionRequest>('action', {
                             name,
                             token,

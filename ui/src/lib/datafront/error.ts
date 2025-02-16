@@ -1,11 +1,5 @@
 import { WSError } from '../net/ws';
-
-export type DatafrontError = {
-    code: string;
-    message: string;
-    details?: unknown;
-    retry?: () => void;
-};
+import { type DatafrontError } from './types';
 
 export function toDatafrontError(err: unknown, retry?: () => void): DatafrontError {
     if (!err || !(err instanceof WSError)) {

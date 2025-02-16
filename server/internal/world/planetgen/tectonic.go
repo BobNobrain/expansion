@@ -6,7 +6,7 @@ import (
 	"srv/internal/utils/geom"
 )
 
-func (ctx *surfaceGenContext) generateTectonicElevations() {
+func (ctx *planetGenContext) generateTectonicElevations() {
 	nodesCount := ctx.surface.Grid.Size()
 	opts := new(tectonicLandscapeOptions)
 	opts.NPlates = utils.Clamp(nodesCount/40, 5, 25)
@@ -43,7 +43,7 @@ type tectonicPlate struct {
 type tectonicPlateIndex int
 
 type tectonicLandscaper struct {
-	ctx  *surfaceGenContext
+	ctx  *planetGenContext
 	opts *tectonicLandscapeOptions
 
 	plates              []*tectonicPlate
@@ -52,7 +52,7 @@ type tectonicLandscaper struct {
 }
 
 func generateTectonicLandscape(
-	ctx *surfaceGenContext,
+	ctx *planetGenContext,
 	opts *tectonicLandscapeOptions,
 ) {
 	nodesCount := ctx.surface.Grid.Size()

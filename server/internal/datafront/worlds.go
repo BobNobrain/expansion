@@ -28,8 +28,7 @@ func (gdf *GameDataFront) InitWorlds(repo components.WorldsRepo) {
 		repo: repo,
 		sub:  eb.CreateSubscription(),
 	}
-	worlds.table = dfcore.NewQueryableTable()
-	dfcore.AddTypedTableDataSource(worlds.table, api.WorldsQueryTypeByID, worlds.queryByID)
+	worlds.table = dfcore.NewQueryableTable(worlds.queryByIDs)
 
 	eb.SubscribeTyped(worlds.sub, events.SourceGalaxy, events.EventGalaxyWorldUpdate, worlds.onWorldUpdated)
 
@@ -37,26 +36,34 @@ func (gdf *GameDataFront) InitWorlds(repo components.WorldsRepo) {
 	gdf.df.AttachTable(dfcore.DFPath("worlds"), worlds.table)
 }
 
-func (w *worldsTable) queryByID(
-	payload api.WorldsQueryByID,
-	_ dfapi.DFTableRequest,
+func (w *worldsTable) queryByIDs(
+	req dfapi.DFTableRequest,
 	_ dfcore.DFRequestContext,
 ) (*dfcore.TableResponse, common.Error) {
-	worldId := world.CelestialID(payload.WorldID)
+	worldIDs := make([]world.CelestialID, 0, len(req.IDs))
+	for _, id := range req.IDs {
+		worldID := world.CelestialID(id)
 
-	if !worldId.IsPlanetID() && !worldId.IsMoonID() {
-		return nil, common.NewValidationError(
-			"WorldOverviewsQueryBySystemID::SystemID",
-			"wrong system id",
-		)
+		if !worldID.IsPlanetID() && !worldID.IsMoonID() {
+			return nil, common.NewValidationError(
+				"DFTableRequest::IDs",
+				"wrong world id: "+id,
+			)
+		}
+
+		worldIDs = append(worldIDs, worldID)
 	}
 
-	worldData, err := w.repo.GetData(worldId)
+	worlds, err := w.repo.GetDataMany(worldIDs)
 	if err != nil {
 		return nil, err
 	}
 
-	return dfcore.SingleEntityTableResponse(dfcore.EntityID(worldData.ID), encodeWorld(worldData)), nil
+	response := dfcore.NewTableResponse()
+	for _, world := range worlds {
+		response.Add(dfcore.EntityID(world.ID), encodeWorld(world))
+	}
+	return response, nil
 }
 
 func (t *worldsTable) onWorldUpdated(payload events.GalaxyWorldUpdate, ev eb.Event) {
@@ -68,13 +75,7 @@ func (t *worldsTable) onWorldUpdated(payload events.GalaxyWorldUpdate, ev eb.Eve
 		return
 	}
 
-	update[dfcore.EntityID(payload.WorldID)] = encodeWorldOverview(world.WorldOverview{
-		ID:         worldData.ID,
-		IsExplored: worldData.Explored != nil,
-		Size:       worldData.Grid.Size(),
-		Conditions: worldData.Conditions,
-		Params:     worldData.Params,
-	})
+	update[dfcore.EntityID(payload.WorldID)] = encodeWorld(worldData)
 	t.table.PublishEntities(update)
 }
 
@@ -128,5 +129,9 @@ func encodeWorld(w world.WorldData) common.Encodable {
 		SnowContent:       w.Composition.Snow.ToMap(),
 		OceansContent:     w.Composition.Oceans.ToMap(),
 		AtmosphereContent: w.Composition.Atmosphere.ToMap(),
+
+		NPops:   w.Population.NPops,
+		NBases:  w.Population.NBases,
+		NCities: w.Population.NCities,
 	})
 }

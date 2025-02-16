@@ -5,7 +5,7 @@ const ROUTE_BASE = '/galaxy';
 export const EXPLORE_ROUTE_DEFINITION = `${ROUTE_BASE}/:id?/:tab?`;
 export type ExploreRouteParams = { id?: string; tab?: string };
 
-export type ExploreObjectType = 'galaxy' | 'sector' | 'system' | 'surface';
+export type ExploreObjectType = 'galaxy' | 'sector' | 'system' | 'world';
 
 export type ExploreRouteInfo = {
     objectId?: string;
@@ -21,7 +21,7 @@ export enum SystemContentTab {
     Stars = 'stars',
 }
 
-export enum SurfaceContentTab {
+export enum WorldContentTab {
     Info = 'info',
     Population = 'population',
     Resources = 'resources',
@@ -29,12 +29,12 @@ export enum SurfaceContentTab {
     Bases = 'bases',
 }
 
-const surfaceContentTabs: Record<string, true> = {
-    [SurfaceContentTab.Info]: true,
-    [SurfaceContentTab.Population]: true,
-    [SurfaceContentTab.Resources]: true,
-    [SurfaceContentTab.Infra]: true,
-    [SurfaceContentTab.Bases]: true,
+const worldContentTabs: Record<string, true> = {
+    [WorldContentTab.Info]: true,
+    [WorldContentTab.Population]: true,
+    [WorldContentTab.Resources]: true,
+    [WorldContentTab.Infra]: true,
+    [WorldContentTab.Bases]: true,
 };
 
 export function useExploreRouteInfo(): () => ExploreRouteInfo {
@@ -55,11 +55,11 @@ export function useExploreRouteInfo(): () => ExploreRouteInfo {
             } else if (id.length === 6) {
                 result.objectType = 'system';
             } else {
-                result.objectType = 'surface';
+                result.objectType = 'world';
             }
         }
 
-        if (result.objectType === 'surface' && result.tab && !surfaceContentTabs[result.tab]) {
+        if (result.objectType === 'world' && result.tab && !worldContentTabs[result.tab]) {
             result.tab = undefined;
             result.plotId = params.tab;
         }
@@ -75,4 +75,32 @@ export type GetExploreRouteParams = {
 
 export function getExploreRoute(params: GetExploreRouteParams): string {
     return [ROUTE_BASE, params.objectId, params.tab].filter(Boolean).join('/');
+}
+
+export function useExploreRouteObjectId(type: ExploreObjectType): () => string | null {
+    const routeInfo = useExploreRouteInfo();
+    return () => {
+        const { objectType, objectId } = routeInfo();
+        return objectType === type ? objectId ?? null : null;
+    };
+}
+
+export function getUpperRoute(info: ExploreRouteInfo): string {
+    switch (info.objectType) {
+        case 'galaxy':
+            return '/';
+
+        case 'sector':
+            return getExploreRoute({});
+
+        case 'system':
+            return getExploreRoute({ objectId: info.objectId!.substring(0, 2) });
+
+        case 'world':
+            if (info.plotId) {
+                return getExploreRoute({ objectId: info.objectId, tab: WorldContentTab.Info });
+            }
+
+            return getExploreRoute({ objectId: info.objectId!.substring(0, 6) });
+    }
 }

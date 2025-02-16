@@ -7,7 +7,7 @@ import styles from './Text.module.css';
 export type TextSize = 'h1' | 'h2' | 'h3' | 'normal' | 'small';
 
 export type TextProps = {
-    color?: SemanticColor | 'dim' | 'default';
+    color?: SemanticColor | 'dim' | 'bright' | 'default';
     inverted?: boolean;
     bold?: boolean;
     italic?: boolean;

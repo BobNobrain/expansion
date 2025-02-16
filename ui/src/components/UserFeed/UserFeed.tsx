@@ -1,6 +1,6 @@
-import { createEffect, Show, type Component } from 'solid-js';
+import { Show, type Component } from 'solid-js';
 import { IconCross, IconUser } from '../../icons';
-import gameDataFront from '../../store/datafront';
+import { dfMe } from '../../store/datafront';
 import { Button } from '../Button/Button';
 import { Container, Spacer } from '../Container/Container';
 import { SkeletonText } from '../Skeleton';
@@ -9,9 +9,7 @@ import { useAuth } from '../../store/auth';
 
 export const UserFeed: Component = () => {
     const { logout } = useAuth();
-    const me = gameDataFront.me.use();
-
-    createEffect(() => console.log(me.value()));
+    const me = dfMe.use();
 
     return (
         <Container hasGap padded fullHeight direction="column">

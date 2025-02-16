@@ -10,7 +10,7 @@ import (
 	"srv/internal/world"
 )
 
-func (ctx *surfaceGenContext) generateRockyConditions() {
+func (ctx *planetGenContext) generateRockyConditions() {
 	starLum := ctx.starParams.Luminosity.Suns()
 	distanceFromStar := ctx.nearestStarDistance.AstronomicalUnits()
 	starDistanceSquared := distanceFromStar * distanceFromStar
@@ -126,7 +126,7 @@ func (ctx *surfaceGenContext) generateRockyConditions() {
 	ctx.surface.Snow = snow
 }
 
-func (ctx *surfaceGenContext) calculateConditionsPerTile() {
+func (ctx *planetGenContext) calculateConditionsPerTile() {
 	grid := ctx.surface.Grid
 	g := phys.CalculatePlanetGravity(ctx.params.Mass, ctx.params.Radius).EarthGs()
 	atmMolarMass := ctx.surface.Atmosphere.Contents.GetAverageMolarMass()
@@ -152,7 +152,7 @@ func (ctx *surfaceGenContext) calculateConditionsPerTile() {
 }
 
 // Assigns basic biomes: solid for high tiles, regolith for lower ones, ocean for those below ocean level
-func (ctx *surfaceGenContext) assignBasicBiomes() {
+func (ctx *planetGenContext) assignBasicBiomes() {
 	grid := ctx.surface.Grid
 	n := grid.Size()
 
@@ -186,7 +186,7 @@ func (ctx *surfaceGenContext) assignBasicBiomes() {
 }
 
 // Assigns more biomes that depend on tile conditions, e.g. adds ice and snow
-func (ctx *surfaceGenContext) assignConditionalBiomes() {
+func (ctx *planetGenContext) assignConditionalBiomes() {
 	grid := ctx.surface.Grid
 	n := grid.Size()
 	oceans := ctx.surface.Oceans.Contents
@@ -223,7 +223,7 @@ func (ctx *surfaceGenContext) assignConditionalBiomes() {
 }
 
 // Marks tiles with suitable conditions as fertile (BiomeSurfaceSoil)
-func (ctx *surfaceGenContext) assignFertileBiomes() {
+func (ctx *planetGenContext) assignFertileBiomes() {
 	// TODO:
 	// 1. check if applicable at all: should have a substantial amount of h2o and o2 in snow/oceans/atmosphere
 	// 2. check if tile conditions are not too extreme: T in -20...70 C, P in 0.3...10 bar

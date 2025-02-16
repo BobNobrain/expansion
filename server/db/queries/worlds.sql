@@ -51,11 +51,59 @@ FROM worlds
             COUNT(*) AS n_bases
         FROM bases
         GROUP BY bases.world_id
-    ) AS world_bases ON world_cities.world_id = worlds.body_id
+    ) AS world_bases ON world_bases.world_id = worlds.body_id
 WHERE worlds.system_id = $1;
 
 -- name: GetWorld :one
 SELECT *
 FROM worlds
+    LEFT JOIN (
+        SELECT cities.world_id,
+            COUNT(*) AS n_cities,
+            SUM(cities.population) AS population
+        FROM cities
+        GROUP BY cities.world_id
+    ) AS world_cities ON world_cities.world_id = worlds.body_id
+    LEFT JOIN (
+        SELECT bases.world_id,
+            COUNT(*) AS n_bases
+        FROM bases
+        GROUP BY bases.world_id
+    ) AS world_bases ON world_bases.world_id = worlds.body_id
 WHERE body_id = $1
 LIMIT 1;
+
+-- name: ResolveWorlds :many
+SELECT worlds.body_id,
+    worlds.system_id,
+    worlds.class,
+    worlds.age_byrs,
+    worlds.radius_km,
+    worlds.mass_earths,
+    worlds.axis_tilt,
+    worlds.day_length_game_days,
+    worlds.grid_size,
+    worlds.explored_at,
+    worlds.explored_by,
+    worlds.surface_pressure_bar,
+    worlds.surface_avg_temp_k,
+    worlds.surface_gravity_g,
+    worlds.surface_data,
+    COALESCE(world_cities.n_cities, 0),
+    COALESCE(world_cities.population, 0),
+    COALESCE(world_bases.n_bases, 0)
+FROM worlds
+    LEFT JOIN (
+        SELECT cities.world_id,
+            COUNT(*) AS n_cities,
+            SUM(cities.population) AS population
+        FROM cities
+        GROUP BY cities.world_id
+    ) AS world_cities ON world_cities.world_id = worlds.body_id
+    LEFT JOIN (
+        SELECT bases.world_id,
+            COUNT(*) AS n_bases
+        FROM bases
+        GROUP BY bases.world_id
+    ) AS world_bases ON world_bases.world_id = worlds.body_id
+WHERE body_id = ANY($1::TEXT [ ]);

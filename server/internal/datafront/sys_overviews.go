@@ -15,9 +15,12 @@ import (
 )
 
 type sysOverviewsTable struct {
-	repo  components.StarSystemsRepo
-	table *dfcore.QueryableTable
-	sub   eb.Subscription
+	repo components.StarSystemsRepo
+	sub  eb.Subscription
+
+	table       *dfcore.QueryableTable
+	qBySectorId *dfcore.TrackableTableQuery[api.SysOverviewsQueryBySectorID]
+	qByCoords   *dfcore.TrackableTableQuery[api.SysOverviewsQueryByCoords]
 }
 
 func (gdf *GameDataFront) InitSysOverviews(repo components.StarSystemsRepo) {
@@ -29,14 +32,16 @@ func (gdf *GameDataFront) InitSysOverviews(repo components.StarSystemsRepo) {
 		repo: repo,
 		sub:  eb.CreateSubscription(),
 	}
-	overviews.table = dfcore.NewQueryableTable()
-	dfcore.AddTypedTableDataSource(overviews.table, api.SysOverviewsQueryTypeBySectorID, overviews.queryBySectorID)
-	dfcore.AddTypedTableDataSource(overviews.table, api.SysOverviewsQueryTypeByCoords, overviews.queryByCoords)
+	overviews.table = dfcore.NewQueryableTable(overviews.queryByID)
+	overviews.qBySectorId = dfcore.NewTrackableTableQuery(overviews.queryBySectorID, overviews.table)
+	overviews.qByCoords = dfcore.NewTrackableTableQuery(overviews.queryByCoords, overviews.table)
 
 	eb.SubscribeTyped(overviews.sub, events.SourceGalaxy, events.EventGalaxySystemUpdate, overviews.onSystemUpdated)
 
 	gdf.sysOverviews = overviews
-	gdf.df.AttachTable(dfcore.DFPath("sys_overviews"), overviews.table)
+	gdf.df.AttachTable("sys_overviews", overviews.table)
+	gdf.df.AttachTableQuery("sys_overviews/bySectorId", overviews.qBySectorId)
+	gdf.df.AttachTableQuery("sys_overviews/byCoords", overviews.qByCoords)
 }
 
 func (u *sysOverviewsTable) dispose() {
@@ -55,14 +60,18 @@ func (u *sysOverviewsTable) onSystemUpdated(payload events.GalaxySystemUpdate, _
 		ID:         system.ID,
 		IsExplored: !system.Explored.By.IsEmpty(),
 		Stars:      system.Stars,
-		NPlanets:   len(system.Worlds), // TODO: properly retrieve and calculate these values
+		// TODO: properly retrieve and calculate values like NPlanets
 	})
 	u.table.PublishEntities(update)
 }
 
+func (t *sysOverviewsTable) queryByID(req dfapi.DFTableRequest, _ dfcore.DFRequestContext) (*dfcore.TableResponse, common.Error) {
+	return nil, common.NewError(common.WithCode("ERR_TODO"), common.WithMessage("sys_overviews[id] is not implemented yet"))
+}
+
 func (u *sysOverviewsTable) queryBySectorID(
 	q api.SysOverviewsQueryBySectorID,
-	_ dfapi.DFTableRequest,
+	_ dfapi.DFTableQueryRequest,
 	_ dfcore.DFRequestContext,
 ) (*dfcore.TableResponse, common.Error) {
 
@@ -78,7 +87,7 @@ func (u *sysOverviewsTable) queryBySectorID(
 		return nil, err
 	}
 
-	result := dfcore.EmptyTableResponse()
+	result := dfcore.NewTableResponse()
 	for _, overview := range overviews {
 		result.Add(dfcore.EntityID(overview.ID), encodeSystemOverview(overview))
 	}
@@ -88,7 +97,7 @@ func (u *sysOverviewsTable) queryBySectorID(
 
 func (u *sysOverviewsTable) queryByCoords(
 	q api.SysOverviewsQueryByCoords,
-	_ dfapi.DFTableRequest,
+	_ dfapi.DFTableQueryRequest,
 	_ dfcore.DFRequestContext,
 ) (*dfcore.TableResponse, common.Error) {
 	overviews, err := u.repo.GetSystemsOnMap(components.StarSystemRepoMapRequest{
@@ -104,7 +113,7 @@ func (u *sysOverviewsTable) queryByCoords(
 		return nil, err
 	}
 
-	result := dfcore.EmptyTableResponse()
+	result := dfcore.NewTableResponse()
 	for _, overview := range overviews {
 		result.Add(dfcore.EntityID(overview.ID), encodeSystemOverview(overview))
 	}

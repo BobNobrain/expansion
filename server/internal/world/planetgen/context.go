@@ -7,10 +7,10 @@ import (
 	"srv/internal/world"
 )
 
-type surfaceGenContext struct {
+type planetGenContext struct {
 	rnd *rand.Rand
 
-	params world.CelestialSurfaceParams
+	params world.WorldParams
 
 	starParams          world.StarParams
 	nearestStarDistance phys.Distance

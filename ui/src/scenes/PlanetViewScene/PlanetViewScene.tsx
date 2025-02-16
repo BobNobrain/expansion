@@ -1,24 +1,24 @@
-import { createEffect, createMemo, createSignal, Show, type Component } from 'solid-js';
+import { createMemo, createSignal, Show, type Component } from 'solid-js';
 import { SceneControls, SceneControlsButton } from '../../components/SceneControls';
 import { World } from '../../domain/World';
 import { IconPeople, IconPlanet, IconPlot, IconRadius, IconRocks } from '../../icons';
-import { useSurfaceOverview } from '../../store/galaxy';
 import { RotatableCamera } from '../common/RotatableCamera/RotatableCamera';
 import { type TileRenderMode } from './colors';
 import { PlanetViewSceneLight } from './PlanetViewSceneLight';
 import { PlanetViewScenePlanet } from './PlanetViewScenePlanet';
 import { PlanetViewSceneAtmosphere } from './PlanetViewSceneAtmosphere';
+import { dfWorlds } from '../../store/datafront';
 
 export type PlanetViewSceneProps = {
     isActive: boolean;
-    surfaceId: string;
+    worldId: string;
 
     selectedPlotId?: string;
     onPlotSelected?: (plotId: string | undefined) => void;
 };
 
 export const PlanetViewScene: Component<PlanetViewSceneProps> = (props) => {
-    const surface = useSurfaceOverview(() => (props.isActive ? props.surfaceId : undefined));
+    const world = dfWorlds.useSingle(() => (props.isActive ? props.worldId : null));
     const [getTileRenderMode, setTileRenderMode] = createSignal<TileRenderMode>('natural');
 
     const activeTileIndex = createMemo(
@@ -29,36 +29,7 @@ export const PlanetViewScene: Component<PlanetViewSceneProps> = (props) => {
         if (props.onPlotSelected) {
             props.onPlotSelected(tile === undefined ? undefined : World.makeTileId(tile));
         }
-
-        // log stuff
-        if (tile === undefined) {
-            return;
-        }
-
-        const data = surface.data?.surface;
-        if (!data) {
-            return;
-        }
-
-        console.log({
-            color: data.colors[tile],
-            biome: data.biomes[tile],
-            elevation: data.elevations[tile],
-            oceanLevel: data.oceanLevel,
-        });
     };
-
-    createEffect(() => {
-        const data = surface.data?.surface;
-        if (!data) {
-            return;
-        }
-
-        console.log({
-            atm: { ...data.atmosphere },
-            oceans: { ...data.oceans },
-        });
-    });
 
     const setTRMNatural = () => setTileRenderMode('natural');
     const setTRMBiomes = () => setTileRenderMode('biomes');
@@ -67,7 +38,7 @@ export const PlanetViewScene: Component<PlanetViewSceneProps> = (props) => {
     const setTRMElevations = () => setTileRenderMode('elevations');
 
     return (
-        <Show when={props.isActive && surface.data}>
+        <Show when={props.isActive && world.result()}>
             <RotatableCamera
                 main
                 fov={75}
@@ -81,8 +52,7 @@ export const PlanetViewScene: Component<PlanetViewSceneProps> = (props) => {
             />
             <PlanetViewSceneLight isNatural={getTileRenderMode() === 'natural'} />
             <PlanetViewScenePlanet
-                surface={surface.data?.surface ?? null}
-                body={surface.data?.body ?? null}
+                world={world.result()}
                 activeTileIndex={activeTileIndex()}
                 onTileClick={onTileClick}
                 tileRenderMode={getTileRenderMode()}

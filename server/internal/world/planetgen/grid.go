@@ -5,7 +5,7 @@ import (
 	"srv/internal/world"
 )
 
-func (ctx *surfaceGenContext) generateGrid() {
+func (ctx *planetGenContext) generateGrid() {
 	planetSize := ctx.params.Radius.Kilometers() / 50_000
 	if planetSize < 0.1 {
 		planetSize = 0.1

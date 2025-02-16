@@ -24,12 +24,15 @@ func (v DFGenericResponse) Encode() any {
 	return v
 }
 
-// type DFUnsubscribe
-
 type DFTableRequest struct {
+	Path         string   `json:"path"`
+	JustBrowsing bool     `json:"justBrowsing"`
+	IDs          []string `json:"ids"`
+}
+
+type DFTableQueryRequest struct {
 	Path         string          `json:"path"`
 	JustBrowsing bool            `json:"justBrowsing"`
-	QueryType    string          `json:"query"`
 	Payload      json.RawMessage `json:"payload"`
 }
 
@@ -50,8 +53,9 @@ type DFGenericEvent struct {
 }
 
 type DFUpdateEvent struct {
-	TablePatches     []DFTableUpdatePatch     `json:"tables,omitempty"`
-	SingletonPatches []DFSingletonUpdatePatch `json:"singletons,omitempty"`
+	TablePatches       []DFTableUpdatePatch             `json:"tables,omitempty"`
+	SingletonPatches   []DFSingletonUpdatePatch         `json:"singletons,omitempty"`
+	QueryNotifications []DFTableQueryUpdateNotification `json:"queries,omitempty"`
 }
 
 func (v DFUpdateEvent) Encode() any {
@@ -69,9 +73,20 @@ type DFSingletonUpdatePatch struct {
 	Update any    `json:"update"`
 }
 
+type DFTableQueryUpdateNotification struct {
+	Path    string `json:"path"`
+	Payload any    `json:"payload"`
+}
+
 type DFTableUnsubscribeRequest struct {
 	Path string   `json:"path"`
 	IDs  []string `json:"ids"`
+}
+
+type DFTableQueryUnsubscribeRequest struct {
+	Path    string          `json:"path"`
+	Payload json.RawMessage `json:"payload"`
+	IDs     []string        `json:"ids,omitempty"`
 }
 
 type DFSingletonUnsubscribeRequest struct {

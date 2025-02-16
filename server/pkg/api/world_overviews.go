@@ -26,4 +26,8 @@ type WorldOverviewsTableRow struct {
 	AvgTempK    float64 `json:"avgTempK"`
 	PressureBar float64 `json:"surfacePressureBar"`
 	GravityGs   float64 `json:"g"`
+
+	NPops   int `json:"nPops"`
+	NBases  int `json:"nBases"`
+	NCities int `json:"nCities"`
 }

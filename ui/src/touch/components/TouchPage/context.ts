@@ -53,7 +53,6 @@ export const usePageContextBinding = (bindings: Partial<PageContextData> | (() =
 
     if (typeof bindings === 'function') {
         createEffect(() => {
-            console.log(bindings());
             ctx.update(bindings());
         });
     } else {

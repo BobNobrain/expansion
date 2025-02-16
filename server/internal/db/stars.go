@@ -39,77 +39,36 @@ type starSystemStarData struct {
 	MassSuns float64 `json:"m_suns"`
 }
 
-var dbWorldClasses = map[string]world.CelestialBodyClass{
-	"G": world.CelestialBodyClassGaseous,
-	"T": world.CelestialBodyClassTerrestial,
-}
-
 func (s *starsRepoImpl) GetContent(id world.StarSystemID) (world.StarSystemContent, common.Error) {
 	dbSystem, err := s.q.GetStarSystem(context.Background(), string(id))
-	system := world.StarSystemContent{}
 	if err != nil {
-		return system, makeDBError(err, "StarSystemsRepo::GetContent")
+		return world.StarSystemContent{}, makeDBError(err, "StarSystemsRepo::GetContent")
 	}
 
-	system.ID = world.StarSystemID(dbSystem.SystemID)
-	if dbSystem.ExploredAt.Valid && dbSystem.ExploredBy.Valid {
-		system.Explored = world.ExplorationData{
-			By: domain.UserID(dbSystem.ExploredBy.String()),
-			At: dbSystem.ExploredAt.Time,
-		}
+	return decodeStarSystem(dbSystem)
+}
+
+func (s *starsRepoImpl) GetContentMany(ids []world.StarSystemID) ([]world.StarSystemContent, common.Error) {
+	strIds := make([]string, 0, len(ids))
+	for _, id := range ids {
+		strIds = append(strIds, string(id))
 	}
 
-	systemData, jsonErr := parseJSON[starSystemData](dbSystem.SystemData)
-	if jsonErr != nil {
-		return system, jsonErr
-	}
-
-	system.Orbits = make(map[world.CelestialID]world.OrbitData)
-	for bodyId, orbitData := range systemData.Orbits {
-		system.Orbits[world.CelestialID(bodyId)] = world.OrbitData{
-			Center: world.CelestialID(orbitData.Center),
-			Ellipse: phys.EllipticOrbit{
-				SemiMajor:    phys.AstronomicalUnits(orbitData.SemiMajorAu),
-				Eccentricity: orbitData.Eccentricity,
-			},
-			Rotation:    geom.Radians(orbitData.RotationRads),
-			Inclination: geom.Radians(orbitData.InclinationRads),
-			T0:          orbitData.T0,
-		}
-	}
-
-	var jerr common.Error
-	system.Stars, jerr = decodeStars(dbSystem.SystemStars)
-	if jerr != nil {
-		return system, jerr
-	}
-
-	dbWorlds, err := s.q.GetWorldsInSystem(context.Background(), string(id))
+	systemRows, err := s.q.ResolveStarSystems(context.Background(), strIds)
 	if err != nil {
-		return system, makeDBError(err, "StarSystemsRepo::GetContent(Worlds)")
+		return nil, makeDBError(err, "StarSystemsRepo::GetContent")
 	}
 
-	system.Worlds = make([]world.WorldOverview, 0, len(dbWorlds))
-	for _, dbWorld := range dbWorlds {
-		system.Worlds = append(system.Worlds, world.WorldOverview{
-			ID:         world.CelestialID(dbWorld.BodyID),
-			IsExplored: dbWorld.ExploredAt.Valid && dbWorld.ExploredBy.Valid,
-			Size:       int(dbWorld.GridSize),
-			Params: world.CelestialSurfaceParams{
-				Class:  dbWorldClasses[dbWorld.Class],
-				Radius: phys.Kilometers(dbWorld.RadiusKm),
-				Mass:   phys.EarthMasses(dbWorld.MassEarths),
-				Age:    phys.BillionYears(dbWorld.AgeByrs),
-			},
-			Conditions: world.SurfaceConditions{
-				Pressure: phys.Bar(dbWorld.SurfacePressureBar),
-				AvgTemp:  phys.Kelvins(dbWorld.SurfaceAvgTempK),
-				Gravity:  phys.EarthGs(dbWorld.SurfaceGravityG),
-			},
-		})
+	systems := make([]world.StarSystemContent, 0, len(systemRows))
+	for _, row := range systemRows {
+		system, err := decodeStarSystem(row)
+		if err != nil {
+			return nil, err
+		}
+		systems = append(systems, system)
 	}
 
-	return system, nil
+	return systems, nil
 }
 
 func (s *starsRepoImpl) GetSystemsOnMap(rq components.StarSystemRepoMapRequest) ([]world.StarSystemOverview, common.Error) {
@@ -310,4 +269,44 @@ func encodeStarSystemData(orbits map[world.CelestialID]world.OrbitData) ([]byte,
 	return json.Marshal(starSystemData{
 		Orbits: jsonOrbits,
 	})
+}
+
+func decodeStarSystem(row dbq.StarSystem) (world.StarSystemContent, common.Error) {
+	system := world.StarSystemContent{
+		ID:     world.StarSystemID(row.SystemID),
+		Orbits: make(map[world.CelestialID]world.OrbitData),
+	}
+
+	if row.ExploredAt.Valid && row.ExploredBy.Valid {
+		system.Explored = world.ExplorationData{
+			By: domain.UserID(row.ExploredBy.String()),
+			At: row.ExploredAt.Time,
+		}
+	}
+
+	systemData, jsonErr := parseJSON[starSystemData](row.SystemData)
+	if jsonErr != nil {
+		return system, jsonErr
+	}
+
+	for bodyId, orbitData := range systemData.Orbits {
+		system.Orbits[world.CelestialID(bodyId)] = world.OrbitData{
+			Center: world.CelestialID(orbitData.Center),
+			Ellipse: phys.EllipticOrbit{
+				SemiMajor:    phys.AstronomicalUnits(orbitData.SemiMajorAu),
+				Eccentricity: orbitData.Eccentricity,
+			},
+			Rotation:    geom.Radians(orbitData.RotationRads),
+			Inclination: geom.Radians(orbitData.InclinationRads),
+			T0:          orbitData.T0,
+		}
+	}
+
+	var jerr common.Error
+	system.Stars, jerr = decodeStars(row.SystemStars)
+	if jerr != nil {
+		return system, jerr
+	}
+
+	return system, nil
 }

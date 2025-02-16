@@ -44,7 +44,7 @@ type GeneratedOceans struct {
 	Contents *material.MaterialCompound
 }
 
-func (d GeneratedSurfaceData) ToWorldExplorationData(params world.CelestialSurfaceParams) world.WorldExplorationData {
+func (d GeneratedSurfaceData) ToWorldExplorationData(params world.WorldParams) world.WorldExplorationData {
 	tiles := make([]world.WorldExplorationDataTile, 0, len(d.Tiles))
 	for _, tile := range d.Tiles {
 		tiles = append(tiles, world.WorldExplorationDataTile{
@@ -60,7 +60,7 @@ func (d GeneratedSurfaceData) ToWorldExplorationData(params world.CelestialSurfa
 
 	return world.WorldExplorationData{
 		Grid: d.Grid,
-		Conditions: world.SurfaceConditions{
+		Conditions: world.WorldConditions{
 			Pressure: d.Atmosphere.SeaLevelPressure,
 			AvgTemp:  d.Atmosphere.AverageTemp,
 			Gravity:  d.SurfaceGravity,

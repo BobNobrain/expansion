@@ -14,7 +14,7 @@ const queryClient = new QueryClient({
 });
 
 export function App(props: ParentProps) {
-    const { tryInitialAuth } = useAuth();
+    const { connect: tryInitialAuth } = useAuth();
     onMount(() => {
         tryInitialAuth();
     });

@@ -5,7 +5,7 @@ import { FloatingHTML } from '../../components/three/FloatingHTML/FloatingHTML';
 import { Text } from '../../components/Text/Text';
 import { type GalacticGridSector } from '../../domain/GalacticOverview';
 import { type RawVertex } from '../../lib/3d/types';
-import gameDataFront from '../../store/datafront';
+import { dfGalaxy } from '../../store/datafront';
 
 import { GalaxyFog } from './GalaxyFog';
 import { GalaxySectorsGrid } from './GalaxySectorsGrid';
@@ -18,7 +18,7 @@ export type GalaxyMapSceneProps = {
 };
 
 export const GalaxyMapScene: Component<GalaxyMapSceneProps> = (props) => {
-    const overview = gameDataFront.galaxy.use();
+    const overview = dfGalaxy.use();
 
     const selectedSector = createMemo(() => {
         const selectedSectorId = props.selectedSector;

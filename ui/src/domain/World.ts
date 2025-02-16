@@ -1,5 +1,5 @@
 import { type RGBColor } from '../lib/color';
-import { type WorldParams, type WorldSurfaceConditions } from './WorldOverview';
+import { type WorldPopulationOverview, type WorldParams, type WorldSurfaceConditions } from './WorldOverview';
 import { type ExplorationData } from './misc';
 
 export type World = {
@@ -19,6 +19,8 @@ export type World = {
     oceans: Record<string, number>;
     atmosphere: Record<string, number>;
     snow: Record<string, number>;
+
+    population: WorldPopulationOverview;
 };
 
 export type WorldGrid = {

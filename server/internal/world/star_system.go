@@ -1,9 +1,7 @@
 package world
 
 import (
-	"srv/internal/domain"
 	"srv/internal/utils/phys"
-	"time"
 )
 
 type StarParams struct {
@@ -38,22 +36,4 @@ type StarSystemContent struct {
 
 	Orbits map[CelestialID]OrbitData
 	Stars  []Star
-	Worlds []WorldOverview
-}
-
-type StarSystem interface {
-	GetSystemID() StarSystemID
-	GetCoords() GalacticCoords
-
-	IsExplored() bool
-	GetExploredBy() domain.UserID
-	GetExploredAt() time.Time
-
-	GetOrbits() map[CelestialID]OrbitData
-
-	GetStars() []*Star
-
-	GetNStars() int
-	GetNPlanets() int
-	GenNAsteroids() int
 }

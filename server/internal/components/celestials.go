@@ -33,6 +33,7 @@ type ExploreSystemPayload struct {
 type StarSystemsRepo interface {
 	GetOverviews(world.GalacticSectorID) ([]world.StarSystemOverview, common.Error)
 	GetContent(world.StarSystemID) (world.StarSystemContent, common.Error)
+	GetContentMany([]world.StarSystemID) ([]world.StarSystemContent, common.Error)
 	GetSystemsOnMap(StarSystemRepoMapRequest) ([]world.StarSystemOverview, common.Error)
 
 	CreateGalaxy(CreateGalaxyPayload) common.Error
@@ -41,7 +42,7 @@ type StarSystemsRepo interface {
 
 type CreateWorldPayload struct {
 	ID     world.CelestialID
-	Params world.CelestialSurfaceParams
+	Params world.WorldParams
 	Size   int
 }
 
@@ -54,6 +55,7 @@ type ExploreWorldPayload struct {
 type WorldsRepo interface {
 	GetOverviews(world.StarSystemID) ([]world.WorldOverview, common.Error)
 	GetData(world.CelestialID) (world.WorldData, common.Error)
+	GetDataMany([]world.CelestialID) ([]world.WorldData, common.Error)
 
 	CreateWorlds([]CreateWorldPayload) common.Error
 	ExploreWorld(ExploreWorldPayload) common.Error

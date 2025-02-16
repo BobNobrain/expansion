@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"srv/internal/components"
 	"srv/internal/db/dbq"
+	"srv/internal/domain"
+	"srv/internal/globals/globaldata"
 	"srv/internal/utils/color"
 	"srv/internal/utils/common"
 	"srv/internal/utils/geom"
@@ -25,6 +27,7 @@ type worldDataJSON struct {
 	Snow       map[string]float64 `json:"snow"`
 
 	ElevationsScaleKm float64 `json:"elScaleKm"`
+	OceanLevel        float64 `json:"oceanLevel"`
 
 	TileColors       []float64 `json:"tileColors"`
 	TileElevations   []float64 `json:"tileEls"`
@@ -120,12 +123,104 @@ func (w *worldsRepoImpl) ExploreWorld(payload components.ExploreWorldPayload) co
 }
 
 func (w *worldsRepoImpl) GetData(worldID world.CelestialID) (world.WorldData, common.Error) {
-	dbWorld, dberr := w.q.GetWorld(context.Background(), string(worldID))
-	if dberr != nil {
-		return world.WorldData{}, makeDBError(dberr, "WorldsRepo::GetData")
+	worlds, err := w.GetDataMany([]world.CelestialID{worldID})
+	if err != nil {
+		return world.WorldData{}, err
 	}
 
-	dbWorldData, err := parseJSON[worldDataJSON](dbWorld.SurfaceData)
+	if len(worlds) == 0 {
+		return world.WorldData{}, common.NewError(
+			common.WithCode("ERR_NOT_FOUND"),
+			common.WithMessage("specified world not found"),
+			common.WithDetails(
+				common.NewDictEncodable().Set("worldId", worldID),
+			),
+		)
+	}
+
+	return worlds[0], nil
+}
+
+func (w *worldsRepoImpl) GetDataMany(ids []world.CelestialID) ([]world.WorldData, common.Error) {
+	strIds := make([]string, 0, len(ids))
+	for _, id := range ids {
+		strIds = append(strIds, string(id))
+	}
+
+	rows, dberr := w.q.ResolveWorlds(context.Background(), strIds)
+	if dberr != nil {
+		return nil, makeDBError(dberr, "WorldsRepo::GetDataMany")
+	}
+
+	worlds := make([]world.WorldData, 0, len(rows))
+	for _, row := range rows {
+		world, err := decodeWorld(row)
+		if err != nil {
+			return nil, err
+		}
+		worlds = append(worlds, world)
+	}
+
+	return worlds, nil
+}
+
+func (w *worldsRepoImpl) GetOverviews(systemID world.StarSystemID) ([]world.WorldOverview, common.Error) {
+	rows, dberr := w.q.GetWorldsInSystem(context.Background(), string(systemID))
+	if dberr != nil {
+		return nil, makeDBError(dberr, "WorldsRepo::GetOverviews")
+	}
+
+	result := make([]world.WorldOverview, 0, len(rows))
+	for _, row := range rows {
+		result = append(result, world.WorldOverview{
+			ID:         world.CelestialID(row.BodyID),
+			IsExplored: row.ExploredAt.Valid && row.ExploredBy.Valid,
+			Size:       int(row.GridSize),
+			Conditions: world.WorldConditions{
+				Pressure: phys.Bar(row.SurfacePressureBar),
+				AvgTemp:  phys.Kelvins(row.SurfaceAvgTempK),
+				Gravity:  phys.EarthGs(row.SurfaceGravityG),
+			},
+			Params: world.WorldParams{
+				Radius: phys.Kilometers(row.RadiusKm),
+				Mass:   phys.EarthMasses(row.MassEarths),
+				Age:    phys.BillionYears(row.AgeByrs),
+				Class:  decodeWorldClass(row.Class),
+			},
+			Population: world.WorldPopulationOverview{
+				NPops:   int(row.Population),
+				NCities: int(row.NCities),
+				NBases:  int(row.NBases),
+			},
+		})
+	}
+
+	return result, nil
+}
+
+func encodeWorldClass(class world.CelestialBodyClass) string {
+	switch class {
+	case world.CelestialBodyClassGaseous:
+		return "G"
+	case world.CelestialBodyClassTerrestial:
+		return "T"
+	default:
+		return "?"
+	}
+}
+func decodeWorldClass(class string) world.CelestialBodyClass {
+	switch class {
+	case "G":
+		return world.CelestialBodyClassGaseous
+	case "T":
+		return world.CelestialBodyClassTerrestial
+	default:
+		return world.CelestialBodyClassTerrestial
+	}
+}
+
+func decodeWorld(row dbq.ResolveWorldsRow) (world.WorldData, common.Error) {
+	dbWorldData, err := parseJSON[worldDataJSON](row.SurfaceData)
 	if err != nil {
 		return world.WorldData{}, err
 	}
@@ -153,72 +248,41 @@ func (w *worldsRepoImpl) GetData(worldID world.CelestialID) (world.WorldData, co
 		})
 	}
 
-	result := world.WorldData{
-		ID:    world.CelestialID(dbWorld.BodyID),
-		Grid:  geom.RestoreSpatialGraph(coords, dbWorldData.Graph),
-		Tiles: tiles,
-		Conditions: world.SurfaceConditions{
-			Pressure: phys.Bar(dbWorld.SurfacePressureBar),
-			AvgTemp:  phys.Kelvins(dbWorld.SurfaceAvgTempK),
-			Gravity:  phys.EarthGs(dbWorld.SurfaceGravityG),
+	var explorationData *world.ExplorationData
+	if row.ExploredAt.Valid && row.ExploredBy.Valid {
+		explorationData = &world.ExplorationData{
+			At: row.ExploredAt.Time,
+			By: domain.UserID(row.ExploredBy.String()),
+		}
+	}
+
+	return world.WorldData{
+		ID:       world.CelestialID(row.BodyID),
+		Grid:     geom.RestoreSpatialGraph(coords, dbWorldData.Graph),
+		Tiles:    tiles,
+		Explored: explorationData,
+		Composition: world.WorldComposition{
+			OceanLevel: dbWorldData.OceanLevel,
+			Atmosphere: globaldata.Materials().RestoreCompoundFromMap(dbWorldData.Atmosphere),
+			Oceans:     globaldata.Materials().RestoreCompoundFromMap(dbWorldData.Oceans),
+			Snow:       globaldata.Materials().RestoreCompoundFromMap(dbWorldData.Snow),
 		},
-		Params: world.CelestialSurfaceParams{
-			Radius: phys.Kilometers(dbWorld.RadiusKm),
-			Mass:   phys.EarthMasses(dbWorld.MassEarths),
-			Age:    phys.BillionYears(dbWorld.AgeByrs),
-			Class:  decodeWorldClass(dbWorld.Class),
+		TileElevationsScale: phys.Kilometers(dbWorldData.ElevationsScaleKm),
+		Conditions: world.WorldConditions{
+			Pressure: phys.Bar(row.SurfacePressureBar),
+			AvgTemp:  phys.Kelvins(row.SurfaceAvgTempK),
+			Gravity:  phys.EarthGs(row.SurfaceGravityG),
 		},
-	}
-
-	return result, nil
-}
-
-func (w *worldsRepoImpl) GetOverviews(systemID world.StarSystemID) ([]world.WorldOverview, common.Error) {
-	rows, dberr := w.q.GetWorldsInSystem(context.Background(), string(systemID))
-	if dberr != nil {
-		return nil, makeDBError(dberr, "WorldsRepo::GetOverviews")
-	}
-
-	result := make([]world.WorldOverview, 0, len(rows))
-	for _, row := range rows {
-		result = append(result, world.WorldOverview{
-			ID:         world.CelestialID(row.BodyID),
-			IsExplored: row.ExploredAt.Valid && row.ExploredBy.Valid,
-			Size:       int(row.GridSize),
-			Conditions: world.SurfaceConditions{
-				Pressure: phys.Bar(row.SurfacePressureBar),
-				AvgTemp:  phys.Kelvins(row.SurfaceAvgTempK),
-				Gravity:  phys.EarthGs(row.SurfaceGravityG),
-			},
-			Params: world.CelestialSurfaceParams{
-				Radius: phys.Kilometers(row.RadiusKm),
-				Mass:   phys.EarthMasses(row.MassEarths),
-				Age:    phys.BillionYears(row.AgeByrs),
-				Class:  decodeWorldClass(row.Class),
-			},
-		})
-	}
-
-	return result, nil
-}
-
-func encodeWorldClass(class world.CelestialBodyClass) string {
-	switch class {
-	case world.CelestialBodyClassGaseous:
-		return "G"
-	case world.CelestialBodyClassTerrestial:
-		return "T"
-	default:
-		return "?"
-	}
-}
-func decodeWorldClass(class string) world.CelestialBodyClass {
-	switch class {
-	case "G":
-		return world.CelestialBodyClassGaseous
-	case "T":
-		return world.CelestialBodyClassTerrestial
-	default:
-		return world.CelestialBodyClassTerrestial
-	}
+		Params: world.WorldParams{
+			Radius: phys.Kilometers(row.RadiusKm),
+			Mass:   phys.EarthMasses(row.MassEarths),
+			Age:    phys.BillionYears(row.AgeByrs),
+			Class:  decodeWorldClass(row.Class),
+		},
+		Population: world.WorldPopulationOverview{
+			NPops:   int(row.Population),
+			NCities: int(row.NCities),
+			NBases:  int(row.NBases),
+		},
+	}, nil
 }
