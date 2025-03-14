@@ -14,6 +14,8 @@ export type World = {
     colors: RGBColor[];
     elevations: number[];
     biomes: string[];
+    soilFertilities?: number[];
+    moistureLevels?: number[];
 
     oceanLevel: number;
     oceans: Record<string, number>;

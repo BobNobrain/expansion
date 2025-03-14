@@ -45,6 +45,9 @@ export const dfWorlds = createDatafrontTable<WorldsTableRow, World>({
             colors: (data.colors ?? []).map(([r, g, b]) => ({ r, g, b })),
             oceanLevel: data.oceansLevel,
 
+            soilFertilities: data.soilFertility,
+            moistureLevels: data.moistureLevels,
+
             atmosphere: data.atmosphere ?? {},
             oceans: data.oceans ?? {},
             snow: data.snow ?? {},

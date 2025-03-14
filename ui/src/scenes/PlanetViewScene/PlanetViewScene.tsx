@@ -1,13 +1,13 @@
-import { createMemo, createSignal, Show, type Component } from 'solid-js';
-import { SceneControls, SceneControlsButton } from '../../components/SceneControls';
+import { createMemo, Show, type Component } from 'solid-js';
+import { RotatableCamera } from '../../components/three/RotatableCamera/RotatableCamera';
 import { World } from '../../domain/World';
-import { IconPeople, IconPlanet, IconPlot, IconRadius, IconRocks } from '../../icons';
-import { RotatableCamera } from '../common/RotatableCamera/RotatableCamera';
-import { type TileRenderMode } from './colors';
-import { PlanetViewSceneLight } from './PlanetViewSceneLight';
-import { PlanetViewScenePlanet } from './PlanetViewScenePlanet';
-import { PlanetViewSceneAtmosphere } from './PlanetViewSceneAtmosphere';
 import { dfWorlds } from '../../store/datafront';
+import { PVSAtmosphere } from './PVSAtmosphere';
+import { PVSLights } from './PVSLights';
+import { PVSPlanet } from './PVSPlanet';
+import { PVSSettings } from './PVSSettings';
+import { createPlanetViewSceneSettings } from './settings';
+import { remap } from '../../lib/math/misc';
 
 export type PlanetViewSceneProps = {
     isActive: boolean;
@@ -19,11 +19,16 @@ export type PlanetViewSceneProps = {
 
 export const PlanetViewScene: Component<PlanetViewSceneProps> = (props) => {
     const world = dfWorlds.useSingle(() => (props.isActive ? props.worldId : null));
-    const [getTileRenderMode, setTileRenderMode] = createSignal<TileRenderMode>('natural');
 
-    const activeTileIndex = createMemo(
-        () => (props.selectedPlotId && World.parseTileId(props.selectedPlotId)) || undefined,
-    );
+    const renderSettings = createPlanetViewSceneSettings();
+
+    const activeTileIndex = createMemo(() => {
+        if (!props.selectedPlotId) {
+            return undefined;
+        }
+
+        return World.parseTileId(props.selectedPlotId);
+    });
 
     const onTileClick = (tile: number | undefined) => {
         if (props.onPlotSelected) {
@@ -31,11 +36,23 @@ export const PlanetViewScene: Component<PlanetViewSceneProps> = (props) => {
         }
     };
 
-    const setTRMNatural = () => setTileRenderMode('natural');
-    const setTRMBiomes = () => setTileRenderMode('biomes');
-    const setTRMPopulation = () => setTileRenderMode('population');
-    const setTRMResources = () => setTileRenderMode('resources');
-    const setTRMElevations = () => setTileRenderMode('elevations');
+    const atmDensity = createMemo(() => {
+        const pressureBar = world.result()?.surface.pressureBar ?? 0.1;
+
+        if (pressureBar < 0.01) {
+            return 0.0;
+        }
+        if (pressureBar < 2) {
+            return remap(pressureBar, { from: [0, 2], to: [0, 0.8] });
+        }
+        if (pressureBar < 10) {
+            // 2..10 -> 0.5..1.0
+
+            return remap(pressureBar, { from: [2, 10], to: [0.8, 1.0] });
+        }
+
+        return 1.0;
+    });
 
     return (
         <Show when={props.isActive && world.result()}>
@@ -50,42 +67,17 @@ export const PlanetViewScene: Component<PlanetViewSceneProps> = (props) => {
                 pitchInertia={0.92}
                 pannable={false}
             />
-            <PlanetViewSceneLight isNatural={getTileRenderMode() === 'natural'} />
-            <PlanetViewScenePlanet
+            <PVSLights isNatural={renderSettings.hasNaturalLighting()} />
+            <PVSPlanet
                 world={world.result()}
                 activeTileIndex={activeTileIndex()}
                 onTileClick={onTileClick}
-                tileRenderMode={getTileRenderMode()}
+                tileRenderMode={renderSettings.getMode()}
+                showBorders={renderSettings.showBorders()}
             />
-            <PlanetViewSceneAtmosphere isNatural={getTileRenderMode() === 'natural'} density={0.6} />
+            <PVSAtmosphere isNatural={renderSettings.hasNaturalLighting()} density={atmDensity()} />
 
-            <SceneControls>
-                <SceneControlsButton
-                    icon={IconPlanet}
-                    isActive={getTileRenderMode() === 'natural'}
-                    onClick={setTRMNatural}
-                />
-                <SceneControlsButton
-                    icon={IconPlot}
-                    isActive={getTileRenderMode() === 'biomes'}
-                    onClick={setTRMBiomes}
-                />
-                <SceneControlsButton
-                    icon={IconPeople}
-                    isActive={getTileRenderMode() === 'population'}
-                    onClick={setTRMPopulation}
-                />
-                <SceneControlsButton
-                    icon={IconRocks}
-                    isActive={getTileRenderMode() === 'resources'}
-                    onClick={setTRMResources}
-                />
-                <SceneControlsButton
-                    icon={IconRadius}
-                    isActive={getTileRenderMode() === 'elevations'}
-                    onClick={setTRMElevations}
-                />
-            </SceneControls>
+            <PVSSettings {...renderSettings} isFertilePlanet={Boolean(world.result()?.soilFertilities)} />
         </Show>
     );
 };

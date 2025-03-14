@@ -24,3 +24,25 @@
 .button.active {
     color: var(--p-primary-500);
 }
+
+.radio-group {
+    position: relative;
+}
+
+.radio-group-content {
+    display: flex;
+    gap: 4px;
+
+    position: absolute;
+    top: 0;
+    right: calc(6px + 100%);
+
+    width: max-content;
+    transition: transform ease-in-out 0.2s;
+    transform: scaleX(0);
+    transform-origin: right;
+}
+
+.radio-group-content.active {
+    transform: scaleX(1);
+}

@@ -5,6 +5,7 @@ import { useInScene } from '../hooks/useInScene';
 
 type DirectionalLightProps = UsePositionProps & {
     ref?: (value: T.DirectionalLight) => void;
+    name?: string;
 
     color: T.ColorRepresentation;
     intensity?: number;
@@ -13,7 +14,6 @@ type DirectionalLightProps = UsePositionProps & {
 export const DirectionalLight: Component<DirectionalLightProps> = (props) => {
     const light = new T.DirectionalLight();
     usePosition(props, light);
-    useInScene(() => light);
 
     props.ref?.(light);
 
@@ -25,6 +25,11 @@ export const DirectionalLight: Component<DirectionalLightProps> = (props) => {
     createEffect(() => {
         light.color = new T.Color(props.color);
     });
+    createEffect(() => {
+        light.name = props.name ?? 'DirectionalLight';
+    });
+
+    useInScene(() => light);
 
     return null;
 };

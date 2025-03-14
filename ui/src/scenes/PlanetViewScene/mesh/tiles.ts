@@ -1,9 +1,11 @@
 import { BufferAttribute, type BufferGeometry } from 'three';
 import { type MeshBuilder } from '../../../lib/3d/MeshBuilder';
-import { type RawColor, type RawVertex } from '../../../lib/3d/types';
+import { type MaterialData } from '../../../lib/3d/material';
+import { type RawVertex } from '../../../lib/3d/types';
+import { Color } from '../../../lib/color';
 
 export class PlanetTileManager<TileData> {
-    private palette: RawColor[] = [];
+    private palette: MaterialData[] = [];
     private tileData: PlanetTile<TileData>[] = [];
 
     constructor(graphMesh: MeshBuilder, initData: (vi: number, builder: MeshBuilder) => TileData) {
@@ -23,7 +25,7 @@ export class PlanetTileManager<TileData> {
         return this.tileData.length;
     }
 
-    setPalette(palette: RawColor[]) {
+    setPalette(palette: MaterialData[]) {
         this.palette = palette;
     }
 
@@ -40,12 +42,16 @@ export class PlanetTileManager<TileData> {
     }
 
     paintGraph(mesh: BufferGeometry) {
-        const colors = this.tileData.map((td) => this.palette[td.colorIndex]).flat();
+        const colors = this.tileData.map((td) => Color.toRaw(this.palette[td.colorIndex].reflective)).flat();
         mesh.setAttribute('color', new BufferAttribute(new Float32Array(colors), 3));
+
+        if (this.palette.some((c) => c.roughness !== undefined)) {
+            const roughnessValues = this.tileData.map((td) => this.palette[td.colorIndex].roughness ?? 1);
+            mesh.setAttribute('roughness', new BufferAttribute(new Float32Array(roughnessValues), 3));
+        }
     }
 
     paintSurface(builder: MeshBuilder) {
-        console.log(this.tileData);
         builder.paintFaces(
             this.palette,
             this.tileData.map((td) => td.colorIndex),

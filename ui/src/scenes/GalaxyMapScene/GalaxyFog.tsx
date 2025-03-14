@@ -72,5 +72,6 @@ export const GalaxyFog: Component<GalaxyFogProps> = (props) => {
         return quad;
     });
 
+    // TODO: use ScreenspaceShader
     return <SceneObject object={getQuad()} />;
 };

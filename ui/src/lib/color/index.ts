@@ -74,4 +74,25 @@ export namespace Color {
         const { r, g, b } = toRGB(c);
         return [r, g, b];
     }
+
+    export function createPalette(size: number, from: RawColor, to: RawColor): RawColor[] {
+        if (size <= 2) {
+            return [from, to];
+        }
+
+        const result: RawColor[] = [];
+        const step: RawColor = [
+            (to[0] - from[0]) / (size - 1),
+            (to[1] - from[1]) / (size - 1),
+            (to[2] - from[2]) / (size - 1),
+        ];
+
+        result.push(from);
+        for (let i = 1; i < size - 1; i++) {
+            result.push([from[0] + step[0] * i, from[1] + step[1] * i, from[2] + step[2] * i]);
+        }
+        result.push(to);
+
+        return result;
+    }
 }

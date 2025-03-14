@@ -1,6 +1,6 @@
-varying vec2 vUv;
+varying vec2 vScreenPos;
 
 void main() {
-    vUv = uv;
+    vScreenPos = uv;
     gl_Position = vec4(position, 1.0);
 }

@@ -9,11 +9,11 @@ const SUN_Y = 0.3;
 const SUN_ROTATION_PERIOD = 30000;
 const SUN_ROTATION_FACTOR = (Math.PI * 2) / SUN_ROTATION_PERIOD;
 
-export type PlanetViewSceneLightProps = {
+export type PVSLightsProps = {
     isNatural: boolean;
 };
 
-export const PlanetViewSceneLight: Component<PlanetViewSceneLightProps> = (props) => {
+export const PVSLights: Component<PVSLightsProps> = (props) => {
     const light = createRef<T.DirectionalLight>();
 
     useAnimation(({ time }) => {
@@ -27,8 +27,8 @@ export const PlanetViewSceneLight: Component<PlanetViewSceneLightProps> = (props
 
     return (
         <>
-            <DirectionalLight ref={light.ref} color={0xffffff} intensity={props.isNatural ? 1 : 0.6} />
-            <AmbientLight color={0xffffff} intensity={props.isNatural ? 0.01 : 0.7} />
+            <DirectionalLight name="PVS_sun" ref={light.ref} color={0xffffff} intensity={1} />
+            <AmbientLight name="PVS_ambient" color={0xffffff} intensity={props.isNatural ? 0.01 : 0.7} />
         </>
     );
 };

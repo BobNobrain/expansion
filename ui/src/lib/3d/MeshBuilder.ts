@@ -1,5 +1,6 @@
 import * as T from 'three';
-import { type RawFace, type RawVertex, type Poly, type RawColor } from './types';
+import { type RawFace, type RawVertex, type Poly } from './types';
+import { type MaterialData } from './material';
 
 const areClose = (a: RawVertex, b: RawVertex, eps: number) => {
     const ds = [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
@@ -18,7 +19,8 @@ export type MeshBuilderSize = {
 
 export class MeshBuilder {
     private verticies: RawVertex[] = [];
-    private colors: RawColor[] = [];
+    private materials: MaterialData[] = [];
+    private hasRoughnessAttribute = false;
     private faces: Poly[] = [];
 
     size(): MeshBuilderSize {
@@ -31,7 +33,7 @@ export class MeshBuilder {
     clone(): MeshBuilder {
         const clone = new MeshBuilder();
         clone.verticies = this.verticies.slice();
-        clone.colors = this.colors.slice();
+        clone.materials = this.materials.slice();
         clone.faces = this.faces.slice();
         return clone;
     }
@@ -119,35 +121,36 @@ export class MeshBuilder {
         this.faces[faceIndex] = vs;
     }
 
-    subdivide(f: (face: Poly, b: MeshBuilder) => Poly[]) {
-        const newFaces: Poly[] = [];
-        for (const face of this.faces) {
-            const subs = f(face, this);
-            newFaces.push(...subs);
-        }
-        this.faces = newFaces;
-    }
+    // subdivide(f: (face: Poly, b: MeshBuilder) => Poly[]) {
+    //     const newFaces: Poly[] = [];
+    //     for (const face of this.faces) {
+    //         const subs = f(face, this);
+    //         newFaces.push(...subs);
+    //     }
+    //     this.faces = newFaces;
+    // }
 
-    triangulate() {
-        const triangulatedFaces: RawFace[] = [];
-        for (let fi = 0; fi < this.faces.length; fi++) {
-            const poly = this.faces[fi];
-            if (poly.length === 3) {
-                triangulatedFaces.push(poly as RawFace);
-                continue;
-            }
+    // triangulate() {
+    //     const triangulatedFaces: RawFace[] = [];
+    //     for (let fi = 0; fi < this.faces.length; fi++) {
+    //         const poly = this.faces[fi];
+    //         if (poly.length === 3) {
+    //             triangulatedFaces.push(poly as RawFace);
+    //             continue;
+    //         }
 
-            const triangles = triangulatePoly(poly);
-            for (const t of triangles) {
-                triangulatedFaces.push(t);
-            }
-        }
-        this.faces = triangulatedFaces;
-    }
+    //         const triangles = triangulatePoly(poly);
+    //         for (const t of triangles) {
+    //             triangulatedFaces.push(t);
+    //         }
+    //     }
+    //     this.faces = triangulatedFaces;
+    // }
 
-    paintFaces(palette: RawColor[], faceColors: number[]) {
+    paintFaces(palette: MaterialData[], faceColors: number[]) {
         const vnOriginal = this.verticies.length;
-        this.colors = new Array<RawColor>(vnOriginal);
+        this.materials = new Array<MaterialData>(vnOriginal);
+        this.hasRoughnessAttribute = palette.some((m) => m.roughness !== undefined);
 
         // duplicates[vi][ci] -> vi with color palette[ci] (or undefined, if none)
         const duplicates = new Array<number[]>(vnOriginal);
@@ -162,14 +165,14 @@ export class MeshBuilder {
                 if (!duplicates[vi]) {
                     duplicates[vi] = new Array<number>(palette.length);
                     duplicates[vi][ci] = vi;
-                    this.colors[vi] = color;
+                    this.materials[vi] = color;
                     continue;
                 }
 
                 if (!duplicates[vi][ci]) {
                     const dupedVi = this.add(...this.verticies[vi]);
                     duplicates[vi][ci] = dupedVi;
-                    this.colors[dupedVi] = color;
+                    this.materials[dupedVi] = color;
                 }
 
                 face[fvi] = duplicates[vi][ci];
@@ -177,7 +180,7 @@ export class MeshBuilder {
         }
     }
 
-    build(): { geometry: T.BufferGeometry; faceIndexMap: Record<number, number> } {
+    buildTriangulated(): { geometry: T.BufferGeometry; faceIndexMap: Record<number, number> } {
         const triangleFaceIndicies: Record<number, number> = {};
         const faces: RawFace[] = [];
         for (let fi = 0; fi < this.faces.length; fi++) {
@@ -200,10 +203,20 @@ export class MeshBuilder {
         geometry.setIndex(faces.flat());
         geometry.computeVertexNormals();
 
-        if (this.colors.length) {
-            const colorsAttr = new T.BufferAttribute(new Float32Array(this.colors.flat()), 3);
+        if (this.materials.length) {
+            const colorsAttr = new T.BufferAttribute(
+                new Float32Array(this.materials.map((m) => m.reflective).flat()),
+                3,
+            );
             geometry.setAttribute('color', colorsAttr);
             geometry.setAttribute('emissive', colorsAttr.clone());
+
+            if (this.hasRoughnessAttribute) {
+                geometry.setAttribute(
+                    'roughness',
+                    new T.BufferAttribute(new Float32Array(this.materials.map((m) => m.roughness ?? 1)), 1),
+                );
+            }
         }
 
         return { geometry, faceIndexMap: triangleFaceIndicies };

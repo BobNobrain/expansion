@@ -1,7 +1,7 @@
 import { type Component, createMemo, Show } from 'solid-js';
 
-import { type PanLimits, RotatableCamera } from '../common/RotatableCamera/RotatableCamera';
 import { FloatingHTML } from '../../components/three/FloatingHTML/FloatingHTML';
+import { type PanLimits, RotatableCamera } from '../../components/three/RotatableCamera/RotatableCamera';
 import { Text } from '../../components/Text/Text';
 import { type GalacticGridSector } from '../../domain/GalacticOverview';
 import { type RawVertex } from '../../lib/3d/types';

@@ -1,15 +1,13 @@
-import { createSignal, type Component, Show } from 'solid-js';
+import { createSignal, type Component } from 'solid-js';
 import { App } from '../../../components/App/App';
+import { type NavSidebarItem } from '../../../components/NavSidebar/NavSidebar';
 import { LogInGuard } from '../../../components/LogInGuard';
 import { WindowManagerContext } from '../../../components/window/context';
 import { WindowManager, type WindowManagerController } from '../../../components/window';
-import { PlanetView } from '../../../views/PlanetView/PlanetView';
 import { DesktopNav } from '../DesktopNav/DesktopNav';
 import { DesktopTopBar } from '../DesktopTopBar/DesktopTopBar';
 import styles from './DesktopUI.module.css';
 import './desktop.css';
-import { GalaxyMapView } from '../../../views/GalaxyMapView/GalaxyMapView';
-import { type NavSidebarItem } from '../../../components/NavSidebar/NavSidebar';
 
 export const DesktopUI: Component = () => {
     const [getWM, setWM] = createSignal<WindowManagerController | null>(null);
@@ -31,12 +29,6 @@ export const DesktopUI: Component = () => {
                         <div class={styles.middle}>
                             <div class={styles.main}>
                                 <WindowManager mode="static" onController={setWM} />
-                                <Show when={getActiveScreen().id === '1'}>
-                                    <PlanetView />
-                                </Show>
-                                <Show when={getActiveScreen().id === '2'}>
-                                    <GalaxyMapView />
-                                </Show>
                             </div>
                             <div class={styles.nav}>
                                 <DesktopNav

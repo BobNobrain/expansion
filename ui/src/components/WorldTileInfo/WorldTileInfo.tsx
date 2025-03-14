@@ -7,17 +7,21 @@ import { SkeletonText } from '../Skeleton';
 import { formatInteger, formatScalar } from '../../lib/strings';
 import { Container } from '../Container/Container';
 import { Badge } from '../Badge/Badge';
-import { IconUnknown } from '../../icons';
+import { IconCloud, IconLeaf, IconUnknown } from '../../icons';
 import { PageHeader, PageHeaderTitle } from '../PageHeader';
 
 type PlotInfo = {
     id: string;
-    elevationKm?: number;
+    elevation?: { km: number; rel: number };
     biome?: string;
     occupation?: 'city' | 'base' | 'infra' | 'empty';
     infraLevels?: {
         transport: number;
         power: number;
+    };
+    soil?: {
+        fertility: number;
+        moisture: number;
     };
     resources?: unknown;
 };
@@ -27,14 +31,17 @@ const defProps: DefinitionListProperties<PlotInfo> = {
         title: 'ID',
         render: 'id',
     },
-    elevationKm: {
+    elevation: {
         title: 'Altitude',
-        render: (v) =>
-            v.elevationKm === undefined ? (
-                <SkeletonText length={4} />
-            ) : (
-                formatScalar(v.elevationKm * 1000, { digits: 0, unit: 'm', noShortenings: true })
-            ),
+        render: (v) => {
+            if (!v.elevation) {
+                return <SkeletonText length={6} />;
+            }
+
+            const km = formatScalar(v.elevation.km * 1000, { digits: 0, unit: 'm', noShortenings: true });
+            const rel = formatScalar(v.elevation.rel * 100, { digits: 1, unit: '%', noShortenings: true });
+            return `${km} (${rel})`;
+        },
     },
     biome: {
         title: 'Biome',
@@ -63,6 +70,30 @@ const defProps: DefinitionListProperties<PlotInfo> = {
             );
         },
     },
+    soil: {
+        title: 'Soil',
+        render: (v) => {
+            if (!v.soil) {
+                return '--';
+            }
+
+            const fertility =
+                v.soil.fertility >= 0
+                    ? formatScalar(v.soil.fertility * 100, { digits: 1, unit: '%', noShortenings: true })
+                    : '--';
+
+            return (
+                <Container direction="row" hasGap>
+                    <Badge style="trasparent" iconLeft={IconLeaf}>
+                        {fertility}
+                    </Badge>
+                    <Badge style="trasparent" iconLeft={IconCloud}>
+                        {formatScalar(v.soil.moisture * 100, { digits: 1, unit: '%', noShortenings: true })}
+                    </Badge>
+                </Container>
+            );
+        },
+    },
     resources: {
         title: 'Resources',
         render: () => '--',
@@ -86,9 +117,19 @@ export const WorldTileInfo: Component = () => {
         return {
             id: plotId,
             biome: worldData.biomes[plotIndex],
-            elevationKm: worldData.elevationsScaleKm * worldData.elevations[plotIndex],
+            elevation: {
+                km: worldData.elevationsScaleKm * worldData.elevations[plotIndex],
+                rel: worldData.elevations[plotIndex],
+            },
             infraLevels: { power: 0, transport: 0 },
             occupation: 'empty',
+            soil:
+                worldData.soilFertilities && worldData.moistureLevels
+                    ? {
+                          fertility: worldData.soilFertilities[plotIndex],
+                          moisture: worldData.moistureLevels[plotIndex],
+                      }
+                    : undefined,
         };
     });
 

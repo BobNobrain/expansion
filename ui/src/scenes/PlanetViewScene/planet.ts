@@ -2,13 +2,14 @@ import { createMemo } from 'solid-js';
 import * as T from 'three';
 import { type World } from '../../domain/World';
 import { type MeshBuilder } from '../../lib/3d/MeshBuilder';
-import { type RawColor } from '../../lib/3d/types';
+import { type MaterialData } from '../../lib/3d/material';
 import { Color } from '../../lib/color';
-import { pickRenderer, type TileRenderMode } from './colors';
+import { pickRenderer } from './colors';
 import { getInvertedMesh } from './mesh/invert';
 import { restorePlanetGrid } from './mesh/grid';
 import { PlanetTileManager } from './mesh/tiles';
 import { scale } from './mesh/utils';
+import { type RenderMode } from './settings';
 
 export type UsePlanetResult = {
     surfaceMesh: () => T.Mesh | null;
@@ -18,7 +19,7 @@ export type UsePlanetResult = {
     faceIndexMap: () => Record<number, number>;
 };
 
-export function usePlanet(getWorld: () => World | null, getMode: () => TileRenderMode): UsePlanetResult {
+export function usePlanet(getWorld: () => World | null, getMode: () => RenderMode): UsePlanetResult {
     const gridBuilder = createMemo(() => {
         const world = getWorld();
         if (!world || !world.grid.coords.length) {
@@ -40,24 +41,23 @@ export function usePlanet(getWorld: () => World | null, getMode: () => TileRende
 
         const tiles = new PlanetTileManager(grid, () => null);
 
-        const palette: RawColor[] = [];
+        const palette: MaterialData[] = [];
         const colorToIndex: Record<string, number> = {};
         const renderer = pickRenderer(getMode());
-        const colors = renderer(world);
+        const materials = renderer(world);
 
-        for (let tileIndex = 0; tileIndex < colors.length; tileIndex++) {
-            const color = colors[tileIndex];
-            const colorString = Color.toHexString(color, { stripAlpha: true });
+        for (let tileIndex = 0; tileIndex < materials.length; tileIndex++) {
+            const color = materials[tileIndex];
+            const colorString = Color.toHexString(color.reflective, { stripAlpha: true });
             let colorIndex = colorToIndex[colorString];
             if (colorIndex === undefined) {
                 colorIndex = colorToIndex[colorString] = palette.length;
-                palette.push(Color.toRaw(color));
+                palette.push(color);
             }
 
             tiles.setTileColor(tileIndex, colorIndex);
         }
 
-        console.log('PALETTE', palette);
         tiles.setPalette(palette);
         return tiles;
     });
@@ -83,7 +83,7 @@ export function usePlanet(getWorld: () => World | null, getMode: () => TileRende
             return null;
         }
 
-        return builder.build();
+        return builder.buildTriangulated();
     });
 
     const surfaceMesh = createMemo(() => {
@@ -94,8 +94,9 @@ export function usePlanet(getWorld: () => World | null, getMode: () => TileRende
 
         const surfaceGeom = builderResult.geometry;
         const surfaceMat = new T.MeshStandardMaterial({
-            roughness: 0.6,
-            metalness: 0.3,
+            // roughness: 0.2,
+            // metalness: 0.2,
+            userData: true,
             flatShading: true,
             vertexColors: true,
         });
@@ -109,7 +110,7 @@ export function usePlanet(getWorld: () => World | null, getMode: () => TileRende
 
         const boundariesBuilder = builder.clone();
         boundariesBuilder.mapVerticies(scale(1.01));
-        const boundariesGeom = boundariesBuilder.build().geometry;
+        const boundariesGeom = boundariesBuilder.buildTriangulated().geometry;
         const boundariesMat = new T.MeshStandardMaterial({
             color: 0xffffff,
             emissive: 0xffffff,
