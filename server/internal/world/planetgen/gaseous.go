@@ -45,33 +45,32 @@ func (ctx *planetGenContext) generateGasGiantConditions() {
 
 	gases.TrimNegligibleMaterials(0.1)
 
-	ctx.surface.Atmosphere.AverageTemp = surfaceConditions.T
-	ctx.surface.Atmosphere.SeaLevelPressure = surfaceConditions.P
-	ctx.surface.Atmosphere.Contents = gases
+	ctx.averageTemp = surfaceConditions.T
+	ctx.seaLevelPressure = surfaceConditions.P
+	ctx.atmosphere = gases
 
-	ctx.surface.Oceans = GeneratedOceans{
-		Level:    -1,
-		Contents: material.NewMaterialCompound(),
-	}
+	ctx.oceans = material.NewMaterialCompound()
+	ctx.oceanLevel = -1
 
 	// TODO: calculate a "settling radius" for gas giants (where the pressure will be ~1atm or a bit higher)
 	surfaceGravity := phys.CalculatePlanetGravity(ctx.params.Mass, ctx.params.Radius.Mul(0.9))
-	ctx.surface.SurfaceGravity = surfaceGravity
+	ctx.surfaceGravity = surfaceGravity
 }
 
 func (ctx *planetGenContext) fillGasGiantTiles() {
-	grid := ctx.surface.Grid
+	grid := ctx.grid
 	n := grid.Size()
 
-	atmColor := ctx.surface.Atmosphere.Contents.GetAverageColorForState(material.StateGas)
+	atmColor := ctx.atmosphere.GetAverageColorForState(material.StateGas)
 
 	for i := 0; i < n; i++ {
-		ctx.surface.Tiles[i] = &GeneratedTileData{
-			Elevation:   0,
-			SurfaceType: world.BiomeSurfaceNone,
-			AverageTemp: ctx.surface.Atmosphere.AverageTemp,
-			Pressure:    ctx.surface.Atmosphere.SeaLevelPressure,
-			Color:       atmColor.Reflective,
+		ctx.tiles[i] = &generatedTileData{
+			Elevation:     0,
+			SurfaceType:   world.BiomeSurfaceNone,
+			AverageTemp:   ctx.averageTemp,
+			Pressure:      ctx.seaLevelPressure,
+			Color:         atmColor.Reflective,
+			SoilFertility: -1,
 		}
 	}
 }

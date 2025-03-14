@@ -10,25 +10,6 @@ type Number interface {
 	constraints.Integer | constraints.Float
 }
 
-func Max[f64 ~float64](first f64, vals ...f64) f64 {
-	result := first
-	for _, v := range vals {
-		if result < v {
-			result = v
-		}
-	}
-	return result
-}
-func Min[f64 ~float64](first f64, vals ...f64) f64 {
-	result := first
-	for _, v := range vals {
-		if result > v {
-			result = v
-		}
-	}
-	return result
-}
-
 func Lerp[f64 ~float64](from, to f64, amount float64) f64 {
 	return from + (to-from)*f64(amount)
 }

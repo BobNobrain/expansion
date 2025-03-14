@@ -13,8 +13,8 @@ type QueryableTable struct {
 	path DFPath
 
 	lock          *sync.RWMutex
-	idSubs        map[EntityID]*utils.Set[domain.ClientID]
-	idSubsReverse map[domain.ClientID]*utils.Set[EntityID]
+	idSubs        map[EntityID]*utils.UndeterministicSet[domain.ClientID]
+	idSubsReverse map[domain.ClientID]*utils.UndeterministicSet[EntityID]
 	dataSource    TableDataSource
 }
 
@@ -31,8 +31,8 @@ type TableDataSource func(dfapi.DFTableRequest, DFRequestContext) (*TableRespons
 func NewQueryableTable(dataSource TableDataSource) *QueryableTable {
 	table := &QueryableTable{
 		lock:          new(sync.RWMutex),
-		idSubs:        make(map[EntityID]*utils.Set[domain.ClientID]),
-		idSubsReverse: make(map[domain.ClientID]*utils.Set[EntityID]),
+		idSubs:        make(map[EntityID]*utils.UndeterministicSet[domain.ClientID]),
+		idSubsReverse: make(map[domain.ClientID]*utils.UndeterministicSet[EntityID]),
 		dataSource:    dataSource,
 	}
 
@@ -121,10 +121,10 @@ func (table *QueryableTable) subscribeForResponse(response *TableResponse, clien
 
 	for id := range response.results {
 		if table.idSubs[id] == nil {
-			table.idSubs[id] = utils.NewSet[domain.ClientID]()
+			table.idSubs[id] = utils.NewUndeterministicSet[domain.ClientID]()
 		}
 		if table.idSubsReverse[client] == nil {
-			table.idSubsReverse[client] = utils.NewSet[EntityID]()
+			table.idSubsReverse[client] = utils.NewUndeterministicSet[EntityID]()
 		}
 
 		table.idSubs[id].Add(client)

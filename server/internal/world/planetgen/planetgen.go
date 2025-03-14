@@ -21,7 +21,7 @@ type GeneratePlanetOptions struct {
 	AvailableMaterials *material.MaterialCompound
 }
 
-func GeneratePlanet(opts GeneratePlanetOptions) *GeneratedSurfaceData {
+func GeneratePlanet(opts GeneratePlanetOptions) world.WorldExplorationData {
 	ctx := &planetGenContext{
 		rnd:    opts.WR.ForCelestial(opts.ID),
 		params: opts.Params,
@@ -30,26 +30,29 @@ func GeneratePlanet(opts GeneratePlanetOptions) *GeneratedSurfaceData {
 		nearestStarDistance: opts.StarDistance,
 
 		availableMaterials: opts.AvailableMaterials,
-
-		surface: &GeneratedSurfaceData{},
 	}
 
 	ctx.generateGrid()
 
 	if opts.Params.Class.IsTerrestial() {
-		// ctx.runSimulation()
 		ctx.generateTectonicElevations()
 		ctx.generateRockyConditions()
+		ctx.makeFertileIfCloseEnough()
+
+		ctx.normalizeOceanLevel()
+
 		ctx.calculateConditionsPerTile()
 		ctx.assignBasicBiomes()
 		ctx.assignConditionalBiomes()
 		ctx.assignFertileBiomes()
+
+		ctx.generateResorces()
 	} else {
 		ctx.generateGasGiantConditions()
 		ctx.fillGasGiantTiles()
 	}
 
-	return ctx.surface
+	return ctx.toWorldExplorationData()
 }
 
 type GenerateMoonOptions struct {
@@ -59,7 +62,7 @@ type GenerateMoonOptions struct {
 	ParentSurfaceDistance phys.Distance
 }
 
-func GenerateMoon(opts GenerateMoonOptions) *GeneratedSurfaceData {
+func GenerateMoon(opts GenerateMoonOptions) world.WorldExplorationData {
 	ctx := &planetGenContext{
 		rnd:    opts.WR.ForCelestial(opts.ID),
 		params: opts.Params,
@@ -71,8 +74,6 @@ func GenerateMoon(opts GenerateMoonOptions) *GeneratedSurfaceData {
 		nearestSurfaceDistance: opts.ParentSurfaceDistance,
 
 		availableMaterials: opts.AvailableMaterials,
-
-		surface: &GeneratedSurfaceData{},
 	}
 
 	ctx.generateGrid()
@@ -85,5 +86,5 @@ func GenerateMoon(opts GenerateMoonOptions) *GeneratedSurfaceData {
 	ctx.assignConditionalBiomes()
 	ctx.assignFertileBiomes()
 
-	return ctx.surface
+	return ctx.toWorldExplorationData()
 }

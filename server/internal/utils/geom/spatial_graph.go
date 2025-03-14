@@ -11,7 +11,7 @@ type SpatialGraph interface {
 
 	Connect(int, int)
 	AreConnected(int, int) bool
-	GetConnections(int) *utils.Set[int]
+	GetConnections(int) *utils.DeterministicSet[int]
 
 	GetCoords(int) Vec3
 	SetCoords(int, Vec3)
@@ -21,7 +21,7 @@ type SpatialGraph interface {
 
 func NewSpatialGraph(size int) SpatialGraph {
 	graph := &spatialGraph{
-		connections: make([]*utils.Set[int], size),
+		connections: make([]*utils.DeterministicSet[int], size),
 		coords:      make([]Vec3, size),
 	}
 	graph.initConnectionSets()
@@ -34,7 +34,7 @@ func RestoreSpatialGraph(coords []Vec3, connectons [][]int) SpatialGraph {
 	}
 
 	graph := &spatialGraph{
-		connections: make([]*utils.Set[int], len(connectons)),
+		connections: make([]*utils.DeterministicSet[int], len(connectons)),
 		coords:      coords,
 	}
 	graph.initConnectionSets()
@@ -50,12 +50,12 @@ func RestoreSpatialGraph(coords []Vec3, connectons [][]int) SpatialGraph {
 
 func (sg *spatialGraph) initConnectionSets() {
 	for i := 0; i < len(sg.connections); i++ {
-		sg.connections[i] = utils.NewSet[int]()
+		sg.connections[i] = utils.NewDeterministicSet[int]()
 	}
 }
 
 type spatialGraph struct {
-	connections []*utils.Set[int]
+	connections []*utils.DeterministicSet[int]
 	coords      []Vec3
 }
 
@@ -70,7 +70,7 @@ func (sg *spatialGraph) Connect(n1, n2 int) {
 func (sg *spatialGraph) AreConnected(n1, n2 int) bool {
 	return sg.connections[n1].Has(n2)
 }
-func (sg *spatialGraph) GetConnections(n int) *utils.Set[int] {
+func (sg *spatialGraph) GetConnections(n int) *utils.DeterministicSet[int] {
 	return sg.connections[n]
 }
 
@@ -81,7 +81,7 @@ func (sg *spatialGraph) GetUnduplicatedConnections() [][]int {
 	for i := 0; i < size; i++ {
 		connecteds := sg.connections[i]
 		nonDuplicates := make([]int, 0)
-		for c := range connecteds.Items() {
+		for _, c := range connecteds.Items() {
 			if i >= c {
 				continue
 			}

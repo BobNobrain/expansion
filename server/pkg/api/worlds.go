@@ -6,10 +6,6 @@ const (
 	WorldsQueryTypeByID = "byId"
 )
 
-type WorldsQueryByID struct {
-	WorldID string `json:"worldId"`
-}
-
 type WorldsTableRow struct {
 	ID string `json:"worldId"`
 
@@ -24,11 +20,13 @@ type WorldsTableRow struct {
 	AxisTiltRads      float64 `json:"axisTiltRads,omitempty"`
 	DayLengthGameDays float64 `json:"dayLengthGD,omitempty"`
 
-	GridCoords   []float64   `json:"gridCoords,omitempty"`
-	GridEdges    [][]int     `json:"gridEdges,omitempty"`
-	Colors       [][]float64 `json:"colors,omitempty"`
-	Elevations   []float64   `json:"elevations,omitempty"`
-	SurfaceTypes []string    `json:"surfaceTypes,omitempty"`
+	GridCoords     []float64   `json:"gridCoords,omitempty"`
+	GridEdges      [][]int     `json:"gridEdges,omitempty"`
+	Colors         [][]float64 `json:"colors,omitempty"`
+	Elevations     []float64   `json:"elevations,omitempty"`
+	SurfaceTypes   []string    `json:"surfaceTypes,omitempty"`
+	MoistureLevels []float64   `json:"moistureLevels,omitempty"`
+	SoilFertility  []float64   `json:"soilFertility,omitempty"`
 
 	AvgTempK          float64 `json:"avgTempK"`
 	PressureBar       float64 `json:"surfacePressureBar"`

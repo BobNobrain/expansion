@@ -93,6 +93,9 @@ func encodeWorld(w world.WorldData) common.Encodable {
 	tileColors := make([][]float64, 0, size)
 	tileElevations := make([]float64, 0, size)
 	tileSurfaceTypes := make([]string, 0, size)
+	var tileSoilFertilities []float64
+	var tileMoistureLevels []float64
+
 	for i := 0; i < size; i++ {
 		coords := w.Grid.GetCoords(i)
 		color := w.Tiles[i].Color
@@ -100,6 +103,16 @@ func encodeWorld(w world.WorldData) common.Encodable {
 		tileColors = append(tileColors, []float64{color.R, color.G, color.B})
 		tileElevations = append(tileElevations, w.Tiles[i].Elevation)
 		tileSurfaceTypes = append(tileSurfaceTypes, w.Tiles[i].Surface.String())
+	}
+
+	if len(w.FertileTiles) > 0 {
+		tileSoilFertilities = make([]float64, 0, len(w.FertileTiles))
+		tileMoistureLevels = make([]float64, 0, len(w.FertileTiles))
+
+		for _, tile := range w.FertileTiles {
+			tileSoilFertilities = append(tileSoilFertilities, tile.SoilFertility)
+			tileMoistureLevels = append(tileMoistureLevels, tile.MoistureLevel)
+		}
 	}
 
 	return common.AsEncodable(api.WorldsTableRow{
@@ -114,11 +127,13 @@ func encodeWorld(w world.WorldData) common.Encodable {
 		AxisTiltRads:      w.Params.AxisTilt.Radians(),
 		DayLengthGameDays: w.Params.DayLength.Days(),
 
-		GridCoords:   gridCoords,
-		GridEdges:    w.Grid.GetUnduplicatedConnections(),
-		Colors:       tileColors,
-		Elevations:   tileElevations,
-		SurfaceTypes: tileSurfaceTypes,
+		GridCoords:     gridCoords,
+		GridEdges:      w.Grid.GetUnduplicatedConnections(),
+		Colors:         tileColors,
+		Elevations:     tileElevations,
+		SurfaceTypes:   tileSurfaceTypes,
+		SoilFertility:  tileSoilFertilities,
+		MoistureLevels: tileMoistureLevels,
 
 		AvgTempK:          w.Conditions.AvgTemp.Kelvins(),
 		PressureBar:       w.Conditions.Pressure.Bar(),

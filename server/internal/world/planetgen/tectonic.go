@@ -7,17 +7,17 @@ import (
 )
 
 func (ctx *planetGenContext) generateTectonicElevations() {
-	nodesCount := ctx.surface.Grid.Size()
+	nodesCount := ctx.grid.Size()
 	opts := new(tectonicLandscapeOptions)
-	opts.NPlates = utils.Clamp(nodesCount/40, 5, 25)
+	opts.NPlates = utils.Clamp(nodesCount/40, 10, 30)
 
 	opts.MinPlateSize = utils.Clamp(nodesCount/120, 3, 10)
 
 	// TODO: randomize these? or load from config?
 	opts.ElevationGap = 0.2
 	opts.OceanPercentage = 0.7
-	opts.Extremeness = 0.6
-	opts.SlopeFactor = 0.3
+	opts.Extremeness = 0.5
+	opts.SlopeFactor = 0.15
 
 	generateTectonicLandscape(ctx, opts)
 	noiseAndBlurElevations(ctx, (&noiseAndBlurElevationsOptions{}).defaults())
@@ -33,7 +33,7 @@ type tectonicLandscapeOptions struct {
 }
 
 type tectonicPlate struct {
-	nodes             *utils.Set[int]
+	nodes             *utils.DeterministicSet[int]
 	elevation         float64
 	movementMagnitude float64
 	movementAngleSin  float64
@@ -55,7 +55,7 @@ func generateTectonicLandscape(
 	ctx *planetGenContext,
 	opts *tectonicLandscapeOptions,
 ) {
-	nodesCount := ctx.surface.Grid.Size()
+	nodesCount := ctx.grid.Size()
 	nPlates := opts.NPlates
 
 	tl := &tectonicLandscaper{
@@ -68,7 +68,7 @@ func generateTectonicLandscape(
 
 	for i := 0; i < nPlates; i++ {
 		tl.plates[i] = &tectonicPlate{
-			nodes: utils.NewSet[int](),
+			nodes: utils.NewDeterministicSet[int](),
 		}
 	}
 
@@ -84,13 +84,10 @@ func generateTectonicLandscape(
 
 func (tl *tectonicLandscaper) floodFillPlates() {
 	nPlates := len(tl.plates)
-	visitedNodes := utils.NewSet[int]()
+	visitedNodes := utils.NewUndeterministicSet[int]()
 	floodQueues := make([]*utils.Queue[int], nPlates)
 
-	floodFillStarts := make([]int, 0)
-	for nodeIndex := range utils.DrawDistinctIntegers(tl.ctx.rnd, nPlates, tl.ctx.surface.Grid.Size()) {
-		floodFillStarts = append(floodFillStarts, nodeIndex)
-	}
+	floodFillStarts := utils.DrawDistinctIntegers(tl.ctx.rnd, nPlates, tl.ctx.grid.Size())
 
 	for pi := 0; pi < nPlates; pi++ {
 		plateStart := floodFillStarts[pi]
@@ -118,8 +115,8 @@ func (tl *tectonicLandscaper) floodFillPlates() {
 				visitedNodes.Add(*nextNode)
 			}
 
-			neighbouringNodes := tl.ctx.surface.Grid.GetConnections(*nextNode)
-			for neighbouringNode := range neighbouringNodes.Items() {
+			neighbouringNodes := tl.ctx.grid.GetConnections(*nextNode)
+			for _, neighbouringNode := range neighbouringNodes.Items() {
 				if visitedNodes.Has(neighbouringNode) {
 					continue
 				}
@@ -159,16 +156,16 @@ func (tl *tectonicLandscaper) eatSmallPlates() {
 			continue
 		}
 
-		plateNeighbours := utils.NewSet[int]()
-		for node := range smallPlate.nodes.Items() {
-			nodeNeighbours := tl.ctx.surface.Grid.GetConnections(node)
-			for neighbour := range nodeNeighbours.Items() {
+		plateNeighbours := utils.NewDeterministicSet[int]()
+		for _, node := range smallPlate.nodes.Items() {
+			nodeNeighbours := tl.ctx.grid.GetConnections(node)
+			for _, neighbour := range nodeNeighbours.Items() {
 				plateNeighbours.Add(neighbour)
 			}
 		}
 
-		neighbouringPlatesPresence := make(map[tectonicPlateIndex]int)
-		for neighbour := range plateNeighbours.Items() {
+		neighbouringPlatesPresence := make([]int, nPlates)
+		for _, neighbour := range plateNeighbours.Items() {
 			plateIndex := tl.plateIndexes[neighbour]
 			if plateIndex == tectonicPlateIndex(pi) {
 				continue
@@ -181,7 +178,7 @@ func (tl *tectonicLandscaper) eatSmallPlates() {
 		biggestNeighbourSize := 0
 		for plateIndex, size := range neighbouringPlatesPresence {
 			if size > biggestNeighbourSize {
-				biggestNeighbourIndex = plateIndex
+				biggestNeighbourIndex = tectonicPlateIndex(plateIndex)
 				biggestNeighbourSize = size
 			}
 		}
@@ -190,7 +187,7 @@ func (tl *tectonicLandscaper) eatSmallPlates() {
 			continue
 		}
 
-		for node := range smallPlate.nodes.Items() {
+		for _, node := range smallPlate.nodes.Items() {
 			tl.plateIndexes[node] = biggestNeighbourIndex
 			tl.plates[biggestNeighbourIndex].nodes.Add(node)
 		}
@@ -202,7 +199,7 @@ func (tl *tectonicLandscaper) calculateLocalPlateMovements() {
 
 	for nodeIndex := 0; nodeIndex < len(tl.plateIndexes); nodeIndex++ {
 		plate := tl.plates[tl.plateIndexes[nodeIndex]]
-		tileCoords := tl.ctx.surface.Grid.GetCoords(nodeIndex)
+		tileCoords := tl.ctx.grid.GetCoords(nodeIndex)
 
 		tileNormal := tileCoords.Normalized()
 		localNorth := planetNorth.Diff(tileNormal.Mul(planetNorth.Dot(tileNormal))).Normalized()
@@ -216,16 +213,16 @@ func (tl *tectonicLandscaper) calculateLocalPlateMovements() {
 func (tl *tectonicLandscaper) assignElevations() {
 	slopeFactor := tl.opts.SlopeFactor
 
-	for vi := 0; vi < len(tl.plateIndexes); vi++ {
+	for vi := range tl.plateIndexes {
 		nodeIndex := vi
 		tilePlateIndex := tl.plateIndexes[vi]
 		tilePlate := tl.plates[tilePlateIndex]
-		neighbours := tl.ctx.surface.Grid.GetConnections(nodeIndex)
+		neighbours := tl.ctx.grid.GetConnections(nodeIndex)
 
 		solidElevation := tilePlate.elevation
 
 		plateMovementAtTile := tl.localPlateMovements[vi]
-		for neighbour := range neighbours.Items() {
+		for _, neighbour := range neighbours.Items() {
 			neighbourPlateIndex := tl.plateIndexes[neighbour]
 			if neighbourPlateIndex == tilePlateIndex {
 				continue
@@ -261,6 +258,6 @@ func (tl *tectonicLandscaper) assignElevations() {
 			solidElevation = 0.9999
 		}
 
-		tl.ctx.surface.Tiles[nodeIndex].Elevation = solidElevation
+		tl.ctx.tiles[nodeIndex].Elevation = solidElevation
 	}
 }

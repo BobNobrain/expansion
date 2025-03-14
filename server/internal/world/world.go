@@ -53,6 +53,7 @@ type WorldData struct {
 	Population  WorldPopulationOverview
 
 	Tiles               []WorldDataTile
+	FertileTiles        []FertileWorldDataTile
 	TileResources       map[int]ResourceDeposit
 	TileElevationsScale phys.Distance
 }
@@ -60,9 +61,14 @@ type WorldData struct {
 type WorldDataTile struct {
 	Color     color.RichColorRGB
 	AvgTemp   phys.Temperature
-	Surface   BiomeSurface
 	Pressure  phys.Pressure
+	Surface   BiomeSurface
 	Elevation float64
+}
+
+type FertileWorldDataTile struct {
+	MoistureLevel float64
+	SoilFertility float64
 }
 
 type WorldExplorationData struct {
@@ -75,7 +81,8 @@ type WorldExplorationData struct {
 	Snow       *material.MaterialCompound
 
 	Tiles               []WorldExplorationDataTile
-	TileResources       map[int]ResourceDeposit
+	FertileTiles        []FertileWorldDataTile
+	TileResources       map[int][]ResourceDeposit
 	TileElevationsScale phys.Distance
 }
 

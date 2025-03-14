@@ -35,7 +35,7 @@ func NewGridBuilder(rnd *rand.Rand, opts GridBuilderOptions) *GridBuilder {
 	}
 }
 
-const minGridSubdivisions int = 5
+const minGridSubdivisions int = 6
 const maxGridSubdivisions int = 16
 
 func (grid *GridBuilder) Generate() geom.SpatialGraph {
@@ -169,7 +169,7 @@ func (grid *GridBuilder) relax() geom.SpatialGraph {
 		forcesByVertex := make([]geom.Vec3, grid.nodesCount)
 
 		for vi := 0; vi < grid.nodesCount; vi++ {
-			for connectedVertex := range connections.GetConnections(vi).Items() {
+			for _, connectedVertex := range connections.GetConnections(vi).Items() {
 				targetV := connections.GetCoords(vi)
 				neighbourV := connections.GetCoords(connectedVertex)
 				edge := targetV.Diff(neighbourV)

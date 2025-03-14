@@ -22,17 +22,17 @@ func GetSeededRandom(seed string) *rand.Rand {
 	return rnd
 }
 
-func DrawDistinctIntegers(rnd *rand.Rand, count int, max int) map[int]bool {
-	met := make(map[int]bool)
+func DrawDistinctIntegers(rnd *rand.Rand, count int, max int) []int {
+	met := NewDeterministicSet[int]()
 
 	for i := 0; i < count; i++ {
 		next := rnd.Intn(max - count + i)
-		if found := met[next]; found {
-			met[max-count+i] = true
+		if met.Has(next) {
+			met.Add(max - count + i)
 		} else {
-			met[next] = true
+			met.Add(next)
 		}
 	}
 
-	return met
+	return met.Items()
 }

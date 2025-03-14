@@ -101,7 +101,7 @@ func (g *galaxyMap) ExploreWorld(worldID world.CelestialID, explorer domain.User
 		ID:         worldID,
 		ExploredBy: explorer,
 
-		Data: generatedData.ToWorldExplorationData(prevWorldData.Params),
+		Data: generatedData,
 	}
 
 	err = g.worlds.ExploreWorld(explorePayload)

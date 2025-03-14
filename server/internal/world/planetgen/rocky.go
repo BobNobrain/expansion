@@ -18,9 +18,7 @@ func (ctx *planetGenContext) generateRockyConditions() {
 	planetMass := ctx.params.Mass
 	planetRadius := ctx.params.Radius
 
-	surfaceGravity := phys.CalculatePlanetGravity(ctx.params.Mass, ctx.params.Radius)
-	ctx.surface.SurfaceGravity = surfaceGravity
-	surfaceAreaKm2 := 4 * math.Pi * ctx.params.Radius.Kilometers() * ctx.params.Radius.Kilometers()
+	ctx.surfaceGravity = phys.CalculatePlanetGravity(ctx.params.Mass, ctx.params.Radius)
 
 	initialAirlessEquilibrium := 278.6 * math.Pow(starLum*0.2/starDistanceSquared, 0.25)
 	randomTempShift := utils.Lerp(0.65, 1.5, ctx.rnd.Float64())
@@ -44,17 +42,23 @@ func (ctx *planetGenContext) generateRockyConditions() {
 
 	if canHaveAtmosphere {
 		// lets generate atmosphere
-		var r float64
-		if ctx.rnd.Float64() < 0.7 {
-			r = utils.Lerp(0, 1e-5, ctx.rnd.Float64())
+		var pressureBars float64
+		rand := ctx.rnd.Float64()
+		if rand < 0.35 {
+			// thin atmosphere
+			pressureBars = utils.Lerp(0.0, 0.1, ctx.rnd.Float64())
+		} else if rand < 0.90 {
+			// normal atmosphere
+			pressureBars = utils.Lerp(0.1, 2.0, ctx.rnd.Float64())
 		} else {
-			r = utils.Lerp(1e-5, 5e-4, ctx.rnd.Float64())
+			// thicc atmosphere
+			pressureBars = utils.Lerp(2.0, 400.0, ctx.rnd.Float64())
 		}
-		atmosphereMass := planetMass.Kilograms() * r
-		pressureValue := atmosphereMass / surfaceAreaKm2 *
-			surfaceGravity.KilometersPerSecondSquared() / planetRadius.Kilometers()
 
-		surfaceConditions.P = phys.Pascals(pressureValue * 1e3)
+		// stronger gravity should correlate with more sea level pressure
+		pressureBars *= utils.Clamp(ctx.surfaceGravity.EarthGs(), 0.8, 1.2)
+
+		surfaceConditions.P = phys.Bar(pressureBars)
 	}
 
 	// shuffle composition around
@@ -75,7 +79,7 @@ func (ctx *planetGenContext) generateRockyConditions() {
 
 	if canHaveAtmosphere {
 		// quickly check if atmosphere contains gases that should have leaked out
-		atmosphericHeight := surfaceConditions.T.CalcAtmosphereHeight(surfaceGravity, atmosphere.GetAverageMolarMass())
+		atmosphericHeight := surfaceConditions.T.CalcAtmosphereHeight(ctx.surfaceGravity, atmosphere.GetAverageMolarMass())
 		escapeVelocityInAtmosphere := phys.CalculatePlanetEscapeVelocity(planetMass, planetRadius.Add(atmosphericHeight))
 		for _, gas := range atmosphere.ListMaterials() {
 			vTherm := surfaceConditions.T.CalcThermalVelocity(gas.GetMolarMass())
@@ -98,21 +102,17 @@ func (ctx *planetGenContext) generateRockyConditions() {
 		atmosphere = material.NewMaterialCompound()
 	}
 
-	ctx.surface.Atmosphere = GeneratedAtmosphere{
-		Contents:         atmosphere,
-		SeaLevelPressure: surfaceConditions.P,
-		AverageTemp:      surfaceConditions.T,
-		WeatherHarshness: 0,
-	}
+	ctx.atmosphere = atmosphere
+	ctx.seaLevelPressure = surfaceConditions.P
+	ctx.averageTemp = surfaceConditions.T
+	ctx.weatherHarshness = 0
 
 	if canHaveAtmosphere {
-		ctx.surface.Atmosphere.WeatherHarshness = ctx.rnd.Float64()
+		ctx.weatherHarshness = ctx.rnd.Float64()
 	}
 
-	ctx.surface.Oceans = GeneratedOceans{
-		Level:    -1,
-		Contents: oceans,
-	}
+	ctx.oceanLevel = -1
+	ctx.oceans = oceans
 	if !oceans.IsEmpty() {
 		r := ctx.rnd.Float64()
 		pseudoBell := utils.Unlerp(-1, 1, utils.PseudoBell(r))
@@ -120,81 +120,110 @@ func (ctx *planetGenContext) generateRockyConditions() {
 		if level > 1 {
 			level = 1
 		}
-		ctx.surface.Oceans.Level = level
+
+		ctx.oceanLevel = level
 	}
 
-	ctx.surface.Snow = snow
+	ctx.snow = snow
+}
+
+func (ctx *planetGenContext) normalizeOceanLevel() {
+	if ctx.oceans.IsEmpty() {
+		return
+	}
+
+	// normalizing ocean level to be always 0
+	for _, tile := range ctx.tiles {
+		if tile.Elevation < ctx.oceanLevel {
+			tile.Elevation = utils.Unlerp(-1.0, ctx.oceanLevel, tile.Elevation) - 1
+		} else {
+			tile.Elevation = utils.Unlerp(ctx.oceanLevel, 0.999, tile.Elevation)
+		}
+	}
+	ctx.oceanLevel = 0
 }
 
 func (ctx *planetGenContext) calculateConditionsPerTile() {
-	grid := ctx.surface.Grid
+	grid := ctx.grid
 	g := phys.CalculatePlanetGravity(ctx.params.Mass, ctx.params.Radius).EarthGs()
-	atmMolarMass := ctx.surface.Atmosphere.Contents.GetAverageMolarMass()
-	oceanLevel := ctx.surface.Oceans.Level
+	atmMolarMass := ctx.atmosphere.GetAverageMolarMass()
+	oceanLevel := ctx.oceanLevel
 
-	maxTemp := ctx.surface.Atmosphere.AverageTemp * 1.05
-	minTemp := ctx.surface.Atmosphere.AverageTemp * 0.95
+	maxTemp := ctx.averageTemp * 1.05
+	minTemp := ctx.averageTemp * 0.95
 	axisTilt := ctx.params.AxisTilt.Radians()
 
 	for i := 0; i < grid.Size(); i++ {
-		tile := ctx.surface.Tiles[i]
+		tile := ctx.tiles[i]
 		elevation := tile.Elevation - oceanLevel
 		tileLon := math.Cos(grid.GetCoords(i).Y)
 
 		// good enough for now
 		tile.AverageTemp = minTemp + (maxTemp-minTemp)*phys.Temperature(math.Cos(axisTilt)*math.Sin(tileLon))
 
-		if ctx.surface.Atmosphere.SeaLevelPressure > 0 {
-			coeff := math.Exp(-g * ctx.surface.RelativeElevationsScale.Kilometers() * 1e-3 * elevation * atmMolarMass / 21500)
-			tile.Pressure = ctx.surface.Atmosphere.SeaLevelPressure * phys.Pressure(coeff)
+		if ctx.seaLevelPressure > 0 {
+			coeff := math.Exp(-g * ctx.relativeElevationsScale.Kilometers() * 1e-3 * elevation * atmMolarMass / 21500)
+			tile.Pressure = ctx.seaLevelPressure * phys.Pressure(coeff)
 		}
 	}
 }
 
 // Assigns basic biomes: solid for high tiles, regolith for lower ones, ocean for those below ocean level
 func (ctx *planetGenContext) assignBasicBiomes() {
-	grid := ctx.surface.Grid
+	const MOUNTAIN_ELEVATION_DIFF_THRESHOLD = 0.2
+
+	grid := ctx.grid
 	n := grid.Size()
 
-	oceanLevel := ctx.surface.Oceans.Level
-	pressureCoeff := utils.Unlerp(phys.Pascals(0), phys.Bar(100), ctx.surface.Atmosphere.SeaLevelPressure)
+	oceanLevel := ctx.oceanLevel
+	pressureCoeff := utils.Unlerp(phys.Pascals(0), phys.Bar(100), ctx.seaLevelPressure)
 	pressureCoeff = utils.Clamp(pressureCoeff, 0, 1)
-	erosion := utils.Lerp(0.0, 0.4, pressureCoeff)
+	erosion := utils.Lerp(0.0, 0.5, pressureCoeff)
 	if oceanLevel > -1 {
-		erosion += 0.1
+		erosion += 0.2
 	}
 
 	solidColor := globaldata.Materials().GetByID("corium").GetColor(material.StateSolid).Reflective
 	regolithColor := solidColor.Multiply(1.1)
-	oceanColor := ctx.surface.Oceans.Contents.GetAverageColorForState(material.StateLiquid).Reflective
+	oceanColor := ctx.oceans.GetAverageColorForState(material.StateLiquid).Reflective
 
 	for i := 0; i < n; i++ {
-		tile := ctx.surface.Tiles[i]
+		tile := ctx.tiles[i]
 		elevation := tile.Elevation
 
 		if elevation < oceanLevel {
 			tile.SurfaceType = world.BiomeSurfaceLiquid
 			tile.Color = oceanColor
-		} else if elevation < oceanLevel+erosion {
-			tile.SurfaceType = world.BiomeSurfaceRegolith
-			tile.Color = regolithColor
-		} else {
+			continue
+		}
+
+		neighbours := ctx.grid.GetConnections(i).Items()
+		avgElevDiff := 0.0
+		for _, ni := range neighbours {
+			nelev := ctx.tiles[ni].Elevation
+			avgElevDiff += math.Abs(nelev - elevation)
+		}
+		avgElevDiff /= float64(len(neighbours))
+
+		if avgElevDiff >= MOUNTAIN_ELEVATION_DIFF_THRESHOLD {
 			tile.SurfaceType = world.BiomeSurfaceSolid
 			tile.Color = solidColor
+			continue
 		}
+
+		tile.SurfaceType = world.BiomeSurfaceRegolith
+		tile.Color = regolithColor
 	}
 }
 
 // Assigns more biomes that depend on tile conditions, e.g. adds ice and snow
 func (ctx *planetGenContext) assignConditionalBiomes() {
-	grid := ctx.surface.Grid
-	n := grid.Size()
-	oceans := ctx.surface.Oceans.Contents
-	snow := ctx.surface.Snow
-	oceansAndSnow := material.MergeCompounds(snow, oceans)
+	n := ctx.grid.Size()
+	oceans := ctx.oceans
+	oceansAndSnow := material.MergeCompounds(ctx.snow, oceans)
 
 	for i := 0; i < n; i++ {
-		tile := ctx.surface.Tiles[i]
+		tile := ctx.tiles[i]
 
 		switch tile.SurfaceType {
 		case world.BiomeSurfaceLiquid:
@@ -220,13 +249,4 @@ func (ctx *planetGenContext) assignConditionalBiomes() {
 			}
 		}
 	}
-}
-
-// Marks tiles with suitable conditions as fertile (BiomeSurfaceSoil)
-func (ctx *planetGenContext) assignFertileBiomes() {
-	// TODO:
-	// 1. check if applicable at all: should have a substantial amount of h2o and o2 in snow/oceans/atmosphere
-	// 2. check if tile conditions are not too extreme: T in -20...70 C, P in 0.3...10 bar
-	// 3. check if tile conditions can sustain liquid h2o and gaseous o2
-	// 4. check if tile is not an ocean
 }

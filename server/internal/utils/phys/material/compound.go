@@ -36,7 +36,31 @@ func (mc *MaterialCompound) Add(mat *Material, amount float64) {
 	mc.totalAmount += amount
 }
 func (mc *MaterialCompound) AddPercentage(mat *Material, percentage float64) {
-	mc.Add(mat, percentage*mc.totalAmount)
+	amt := percentage * mc.totalAmount
+	if mc.totalAmount == 0.0 {
+		amt = 1.0
+	}
+	mc.Add(mat, amt)
+}
+func (mc *MaterialCompound) SetPercentages(values map[*Material]float64) {
+	totalPercentagesAdded := 0.0
+	for _, percentage := range values {
+		totalPercentagesAdded += percentage
+	}
+
+	if totalPercentagesAdded > 1.0 {
+		totalPercentagesAdded = 1.0
+	}
+
+	rescale := 1.0 - totalPercentagesAdded
+	for _, component := range mc.components {
+		component.amount = rescale * (component.amount / mc.totalAmount)
+	}
+	mc.totalAmount *= rescale
+
+	for mat, percentage := range values {
+		mc.Add(mat, percentage)
+	}
 }
 
 func (mc *MaterialCompound) Remove(mat *Material) {

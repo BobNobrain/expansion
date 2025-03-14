@@ -13,7 +13,7 @@ type TableQueryDataSource[P any] func(P, dfapi.DFTableQueryRequest, DFRequestCon
 
 type TrackableTableQuery[P comparable] struct {
 	lock      *sync.Mutex
-	listeners map[P]*utils.Set[domain.ClientID]
+	listeners map[P]*utils.UndeterministicSet[domain.ClientID]
 
 	updater     *dfUpdatesQueue
 	dataSource  TableQueryDataSource[P]
@@ -35,7 +35,7 @@ func NewTrackableTableQuery[P comparable](
 ) *TrackableTableQuery[P] {
 	ttq := &TrackableTableQuery[P]{
 		lock:        new(sync.Mutex),
-		listeners:   make(map[P]*utils.Set[domain.ClientID]),
+		listeners:   make(map[P]*utils.UndeterministicSet[domain.ClientID]),
 		dataSource:  dataSource,
 		sourceTable: sourceTable,
 	}
@@ -56,7 +56,7 @@ func (query *TrackableTableQuery[P]) Query(
 	rows, err := query.dataSource(payload, req, ctx)
 
 	if query.listeners[payload] == nil {
-		query.listeners[payload] = utils.NewSet[domain.ClientID]()
+		query.listeners[payload] = utils.NewUndeterministicSet[domain.ClientID]()
 	}
 	query.listeners[payload].Add(ctx.ClientID)
 	query.sourceTable.subscribeForResponse(rows, ctx.ClientID)

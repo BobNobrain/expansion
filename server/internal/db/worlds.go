@@ -34,6 +34,8 @@ type worldDataJSON struct {
 	TileTempsK       []float64 `json:"tileTempsK"`
 	TilePressuresBar []float64 `json:"tilePsBar"`
 	TileSurface      []int     `json:"tileSurfaces"`
+	TileFertilities  []float64 `json:"tileFertilities,omitempty"`
+	TileMoistures    []float64 `json:"tileMoistures,omitempty"`
 }
 
 func (w *worldsRepoImpl) CreateWorlds(worlds []components.CreateWorldPayload) common.Error {
@@ -73,6 +75,9 @@ func (w *worldsRepoImpl) ExploreWorld(payload components.ExploreWorldPayload) co
 	tilePressures := make([]float64, 0, nTiles)
 	tileSurfaces := make([]int, 0, nTiles)
 
+	var tileFertilities []float64
+	var tileMoistures []float64
+
 	for i := 0; i < payload.Data.Grid.Size(); i++ {
 		pos := payload.Data.Grid.GetCoords(i)
 		coords = append(coords, pos.X, pos.Y, pos.Z)
@@ -83,6 +88,16 @@ func (w *worldsRepoImpl) ExploreWorld(payload components.ExploreWorldPayload) co
 		tileTemps = append(tileTemps, tileData.AvgTemp.Kelvins())
 		tilePressures = append(tilePressures, tileData.Pressure.Bar())
 		tileSurfaces = append(tileSurfaces, int(tileData.Surface))
+	}
+
+	if len(payload.Data.FertileTiles) > 0 {
+		tileFertilities = make([]float64, 0, len(payload.Data.FertileTiles))
+		tileMoistures = make([]float64, 0, len(payload.Data.FertileTiles))
+
+		for _, tile := range payload.Data.FertileTiles {
+			tileFertilities = append(tileFertilities, tile.SoilFertility)
+			tileMoistures = append(tileMoistures, tile.MoistureLevel)
+		}
 	}
 
 	surfaceData := worldDataJSON{
@@ -99,6 +114,8 @@ func (w *worldsRepoImpl) ExploreWorld(payload components.ExploreWorldPayload) co
 		TileTempsK:        tileTemps,
 		TilePressuresBar:  tilePressures,
 		TileSurface:       tileSurfaces,
+		TileFertilities:   tileFertilities,
+		TileMoistures:     tileMoistures,
 	}
 
 	surfaceDataJSON, jerr := json.Marshal(surfaceData)
@@ -228,6 +245,7 @@ func decodeWorld(row dbq.ResolveWorldsRow) (world.WorldData, common.Error) {
 	nTiles := len(dbWorldData.Coords) / 3
 	coords := make([]geom.Vec3, 0, nTiles)
 	tiles := make([]world.WorldDataTile, 0, nTiles)
+
 	for i := 0; i < nTiles; i++ {
 		coords = append(coords, geom.Vec3{
 			X: dbWorldData.Coords[i*3+0],
@@ -248,6 +266,18 @@ func decodeWorld(row dbq.ResolveWorldsRow) (world.WorldData, common.Error) {
 		})
 	}
 
+	var fertileTiles []world.FertileWorldDataTile
+	if len(dbWorldData.TileFertilities) > 0 {
+		fertileTiles = make([]world.FertileWorldDataTile, 0, len(dbWorldData.TileFertilities))
+
+		for i := range dbWorldData.TileFertilities {
+			fertileTiles = append(fertileTiles, world.FertileWorldDataTile{
+				SoilFertility: dbWorldData.TileFertilities[i],
+				MoistureLevel: dbWorldData.TileMoistures[i],
+			})
+		}
+	}
+
 	var explorationData *world.ExplorationData
 	if row.ExploredAt.Valid && row.ExploredBy.Valid {
 		explorationData = &world.ExplorationData{
@@ -257,10 +287,11 @@ func decodeWorld(row dbq.ResolveWorldsRow) (world.WorldData, common.Error) {
 	}
 
 	return world.WorldData{
-		ID:       world.CelestialID(row.BodyID),
-		Grid:     geom.RestoreSpatialGraph(coords, dbWorldData.Graph),
-		Tiles:    tiles,
-		Explored: explorationData,
+		ID:           world.CelestialID(row.BodyID),
+		Grid:         geom.RestoreSpatialGraph(coords, dbWorldData.Graph),
+		Tiles:        tiles,
+		FertileTiles: fertileTiles,
+		Explored:     explorationData,
 		Composition: world.WorldComposition{
 			OceanLevel: dbWorldData.OceanLevel,
 			Atmosphere: globaldata.Materials().RestoreCompoundFromMap(dbWorldData.Atmosphere),

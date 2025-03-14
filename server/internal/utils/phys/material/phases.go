@@ -187,8 +187,8 @@ func sampleLineAtP(line []PhaseDiagramPoint, p phys.Pressure) phys.Temperature {
 		pt1 := line[i]
 		pt2 := line[i+1]
 
-		pMin := utils.Min(pt1.P, pt2.P)
-		pMax := utils.Max(pt1.P, pt2.P)
+		pMin := min(pt1.P, pt2.P)
+		pMax := max(pt1.P, pt2.P)
 
 		if pMin <= p && p < pMax {
 			// find the exact spot on the line segment
