@@ -18,6 +18,9 @@
 .flex.column {
     flex-flow: column;
 }
+.flex.wrap {
+    flex-wrap: wrap;
+}
 
 .grid {
     display: grid;

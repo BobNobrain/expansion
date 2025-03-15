@@ -2,6 +2,7 @@ import { type World } from '../../domain/World';
 import { type MaterialData } from '../../lib/3d/material';
 import type { RawColor } from '../../lib/3d/types';
 import { Color } from '../../lib/color';
+import { remap } from '../../lib/math/misc';
 import { type RenderMode } from './settings';
 
 export type ColorRenderer = (surface: World) => MaterialData[];
@@ -56,8 +57,12 @@ const elevationsRenderer = createPaletteRenderer(elevationColors, (world) => {
     return world.elevations.map((h) => (h - min) / diff);
 });
 
-const fertilityRenderer = createPaletteRenderer(Color.createPalette(10, [0.2, 0.2, 0.2], [0.5, 1.0, 0.3]), (world) =>
-    world.soilFertilities ? world.soilFertilities.map((f) => Math.max(0, f)) : [],
+const fertilityRenderer = createPaletteRenderer(
+    [[0.4, 0.4, 0.4], ...Color.createPalette(9, [0.9, 0.2, 0.2], [0.5, 1.0, 0.3])],
+    (world) =>
+        world.soilFertilities
+            ? world.soilFertilities.map((f) => (f < 0 ? 0 : remap(f, { from: [0, 1], to: [0.1, 1] })))
+            : [],
 );
 
 const moistureRenderer = createPaletteRenderer(

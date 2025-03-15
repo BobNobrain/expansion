@@ -19,6 +19,7 @@ import { TouchCurtain, type TouchCurtainTab } from '../../components/TouchCurtai
 import { usePageContextBinding } from '../../components/TouchPage';
 import { SystemContentPlanets } from './tabs/SystemContentPlanets';
 import { SystemContentStars } from './tabs/SystemContentStars';
+import { WorldResources } from '../../../components/WorldResources/WorldResources';
 
 const RedirectToTab: Component<{ tab: string }> = (props) => {
     const navigate = useNavigate();
@@ -176,7 +177,9 @@ export const CartographyPage: Component = () => {
                             <WorldInfo />
                         </Match>
                         <Match when={routeInfo().tab === WorldContentTab.Population}>Population...</Match>
-                        <Match when={routeInfo().tab === WorldContentTab.Resources}>Resources...</Match>
+                        <Match when={routeInfo().tab === WorldContentTab.Resources}>
+                            <WorldResources />
+                        </Match>
                         <Match when={routeInfo().tab === WorldContentTab.Infra}>Infra...</Match>
                         <Match when={routeInfo().tab === WorldContentTab.Bases}>Bases...</Match>
 

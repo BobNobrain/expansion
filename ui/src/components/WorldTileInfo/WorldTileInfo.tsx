@@ -1,15 +1,18 @@
-import { type Component, createMemo } from 'solid-js';
+import { type Component, createMemo, Show } from 'solid-js';
 import { Badge } from '../Badge/Badge';
+import { CommodityIcon } from '../CommodityIcon/CommodityIcon';
 import { Container } from '../Container/Container';
+import { DataTable, type DataTableColumn } from '../DataTable';
 import { DefinitionList, type DefinitionListProperties } from '../DefinitionList/DefinitionList';
 import { OperationDisplay } from '../OperationDisplay/OperationDisplay';
 import { PageHeader, PageHeaderTitle } from '../PageHeader';
 import { SkeletonText } from '../Skeleton';
 import { type ResourceDeposit } from '../../domain/World';
-import { IconCloud, IconLeaf, IconUnknown } from '../../icons';
+import { IconCloud, IconLeaf, IconPlot, IconRocks, IconUnknown } from '../../icons';
 import { formatInteger, formatScalar } from '../../lib/strings';
 import { useExploreRouteInfo, useExploreRouteObjectId } from '../../routes/explore';
 import { dfWorlds } from '../../store/datafront';
+import { InlineLoader } from '../InlineLoader/InlineLoader';
 
 type PlotInfo = {
     id: string;
@@ -24,7 +27,6 @@ type PlotInfo = {
         fertility: number;
         moisture: number;
     };
-    resources?: ResourceDeposit[];
 };
 
 const defProps: DefinitionListProperties<PlotInfo> = {
@@ -95,26 +97,29 @@ const defProps: DefinitionListProperties<PlotInfo> = {
             );
         },
     },
-    resources: {
-        title: 'Resources',
-        render: (v) => {
-            if (!v.resources || !v.resources.length) {
-                return '--';
-            }
-
-            return v.resources
-                .map(
-                    (r) =>
-                        `${r.resource}: ${formatScalar(r.abundance * 100, {
-                            digits: 1,
-                            unit: '%',
-                            noShortenings: true,
-                        })}`,
-                )
-                .join('; ');
-        },
-    },
 };
+
+const RESOURCE_COLUMNS: DataTableColumn<ResourceDeposit>[] = [
+    {
+        content: (row) => <CommodityIcon resource={row.resource} />,
+        width: 48,
+    },
+    {
+        header: 'Resource',
+        content: 'resource',
+    },
+    {
+        header: 'Quality',
+        width: 100,
+        align: 'right',
+        content: (row) =>
+            formatScalar(row.abundance * 100, {
+                digits: 1,
+                unit: '%',
+                noShortenings: true,
+            }),
+    },
+];
 
 export const WorldTileInfo: Component = () => {
     const routeInfo = useExploreRouteInfo();
@@ -146,16 +151,41 @@ export const WorldTileInfo: Component = () => {
                           moisture: worldData.moistureLevels[tileIndex],
                       }
                     : undefined,
-            resources: worldData.resources[tileIndex] ?? [],
         };
+    });
+
+    const resourceRows = createMemo(() => {
+        const worldData = world.result();
+        const plotId = routeInfo().plotId;
+        if (!worldData || !plotId) {
+            return [];
+        }
+
+        const tileIndex = Number.parseInt(plotId, 16);
+        return worldData.resources[tileIndex] ?? [];
     });
 
     return (
         <OperationDisplay error={world.error()} loading={world.isLoading()}>
             <PageHeader>
-                <PageHeaderTitle>Planetary plot #{routeInfo().plotId ?? '??'}</PageHeaderTitle>
+                <PageHeaderTitle>Tile</PageHeaderTitle>
+                <IconPlot size={20} block />
             </PageHeader>
             <DefinitionList items={defProps} value={plotInfo()} isLoading={world.isLoading()} />
+
+            <PageHeader>
+                <PageHeaderTitle>Resource Deposits</PageHeaderTitle>
+                <Show when={world.result()}>
+                    <Badge style="trasparent" iconLeft={IconRocks} color="accent">
+                        {resourceRows().length}
+                    </Badge>
+                </Show>
+            </PageHeader>
+            <DataTable columns={RESOURCE_COLUMNS} rows={resourceRows()}>
+                <Show when={world.isLoading()} fallback="No resource deposits on this plot">
+                    <InlineLoader />
+                </Show>
+            </DataTable>
         </OperationDisplay>
     );
 };

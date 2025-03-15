@@ -1,5 +1,6 @@
 out
 node_modules
 *.generated.ts
+*.generated.json
 
 assets/tx/galaxy-*.png

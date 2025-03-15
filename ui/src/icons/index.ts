@@ -9,6 +9,7 @@ export { IconBack } from './back';
 export { IconChevronRight } from './chevron-right';
 export { IconCity } from './city';
 export { IconCloud } from './cloud';
+export { IconConstruction } from './construction';
 export { IconContext } from './context';
 export { IconCopy } from './copy';
 export { IconCross } from './cross';
