@@ -3,7 +3,8 @@
     "id": "no2",
     "tags": [
         "wg",
-        "volatile"
+        "volatile",
+        "toxic"
     ],
     "abundance": {
         "min": 0.001,

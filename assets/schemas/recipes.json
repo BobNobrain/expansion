@@ -1,0 +1,38 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Recipes",
+    "description": "A collection of game recipes",
+    "type": "object",
+    "properties": {
+        "$schema": { "type": "string" },
+        "recipes": {
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/Recipe"
+            }
+        }
+    },
+    "$defs": {
+        "Recipe": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "equipment": { "type": "array", "items": { "type": "string" } },
+                "inputs": { "$ref": "#/$defs/MaterialAmounts" },
+                "outputs": { "$ref": "#/$defs/MaterialAmounts" },
+                "baseTime": { "type": "string", "pattern": "^([0-9]+[dhms])+$" },
+                "affectedByFertility": { "type": "boolean" },
+                "affectedByResource": { "type": "boolean" },
+                "affectedByAtmosphere": { "type": "boolean" },
+                "affectedByOcean": { "type": "boolean" }
+            },
+            "required": [ "equipment", "inputs", "outputs", "baseTime" ]
+        },
+        "MaterialAmounts": {
+            "type": "object",
+            "patternProperties": {
+                "^[a-z][a-zA-Z0-9]*$": { "type": "number", "min": 0 }
+            }
+        }
+    }
+}

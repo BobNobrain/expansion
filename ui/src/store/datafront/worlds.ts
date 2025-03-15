@@ -48,6 +48,8 @@ export const dfWorlds = createDatafrontTable<WorldsTableRow, World>({
             soilFertilities: data.soilFertility,
             moistureLevels: data.moistureLevels,
 
+            resources: data.resources ?? {},
+
             atmosphere: data.atmosphere ?? {},
             oceans: data.oceans ?? {},
             snow: data.snow ?? {},

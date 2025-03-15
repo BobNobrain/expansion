@@ -54,7 +54,7 @@ type WorldData struct {
 
 	Tiles               []WorldDataTile
 	FertileTiles        []FertileWorldDataTile
-	TileResources       map[int]ResourceDeposit
+	TileResources       map[int][]ResourceDeposit
 	TileElevationsScale phys.Distance
 }
 

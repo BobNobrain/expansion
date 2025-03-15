@@ -1,0 +1,84 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Commodities",
+    "description": "List of game materials and resources",
+    "type": "object",
+    "properties": {
+        "$schema": { "type": "string" },
+        "commodities": {
+            "type": "object",
+            "patternProperties": {
+                "^[a-z][A-Za-z0-9]*$": {
+                    "$ref": "#/$defs/Commodity"
+                }
+            },
+            "additionalProperties": false
+        },
+        "resources": {
+            "type": "object",
+            "description": "resources that can be generated on worlds with surfaces",
+            "patternProperties": {
+                "^[a-z][A-Za-z0-9]*$": {
+                    "$ref": "#/$defs/Resource"
+                }
+            },
+            "additionalProperties": false
+        },
+        "worldgenMaterials": {
+            "type": "object",
+            "description": "maps worldgen material id to material id from #/materials",
+            "patternProperties": {
+                "^[a-z][A-Za-z0-9]*$": {
+                    "type": "string",
+                    "pattern": "^[a-z][A-Za-z0-9]*$"
+                }
+            },
+            "additionalProperties": false
+        },
+        "additionalProperties": false,
+        "required": [ "materials", "resources", "worldgenMaterials" ]
+    },
+    "$defs": {
+        "Commodity": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "category": {
+                    "type": "string",
+                    "enum": [
+                        "metals",
+                        "resources",
+                        "crops",
+                        "consumables",
+                        "construction",
+                        "machinery"
+                    ]
+                },
+                "mass": { "type": "number", "min": 0 },
+                "volume": { "type": "number", "min": 0 },
+                "expiry": { "type": "string", "pattern": "^([0-9]+[dhms])+$" },
+                "quantized": { "type": "boolean" }
+            }
+        },
+        "Resource": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "abundance": {
+                    "type": "number",
+                    "min": 0,
+                    "max": 1,
+                    "description": "Probability to encounter this resource on any given planet/moon"
+                },
+                "veins": {
+                    "type": "number",
+                    "min": 0,
+                    "max": 1,
+                    "description": "How much veins to generate across the planet/moon, with 1 meaning the maximum possible amount (depends on world size)"
+                },
+                "fertileOnly": { "type": "boolean" }
+            },
+            "required": [ "abundance", "veins" ]
+        }
+    }
+}

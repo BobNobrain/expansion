@@ -1,6 +1,6 @@
 import { createSignal } from 'solid-js';
 
-export type RenderMode = 'natural' | 'biomes' | 'soil' | 'moisture' | 'elevations';
+export type RenderMode = 'natural' | 'biomes' | 'soil' | 'moisture' | 'elevations' | 'resources';
 
 export type PlanetViewSceneSettingsState = {
     getMode: () => RenderMode;

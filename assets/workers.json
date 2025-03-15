@@ -1,0 +1,53 @@
+{
+    "tiers": [ "intern", "apprentice", "master" ],
+    "contributions": {
+        "intern": 0.2,
+        "apprentice": 0.6,
+        "master": 1
+    },
+    "expRequirements": {
+        "intern": 0,
+        "apprentice": 300,
+        "master": 1000
+    },
+    "mismatchModifiers": {
+        "intern": {
+            "apprentice": {
+                "productivity": 0.25,
+                "happiness": 1.5,
+                "experienceGain": 2.0,
+                "experienceGainNoMentor": 1.5
+            },
+            "master": {
+                "productivity": 0.05,
+                "happiness": 0.9,
+                "experienceGain": 1.2,
+                "experienceGainNoMentor": 1.0
+            }
+        },
+        "apprentice": {
+            "intern": {
+                "productivity": 1.5,
+                "happiness": 0.5,
+                "experienceGain": 0.5,
+                "experienceGainNoMentor": 0.5
+            },
+            "master": {
+                "productivity": 0.5,
+                "happiness": 1.5,
+                "experienceGain": 1.8,
+                "experienceGainNoMentor": 1.4
+            }
+        },
+        "master": {
+            "intern": {
+                "productivity": 2.0,
+                "happiness": 0.1
+            },
+            "apprentice": {
+                "productivity": 1.5,
+                "happiness": 0.5
+            }
+        }
+    }
+}

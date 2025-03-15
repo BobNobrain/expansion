@@ -1,14 +1,15 @@
 import { type Component, createMemo } from 'solid-js';
-import { useExploreRouteInfo, useExploreRouteObjectId } from '../../routes/explore';
-import { OperationDisplay } from '../OperationDisplay/OperationDisplay';
-import { dfWorlds } from '../../store/datafront';
-import { DefinitionList, type DefinitionListProperties } from '../DefinitionList/DefinitionList';
-import { SkeletonText } from '../Skeleton';
-import { formatInteger, formatScalar } from '../../lib/strings';
-import { Container } from '../Container/Container';
 import { Badge } from '../Badge/Badge';
-import { IconCloud, IconLeaf, IconUnknown } from '../../icons';
+import { Container } from '../Container/Container';
+import { DefinitionList, type DefinitionListProperties } from '../DefinitionList/DefinitionList';
+import { OperationDisplay } from '../OperationDisplay/OperationDisplay';
 import { PageHeader, PageHeaderTitle } from '../PageHeader';
+import { SkeletonText } from '../Skeleton';
+import { type ResourceDeposit } from '../../domain/World';
+import { IconCloud, IconLeaf, IconUnknown } from '../../icons';
+import { formatInteger, formatScalar } from '../../lib/strings';
+import { useExploreRouteInfo, useExploreRouteObjectId } from '../../routes/explore';
+import { dfWorlds } from '../../store/datafront';
 
 type PlotInfo = {
     id: string;
@@ -23,7 +24,7 @@ type PlotInfo = {
         fertility: number;
         moisture: number;
     };
-    resources?: unknown;
+    resources?: ResourceDeposit[];
 };
 
 const defProps: DefinitionListProperties<PlotInfo> = {
@@ -96,7 +97,22 @@ const defProps: DefinitionListProperties<PlotInfo> = {
     },
     resources: {
         title: 'Resources',
-        render: () => '--',
+        render: (v) => {
+            if (!v.resources || !v.resources.length) {
+                return '--';
+            }
+
+            return v.resources
+                .map(
+                    (r) =>
+                        `${r.resource}: ${formatScalar(r.abundance * 100, {
+                            digits: 1,
+                            unit: '%',
+                            noShortenings: true,
+                        })}`,
+                )
+                .join('; ');
+        },
     },
 };
 
@@ -112,24 +128,25 @@ export const WorldTileInfo: Component = () => {
             return { id: plotId ?? '--' };
         }
 
-        const plotIndex = Number.parseInt(plotId, 16);
+        const tileIndex = Number.parseInt(plotId, 16);
 
         return {
             id: plotId,
-            biome: worldData.biomes[plotIndex],
+            biome: worldData.biomes[tileIndex],
             elevation: {
-                km: worldData.elevationsScaleKm * worldData.elevations[plotIndex],
-                rel: worldData.elevations[plotIndex],
+                km: worldData.elevationsScaleKm * worldData.elevations[tileIndex],
+                rel: worldData.elevations[tileIndex],
             },
             infraLevels: { power: 0, transport: 0 },
             occupation: 'empty',
             soil:
                 worldData.soilFertilities && worldData.moistureLevels
                     ? {
-                          fertility: worldData.soilFertilities[plotIndex],
-                          moisture: worldData.moistureLevels[plotIndex],
+                          fertility: worldData.soilFertilities[tileIndex],
+                          moisture: worldData.moistureLevels[tileIndex],
                       }
                     : undefined,
+            resources: worldData.resources[tileIndex] ?? [],
         };
     });
 

@@ -36,6 +36,13 @@ type worldDataJSON struct {
 	TileSurface      []int     `json:"tileSurfaces"`
 	TileFertilities  []float64 `json:"tileFertilities,omitempty"`
 	TileMoistures    []float64 `json:"tileMoistures,omitempty"`
+
+	TileResources []worldDataJSONResourceDeposit `json:"tileResources"`
+}
+type worldDataJSONResourceDeposit struct {
+	TileID     int     `json:"tile"`
+	ResourceID string  `json:"resource"`
+	Abundance  float64 `json:"abundance"`
 }
 
 func (w *worldsRepoImpl) CreateWorlds(worlds []components.CreateWorldPayload) common.Error {
@@ -100,6 +107,17 @@ func (w *worldsRepoImpl) ExploreWorld(payload components.ExploreWorldPayload) co
 		}
 	}
 
+	tileResources := make([]worldDataJSONResourceDeposit, 0)
+	for tileId, deposits := range payload.Data.TileResources {
+		for _, deposit := range deposits {
+			tileResources = append(tileResources, worldDataJSONResourceDeposit{
+				TileID:     tileId,
+				ResourceID: string(deposit.ResourceID),
+				Abundance:  deposit.Abundance,
+			})
+		}
+	}
+
 	surfaceData := worldDataJSON{
 		Graph:  payload.Data.Grid.GetUnduplicatedConnections(),
 		Coords: coords,
@@ -116,6 +134,8 @@ func (w *worldsRepoImpl) ExploreWorld(payload components.ExploreWorldPayload) co
 		TileSurface:       tileSurfaces,
 		TileFertilities:   tileFertilities,
 		TileMoistures:     tileMoistures,
+
+		TileResources: tileResources,
 	}
 
 	surfaceDataJSON, jerr := json.Marshal(surfaceData)
@@ -286,6 +306,14 @@ func decodeWorld(row dbq.ResolveWorldsRow) (world.WorldData, common.Error) {
 		}
 	}
 
+	resourceDeposits := make(map[int][]world.ResourceDeposit)
+	for _, depositData := range dbWorldData.TileResources {
+		resourceDeposits[depositData.TileID] = append(resourceDeposits[depositData.TileID], world.ResourceDeposit{
+			ResourceID: world.ResourceID(depositData.ResourceID),
+			Abundance:  depositData.Abundance,
+		})
+	}
+
 	return world.WorldData{
 		ID:           world.CelestialID(row.BodyID),
 		Grid:         geom.RestoreSpatialGraph(coords, dbWorldData.Graph),
@@ -315,5 +343,6 @@ func decodeWorld(row dbq.ResolveWorldsRow) (world.WorldData, common.Error) {
 			NCities: int(row.NCities),
 			NBases:  int(row.NBases),
 		},
+		TileResources: resourceDeposits,
 	}, nil
 }

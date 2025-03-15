@@ -2,22 +2,29 @@ package globaldata
 
 import "srv/internal/globals/assets"
 
-var globalRegistry *MaterialRegistry
+var globalMaterialsRegistry *MaterialRegistry
+var globalCraftingRegistry *CraftingRegistry
 
 func Init() {
-	globalRegistry = newMaterialRegistry()
-
+	globalMaterialsRegistry = newMaterialRegistry()
 	allMats, err := assets.LoadWGMaterials()
-
 	if err != nil {
 		panic(err)
 	}
+	globalMaterialsRegistry.fill(allMats)
 
-	for _, mat := range allMats {
-		globalRegistry.byId[mat.GetID()] = mat
+	globalCraftingRegistry = newCraftingRegistry()
+	craftingData, err := assets.LoadCommodities()
+	if err != nil {
+		panic(err)
 	}
+	globalCraftingRegistry.fill(craftingData)
 }
 
 func Materials() *MaterialRegistry {
-	return globalRegistry
+	return globalMaterialsRegistry
+}
+
+func Crafting() *CraftingRegistry {
+	return globalCraftingRegistry
 }

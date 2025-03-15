@@ -1,0 +1,167 @@
+{
+    "$schema": "../schemas/buildings.json",
+    "buildings": {
+        "facility": {
+            "materialsPerArea": {
+                "constructionPanel": 2,
+                "constructionBlocks": 1,
+                "concrete": 2,
+                "steelBeams": 3
+            }
+        },
+        "farmland": {
+            "materialsPerArea": {
+                "constructionBlocks": 1,
+                "concrete": 2,
+                "steelBeams": 2
+            }
+        },
+        "mine": {
+            "materialsPerArea": {
+                "constructionPanel": 1,
+                "constructionBlocks": 2,
+                "concrete": 3,
+                "steelBeams": 6
+            }
+        },
+        "rig": {
+            "materialsPerArea": {
+                "constructionPanel": 1,
+                "constructionBlocks": 1,
+                "concrete": 2,
+                "steelBeams": 8
+            }
+        },
+        "office": {
+            "materialsPerArea": {
+                "constructionPanel": 3,
+                "constructionBlocks": 3,
+                "concrete": 3,
+                "steelBeams": 2
+            }
+        }
+    },
+    "equipment": {
+        "drill": {
+            "building": "mine",
+            "area": 80,
+            "operators": {
+                "workers": { "counts": [ 5, 2, 0 ] }
+            }
+        },
+        "pump": {
+            "building": "rig",
+            "area": 20,
+            "operators": {
+                "workers": { "counts": [ 5, 2, 0 ] }
+            }
+        },
+        "airFilter": {
+            "building": "rig",
+            "area": 40,
+            "operators": {
+                "workers": { "counts": [ 5, 2, 0 ] }
+            }
+        },
+        "field": {
+            "building": "farmland",
+            "area": 50,
+            "operators": {
+                "workers": { "counts": [ 3, 1, 0 ] }
+            }
+        },
+        "foodProcessor": {
+            "building": "facility",
+            "area": 10,
+            "operators": {
+                "workers": { "counts": [ 3, 1, 1 ] }
+            }
+        },
+        "smelter": {
+            "building": "facility",
+            "area": 20,
+            "operators": {
+                "workers": { "counts": [ 3, 1, 0 ], "contribution": 1.5 },
+                "engineers": { "counts": [ 1, 0, 0 ], "contribution": 1 }
+            }
+        },
+        "constructionMixer": {
+            "building": "facility",
+            "area": 10,
+            "operators": {
+                "workers": { "counts": [ 3, 0, 0 ] }
+            }
+        },
+        "constructionPress": {
+            "building": "facility",
+            "area": 10,
+            "operators": {
+                "workers": { "counts": [ 3, 1, 0 ] }
+            }
+        },
+        "machineAssembler": {
+            "building": "facility",
+            "area": 20,
+            "operators": {
+                "workers": { "counts": [ 3, 0, 0 ], "contribution": 1 },
+                "engineers": { "counts": [ 2, 1, 0 ], "contribution": 1 }
+            }
+        },
+        "plasticPrinter": {
+            "building": "facility",
+            "area": 30,
+            "operators": {
+                "workers": { "counts": [ 2, 0, 0 ], "contribution": 1 },
+                "engineers": { "counts": [ 3, 3, 0 ], "contribution": 2 }
+            }
+        },
+        "metalsmithing": {
+            "building": "facility",
+            "area": 30,
+            "operators": {
+                "workers": { "counts": [ 3, 3, 0 ], "contribution": 1 },
+                "engineers": { "counts": [ 2, 1, 0 ], "contribution": 1 }
+            }
+        },
+        "electronicsAssembler": {
+            "building": "facility",
+            "area": 40,
+            "operators": {
+                "workers": { "counts": [ 3, 1, 0 ], "contribution": 1 },
+                "engineers": { "counts": [ 5, 3, 1 ], "contribution": 3 }
+            }
+        },
+        "chemicalMixer": {
+            "building": "facility",
+            "area": 20,
+            "operators": {
+                "workers": { "counts": [ 2, 0, 0 ], "contribution": 1 },
+                "engineers": { "counts": [ 3, 1, 0 ], "contribution": 2 }
+            }
+        },
+        "chemicalLab": {
+            "building": "facility",
+            "area": 30,
+            "operators": {
+                "workers": { "counts": [ 2, 0, 0 ], "contribution": 1 },
+                "engineers": { "counts": [ 6, 5, 2 ], "contribution": 3 }
+            }
+        },
+        "openSpace": {
+            "building": "office",
+            "area": 20,
+            "operators": {
+                "workers": { "counts": [ 2, 0, 0 ], "contribution": 1 },
+                "managers": { "counts": [ 5, 2, 0 ], "contribution": 2 }
+            }
+        },
+        "managementCabinets": {
+            "building": "office",
+            "area": 10,
+            "operators": {
+                "workers": { "counts": [ 1, 0, 0 ], "contribution": 1 },
+                "managers": { "counts": [ 5, 5, 1 ], "contribution": 3 }
+            }
+        }
+    }
+}

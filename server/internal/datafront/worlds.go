@@ -115,6 +115,16 @@ func encodeWorld(w world.WorldData) common.Encodable {
 		}
 	}
 
+	resourceDeposits := make(map[int][]api.WorldsTableRowResourceDeposit)
+	for tileId, deposits := range w.TileResources {
+		for _, deposit := range deposits {
+			resourceDeposits[tileId] = append(resourceDeposits[tileId], api.WorldsTableRowResourceDeposit{
+				ResourceID: string(deposit.ResourceID),
+				Abundance:  deposit.Abundance,
+			})
+		}
+	}
+
 	return common.AsEncodable(api.WorldsTableRow{
 		ID:         string(w.ID),
 		ExploredBy: exploredBy,
@@ -134,6 +144,8 @@ func encodeWorld(w world.WorldData) common.Encodable {
 		SurfaceTypes:   tileSurfaceTypes,
 		SoilFertility:  tileSoilFertilities,
 		MoistureLevels: tileMoistureLevels,
+
+		ResourceDeposits: resourceDeposits,
 
 		AvgTempK:          w.Conditions.AvgTemp.Kelvins(),
 		PressureBar:       w.Conditions.Pressure.Bar(),

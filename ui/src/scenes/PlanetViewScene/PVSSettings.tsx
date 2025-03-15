@@ -11,6 +11,7 @@ import {
     IconPlot,
     IconPlotOutline,
     IconRadius,
+    IconRocks,
 } from '../../icons';
 
 export type PVSSettingsProps = PlanetViewSceneSettingsState & {
@@ -34,11 +35,12 @@ const modeIcons: Record<RenderMode, Icon> = {
     soil: IconLeaf,
     moisture: IconCloud,
     elevations: IconRadius,
+    resources: IconRocks,
 };
 
 export const PVSSettings: Component<PVSSettingsProps> = (props) => {
     const availableRenderModes = createMemo<RenderMode[]>(() => {
-        const result: RenderMode[] = ['natural', 'biomes'];
+        const result: RenderMode[] = ['natural', 'biomes', 'resources'];
 
         if (props.isFertilePlanet) {
             result.push('soil', 'moisture');

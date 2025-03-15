@@ -1,0 +1,47 @@
+{
+    "$schema": "../schemas/recipes.json",
+    "recipes": [
+        {
+            "equipment": [ "mine" ],
+            "inputs": { },
+            "outputs": { },
+            "baseTime": "24h",
+            "affectedByResource": true
+        },
+        {
+            "equipment": [ "pump" ],
+            "inputs": { },
+            "outputs": { },
+            "baseTime": "24h",
+            "affectedByOcean": true
+        },
+        {
+            "equipment": [ "airFilter" ],
+            "inputs": { },
+            "outputs": { },
+            "baseTime": "24h",
+            "affectedByAtmosphere": true
+        },
+        {
+            "equipment": [ "field" ],
+            "inputs": { },
+            "outputs": {
+                "grain": 10
+            },
+            "baseTime": "24h",
+            "affectedByFertility": true
+        },
+        {
+            "equipment": [ "smelter" ],
+            "inputs": {
+                "ironOre": 1,
+                "oxygen": 1,
+                "coal": 1
+            },
+            "outputs": {
+                "steel": 1
+            },
+            "baseTime": "1h"
+        }
+    ]
+}

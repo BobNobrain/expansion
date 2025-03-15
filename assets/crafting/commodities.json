@@ -1,0 +1,100 @@
+{
+    "$schema": "../schemas/commodities.json",
+    "commodities": {
+        "grain": {
+            "category": "crops",
+            "mass": 0.8,
+            "volume": 1,
+            "expiry": "14d"
+        },
+        "limestone": {
+            "category": "resources",
+            "mass": 2.4,
+            "volume": 1
+        },
+        "ironOre": {
+            "category": "resources",
+            "mass": 2.5,
+            "volume": 1
+        },
+        "aluminiumOre": {
+            "category": "resources",
+            "mass": 1.4,
+            "volume": 1
+        },
+        "copperOre": {
+            "category": "resources",
+            "mass": 3.2,
+            "volume": 1
+        },
+        "water": {
+            "category": "resources",
+            "mass": 1,
+            "volume": 1
+        },
+        "oxygen": {
+            "category": "resources",
+            "mass": 1.1,
+            "volume": 1
+        },
+        "coal": {
+            "category": "resources",
+            "mass": 1.3,
+            "volume": 1
+        },
+        "steel": {
+            "category": "metals",
+            "mass": 7.85,
+            "volume": 1
+        },
+        "concrete": {
+            "category": "construction",
+            "mass": 3,
+            "volume": 1
+        },
+        "constructionPanel": {
+            "category": "construction",
+            "mass": 0.5,
+            "volume": 0.8,
+            "quantized": true
+        },
+        "constructionBlocks": {
+            "category": "construction",
+            "mass": 1,
+            "volume": 2
+        },
+        "steelBeams": {
+            "category": "construction",
+            "mass": 1,
+            "volume": 0.2,
+            "quantized": true
+        }
+    },
+    "resources": {
+        "limestone": {
+            "abundance": 0.8,
+            "veins": 0.5
+        },
+        "ironOre": {
+            "abundance": 0.9,
+            "veins": 0.6
+        },
+        "aluminiumOre": {
+            "abundance": 0.8,
+            "veins": 0.4
+        },
+        "copperOre": {
+            "abundance": 0.9,
+            "veins": 0.55
+        },
+        "coal": {
+            "abundance": 0.5,
+            "veins": 0.6,
+            "fertileOnly": true
+        }
+    },
+    "worldgenMaterials": {
+        "h2o": "water",
+        "o2": "oxygen"
+    }
+}

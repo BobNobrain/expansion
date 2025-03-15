@@ -68,8 +68,6 @@ func (ctx *planetGenContext) toWorldExplorationData() world.WorldExplorationData
 		})
 	}
 
-	resources := make(map[int][]world.ResourceDeposit)
-
 	var fertileTiles []world.FertileWorldDataTile
 	if ctx.maxSoilFertility >= 0 {
 		fertileTiles = make([]world.FertileWorldDataTile, 0, len(ctx.tiles))
@@ -97,7 +95,7 @@ func (ctx *planetGenContext) toWorldExplorationData() world.WorldExplorationData
 
 		Tiles:               tiles,
 		FertileTiles:        fertileTiles,
-		TileResources:       resources,
+		TileResources:       ctx.resources,
 		TileElevationsScale: ctx.relativeElevationsScale,
 	}
 }

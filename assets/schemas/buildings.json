@@ -1,0 +1,80 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Buildings",
+    "description": "Game buildings and equipment",
+    "type": "object",
+    "properties": {
+        "$schema": { "type": "string" },
+        "buildings": {
+            "type": "object",
+            "patternProperties": {
+                "^[a-z][A-Za-z0-9]*$": {
+                    "$ref": "#/$defs/Building"
+                }
+            },
+            "additionalProperties": false
+        },
+        "equipment": {
+            "type": "object",
+            "patternProperties": {
+                "^[a-z][A-Za-z0-9]*$": {
+                    "$ref": "#/$defs/Equipment"
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "$defs": {
+        "Building": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "materialsPerArea": {
+                    "type": "object",
+                    "patternProperties": {
+                        "^[a-z][A-Za-z0-9]*$": { "type": "number", "min": 0 }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "required": [ "materialsPerArea" ]
+        },
+        "Equipment": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "building": { "type": "string" },
+                "area": { "type": "integer", "min": 1 },
+                "operators": {
+                    "type": "object",
+                    "properties": {
+                        "workers": { "$ref": "#/$defs/OperatorsPerProfession" },
+                        "engineers": { "$ref": "#/$defs/OperatorsPerProfession" },
+                        "managers": { "$ref": "#/$defs/OperatorsPerProfession" }
+                    },
+                    "additionalProperties": false,
+                    "required": [ ]
+                }
+            },
+            "required": [ "area", "operators", "building" ]
+        },
+        "OperatorsPerProfession": {
+            "type": "object",
+            "properties": {
+                "counts": {
+                    "type": "array",
+                    "description": "Amount of workers per tier: intern / apprentice / master",
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "items": { "type": "integer", "min": 0 }
+                },
+                "contribution": {
+                    "type": "number",
+                    "minExclusive": 0
+                }
+            },
+            "required": [ "counts" ],
+            "additionalProperties": false
+        }
+    }
+}

@@ -28,6 +28,8 @@ type WorldsTableRow struct {
 	MoistureLevels []float64   `json:"moistureLevels,omitempty"`
 	SoilFertility  []float64   `json:"soilFertility,omitempty"`
 
+	ResourceDeposits map[int][]WorldsTableRowResourceDeposit `json:"resources,omitempty"`
+
 	AvgTempK          float64 `json:"avgTempK"`
 	PressureBar       float64 `json:"surfacePressureBar"`
 	GravityGs         float64 `json:"g"`
@@ -41,4 +43,9 @@ type WorldsTableRow struct {
 	NPops   int `json:"nPops"`
 	NBases  int `json:"nBases"`
 	NCities int `json:"nCities"`
+}
+
+type WorldsTableRowResourceDeposit struct {
+	ResourceID string  `json:"resource"`
+	Abundance  float64 `json:"abundance"`
 }

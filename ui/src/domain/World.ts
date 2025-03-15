@@ -17,6 +17,8 @@ export type World = {
     soilFertilities?: number[];
     moistureLevels?: number[];
 
+    resources: Record<number, ResourceDeposit[]>;
+
     oceanLevel: number;
     oceans: Record<string, number>;
     atmosphere: Record<string, number>;
@@ -28,6 +30,11 @@ export type World = {
 export type WorldGrid = {
     coords: number[];
     edges: number[][];
+};
+
+export type ResourceDeposit = {
+    resource: string;
+    abundance: number;
 };
 
 export namespace World {

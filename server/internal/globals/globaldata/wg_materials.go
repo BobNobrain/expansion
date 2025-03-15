@@ -15,6 +15,12 @@ func newMaterialRegistry() *MaterialRegistry {
 	}
 }
 
+func (r *MaterialRegistry) fill(allMats []*material.Material) {
+	for _, mat := range allMats {
+		globalMaterialsRegistry.byId[mat.GetID()] = mat
+	}
+}
+
 func (r *MaterialRegistry) GetByID(id material.MaterialID) *material.Material {
 	return r.byId[id]
 }

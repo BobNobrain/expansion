@@ -79,6 +79,9 @@ func (d *Mass) UnmarshalJSON(data []byte) error {
 
 type Volume float64
 
+func CubicMeters(m3 float64) Volume {
+	return Volume(m3 * 1e-9)
+}
 func CubeVolume(side Distance) Volume {
 	km := side.Kilometers()
 	return Volume(km * km * km)
@@ -99,7 +102,13 @@ type Density float64
 func TonsPerCubicKilometer(d float64) Density {
 	return Density(d)
 }
+func TonsPerCubicMeter(tPerM3 float64) Density {
+	return Density(tPerM3 * 1e-9)
+}
 
 func (d Density) TonsPerCubicKilometer() float64 {
 	return float64(d)
+}
+func (d Density) TonsPerCubicMeter() float64 {
+	return float64(d) * 1e9
 }

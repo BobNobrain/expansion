@@ -16,8 +16,12 @@ export const PVSTileBorders: Component<PVSTileBordersProps> = (props) => {
 
         const edges = new EdgesGeometry(surface.geometry);
         edges.scale(1.001, 1.001, 1.001);
-        const result = new LineSegments(edges, new LineBasicMaterial({ color: 0xf7b212, opacity: 0.5, linewidth: 2 }));
+        const result = new LineSegments(
+            edges,
+            new LineBasicMaterial({ color: 0xf7b212, opacity: 0.5, linewidth: 2, transparent: true }),
+        );
         result.name = 'PVS_tileBorders';
+        result.renderOrder = -1;
         return result;
     });
 

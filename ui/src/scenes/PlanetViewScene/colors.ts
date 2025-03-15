@@ -65,6 +65,28 @@ const moistureRenderer = createPaletteRenderer(
     (world) => world.moistureLevels ?? [],
 );
 
+const resourceEmptyColor: RawColor = [0.4, 0.4, 0.4];
+const resourceAbundanceColors: RawColor[] = [
+    [0.9, 0.2, 0.2],
+    [0.8, 0.5, 0.2],
+    [0.7, 0.7, 0.2],
+    [0.5, 0.8, 0.2],
+    [0.2, 0.9, 0.2],
+];
+const resourcesRenderer: ColorRenderer = (world) =>
+    world.elevations.map((_, i) => {
+        const resources = world.resources[i];
+        if (!resources || !resources.length) {
+            return { reflective: resourceEmptyColor };
+        }
+        const maxAbundance = Math.max(...resources.map((r) => r.abundance));
+        const colorIndex = Math.min(
+            resourceAbundanceColors.length - 1,
+            Math.floor(maxAbundance * resourceAbundanceColors.length),
+        );
+        return { reflective: resourceAbundanceColors[colorIndex] };
+    });
+
 export function pickRenderer(mode: RenderMode): ColorRenderer {
     switch (mode) {
         case 'biomes':
@@ -78,6 +100,9 @@ export function pickRenderer(mode: RenderMode): ColorRenderer {
 
         case 'moisture':
             return moistureRenderer;
+
+        case 'resources':
+            return resourcesRenderer;
 
         default:
             return naturalColorRenderer;
