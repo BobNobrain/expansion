@@ -1,20 +1,24 @@
 import { type Component, createMemo, Show } from 'solid-js';
 import { Badge } from '../Badge/Badge';
 import { CommodityIcon } from '../CommodityIcon/CommodityIcon';
-import { Container } from '../Container/Container';
+import { Container, Spacer } from '../Container/Container';
 import { DataTable, type DataTableColumn } from '../DataTable';
 import { DefinitionList, type DefinitionListProperties } from '../DefinitionList/DefinitionList';
 import { OperationDisplay } from '../OperationDisplay/OperationDisplay';
-import { PageHeader, PageHeaderTitle } from '../PageHeader';
+import { PageHeader, PageHeaderActions, PageHeaderIcon, PageHeaderTitle } from '../PageHeader';
 import { SkeletonText } from '../Skeleton';
-import { type ResourceDeposit } from '../../domain/World';
-import { IconCloud, IconLeaf, IconPlot, IconRocks, IconUnknown } from '../../icons';
+import { World, type ResourceDeposit } from '../../domain/World';
+import { IconCity, IconCloud, IconFlag, IconLeaf, IconPlot, IconRails, IconRocks, IconUnknown } from '../../icons';
 import { formatInteger, formatScalar } from '../../lib/strings';
 import { useExploreRouteInfo, useExploreRouteObjectId } from '../../routes/explore';
 import { dfWorlds } from '../../store/datafront';
 import { InlineLoader } from '../InlineLoader/InlineLoader';
+import { Button } from '../Button/Button';
+import { TouchModal } from '../../touch/components/TouchModal';
+import { useModalRouteState } from '../../routes/modals';
+import { FoundCityForm } from '../FoundCityForm/FoundCityForm';
 
-type PlotInfo = {
+type TileInfo = {
     id: string;
     elevation?: { km: number; rel: number };
     biome?: string;
@@ -29,7 +33,7 @@ type PlotInfo = {
     };
 };
 
-const defProps: DefinitionListProperties<PlotInfo> = {
+const defProps: DefinitionListProperties<TileInfo> = {
     id: {
         title: 'ID',
         render: 'id',
@@ -126,17 +130,17 @@ export const WorldTileInfo: Component = () => {
     const worldId = useExploreRouteObjectId('world');
     const world = dfWorlds.useSingle(worldId);
 
-    const plotInfo = createMemo<PlotInfo>(() => {
+    const tileInfo = createMemo<TileInfo>(() => {
         const worldData = world.result();
-        const plotId = routeInfo().plotId;
-        if (!worldData || !plotId) {
-            return { id: plotId ?? '--' };
+        const tileId = routeInfo().tileId;
+        if (!worldData || !tileId) {
+            return { id: tileId ?? '--' };
         }
 
-        const tileIndex = Number.parseInt(plotId, 16);
+        const tileIndex = World.parseTileId(tileId)!;
 
         return {
-            id: plotId,
+            id: tileId,
             biome: worldData.biomes[tileIndex],
             elevation: {
                 km: worldData.elevationsScaleKm * worldData.elevations[tileIndex],
@@ -156,36 +160,55 @@ export const WorldTileInfo: Component = () => {
 
     const resourceRows = createMemo(() => {
         const worldData = world.result();
-        const plotId = routeInfo().plotId;
-        if (!worldData || !plotId) {
+        const tileId = routeInfo().tileId;
+        if (!worldData || !tileId) {
             return [];
         }
 
-        const tileIndex = Number.parseInt(plotId, 16);
+        const tileIndex = World.parseTileId(tileId)!;
         return worldData.resources[tileIndex] ?? [];
     });
 
-    return (
-        <OperationDisplay error={world.error()} loading={world.isLoading()}>
-            <PageHeader>
-                <PageHeaderTitle>Tile</PageHeaderTitle>
-                <IconPlot size={20} block />
-            </PageHeader>
-            <DefinitionList items={defProps} value={plotInfo()} isLoading={world.isLoading()} />
+    const foundCityModal = useModalRouteState('foundCity');
 
-            <PageHeader>
-                <PageHeaderTitle>Resource Deposits</PageHeaderTitle>
-                <Show when={world.result()}>
-                    <Badge style="trasparent" iconLeft={IconRocks} color="accent">
-                        {resourceRows().length}
-                    </Badge>
-                </Show>
-            </PageHeader>
-            <DataTable columns={RESOURCE_COLUMNS} rows={resourceRows()}>
-                <Show when={world.isLoading()} fallback="No resource deposits on this plot">
-                    <InlineLoader />
-                </Show>
-            </DataTable>
-        </OperationDisplay>
+    return (
+        <>
+            <OperationDisplay error={world.error()} loading={world.isLoading()}>
+                <PageHeader>
+                    <PageHeaderTitle>Tile</PageHeaderTitle>
+                    {/* <IconPlot size={20} block /> */}
+                    <PageHeaderIcon icon={IconPlot} />
+                    <Spacer />
+                    <PageHeaderActions>
+                        <Button square style="light">
+                            <IconFlag size={32} block />
+                        </Button>
+                        <Button square style="light" onClick={foundCityModal.open}>
+                            <IconCity size={32} block />
+                        </Button>
+                        <Button square style="light">
+                            <IconRails size={32} block />
+                        </Button>
+                    </PageHeaderActions>
+                </PageHeader>
+                <DefinitionList items={defProps} value={tileInfo()} isLoading={world.isLoading()} />
+
+                <PageHeader>
+                    <PageHeaderTitle>Resource Deposits</PageHeaderTitle>
+                    <Show when={world.result()}>
+                        <PageHeaderIcon icon={IconRocks} text={resourceRows().length.toString()} />
+                    </Show>
+                </PageHeader>
+                <DataTable columns={RESOURCE_COLUMNS} rows={resourceRows()}>
+                    <Show when={world.isLoading()} fallback="No resource deposits on this plot">
+                        <InlineLoader />
+                    </Show>
+                </DataTable>
+            </OperationDisplay>
+
+            <TouchModal isOpen={foundCityModal.isOpen()} onClose={foundCityModal.close} title="Found City">
+                <FoundCityForm onSuccess={foundCityModal.close} />
+            </TouchModal>
+        </>
     );
 };

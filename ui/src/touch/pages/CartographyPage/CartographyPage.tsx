@@ -58,8 +58,8 @@ export const CartographyPage: Component = () => {
 
             case 'world':
                 title = info.objectId!;
-                if (info.plotId) {
-                    subtitle = `Planetary tile #${info.plotId}`;
+                if (info.tileId) {
+                    subtitle = `Planetary tile #${info.tileId}`;
                 } else {
                     subtitle = 'Planet';
                 }
@@ -98,7 +98,7 @@ export const CartographyPage: Component = () => {
                 ];
 
             case 'world':
-                if (info.plotId) {
+                if (info.tileId) {
                     return [];
                 }
                 return [
@@ -141,7 +141,7 @@ export const CartographyPage: Component = () => {
                 <PlanetViewScene
                     isActive={routeInfo().objectType === 'world'}
                     worldId={routeInfo().objectId!}
-                    selectedPlotId={routeInfo().plotId}
+                    selectedPlotId={routeInfo().tileId}
                     onPlotSelected={(plot) => {
                         if (!plot) {
                             navigate(getExploreRoute({ objectId: routeInfo().objectId, tab: WorldContentTab.Info }));
@@ -183,7 +183,7 @@ export const CartographyPage: Component = () => {
                         <Match when={routeInfo().tab === WorldContentTab.Infra}>Infra...</Match>
                         <Match when={routeInfo().tab === WorldContentTab.Bases}>Bases...</Match>
 
-                        <Match when={!routeInfo().tab && !routeInfo().plotId}>
+                        <Match when={!routeInfo().tab && !routeInfo().tileId}>
                             <RedirectToTab tab={WorldContentTab.Info} />
                         </Match>
                     </Switch>

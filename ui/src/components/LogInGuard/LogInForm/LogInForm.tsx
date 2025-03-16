@@ -1,8 +1,9 @@
-import { createMemo, createSignal, type Component } from 'solid-js';
-import { type DatafrontError } from '../../../lib/datafront/error';
+import { createMemo, type Component } from 'solid-js';
+import { type DatafrontError } from '../../../lib/datafront/types';
 import type * as api from '../../../lib/net/api';
 import { Button } from '../../Button/Button';
 import { Form, FormActions, FormField, type ValidationState, FormHeader } from '../../Form';
+import { createFormFieldState, useValidateAll } from '../../Form/utils';
 import { TextInput } from '../../TextInput/TextInput';
 import styles from './LogInForm.module.css';
 
@@ -13,17 +14,27 @@ export type LogInFormProps = {
 };
 
 export const LogInForm: Component<LogInFormProps> = (props) => {
-    const [getUsername, setUsername] = createSignal('');
-    const [getPassword, setPassword] = createSignal('');
+    const username = createFormFieldState('', {
+        validator: (value) =>
+            value.length < 3 ? { type: 'error', message: 'Please enter a valid username' } : { type: 'ok' },
+    });
+    const password = createFormFieldState('', {
+        validator: (value) => (value.length ? { type: 'ok' } : { type: 'error', message: 'Please enter a password' }),
+    });
+    const validateForm = useValidateAll([username, password]);
 
-    const login = () => {
+    const onSubmit = () => {
+        if (!validateForm()) {
+            return;
+        }
+
         props.onSubmit({
-            username: getUsername(),
-            password: getPassword(),
+            username: username.get(),
+            password: password.get(),
         });
     };
 
-    const validity = createMemo<ValidationState | undefined>(() => {
+    const externalValidity = createMemo<ValidationState | undefined>(() => {
         if (!props.error) {
             return undefined;
         }
@@ -36,19 +47,32 @@ export const LogInForm: Component<LogInFormProps> = (props) => {
 
     return (
         <div class={styles.content}>
-            <Form loading={props.loading}>
+            <Form loading={props.loading} onSubmit={onSubmit}>
                 <FormHeader>Log In</FormHeader>
                 <FormField>
-                    <TextInput label="Username" value={getUsername()} onUpdate={setUsername} validity={validity()} />
+                    <TextInput
+                        label="Username"
+                        value={username.get()}
+                        onUpdate={username.set}
+                        validity={externalValidity() ?? username.validity()}
+                        onBlur={username.validate}
+                    />
                 </FormField>
                 <FormField>
-                    <TextInput label="Password" value={getPassword()} onUpdate={setPassword} password />
+                    <TextInput
+                        label="Password"
+                        value={password.get()}
+                        onUpdate={password.set}
+                        validity={password.validity()}
+                        onBlur={password.validate}
+                        password
+                    />
                 </FormField>
                 <FormActions>
                     <Button color="secondary" loading={props.loading} style="text">
                         Forgot Password?
                     </Button>
-                    <Button color="primary" onClick={login} loading={props.loading}>
+                    <Button color="primary" type="submit" loading={props.loading}>
                         Log In
                     </Button>
                 </FormActions>

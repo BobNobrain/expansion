@@ -1,8 +1,26 @@
 .header {
     display: flex;
     justify-content: flex-start;
-    align-items: flex-start;
+    align-items: center;
     gap: 8px;
 
     padding: 8px 12px;
+}
+
+.iconWrapper {
+    align-self: flex-start;
+}
+.iconWrapper > svg {
+    float: left;
+}
+.iconText {
+    margin-left: 4px;
+
+    font-size: 16px;
+    line-height: 20px;
+}
+
+.actions {
+    display: flex;
+    gap: 8px;
 }

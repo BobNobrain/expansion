@@ -1,6 +1,6 @@
 import { iconify } from './common/utils';
 
-export const IconPlotOutline = iconify({
+export const IconTileOutline = iconify({
     viewBox: '0 0 32 32',
     content: () => [
         <path

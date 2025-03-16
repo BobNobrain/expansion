@@ -11,7 +11,7 @@ export type ExploreRouteInfo = {
     objectId?: string;
     objectType: ExploreObjectType;
     tab?: string;
-    plotId?: string;
+    tileId?: string;
 };
 
 export enum SystemContentTab {
@@ -45,7 +45,7 @@ export function useExploreRouteInfo(): () => ExploreRouteInfo {
             objectId: params.id,
             objectType: 'galaxy',
             tab: params.tab,
-            plotId: undefined,
+            tileId: undefined,
         };
 
         const id = params.id;
@@ -61,7 +61,7 @@ export function useExploreRouteInfo(): () => ExploreRouteInfo {
 
         if (result.objectType === 'world' && result.tab && !worldContentTabs[result.tab]) {
             result.tab = undefined;
-            result.plotId = params.tab;
+            result.tileId = params.tab;
         }
 
         return result;
@@ -97,7 +97,7 @@ export function getUpperRoute(info: ExploreRouteInfo): string {
             return getExploreRoute({ objectId: info.objectId!.substring(0, 2) });
 
         case 'world':
-            if (info.plotId) {
+            if (info.tileId) {
                 return getExploreRoute({ objectId: info.objectId, tab: WorldContentTab.Info });
             }
 

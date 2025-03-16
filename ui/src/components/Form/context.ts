@@ -1,8 +1,8 @@
 import { createContext, onCleanup, useContext } from 'solid-js';
-import { type FormFieldRegistrationData, type FormFieldController } from './types';
+import { type FormFieldController } from './types';
 
 export type FormContext = {
-    registerControl: (key: string | number, field: FormFieldController) => FormFieldRegistrationData;
+    registerControl: (key: string | number, field: FormFieldController) => void;
     unregisterControl: (key: string | number) => void;
 };
 
@@ -14,16 +14,14 @@ export const registerInFormContext = (
         formKey?: string;
     },
     field: Partial<FormFieldController>,
-): FormFieldRegistrationData => {
+): void => {
     if (props.formKey === undefined) {
-        return { initialValue: undefined };
+        return;
     }
 
     const ctx = useContext(FormContext);
     if (ctx === null) {
-        return {
-            initialValue: undefined,
-        };
+        return;
     }
 
     const controller: FormFieldController = {
@@ -32,10 +30,8 @@ export const registerInFormContext = (
         ...field,
     };
 
-    const data = ctx.registerControl(props.formKey, controller);
+    ctx.registerControl(props.formKey, controller);
     onCleanup(() => {
         ctx.unregisterControl(props.formKey!);
     });
-
-    return data;
 };

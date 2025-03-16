@@ -1,6 +1,8 @@
 import { type ParentComponent, Show, type JSX } from 'solid-js';
+import { Button } from '../../../components/Button/Button';
+import { IconCross } from '../../../icons';
+import { stopPropagation } from '../../../lib/misc';
 import styles from './TouchModal.module.css';
-import { Text } from '../../../components/Text/Text';
 
 export type TouchModalProps = {
     title?: string | JSX.Element;
@@ -17,9 +19,16 @@ export const TouchModal: ParentComponent<TouchModalProps> = (props) => {
             }}
             onClick={props.onClose}
         >
-            <div class={styles.content}>
+            <div class={styles.content} onClick={stopPropagation}>
                 <Show when={props.title}>
-                    <Text size="h2">{props.title}</Text>
+                    <header class={styles.header}>
+                        <h2 class={styles.title}>{props.title}</h2>
+                        <Show when={props.onClose}>
+                            <Button square style="text" onClick={props.onClose}>
+                                <IconCross size={20} />
+                            </Button>
+                        </Show>
+                    </header>
                 </Show>
                 {props.children}
             </div>

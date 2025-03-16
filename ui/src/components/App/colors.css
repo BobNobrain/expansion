@@ -21,6 +21,7 @@
     --p-primary-300: #AC7903;
     --p-primary-400: #D79807;
     --p-primary-500-25: #F7B21240;
+    --p-primary-500-50: #F7B21280;
     --p-primary-500: #F7B212;
     --p-primary-600: #FCBD2C;
     --p-primary-700: #FFCC55;
@@ -38,6 +39,7 @@
     --p-secondary-900: #BF94FF;
     --p-red-100: #290B0A;
     --p-red-200: #4E1614;
+    --p-red-300-75: #792421bf;
     --p-red-300: #792421;
     --p-red-400: #AC3531;
     --p-red-500-25: #CE413C40;
@@ -48,6 +50,7 @@
     --p-red-900: #FF9692;
     --p-green-100: #02210B;
     --p-green-200: #044015;
+    --p-green-300-75: #086924bf;
     --p-green-300: #086924;
     --p-green-400: #0F9535;
     --p-green-500-25: #18B04440;

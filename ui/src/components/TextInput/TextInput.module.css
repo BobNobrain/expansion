@@ -47,9 +47,14 @@
 .icon.icon-lock {
     cursor: default;
 }
+.icon-placeholder {
+    flex: 0 0 auto;
+    width: 22px;
+}
 
 .controls {
     flex: 0 0 auto;
+    margin-left: 4px;
 }
 
 .prefix, .suffix {
@@ -83,12 +88,21 @@
     top: calc(100% - 6px);
     right: 4px;
     padding: 2px 6px;
+    z-index: 1;
 
     color: var(--p-main-900);
     background-color: var(--p-main-300-75);
 
     font-size: 14px;
     line-height: 14px;
-    font-weight: 600;
-    font-variation-settings: "wght" 600;
+    font-weight: 500;
+    font-variation-settings: "wght" 500;
+}
+.hint.error {
+    color: var(--p-red-900);
+    background-color: var(--p-red-300-75);
+}
+.hint.success {
+    color: var(--p-green-900);
+    background-color: var(--p-green-300-75);
 }

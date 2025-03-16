@@ -4,6 +4,11 @@
     border: 1px solid transparent;
     border-radius: 50%;
     text-align: center;
+
+    /* for temp icons */
+    font-size: 10px;
+    line-height: 14px;
+    font-variation-settings: "wght" 600;
 }
 
 .icon.hint, .icon.lock {

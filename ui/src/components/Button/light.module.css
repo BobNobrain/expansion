@@ -1,0 +1,107 @@
+.primary {
+    --button-bg: var(--p-main-700-25);
+    --button-border: var(--p-main-700-50);
+    --button-text: var(--p-primary-500);
+    --button-shadow: var(--p-primary-500-25);
+}
+.primary:hover {
+    --button-bg: var(--p-main-700-50);
+    --button-text: var(--p-primary-700);
+    --button-shadow: var(--p-primary-500-50);
+}
+.primary:active {
+    --button-bg: transparent;
+    --button-border: var(--p-main-300-75);
+    --button-text: var(--p-primary-300);
+    --button-shadow: transparent;
+}
+
+.secondary {
+    --button-bg: var(--p-main-500-35);
+    --button-border: var(--p-main-700-50);
+    --button-text: var(--p-main-800);
+    --button-shadow: var(--p-main-500-35);
+}
+.secondary:hover {
+    --button-bg: var(--p-main-700-50);
+    --button-text: var(--p-main-900);
+    --button-shadow: var(--p-main-500);
+}
+.secondary:active {
+    --button-bg: transparent;
+    --button-border: var(--p-main-300-75);
+    --button-text: var(--p-main-300);
+    --button-shadow: transparent;
+}
+
+/* TODO: these are copied from style=solid, the colors should be reviewed */
+
+.accent {
+    --button-bg: var(--p-secondary-500-25);
+    --button-border: var(--p-secondary-500);
+    --button-text: var(--p-secondary-500);
+}
+.accent:hover {
+    --button-border: var(--p-secondary-700);
+}
+.accent:active {
+    --button-border: var(--p-secondary-300);
+    --button-bg: transparent;
+    --button-text: var(--p-secondary-300);
+}
+
+.info {
+    --button-bg: var(--p-blue-500-25);
+    --button-border: var(--p-blue-500);
+    --button-text: var(--p-blue-500);
+}
+.info:hover {
+    --button-border: var(--p-blue-700);
+}
+.info:active {
+    --button-border: var(--p-blue-300);
+    --button-bg: transparent;
+    --button-text: var(--p-blue-300);
+}
+
+.error {
+    --button-bg: var(--p-red-500-25);
+    --button-border: var(--p-red-500);
+    --button-text: var(--p-red-500);
+}
+.error:hover {
+    --button-border: var(--p-red-700);
+}
+.error:active {
+    --button-border: var(--p-red-300);
+    --button-bg: transparent;
+    --button-text: var(--p-red-300);
+}
+
+.success {
+    --button-bg: var(--p-green-500-25);
+    --button-border: var(--p-green-500);
+    --button-text: var(--p-green-500);
+}
+.success:hover {
+    --button-border: var(--p-green-700);
+}
+.success:active {
+    --button-border: var(--p-green-300);
+    --button-bg: transparent;
+    --button-text: var(--p-green-300);
+}
+
+.warn {
+    --button-bg: var(--p-orange-500-25);
+    --button-border: var(--p-orange-500);
+    --button-text: var(--p-orange-500);
+}
+.warn:hover {
+    --button-border: var(--p-orange-700);
+}
+.warn:active {
+    --button-border: var(--p-orange-300);
+    --button-bg: transparent;
+    --button-text: var(--p-orange-300);
+}

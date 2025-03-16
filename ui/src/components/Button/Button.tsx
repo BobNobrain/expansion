@@ -1,12 +1,11 @@
 import { type ParentProps, type Component, Show, createMemo } from 'solid-js';
 import { type SemanticColor } from '../../lib/appearance';
+import common from './Button.module.css';
+import lightStyleColors from './light.module.css';
 import solidStyleColors from './solid.module.css';
 import textStyleColors from './text.module.css';
-import sizes from './sizes.module.css';
-import common from './Button.module.css';
 
-export type ButtonWing = 'none' | 'up' | 'down';
-export type ButtonStyle = 'solid' | 'text';
+export type ButtonStyle = 'solid' | 'text' | 'light';
 export type ButtonSize = 's' | 'm';
 
 export type ButtonProps = ParentProps & {
@@ -20,15 +19,17 @@ export type ButtonProps = ParentProps & {
     loading?: boolean;
 
     onClick?: (ev: MouseEvent) => void;
+    type?: 'button' | 'submit'; // TODO: add 'link'?
 };
 
 export const Button: Component<ButtonProps> = (props) => {
     const onClick = (ev: MouseEvent) => {
-        if (!props.onClick || props.loading || props.disabled) {
+        if (props.loading || props.disabled) {
+            ev.preventDefault();
             return;
         }
 
-        props.onClick(ev);
+        props.onClick?.(ev);
     };
 
     const classList = createMemo<Record<string, boolean | undefined>>(() => {
@@ -45,13 +46,16 @@ export const Button: Component<ButtonProps> = (props) => {
             case 'text':
                 colorClassName = textStyleColors[color];
                 break;
+
+            case 'light':
+                colorClassName = lightStyleColors[color];
         }
 
         return {
             [colorClassName]: !props.disabled,
-            [sizes[size]]: true,
-            [common[style]]: true,
+            [common[size]]: true,
             [common.square]: props.square,
+            [common[style]]: true,
             [common.compact]: props.compact,
             [common.disabled]: props.disabled,
             [common.loading]: props.loading && !props.disabled,
@@ -59,7 +63,13 @@ export const Button: Component<ButtonProps> = (props) => {
     });
 
     return (
-        <button class={common.button} classList={classList()} onClick={onClick}>
+        <button
+            class={common.button}
+            classList={classList()}
+            onClick={onClick}
+            type={props.type ?? 'button'}
+            disabled={props.disabled || props.loading}
+        >
             <Show when={props.loading}>
                 <div class={common.loader} />
             </Show>

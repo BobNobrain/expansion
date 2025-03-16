@@ -31,11 +31,16 @@
     font-variation-settings: "wght" 600;
     letter-spacing: 1px;
 }
+.light {
+    background: radial-gradient(at center, var(--button-bg), var(--button-border));
+    box-shadow: 0 0 8px var(--button-shadow);
+    border-radius: 2px;
+    /* border: 1px solid var(--button-border); */
 
-.square {
-    width: var(--button-size);
-    padding-left: 0;
-    padding-right: 0;
+    color: var(--button-text);
+    font-weight: 600;
+    font-variation-settings: "wght" 600;
+    letter-spacing: 1px;
 }
 
 .button.disabled {
@@ -46,6 +51,31 @@
     --button-bg: transparent;
     --button-border: var(--p-main-700);
     --button-text: var(--p-main-700);
+}
+
+.s {
+    height: 28px;
+}
+.s.square {
+    width: 28px;
+}
+
+.m {
+    height: 36px;
+    padding: 10px 16px;
+
+    font-size: 16px;
+    line-height: 16px;
+}
+.m.square {
+    width: 36px;
+    padding: 0;
+}
+
+.square {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .button.loading {

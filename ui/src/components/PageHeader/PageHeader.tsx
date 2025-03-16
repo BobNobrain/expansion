@@ -1,4 +1,6 @@
-import { type ParentComponent } from 'solid-js';
+import { type Component, Show, type ParentComponent } from 'solid-js';
+import { Dynamic } from 'solid-js/web';
+import { type Icon } from '../../icons';
 import { Text } from '../Text/Text';
 import styles from './PageHeader.module.css';
 
@@ -14,6 +16,21 @@ export const PageHeaderTitle: ParentComponent = (props) => {
     );
 };
 
-export const PageHeaderSuperscript: ParentComponent = (props) => {
-    return <Text color="dim">{props.children}</Text>;
+export type PageHeaderIconProps = {
+    icon: Icon;
+    text?: string;
+};
+export const PageHeaderIcon: Component<PageHeaderIconProps> = (props) => {
+    return (
+        <div class={styles.iconWrapper}>
+            <Dynamic component={props.icon} size={20} />
+            <Show when={props.text}>
+                <span class={styles.iconText}>{props.text}</span>
+            </Show>
+        </div>
+    );
+};
+
+export const PageHeaderActions: ParentComponent = (props) => {
+    return <div class={styles.actions}>{props.children}</div>;
 };

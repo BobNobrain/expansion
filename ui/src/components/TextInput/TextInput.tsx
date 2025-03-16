@@ -8,6 +8,8 @@ export type TextInputProps = {
     onUpdate: (newValue: string, ev: Event) => void;
 
     onKeyUp?: (ev: KeyboardEvent) => void;
+    onFocus?: (ev: FocusEvent) => void;
+    onBlur?: (ev: FocusEvent) => void;
 
     label?: string;
     suffix?: string;
@@ -103,10 +105,12 @@ export const TextInput: Component<TextInputProps> = (props) => {
                     <InputIcon type="lock" />
                 </div>
             </Show>
-            <Show when={visuals().appearance === 'normal' && Boolean(props.hint)}>
-                <div class={styles.icon} onClick={toggleHint}>
-                    <InputIcon type="hint" />
-                </div>
+            <Show when={visuals().appearance === 'normal'}>
+                <Show when={props.hint} fallback={<div class={styles.iconPlaceholder} />}>
+                    <div class={styles.icon} onClick={toggleHint}>
+                        <InputIcon type="hint" />
+                    </div>
+                </Show>
             </Show>
             <Show when={props.controls}>
                 <div class={styles.controls}>{props.controls}</div>
@@ -124,6 +128,8 @@ export const TextInput: Component<TextInputProps> = (props) => {
                 type={props.password ? 'password' : 'text'}
                 placeholder={props.placeholder}
                 onKeyUp={props.onKeyUp}
+                onFocus={props.onFocus}
+                onBlur={props.onBlur}
             />
             <Show when={props.suffix}>
                 <span class={styles.suffix}>{props.suffix}</span>

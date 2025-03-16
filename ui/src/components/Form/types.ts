@@ -12,8 +12,8 @@ export type ValidationState =
           type: 'loading';
       };
 
-export type FormFieldController = {
-    retrieveValue: () => unknown;
+export type FormFieldController<T = unknown> = {
+    retrieveValue: () => T;
     validate: () => boolean;
 };
 
