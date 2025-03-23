@@ -2,48 +2,47 @@ package globaldata
 
 import (
 	"slices"
+	"srv/internal/game"
 	"srv/internal/globals/assets"
 	"srv/internal/utils/phys"
 	"srv/internal/utils/phys/material"
-	"srv/internal/world"
-	"srv/internal/world/crafting"
 )
 
 type CraftingRegistry struct {
-	commodities        map[crafting.CommodityID]crafting.Commodity
-	resources          map[world.ResourceID]world.ResourceData
-	resourceIDs        []world.ResourceID // this one is needed for consistent iteration order when generating worlds
-	materialToResource map[material.MaterialID]world.ResourceID
+	commodities        map[game.CommodityID]game.Commodity
+	resources          map[game.ResourceID]game.ResourceData
+	resourceIDs        []game.ResourceID // this one is needed for consistent iteration order when generating worlds
+	materialToResource map[material.MaterialID]game.ResourceID
 }
 
 func newCraftingRegistry() *CraftingRegistry {
 	return &CraftingRegistry{
-		commodities:        make(map[crafting.CommodityID]crafting.Commodity),
-		resources:          make(map[world.ResourceID]world.ResourceData),
-		materialToResource: make(map[material.MaterialID]world.ResourceID),
+		commodities:        make(map[game.CommodityID]game.Commodity),
+		resources:          make(map[game.ResourceID]game.ResourceData),
+		materialToResource: make(map[material.MaterialID]game.ResourceID),
 	}
 }
 
 func (r *CraftingRegistry) fill(commoditiesData *assets.CommoditiesAsset) {
 	for id, data := range commoditiesData.Commodities {
-		r.commodities[crafting.CommodityID(id)] = crafting.Commodity{
-			CommodityID: crafting.CommodityID(id),
+		r.commodities[game.CommodityID(id)] = game.Commodity{
+			CommodityID: game.CommodityID(id),
 			Mass:        phys.Kilograms(data.Mass),
 			Volume:      phys.CubicMeters(data.Volume),
 			IsQuantized: data.IsQuantized,
 		}
 	}
 
-	r.resourceIDs = make([]world.ResourceID, 0, len(commoditiesData.Resources))
+	r.resourceIDs = make([]game.ResourceID, 0, len(commoditiesData.Resources))
 	for id, data := range commoditiesData.Resources {
-		rid := world.ResourceID(id)
-		cid := crafting.CommodityID(id)
+		rid := game.ResourceID(id)
+		cid := game.CommodityID(id)
 
 		if _, found := r.commodities[cid]; !found {
 			panic("crafting data invalid: no commodity for resource " + id)
 		}
 
-		r.resources[rid] = world.ResourceData{
+		r.resources[rid] = game.ResourceData{
 			ResourceID:    rid,
 			CommodityID:   cid,
 			Abundance:     data.Abundance,
@@ -55,7 +54,7 @@ func (r *CraftingRegistry) fill(commoditiesData *assets.CommoditiesAsset) {
 	slices.Sort(r.resourceIDs)
 
 	for matID, resourceID := range commoditiesData.WGMaterialsMap {
-		rid := world.ResourceID(resourceID)
+		rid := game.ResourceID(resourceID)
 		mid := material.MaterialID(matID)
 
 		if Materials().GetByID(mid) == nil {
@@ -66,17 +65,17 @@ func (r *CraftingRegistry) fill(commoditiesData *assets.CommoditiesAsset) {
 	}
 }
 
-func (r *CraftingRegistry) GetCommodity(id crafting.CommodityID) crafting.Commodity {
+func (r *CraftingRegistry) GetCommodity(id game.CommodityID) game.Commodity {
 	return r.commodities[id]
 }
 
-func (r *CraftingRegistry) GetResourceData(id world.ResourceID) world.ResourceData {
+func (r *CraftingRegistry) GetResourceData(id game.ResourceID) game.ResourceData {
 	return r.resources[id]
 }
-func (r *CraftingRegistry) GetAllResourceIDs() []world.ResourceID {
+func (r *CraftingRegistry) GetAllResourceIDs() []game.ResourceID {
 	return r.resourceIDs
 }
 
-func (r *CraftingRegistry) GetResourceForMaterial(id material.MaterialID) world.ResourceData {
+func (r *CraftingRegistry) GetResourceForMaterial(id material.MaterialID) game.ResourceData {
 	return r.resources[r.materialToResource[id]]
 }

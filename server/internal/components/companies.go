@@ -2,8 +2,8 @@ package components
 
 import (
 	"srv/internal/domain"
+	"srv/internal/game"
 	"srv/internal/utils/common"
-	"srv/internal/world"
 )
 
 type CreateCompanyPayload struct {
@@ -12,8 +12,8 @@ type CreateCompanyPayload struct {
 }
 
 type CompaniesRepo interface {
-	Create(CreateCompanyPayload) (world.CompanyOverview, common.Error)
-	ResolveOverviews([]world.CompanyID) (map[world.CompanyID]world.CompanyOverview, common.Error)
+	Create(CreateCompanyPayload) (game.CompanyOverview, common.Error)
+	ResolveOverviews([]game.CompanyID) (map[game.CompanyID]game.CompanyOverview, common.Error)
 
-	GetCompanyData(world.CompanyID) (world.CompanyData, common.Error)
+	GetCompanyData(game.CompanyID) (game.CompanyData, common.Error)
 }

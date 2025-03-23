@@ -5,17 +5,17 @@ import (
 	"srv/internal/components"
 	"srv/internal/datafront/dfcore"
 	"srv/internal/events"
+	"srv/internal/game"
 	"srv/internal/globals/eb"
 	"srv/internal/globals/logger"
 	"srv/internal/utils/common"
 	"srv/internal/utils/geom"
-	"srv/internal/world"
 	"srv/pkg/api"
 	"srv/pkg/dfapi"
 )
 
 type sysOverviewsTable struct {
-	repo components.StarSystemsRepo
+	repo components.StarSystemsRepoReadonly
 	sub  eb.Subscription
 
 	table       *dfcore.QueryableTable
@@ -23,7 +23,7 @@ type sysOverviewsTable struct {
 	qByCoords   *dfcore.TrackableTableQuery[api.SysOverviewsQueryByCoords]
 }
 
-func (gdf *GameDataFront) InitSysOverviews(repo components.StarSystemsRepo) {
+func (gdf *GameDataFront) InitSysOverviews(repo components.StarSystemsRepoReadonly) {
 	if gdf.sysOverviews != nil {
 		panic("GameDataFront.InitSystemOverviews() has already been called!")
 	}
@@ -56,7 +56,7 @@ func (u *sysOverviewsTable) onSystemUpdated(payload events.GalaxySystemUpdate, _
 	}
 
 	update := make(map[dfcore.EntityID]common.Encodable)
-	update[dfcore.EntityID(payload.SystemID)] = encodeSystemOverview(world.StarSystemOverview{
+	update[dfcore.EntityID(payload.SystemID)] = encodeSystemOverview(game.StarSystemOverview{
 		ID:         system.ID,
 		IsExplored: !system.Explored.By.IsEmpty(),
 		Stars:      system.Stars,
@@ -82,7 +82,7 @@ func (u *sysOverviewsTable) queryBySectorID(
 		)
 	}
 
-	overviews, err := u.repo.GetOverviews(world.GalacticSectorID(q.SectorID))
+	overviews, err := u.repo.GetOverviews(game.GalacticSectorID(q.SectorID))
 	if err != nil {
 		return nil, err
 	}
@@ -102,9 +102,9 @@ func (u *sysOverviewsTable) queryByCoords(
 ) (*dfcore.TableResponse, common.Error) {
 	overviews, err := u.repo.GetSystemsOnMap(components.StarSystemRepoMapRequest{
 		Limit: q.Limit,
-		Sector: world.GalacticSectorCoords{
-			InnerR:     world.GalacticCoordsRadius(q.RMin),
-			OuterR:     world.GalacticCoordsRadius(q.RMax),
+		Sector: game.GalacticSectorCoords{
+			InnerR:     game.GalacticCoordsRadius(q.RMin),
+			OuterR:     game.GalacticCoordsRadius(q.RMax),
 			ThetaStart: geom.Radians(q.ThetaStart),
 			ThetaEnd:   geom.Radians(q.ThetaEnd),
 		},
@@ -121,7 +121,7 @@ func (u *sysOverviewsTable) queryByCoords(
 	return result, nil
 }
 
-func encodeSystemOverview(overview world.StarSystemOverview) common.Encodable {
+func encodeSystemOverview(overview game.StarSystemOverview) common.Encodable {
 	stars := make([]api.SysOverviewsTableRowStar, 0, len(overview.Stars))
 	for _, star := range overview.Stars {
 		stars = append(stars, api.SysOverviewsTableRowStar{

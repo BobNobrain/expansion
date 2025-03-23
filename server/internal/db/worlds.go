@@ -6,16 +6,18 @@ import (
 	"srv/internal/components"
 	"srv/internal/db/dbq"
 	"srv/internal/domain"
+	"srv/internal/game"
 	"srv/internal/globals/globaldata"
+	"srv/internal/utils"
 	"srv/internal/utils/color"
 	"srv/internal/utils/common"
 	"srv/internal/utils/geom"
 	"srv/internal/utils/phys"
-	"srv/internal/world"
 )
 
 type worldsRepoImpl struct {
-	q *dbq.Queries
+	q   *dbq.Queries
+	ctx context.Context
 }
 
 type worldDataJSON struct {
@@ -61,7 +63,7 @@ func (w *worldsRepoImpl) CreateWorlds(worlds []components.CreateWorldPayload) co
 		})
 	}
 
-	_, err := w.q.CreateWorlds(context.Background(), createData)
+	_, err := w.q.CreateWorlds(w.ctx, createData)
 	if err != nil {
 		return makeDBError(err, "WorldsRepo::CreateWorlds")
 	}
@@ -143,7 +145,7 @@ func (w *worldsRepoImpl) ExploreWorld(payload components.ExploreWorldPayload) co
 		return makeDBError(jerr, "WorldsRepo::ExploreWorld(SurfaceData.ToJSON)")
 	}
 
-	dberr := w.q.ExploreWorld(context.Background(), dbq.ExploreWorldParams{
+	dberr := w.q.ExploreWorld(w.ctx, dbq.ExploreWorldParams{
 		ExploredBy:         uuid,
 		BodyID:             string(payload.ID),
 		SurfacePressureBar: payload.Data.Conditions.Pressure.Bar(),
@@ -159,14 +161,14 @@ func (w *worldsRepoImpl) ExploreWorld(payload components.ExploreWorldPayload) co
 	return nil
 }
 
-func (w *worldsRepoImpl) GetData(worldID world.CelestialID) (world.WorldData, common.Error) {
-	worlds, err := w.GetDataMany([]world.CelestialID{worldID})
+func (w *worldsRepoImpl) GetData(worldID game.CelestialID) (game.WorldData, common.Error) {
+	worlds, err := w.GetDataMany([]game.CelestialID{worldID})
 	if err != nil {
-		return world.WorldData{}, err
+		return game.WorldData{}, err
 	}
 
 	if len(worlds) == 0 {
-		return world.WorldData{}, common.NewError(
+		return game.WorldData{}, common.NewError(
 			common.WithCode("ERR_NOT_FOUND"),
 			common.WithMessage("specified world not found"),
 			common.WithDetails(
@@ -178,53 +180,39 @@ func (w *worldsRepoImpl) GetData(worldID world.CelestialID) (world.WorldData, co
 	return worlds[0], nil
 }
 
-func (w *worldsRepoImpl) GetDataMany(ids []world.CelestialID) ([]world.WorldData, common.Error) {
-	strIds := make([]string, 0, len(ids))
-	for _, id := range ids {
-		strIds = append(strIds, string(id))
-	}
-
-	rows, dberr := w.q.ResolveWorlds(context.Background(), strIds)
+func (w *worldsRepoImpl) GetDataMany(ids []game.CelestialID) ([]game.WorldData, common.Error) {
+	rows, dberr := w.q.ResolveWorlds(w.ctx, utils.ConvertStrings[game.CelestialID, string](ids))
 	if dberr != nil {
 		return nil, makeDBError(dberr, "WorldsRepo::GetDataMany")
 	}
 
-	worlds := make([]world.WorldData, 0, len(rows))
-	for _, row := range rows {
-		world, err := decodeWorld(row)
-		if err != nil {
-			return nil, err
-		}
-		worlds = append(worlds, world)
-	}
-
-	return worlds, nil
+	return utils.MapFailable(rows, decodeWorld)
 }
 
-func (w *worldsRepoImpl) GetOverviews(systemID world.StarSystemID) ([]world.WorldOverview, common.Error) {
-	rows, dberr := w.q.GetWorldsInSystem(context.Background(), string(systemID))
+func (w *worldsRepoImpl) GetOverviews(systemID game.StarSystemID) ([]game.WorldOverview, common.Error) {
+	rows, dberr := w.q.GetWorldsInSystem(w.ctx, string(systemID))
 	if dberr != nil {
 		return nil, makeDBError(dberr, "WorldsRepo::GetOverviews")
 	}
 
-	result := make([]world.WorldOverview, 0, len(rows))
+	result := make([]game.WorldOverview, 0, len(rows))
 	for _, row := range rows {
-		result = append(result, world.WorldOverview{
-			ID:         world.CelestialID(row.BodyID),
+		result = append(result, game.WorldOverview{
+			ID:         game.CelestialID(row.BodyID),
 			IsExplored: row.ExploredAt.Valid && row.ExploredBy.Valid,
 			Size:       int(row.GridSize),
-			Conditions: world.WorldConditions{
+			Conditions: game.WorldConditions{
 				Pressure: phys.Bar(row.SurfacePressureBar),
 				AvgTemp:  phys.Kelvins(row.SurfaceAvgTempK),
 				Gravity:  phys.EarthGs(row.SurfaceGravityG),
 			},
-			Params: world.WorldParams{
+			Params: game.WorldParams{
 				Radius: phys.Kilometers(row.RadiusKm),
 				Mass:   phys.EarthMasses(row.MassEarths),
 				Age:    phys.BillionYears(row.AgeByrs),
 				Class:  decodeWorldClass(row.Class),
 			},
-			Population: world.WorldPopulationOverview{
+			Population: game.WorldPopulationOverview{
 				NPops:   int(row.Population),
 				NCities: int(row.NCities),
 				NBases:  int(row.NBases),
@@ -235,36 +223,36 @@ func (w *worldsRepoImpl) GetOverviews(systemID world.StarSystemID) ([]world.Worl
 	return result, nil
 }
 
-func encodeWorldClass(class world.CelestialBodyClass) string {
+func encodeWorldClass(class game.CelestialBodyClass) string {
 	switch class {
-	case world.CelestialBodyClassGaseous:
+	case game.CelestialBodyClassGaseous:
 		return "G"
-	case world.CelestialBodyClassTerrestial:
+	case game.CelestialBodyClassTerrestial:
 		return "T"
 	default:
 		return "?"
 	}
 }
-func decodeWorldClass(class string) world.CelestialBodyClass {
+func decodeWorldClass(class string) game.CelestialBodyClass {
 	switch class {
 	case "G":
-		return world.CelestialBodyClassGaseous
+		return game.CelestialBodyClassGaseous
 	case "T":
-		return world.CelestialBodyClassTerrestial
+		return game.CelestialBodyClassTerrestial
 	default:
-		return world.CelestialBodyClassTerrestial
+		return game.CelestialBodyClassTerrestial
 	}
 }
 
-func decodeWorld(row dbq.ResolveWorldsRow) (world.WorldData, common.Error) {
+func decodeWorld(row dbq.ResolveWorldsRow) (game.WorldData, common.Error) {
 	dbWorldData, err := parseJSON[worldDataJSON](row.SurfaceData)
 	if err != nil {
-		return world.WorldData{}, err
+		return game.WorldData{}, err
 	}
 
 	nTiles := len(dbWorldData.Coords) / 3
 	coords := make([]geom.Vec3, 0, nTiles)
-	tiles := make([]world.WorldDataTile, 0, nTiles)
+	tiles := make([]game.WorldDataTile, 0, nTiles)
 
 	for i := 0; i < nTiles; i++ {
 		coords = append(coords, geom.Vec3{
@@ -273,72 +261,72 @@ func decodeWorld(row dbq.ResolveWorldsRow) (world.WorldData, common.Error) {
 			Z: dbWorldData.Coords[i*3+2],
 		})
 
-		tiles = append(tiles, world.WorldDataTile{
+		tiles = append(tiles, game.WorldDataTile{
 			Color: color.RichColorRGB{
 				R: dbWorldData.TileColors[i*3+0],
 				G: dbWorldData.TileColors[i*3+1],
 				B: dbWorldData.TileColors[i*3+2],
 			},
 			AvgTemp:   phys.Kelvins(dbWorldData.TileTempsK[i]),
-			Surface:   world.BiomeSurface(dbWorldData.TileSurface[i]),
+			Surface:   game.BiomeSurface(dbWorldData.TileSurface[i]),
 			Pressure:  phys.Bar(dbWorldData.TilePressuresBar[i]),
 			Elevation: dbWorldData.TileElevations[i],
 		})
 	}
 
-	var fertileTiles []world.FertileWorldDataTile
+	var fertileTiles []game.FertileWorldDataTile
 	if len(dbWorldData.TileFertilities) > 0 {
-		fertileTiles = make([]world.FertileWorldDataTile, 0, len(dbWorldData.TileFertilities))
+		fertileTiles = make([]game.FertileWorldDataTile, 0, len(dbWorldData.TileFertilities))
 
 		for i := range dbWorldData.TileFertilities {
-			fertileTiles = append(fertileTiles, world.FertileWorldDataTile{
+			fertileTiles = append(fertileTiles, game.FertileWorldDataTile{
 				SoilFertility: dbWorldData.TileFertilities[i],
 				MoistureLevel: dbWorldData.TileMoistures[i],
 			})
 		}
 	}
 
-	var explorationData *world.ExplorationData
+	var explorationData *game.ExplorationData
 	if row.ExploredAt.Valid && row.ExploredBy.Valid {
-		explorationData = &world.ExplorationData{
+		explorationData = &game.ExplorationData{
 			At: row.ExploredAt.Time,
 			By: domain.UserID(row.ExploredBy.String()),
 		}
 	}
 
-	resourceDeposits := make(map[int][]world.ResourceDeposit)
+	resourceDeposits := make(map[int][]game.ResourceDeposit)
 	for _, depositData := range dbWorldData.TileResources {
-		resourceDeposits[depositData.TileID] = append(resourceDeposits[depositData.TileID], world.ResourceDeposit{
-			ResourceID: world.ResourceID(depositData.ResourceID),
+		resourceDeposits[depositData.TileID] = append(resourceDeposits[depositData.TileID], game.ResourceDeposit{
+			ResourceID: game.ResourceID(depositData.ResourceID),
 			Abundance:  depositData.Abundance,
 		})
 	}
 
-	return world.WorldData{
-		ID:           world.CelestialID(row.BodyID),
+	return game.WorldData{
+		ID:           game.CelestialID(row.BodyID),
 		Grid:         geom.RestoreSpatialGraph(coords, dbWorldData.Graph),
 		Tiles:        tiles,
 		FertileTiles: fertileTiles,
 		Explored:     explorationData,
-		Composition: world.WorldComposition{
+		Composition: game.WorldComposition{
 			OceanLevel: dbWorldData.OceanLevel,
 			Atmosphere: globaldata.Materials().RestoreCompoundFromMap(dbWorldData.Atmosphere),
 			Oceans:     globaldata.Materials().RestoreCompoundFromMap(dbWorldData.Oceans),
 			Snow:       globaldata.Materials().RestoreCompoundFromMap(dbWorldData.Snow),
 		},
 		TileElevationsScale: phys.Kilometers(dbWorldData.ElevationsScaleKm),
-		Conditions: world.WorldConditions{
+		Conditions: game.WorldConditions{
 			Pressure: phys.Bar(row.SurfacePressureBar),
 			AvgTemp:  phys.Kelvins(row.SurfaceAvgTempK),
 			Gravity:  phys.EarthGs(row.SurfaceGravityG),
 		},
-		Params: world.WorldParams{
+		Params: game.WorldParams{
 			Radius: phys.Kilometers(row.RadiusKm),
 			Mass:   phys.EarthMasses(row.MassEarths),
 			Age:    phys.BillionYears(row.AgeByrs),
 			Class:  decodeWorldClass(row.Class),
 		},
-		Population: world.WorldPopulationOverview{
+		Population: game.WorldPopulationOverview{
 			NPops:   int(row.Population),
 			NCities: int(row.NCities),
 			NBases:  int(row.NBases),

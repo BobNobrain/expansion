@@ -2,16 +2,16 @@ package datafront
 
 import (
 	"srv/internal/datafront/dfcore"
+	"srv/internal/game"
 	"srv/internal/globals/assets"
 	"srv/internal/utils/common"
-	"srv/internal/world"
 	"srv/pkg/api"
 )
 
 type galaxyMapSingleton struct {
 	value dfcore.QueryableSingleton
 
-	grid      world.GalacticGrid
+	grid      game.GalacticGrid
 	valueData *api.DFGalaxyValue
 }
 
@@ -31,9 +31,9 @@ func (gmap *galaxyMapSingleton) getValue(_ dfcore.DFRequestContext) (common.Enco
 
 func (gmap *galaxyMapSingleton) init() {
 	valueData := &api.DFGalaxyValue{
-		OuterR: float64(world.OuterRimRadius),
-		InnerR: float64(world.InnerRimRadius),
-		MaxH:   float64(world.MaxHeightDispacement),
+		OuterR: float64(game.OuterRimRadius),
+		InnerR: float64(game.InnerRimRadius),
+		MaxH:   float64(game.MaxHeightDispacement),
 	}
 
 	if gmap.grid == nil {

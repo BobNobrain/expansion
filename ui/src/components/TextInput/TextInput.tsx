@@ -5,7 +5,7 @@ import { InputIcon } from '../InputIcon/InputIcon';
 
 export type TextInputProps = {
     value: string;
-    onUpdate: (newValue: string, ev: Event) => void;
+    onUpdate?: (newValue: string, ev: Event) => void;
 
     onKeyUp?: (ev: KeyboardEvent) => void;
     onFocus?: (ev: FocusEvent) => void;
@@ -24,7 +24,6 @@ export type TextInputProps = {
     clearable?: boolean;
     inputMode?: JSX.InputHTMLAttributes<'text'>['inputMode'];
 
-    formKey?: string;
     validity?: ValidationState;
 };
 
@@ -38,7 +37,7 @@ export const TextInput: Component<TextInputProps> = (props) => {
     let inputRef!: HTMLInputElement;
 
     const updateValue = (ev: Event) => {
-        props.onUpdate((ev.target as HTMLInputElement).value, ev);
+        props.onUpdate?.((ev.target as HTMLInputElement).value, ev);
     };
 
     registerInFormContext(props, {});

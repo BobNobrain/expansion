@@ -2,20 +2,21 @@ package monolith
 
 import (
 	"fmt"
+	"srv/internal/components"
 	"srv/internal/components/auth"
 	"srv/internal/datafront"
 	"srv/internal/db"
-	"srv/internal/game/galaxymap"
+	"srv/internal/game/worldgen"
 	"srv/internal/globals/config"
 	"srv/internal/globals/logger"
 	"srv/internal/transport/http"
 	"srv/internal/transport/ws"
-	"srv/internal/world/worldgen"
+	"srv/internal/usecases"
 )
 
 type Monolith struct {
 	// runner components.Runner
-	store *db.Storage
+	store components.Storage
 	gdf   *datafront.GameDataFront
 }
 
@@ -24,18 +25,11 @@ func New() *Monolith {
 }
 
 func (m *Monolith) Start() error {
-	store := db.NewDBPermastore()
+	store := db.NewDBStorage()
 	m.store = store
 
-	userRepo := store.UserRepo()
-	auth := auth.NewAuthenticator(userRepo)
-
+	auth := auth.NewAuthenticator(store.Users())
 	worldGen := worldgen.NewWorldGen(config.World().Seed)
-	gmap := galaxymap.New(galaxymap.GalaxyMapOptions{
-		WorldGen:    worldGen,
-		StarSystems: store.StarSystemsRepo(),
-		Worlds:      store.WorldsRepo(),
-	})
 
 	gdf := datafront.NewDataFront()
 	m.gdf = gdf
@@ -43,18 +37,21 @@ func (m *Monolith) Start() error {
 	gdf.Run(comms)
 
 	gdf.InitGalaxyMap()
-	gdf.InitMeSingleton(userRepo)
+	gdf.InitMeSingleton(store.Users())
 
-	gdf.InitSysOverviews(store.StarSystemsRepo())
-	gdf.InitSystems(store.StarSystemsRepo())
-	gdf.InitWorldOverviews(store.WorldsRepo())
-	gdf.InitWorlds(store.WorldsRepo())
+	gdf.InitSysOverviews(store.Systems())
+	gdf.InitSystems(store.Systems())
+	gdf.InitWorldOverviews(store.Worlds())
+	gdf.InitWorlds(store.Worlds())
 
-	gdf.InitUsers(userRepo, comms)
+	gdf.InitUsers(store.Users(), comms)
 	gdf.InitOnline(comms)
 
-	gdf.InitExploreActions(gmap)
-	// gdf.InitCityActions(store.CitiesRepo())
+	gdf.InitExploreActions(
+		usecases.NewExploreSystemUsecase(worldGen, store),
+		usecases.NewExploreWorldUsecase(worldGen, store),
+	)
+	gdf.InitCityActions(usecases.NewFoundCityUsecase(store))
 	// gdf.InitBaseActions(...)
 
 	srv, herr := http.NewHTTPServer(auth, comms)

@@ -4,22 +4,22 @@ import (
 	"srv/internal/components"
 	"srv/internal/datafront/dfcore"
 	"srv/internal/events"
+	"srv/internal/game"
 	"srv/internal/globals/eb"
 	"srv/internal/globals/logger"
 	"srv/internal/utils/common"
-	"srv/internal/world"
 	"srv/pkg/api"
 	"srv/pkg/dfapi"
 	"time"
 )
 
 type worldsTable struct {
-	repo  components.WorldsRepo
+	repo  components.WorldsRepoReadonly
 	table *dfcore.QueryableTable
 	sub   eb.Subscription
 }
 
-func (gdf *GameDataFront) InitWorlds(repo components.WorldsRepo) {
+func (gdf *GameDataFront) InitWorlds(repo components.WorldsRepoReadonly) {
 	if gdf.worlds != nil {
 		panic("GameDataFront.InitWorlds() has already been called!")
 	}
@@ -40,9 +40,9 @@ func (w *worldsTable) queryByIDs(
 	req dfapi.DFTableRequest,
 	_ dfcore.DFRequestContext,
 ) (*dfcore.TableResponse, common.Error) {
-	worldIDs := make([]world.CelestialID, 0, len(req.IDs))
+	worldIDs := make([]game.CelestialID, 0, len(req.IDs))
 	for _, id := range req.IDs {
-		worldID := world.CelestialID(id)
+		worldID := game.CelestialID(id)
 
 		if !worldID.IsPlanetID() && !worldID.IsMoonID() {
 			return nil, common.NewValidationError(
@@ -79,7 +79,7 @@ func (t *worldsTable) onWorldUpdated(payload events.GalaxyWorldUpdate, ev eb.Eve
 	t.table.PublishEntities(update)
 }
 
-func encodeWorld(w world.WorldData) common.Encodable {
+func encodeWorld(w game.WorldData) common.Encodable {
 	var exploredBy string
 	var exploredAt time.Time
 
@@ -161,4 +161,8 @@ func encodeWorld(w world.WorldData) common.Encodable {
 		NBases:  w.Population.NBases,
 		NCities: w.Population.NCities,
 	})
+}
+
+func (w *worldsTable) dispose() {
+	w.sub.UnsubscribeAll()
 }

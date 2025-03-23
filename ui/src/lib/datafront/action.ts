@@ -2,7 +2,7 @@ import { createMemo, createSignal } from 'solid-js';
 import { type DFActionRequest } from '../net/datafront.generated';
 import { type WSClient } from '../net/ws';
 import { toDatafrontError } from './error';
-import { type DatafrontAction, type DatafrontError } from './types';
+import { type DatafrontActionCallbacks, type DatafrontAction, type DatafrontError } from './types';
 
 export type DatafrontActionOptions = {
     name: string;
@@ -10,7 +10,7 @@ export type DatafrontActionOptions = {
 };
 
 export type RunningAction<P, R> = {
-    run: (payload: P) => void;
+    run: (payload: P, callbacks?: DatafrontActionCallbacks) => void;
     result: () => R | null;
     isLoading: () => boolean;
     error: () => DatafrontError | null;
@@ -23,7 +23,7 @@ function createRunningAction<P, R>(impl: (payload: P) => Promise<R>): RunningAct
     let canRun = true;
 
     const action: RunningAction<P, R> = {
-        run: (payload) => {
+        run: (payload, callbacks) => {
             if (!canRun) {
                 return;
             }
@@ -36,9 +36,10 @@ function createRunningAction<P, R>(impl: (payload: P) => Promise<R>): RunningAct
                     // eslint-disable-next-line @typescript-eslint/ban-types
                     setResult(r as Exclude<R, Function>);
                     setLoading(false);
+                    callbacks?.onSuccess?.();
                 })
                 .catch((err) => {
-                    const dfErr = toDatafrontError(err, () => action.run(payload));
+                    const dfErr = toDatafrontError(err, () => action.run(payload, callbacks));
                     console.error('[action]', err);
                     setError(dfErr);
                     setLoading(false);
@@ -80,7 +81,7 @@ export function createDatafrontAction<Payload, Result = void>({
                 isLoading: createMemo(() => getAction().isLoading()),
                 error: createMemo(() => getAction().error()),
                 result: createMemo(() => getAction().result()),
-                run: (p) => getAction().run(p),
+                run: (p, c) => getAction().run(p, c),
             };
         },
     };

@@ -10,7 +10,8 @@ import (
 )
 
 type namesRegistryImpl struct {
-	q *dbq.Queries
+	q   *dbq.Queries
+	ctx context.Context
 }
 
 // TODO: is this even used anywhere?
@@ -26,7 +27,7 @@ func (n *namesRegistryImpl) GetCurrentNameOf(id string) (domain.NamesRegistryEnt
 }
 
 func (n *namesRegistryImpl) GetCurrentNamesOf(ids []string) (map[string]domain.NamesRegistryEntryShort, common.Error) {
-	dbNames, err := n.q.ResolveNames(context.Background(), ids)
+	dbNames, err := n.q.ResolveNames(n.ctx, ids)
 	if err != nil {
 		return nil, makeDBError(err, "CNR::GetCurrentNamesOf")
 	}
@@ -51,7 +52,7 @@ func (n *namesRegistryImpl) Review(review components.NamesRegistryReview) common
 	}
 
 	if review.ShouldApprove {
-		dberr := n.q.ApproveName(context.Background(), dbq.ApproveNameParams{
+		dberr := n.q.ApproveName(n.ctx, dbq.ApproveNameParams{
 			EntryID:    int32(review.EntryID),
 			ReviewerID: reviewerUUID,
 		})
@@ -62,7 +63,7 @@ func (n *namesRegistryImpl) Review(review components.NamesRegistryReview) common
 		return nil
 	}
 
-	dberr := n.q.DeclineName(context.Background(), dbq.DeclineNameParams{
+	dberr := n.q.DeclineName(n.ctx, dbq.DeclineNameParams{
 		EntryID:       int32(review.EntryID),
 		ReviewerID:    reviewerUUID,
 		ReviewComment: review.Comment,
@@ -80,7 +81,7 @@ func (n *namesRegistryImpl) SuggestName(rq components.NamesRegistrySuggestion) c
 		return err
 	}
 
-	dberr := n.q.SubmitName(context.Background(), dbq.SubmitNameParams{
+	dberr := n.q.SubmitName(n.ctx, dbq.SubmitNameParams{
 		CelestialID: rq.ObjectID,
 		AuthorID:    authorUUID,
 		Name:        rq.Name,
@@ -97,7 +98,7 @@ func (n *namesRegistryImpl) GetEntriesByAuthor(authorID domain.UserID, page pagi
 		return pagination.EmptyPage[domain.NamesRegistryEntry](), err
 	}
 
-	rows, dberr := n.q.ListNameSubmissionsByAuthor(context.Background(), dbq.ListNameSubmissionsByAuthorParams{
+	rows, dberr := n.q.ListNameSubmissionsByAuthor(n.ctx, dbq.ListNameSubmissionsByAuthorParams{
 		Limit:    int32(page.Limit),
 		Offset:   int32(page.Offset),
 		AuthorID: authorUUID,
@@ -108,7 +109,7 @@ func (n *namesRegistryImpl) GetEntriesByAuthor(authorID domain.UserID, page pagi
 
 	entries := decodeNameSuggestions(rows)
 
-	total, dberr := n.q.ListNameEntriesByAuthorTotal(context.Background(), authorUUID)
+	total, dberr := n.q.ListNameEntriesByAuthorTotal(n.ctx, authorUUID)
 	if dberr != nil {
 		return pagination.EmptyPage[domain.NamesRegistryEntry](), makeDBError(err, "CNR::GetEntriesByAuthor(Total)")
 	}
@@ -123,7 +124,7 @@ func (n *namesRegistryImpl) GetEntriesByAuthor(authorID domain.UserID, page pagi
 }
 
 func (n *namesRegistryImpl) GetSuggestionsBacklog(page pagination.PageParams) (pagination.Page[domain.NamesRegistryEntry], common.Error) {
-	rows, dberr := n.q.ListPendingNameSubmissions(context.Background(), dbq.ListPendingNameSubmissionsParams{
+	rows, dberr := n.q.ListPendingNameSubmissions(n.ctx, dbq.ListPendingNameSubmissionsParams{
 		Limit:  int32(page.Limit),
 		Offset: int32(page.Offset),
 	})
@@ -132,7 +133,7 @@ func (n *namesRegistryImpl) GetSuggestionsBacklog(page pagination.PageParams) (p
 	}
 
 	entries := decodeNameSuggestions(rows)
-	total, dberr := n.q.ListPendingNameSubmissionsTotal(context.Background())
+	total, dberr := n.q.ListPendingNameSubmissionsTotal(n.ctx)
 	if dberr != nil {
 		return pagination.EmptyPage[domain.NamesRegistryEntry](), makeDBError(dberr, "CNR::GetSuggestionsBacklog(Total)")
 	}

@@ -4,23 +4,23 @@ import (
 	"srv/internal/components"
 	"srv/internal/datafront/dfcore"
 	"srv/internal/events"
+	"srv/internal/game"
 	"srv/internal/globals/eb"
 	"srv/internal/globals/logger"
 	"srv/internal/utils/common"
-	"srv/internal/world"
 	"srv/pkg/api"
 	"srv/pkg/dfapi"
 )
 
 type worldOverviewsTable struct {
-	repo components.WorldsRepo
+	repo components.WorldsRepoReadonly
 	sub  eb.Subscription
 
 	table       *dfcore.QueryableTable
 	qBySystemID *dfcore.TrackableTableQuery[api.WorldOverviewsQueryBySystemID]
 }
 
-func (gdf *GameDataFront) InitWorldOverviews(repo components.WorldsRepo) {
+func (gdf *GameDataFront) InitWorldOverviews(repo components.WorldsRepoReadonly) {
 	if gdf.worldOverviews != nil {
 		panic("GameDataFront.InitWorldOverviews() has already been called!")
 	}
@@ -53,7 +53,7 @@ func (t *worldOverviewsTable) queryBySystemID(
 	_ dfapi.DFTableQueryRequest,
 	_ dfcore.DFRequestContext,
 ) (*dfcore.TableResponse, common.Error) {
-	systemID := world.StarSystemID(payload.SystemID)
+	systemID := game.StarSystemID(payload.SystemID)
 	if !systemID.IsValid() {
 		return nil, common.NewValidationError("WorldOverviewsQueryBySystemID::SystemID", "wrong system id")
 	}
@@ -83,7 +83,7 @@ func (t *worldOverviewsTable) onWorldUpdated(payload events.GalaxyWorldUpdate, e
 	}
 
 	update := make(map[dfcore.EntityID]common.Encodable)
-	update[dfcore.EntityID(payload.WorldID)] = encodeWorldOverview(world.WorldOverview{
+	update[dfcore.EntityID(payload.WorldID)] = encodeWorldOverview(game.WorldOverview{
 		ID:         worldData.ID,
 		IsExplored: worldData.Explored != nil,
 		Size:       worldData.Grid.Size(),
@@ -93,7 +93,7 @@ func (t *worldOverviewsTable) onWorldUpdated(payload events.GalaxyWorldUpdate, e
 	t.table.PublishEntities(update)
 }
 
-func encodeWorldOverview(overview world.WorldOverview) common.Encodable {
+func encodeWorldOverview(overview game.WorldOverview) common.Encodable {
 	return common.AsEncodable(api.WorldOverviewsTableRow{
 		WorldID:    string(overview.ID),
 		Size:       overview.Size,

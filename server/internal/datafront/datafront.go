@@ -16,6 +16,7 @@ type GameDataFront struct {
 	systems *systemsTable
 	users   *usersTable
 	worlds  *worldsTable
+	cities  *citiesTable
 
 	sysOverviews   *sysOverviewsTable
 	worldOverviews *worldOverviewsTable
@@ -42,6 +43,8 @@ func (gdf *GameDataFront) Dispose() {
 	gdf.systems.dispose()
 	gdf.sysOverviews.dispose()
 	gdf.worldOverviews.dispose()
+	gdf.worlds.dispose()
+	gdf.cities.dispose()
 
 	gdf.df.Dispose()
 }

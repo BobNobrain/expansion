@@ -1,7 +1,9 @@
 package db
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
 	"srv/internal/utils/common"
 
 	"github.com/jackc/pgx/v5/pgtype"
@@ -23,4 +25,12 @@ func parseJSON[T any](jsonData []byte) (T, common.Error) {
 		return parsed, common.NewDecodingError(err)
 	}
 	return parsed, nil
+}
+
+func (db *storageImpl) ClearTable(tableName string) error {
+	_, err := db.conn.Exec(context.Background(), fmt.Sprintf("DELETE FROM %s", tableName))
+	if err != nil {
+		return err
+	}
+	return nil
 }

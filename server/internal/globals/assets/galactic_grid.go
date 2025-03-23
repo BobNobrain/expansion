@@ -1,9 +1,9 @@
 package assets
 
 import (
+	"srv/internal/game"
 	"srv/internal/utils/common"
 	"srv/internal/utils/geom"
-	"srv/internal/world"
 )
 
 type galacticGridAsset struct {
@@ -18,31 +18,31 @@ type galacticGridAssetSector struct {
 	OuterR     float64 `json:"r_min"`
 }
 
-func LoadGalacticGrid() (world.GalacticGrid, common.Error) {
+func LoadGalacticGrid() (game.GalacticGrid, common.Error) {
 	var data galacticGridAsset
 	err := globalLoader.loadJSONAsset("galactic_grid.json", &data)
 	if err != nil {
 		return nil, newAssetParseError("galactic_grid.json", err)
 	}
 
-	sectors := make(map[world.GalacticSectorID]*world.GalacticSector)
+	sectors := make(map[game.GalacticSectorID]*game.GalacticSector)
 	for _, sector := range data.Sectors {
-		sectors[world.GalacticSectorID(sector.ID)] = &world.GalacticSector{
-			ID: world.GalacticSectorID(sector.ID),
-			Coords: world.GalacticSectorCoords{
-				InnerR:     world.GalacticCoordsRadius(sector.InnerR),
-				OuterR:     world.GalacticCoordsRadius(sector.OuterR),
+		sectors[game.GalacticSectorID(sector.ID)] = &game.GalacticSector{
+			ID: game.GalacticSectorID(sector.ID),
+			Coords: game.GalacticSectorCoords{
+				InnerR:     game.GalacticCoordsRadius(sector.InnerR),
+				OuterR:     game.GalacticCoordsRadius(sector.OuterR),
 				ThetaStart: geom.Radians(sector.ThetaStart),
 				ThetaEnd:   geom.Radians(sector.ThetaEnd),
 			},
 		}
 	}
 
-	grid := world.BuildGalacticGridFromSectorsData(sectors)
+	grid := game.BuildGalacticGridFromSectorsData(sectors)
 	return grid, nil
 }
 
-func SaveGalacticGrid(grid world.GalacticGrid) common.Error {
+func SaveGalacticGrid(grid game.GalacticGrid) common.Error {
 	jsonSectors := make([]galacticGridAssetSector, 0, grid.Size())
 	for _, sector := range grid.GetSectors() {
 		jsonSectors = append(jsonSectors, galacticGridAssetSector{

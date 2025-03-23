@@ -12,11 +12,11 @@ import (
 )
 
 type authenticator struct {
-	userRepo components.UserRepo
+	userRepo components.UserRepoReadonly
 	jwtKey   []byte
 }
 
-func NewAuthenticator(users components.UserRepo) components.Authenticator {
+func NewAuthenticator(users components.UserRepoReadonly) components.Authenticator {
 	cfg := config.Auth()
 	return &authenticator{
 		userRepo: users,

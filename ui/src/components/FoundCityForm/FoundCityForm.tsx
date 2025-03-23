@@ -5,6 +5,9 @@ import { Button } from '../Button/Button';
 import { IconDice } from '../../icons';
 import { getRandomCityName } from './names';
 import { createFormFieldState, useValidateAll } from '../Form/utils';
+import { dfFoundCity } from '../../store/datafront';
+import { useExploreRouteInfo } from '../../routes/explore';
+import { World } from '../../domain/World';
 
 export type FoundCityFormProps = {
     onSuccess?: () => void;
@@ -22,18 +25,32 @@ export const FoundCityForm: Component<FoundCityFormProps> = (props) => {
         },
     });
     const validateForm = useValidateAll([cityName]);
+    const randomizeName = () => cityName.set(getRandomCityName());
 
-    const randomizeName = () => {
-        cityName.set(getRandomCityName());
-    };
+    const routeInfo = useExploreRouteInfo();
+    const action = dfFoundCity.use(() => routeInfo().tileId!);
 
     const onSubmit = () => {
         if (!validateForm()) {
             return;
         }
 
-        // TODO: call the action
-        props.onSuccess?.();
+        const { tileId, objectId, objectType } = routeInfo();
+        const tileIndex = World.parseTileId(tileId!);
+        if (!tileId || !objectId || objectType !== 'world' || tileIndex === undefined) {
+            throw new Error('wrong route state for FoundCityForm: ' + JSON.stringify(routeInfo()));
+        }
+
+        action.run(
+            {
+                name: cityName.get(),
+                tileId: tileIndex,
+                worldId: objectId,
+            },
+            {
+                onSuccess: props.onSuccess,
+            },
+        );
     };
 
     return (
@@ -44,7 +61,6 @@ export const FoundCityForm: Component<FoundCityFormProps> = (props) => {
             </p>
             <FormField>
                 <TextInput
-                    formKey="name"
                     label="City Name"
                     placeholder="Name the new city"
                     value={cityName.get()}
@@ -57,6 +73,9 @@ export const FoundCityForm: Component<FoundCityFormProps> = (props) => {
                         </Button>
                     }
                 />
+            </FormField>
+            <FormField>
+                <TextInput label="Location" value={`${routeInfo().objectId}#${routeInfo().tileId}`} disabled />
             </FormField>
             <FormActions>
                 <Button color="primary" type="submit">

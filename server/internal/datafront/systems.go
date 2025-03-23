@@ -4,21 +4,21 @@ import (
 	"srv/internal/components"
 	"srv/internal/datafront/dfcore"
 	"srv/internal/events"
+	"srv/internal/game"
 	"srv/internal/globals/eb"
 	"srv/internal/globals/logger"
 	"srv/internal/utils/common"
-	"srv/internal/world"
 	"srv/pkg/api"
 	"srv/pkg/dfapi"
 )
 
 type systemsTable struct {
-	repo  components.StarSystemsRepo
+	repo  components.StarSystemsRepoReadonly
 	table *dfcore.QueryableTable
 	sub   eb.Subscription
 }
 
-func (gdf *GameDataFront) InitSystems(repo components.StarSystemsRepo) {
+func (gdf *GameDataFront) InitSystems(repo components.StarSystemsRepoReadonly) {
 	if gdf.systems != nil {
 		panic("GameDataFront.InitSystems() has already been called!")
 	}
@@ -43,9 +43,9 @@ func (t *systemsTable) queryByIDs(
 	req dfapi.DFTableRequest,
 	_ dfcore.DFRequestContext,
 ) (*dfcore.TableResponse, common.Error) {
-	systemIDs := make([]world.StarSystemID, 0, len(req.IDs))
+	systemIDs := make([]game.StarSystemID, 0, len(req.IDs))
 	for _, id := range req.IDs {
-		systemID := world.StarSystemID(id)
+		systemID := game.StarSystemID(id)
 		if !systemID.IsValid() {
 			return nil, common.NewValidationError("SystemsQueryByID::SystemID", "wrong system id")
 		}
@@ -78,7 +78,7 @@ func (t *systemsTable) onSystemUpdated(payload events.GalaxySystemUpdate, _ eb.E
 	t.table.PublishEntities(update)
 }
 
-func encodeSystem(system world.StarSystemContent) common.Encodable {
+func encodeSystem(system game.StarSystemContent) common.Encodable {
 	stars := make(map[string]api.SysOverviewsTableRowStar, len(system.Stars))
 	for _, star := range system.Stars {
 		stars[string(star.ID)] = api.SysOverviewsTableRowStar{

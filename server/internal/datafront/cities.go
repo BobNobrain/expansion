@@ -1,0 +1,103 @@
+package datafront
+
+import (
+	"srv/internal/components"
+	"srv/internal/datafront/dfcore"
+	"srv/internal/events"
+	"srv/internal/game"
+	"srv/internal/globals/eb"
+	"srv/internal/utils"
+	"srv/internal/utils/common"
+	"srv/pkg/api"
+	"srv/pkg/dfapi"
+)
+
+type citiesTable struct {
+	repo components.CitiesRepoReadonly
+	sub  eb.Subscription
+
+	table      *dfcore.QueryableTable
+	qByWorldID *dfcore.TrackableTableQuery[api.CitiesQueryByWorldID]
+}
+
+func (gdf *GameDataFront) InitCities(repo components.CitiesRepoReadonly) {
+	if gdf.worldOverviews != nil {
+		panic("GameDataFront.InitWorldOverviews() has already been called!")
+	}
+
+	cities := &citiesTable{
+		repo: repo,
+		sub:  eb.CreateSubscription(),
+	}
+	cities.table = dfcore.NewQueryableTable(cities.queryByIDs)
+	cities.qByWorldID = dfcore.NewTrackableTableQuery(cities.queryByWorldID, cities.table)
+
+	eb.SubscribeTyped(cities.sub, events.SourceGalaxy, events.EventGalaxyCityCreation, cities.onNewCityFounded)
+
+	gdf.cities = cities
+	gdf.df.AttachTable("cities", cities.table)
+	gdf.df.AttachTableQuery("cities/byWorldId", cities.qByWorldID)
+}
+
+func (t *citiesTable) dispose() {
+	t.sub.UnsubscribeAll()
+}
+
+func (t *citiesTable) queryByIDs(req dfapi.DFTableRequest, ctx dfcore.DFRequestContext) (*dfcore.TableResponse, common.Error) {
+	return nil, common.NewError(common.WithCode("ERR_TODO"), common.WithMessage("cities[id] is not implemented yet"))
+}
+
+func (t *citiesTable) queryByWorldID(
+	payload api.CitiesQueryByWorldID,
+	_ dfapi.DFTableQueryRequest,
+	_ dfcore.DFRequestContext,
+) (*dfcore.TableResponse, common.Error) {
+	worldId := game.CelestialID(payload.WorldID)
+	if worldId.IsStarID() {
+		return nil, common.NewValidationError("CitiesQueryBySystemID::WorldID", "wrong world id")
+	}
+
+	cities, err := t.repo.GetByWorldID(worldId)
+	if err != nil {
+		return nil, err
+	}
+
+	result := dfcore.NewTableResponse()
+	for _, city := range cities {
+		result.Add(dfcore.EntityID(city.CityID.String()), encodeCity(city))
+	}
+
+	return result, nil
+}
+
+func (t *citiesTable) onNewCityFounded(payload events.GalaxyCityCreation, ev eb.Event) {
+	t.qByWorldID.PublishChangedNotification(api.CitiesQueryByWorldID{WorldID: string(payload.WorldID)})
+}
+
+func encodeCity(city game.City) common.Encodable {
+	buildings := make(map[string]int)
+	for bid, count := range city.CityBuildings {
+		buildings[string(bid)] = count
+	}
+
+	popCounts := make(map[string]api.LinearEV)
+	for wf, count := range city.Population.ByWorkforceType {
+		popCounts[wf.String()] = api.LinearEV{
+			X: count.InitialValue,
+			T: count.LastUpdated,
+			V: count.Speed,
+		}
+	}
+
+	return common.AsEncodable(api.CitiesTableRow{
+		CityID:           int(city.CityID),
+		WorldID:          string(city.WorldID),
+		CenterTileID:     int(city.TileID),
+		Name:             city.Name,
+		EstablishedAt:    city.EstablishedAt,
+		EstablishedBy:    string(city.EstablishedBy),
+		CityBuildings:    buildings,
+		PopulationCounts: popCounts,
+		CityTiles:        utils.ConvertInts[game.TileID, int](city.CityTiles),
+	})
+}

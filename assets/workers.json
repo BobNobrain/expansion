@@ -1,14 +1,29 @@
 {
-    "tiers": [ "intern", "apprentice", "master" ],
+    "tiers": {
+        "default": { "id": "intern" },
+        "expertises": {
+            "physical": {
+                "apprentice": { "id": "worker" },
+                "master": { "id": "foreman" }
+            },
+            "management": {
+                "apprentice": { "id": "manager" },
+                "master": { "id": "clevel" }
+            },
+            "engineering": {
+                "apprentice": { "id": "engineer" },
+                "master": { "id": "senior" }
+            },
+            "research": {
+                "apprentice": { "id": "researcher" },
+                "master": { "id": "scientist" }
+            }
+        }
+    },
     "contributions": {
         "intern": 0.2,
         "apprentice": 0.6,
         "master": 1
-    },
-    "expRequirements": {
-        "intern": 0,
-        "apprentice": 300,
-        "master": 1000
     },
     "mismatchModifiers": {
         "intern": {

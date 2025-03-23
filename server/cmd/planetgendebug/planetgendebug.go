@@ -2,14 +2,14 @@ package main
 
 import (
 	"fmt"
+	"srv/internal/game"
+	"srv/internal/game/planetgen"
+	"srv/internal/game/worldgen"
 	"srv/internal/globals"
 	"srv/internal/globals/config"
 	"srv/internal/globals/globaldata"
 	"srv/internal/utils/phys"
 	"srv/internal/utils/phys/material"
-	"srv/internal/world"
-	"srv/internal/world/planetgen"
-	"srv/internal/world/worldgen"
 )
 
 func main() {
@@ -23,14 +23,14 @@ func main() {
 	}
 
 	planet := planetgen.GeneratePlanet(planetgen.GeneratePlanetOptions{
-		WR: *worldgen.NewWorldRandom(config.World().Seed),
-		ID: world.CreatePlanetID(world.CelestialID("AA-001"), 1),
-		Params: world.WorldParams{
+		WR: worldgen.NewWorldRandom(config.World().Seed),
+		ID: game.CreatePlanetID(game.CelestialID("AA-001"), 1),
+		Params: game.WorldParams{
 			Radius: phys.Kilometers(6400),
 			Mass:   phys.EarthMasses(1),
-			Class:  world.CelestialBodyClassTerrestial,
+			Class:  game.CelestialBodyClassTerrestial,
 		},
-		StarParams: world.StarParams{
+		StarParams: game.StarParams{
 			Temperature: phys.Kelvins(5600),
 			Luminosity:  phys.LuminositySuns(1),
 			Mass:        phys.SolarMasses(1),

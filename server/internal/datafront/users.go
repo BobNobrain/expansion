@@ -12,13 +12,13 @@ import (
 )
 
 type usersTable struct {
-	repo    components.UserRepo
+	repo    components.UserRepoReadonly
 	tracker components.OnlinePresenceTracker
 	table   *dfcore.QueryableTable
 	sub     eb.Subscription
 }
 
-func (gdf *GameDataFront) InitUsers(repo components.UserRepo, tracker components.OnlinePresenceTracker) {
+func (gdf *GameDataFront) InitUsers(repo components.UserRepoReadonly, tracker components.OnlinePresenceTracker) {
 	if gdf.users != nil {
 		panic("GameDataFront.InitUsers() has already been called!")
 	}

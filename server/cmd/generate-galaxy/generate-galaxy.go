@@ -1,20 +1,21 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"srv/internal/components"
 	"srv/internal/db"
+	"srv/internal/game/worldgen"
 	"srv/internal/globals"
 	"srv/internal/globals/assets"
 	"srv/internal/globals/config"
 	"srv/internal/utils/cmdutils"
-	"srv/internal/world/worldgen"
 )
 
 func main() {
 	globals.Init()
 
-	store := db.NewDBPermastore()
+	store := db.NewDBStorage()
 	defer store.Dispose()
 
 	wgen := worldgen.NewWorldGen(config.World().Seed)
@@ -50,9 +51,14 @@ func main() {
 		})
 	}
 
-	cmdutils.Ensure(store.StarSystemsRepo().CreateGalaxy(components.CreateGalaxyPayload{
+	tx := cmdutils.Require(store.StartTransaction(context.Background()))
+	defer tx.Rollback()
+
+	cmdutils.Ensure(tx.Systems().CreateGalaxy(components.CreateGalaxyPayload{
 		Systems: systemsCreateData,
 	}))
+
+	cmdutils.Ensure(tx.Commit())
 
 	fmt.Println("  saved star systems to db")
 

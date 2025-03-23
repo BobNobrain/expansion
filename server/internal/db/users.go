@@ -5,11 +5,13 @@ import (
 	"srv/internal/components"
 	"srv/internal/db/dbq"
 	"srv/internal/domain"
+	"srv/internal/utils"
 	"srv/internal/utils/common"
 )
 
 type userRepoImpl struct {
-	q *dbq.Queries
+	q   *dbq.Queries
+	ctx context.Context
 }
 
 func (db *userRepoImpl) CheckRoles(uid domain.UserID, roles []domain.UserRole) (map[domain.UserRole]bool, common.Error) {
@@ -18,7 +20,7 @@ func (db *userRepoImpl) CheckRoles(uid domain.UserID, roles []domain.UserRole) (
 		return nil, parseErr
 	}
 	// TODO: also include list of roles to check in query
-	userRoles, err := db.q.GetUserRoles(context.Background(), uuid)
+	userRoles, err := db.q.GetUserRoles(db.ctx, uuid)
 	if err != nil {
 		return nil, makeDBError(err, "UserRepo::CheckRoles")
 	}
@@ -32,7 +34,7 @@ func (db *userRepoImpl) CheckRoles(uid domain.UserID, roles []domain.UserRole) (
 }
 
 func (db *userRepoImpl) Create(data components.UserCreateData) (domain.User, common.Error) {
-	created, err := db.q.CreateUser(context.Background(), dbq.CreateUserParams{
+	created, err := db.q.CreateUser(db.ctx, dbq.CreateUserParams{
 		Username:     string(data.Username),
 		Email:        data.Email,
 		PasswordHash: data.PasswordHash,
@@ -60,17 +62,17 @@ func (db *userRepoImpl) Get(rq components.GetUserRequest) (domain.User, common.E
 		if parseErr != nil {
 			return domain.User{}, parseErr
 		}
-		dbUser, err = db.q.GetUserByID(context.Background(), uuid)
+		dbUser, err = db.q.GetUserByID(db.ctx, uuid)
 		if err != nil {
 			return domain.User{}, makeDBError(err, "UserRepo::Get(UserID)")
 		}
 	} else if rq.Username != "" {
-		dbUser, err = db.q.GetUserByUsername(context.Background(), string(rq.Username))
+		dbUser, err = db.q.GetUserByUsername(db.ctx, string(rq.Username))
 		if err != nil {
 			return domain.User{}, makeDBError(err, "UserRepo::Get(Username)")
 		}
 	} else if rq.Email != "" {
-		dbUser, err = db.q.GetUserByUsername(context.Background(), rq.Email)
+		dbUser, err = db.q.GetUserByUsername(db.ctx, rq.Email)
 		if err != nil {
 			return domain.User{}, makeDBError(err, "UserRepo::Get(Email)")
 		}
@@ -78,7 +80,7 @@ func (db *userRepoImpl) Get(rq components.GetUserRequest) (domain.User, common.E
 
 	user := decodeUser(dbUser)
 	if rq.WithRoles {
-		roles, err := db.q.GetUserRoles(context.Background(), dbUser.Uid)
+		roles, err := db.q.GetUserRoles(db.ctx, dbUser.Uid)
 		if err != nil {
 			return user, makeDBError(err, "UserRepo::Get(WithRoles)")
 		}
@@ -91,7 +93,7 @@ func (db *userRepoImpl) Get(rq components.GetUserRequest) (domain.User, common.E
 }
 
 func (db *userRepoImpl) GetCredentials(username domain.Username) (domain.UserCredentials, common.Error) {
-	dbCreds, err := db.q.GetCredentials(context.Background(), string(username))
+	dbCreds, err := db.q.GetCredentials(db.ctx, string(username))
 	if err != nil {
 		return domain.UserCredentials{}, makeDBError(err, "UserRepo::GetCredentials")
 	}
@@ -104,12 +106,7 @@ func (db *userRepoImpl) GetCredentials(username domain.Username) (domain.UserCre
 }
 
 func (db *userRepoImpl) GetManyByIDs(uids []domain.UserID) ([]domain.User, common.Error) {
-	ids := make([]string, 0, len(uids))
-	for _, uid := range uids {
-		ids = append(ids, string(uid))
-	}
-
-	dbUsers, err := db.q.ResolveUsers(context.Background(), ids)
+	dbUsers, err := db.q.ResolveUsers(db.ctx, utils.ConvertStrings[domain.UserID, string](uids))
 	if err != nil {
 		return nil, makeDBError(err, "UserRepo::GetManyByIDs")
 	}
@@ -139,7 +136,7 @@ func (db *userRepoImpl) GrantRoles(rq components.ChangeRolesRequest) common.Erro
 	}
 
 	for _, role := range rq.Roles {
-		err := db.q.GrantRole(context.Background(), dbq.GrantRoleParams{
+		err := db.q.GrantRole(db.ctx, dbq.GrantRoleParams{
 			Uid:       targetUUID,
 			GrantedBy: authorUUID,
 			Role:      string(role),

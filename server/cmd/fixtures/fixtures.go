@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"srv/internal/components"
 	"srv/internal/components/auth"
@@ -14,17 +15,20 @@ import (
 func main() {
 	globals.Init()
 
-	store := db.NewDBPermastore()
+	store := db.NewDBStorage()
 	defer store.Dispose()
 
 	fmt.Println("Generating fixtures:")
 
-	userRepo := store.UserRepo()
-	hasher := auth.NewAuthenticator(store.UserRepo())
-
 	cmdutils.Ensure(store.ClearTable("users"))
 	cmdutils.Ensure(store.ClearTable("roles"))
 	cmdutils.Ensure(store.ClearTable("companies"))
+
+	tx := cmdutils.Require(store.StartTransaction(context.Background()))
+	defer tx.Rollback()
+
+	userRepo := tx.Users()
+	hasher := auth.NewAuthenticator(userRepo)
 
 	users := cmdutils.Require(assets.LoadDevUsers())
 	for _, user := range users.Users {
@@ -35,6 +39,8 @@ func main() {
 		}))
 		fmt.Printf("  created @%s: #%s\n", created.Username, created.ID)
 	}
+
+	cmdutils.Ensure(tx.Commit())
 
 	fmt.Printf("  created %d users\n", len(users.Users))
 }

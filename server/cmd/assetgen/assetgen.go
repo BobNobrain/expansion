@@ -1,11 +1,11 @@
 package main
 
 import (
+	"srv/internal/game/worldgen"
 	"srv/internal/globals"
 	"srv/internal/globals/assets"
 	"srv/internal/globals/config"
 	"srv/internal/utils/cmdutils"
-	"srv/internal/world/worldgen"
 )
 
 func main() {

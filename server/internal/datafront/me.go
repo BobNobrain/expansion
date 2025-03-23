@@ -9,10 +9,10 @@ import (
 
 type meSingleton struct {
 	value dfcore.QueryableSingleton
-	users components.UserRepo
+	users components.UserRepoReadonly
 }
 
-func (gdf *GameDataFront) InitMeSingleton(users components.UserRepo) {
+func (gdf *GameDataFront) InitMeSingleton(users components.UserRepoReadonly) {
 	me := &meSingleton{
 		users: users,
 	}

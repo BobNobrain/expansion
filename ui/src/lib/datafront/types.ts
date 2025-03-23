@@ -38,8 +38,12 @@ export type DatafrontAction<Payload, Result> = {
     use: (idempotencyToken: () => string) => UseActionResult<Payload, Result>;
 };
 
+export type DatafrontActionCallbacks = {
+    onSuccess?: () => void;
+};
+
 export type UseActionResult<Payload, Result> = {
-    run: (payload: Payload) => void;
+    run: (payload: Payload, callbacks?: DatafrontActionCallbacks) => void;
     result: () => Result | null;
     isLoading: () => boolean;
     error: () => DatafrontError | null;

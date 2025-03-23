@@ -17,6 +17,8 @@ type SpatialGraph interface {
 	SetCoords(int, Vec3)
 	GetAllCoords() []Vec3
 	GetUnduplicatedConnections() [][]int
+
+	GetVerticiesAround(center int, radius int) *utils.DeterministicSet[int]
 }
 
 func NewSpatialGraph(size int) SpatialGraph {
@@ -105,4 +107,35 @@ func (sg *spatialGraph) SetCoords(n int, coords Vec3) {
 }
 func (sg *spatialGraph) GetAllCoords() []Vec3 {
 	return sg.coords
+}
+
+func (sg *spatialGraph) GetVerticiesAround(center int, radius int) *utils.DeterministicSet[int] {
+	visited := utils.NewDeterministicSet[int]()
+
+	front := make([]int, 0, 1)
+	front = append(front, center)
+
+	for range radius {
+		newFront := make([]int, 0)
+
+		for _, f := range front {
+			visited.Add(f)
+
+			for _, n := range sg.GetConnections(f).Items() {
+				if visited.Has(n) {
+					continue
+				}
+
+				newFront = append(newFront, n)
+			}
+		}
+
+		front = newFront
+	}
+
+	for _, f := range front {
+		visited.Add(f)
+	}
+
+	return visited
 }

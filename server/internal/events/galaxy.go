@@ -1,18 +1,24 @@
 package events
 
-import "srv/internal/world"
+import "srv/internal/game"
 
 const SourceGalaxy = "galaxy"
 
 const (
 	EventGalaxySystemUpdate = "systemUpdate"
 	EventGalaxyWorldUpdate  = "worldUpdate"
+	EventGalaxyCityCreation = "cityCreation"
 )
 
 type GalaxySystemUpdate struct {
-	SystemID world.StarSystemID
+	SystemID game.StarSystemID
 }
 
 type GalaxyWorldUpdate struct {
-	WorldID world.CelestialID
+	WorldID game.CelestialID
+}
+
+type GalaxyCityCreation struct {
+	WorldID game.CelestialID
+	CityID  game.CityID
 }
