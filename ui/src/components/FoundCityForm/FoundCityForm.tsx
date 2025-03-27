@@ -1,4 +1,4 @@
-import { type Component } from 'solid-js';
+import { Show, type Component } from 'solid-js';
 import { Form, FormActions, FormField } from '../Form';
 import { TextInput } from '../TextInput/TextInput';
 import { Button } from '../Button/Button';
@@ -10,6 +10,7 @@ import { useExploreRouteInfo } from '../../routes/explore';
 import { World } from '../../domain/World';
 
 export type FoundCityFormProps = {
+    onCancel?: () => void;
     onSuccess?: () => void;
 };
 
@@ -54,7 +55,7 @@ export const FoundCityForm: Component<FoundCityFormProps> = (props) => {
     };
 
     return (
-        <Form onSubmit={onSubmit}>
+        <Form onSubmit={onSubmit} loading={action.isLoading()} error={action.error()}>
             <p>
                 This action will create a building site for a city on this planet. You are given the honor to name this
                 future settlement.
@@ -78,7 +79,17 @@ export const FoundCityForm: Component<FoundCityFormProps> = (props) => {
                 <TextInput label="Location" value={`${routeInfo().objectId}#${routeInfo().tileId}`} disabled />
             </FormField>
             <FormActions>
-                <Button color="primary" type="submit">
+                <Show when={props.onCancel}>
+                    <Button style="text" disabled={action.isLoading()} onClick={props.onCancel}>
+                        Cancel
+                    </Button>
+                </Show>
+                <Button
+                    color="primary"
+                    type="submit"
+                    loading={action.isLoading()}
+                    disabled={Boolean(action.error() ? !action.error()!.retry : false)}
+                >
                     Continue
                 </Button>
             </FormActions>

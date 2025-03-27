@@ -80,7 +80,7 @@ func (c *citiesRepoImpl) GetByWorldID(wid game.CelestialID) ([]game.City, common
 		return nil, makeDBError(err, "CitiesRepo::GetByWorldID")
 	}
 
-	return utils.MapFailable(dbCities, decodeCity)
+	return utils.MapSliceFailable(dbCities, decodeCity)
 }
 
 func (c *citiesRepoImpl) ResolveIDs(ids []game.CityID) ([]game.City, common.Error) {
@@ -89,7 +89,7 @@ func (c *citiesRepoImpl) ResolveIDs(ids []game.CityID) ([]game.City, common.Erro
 		return nil, makeDBError(err, "CitiesRepo::ResolveIDs")
 	}
 
-	return utils.MapFailable(dbCities, decodeCity)
+	return utils.MapSliceFailable(dbCities, decodeCity)
 }
 
 func decodeCity(dbCity dbq.City) (game.City, common.Error) {

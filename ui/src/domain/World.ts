@@ -49,4 +49,8 @@ export namespace World {
     export function makeTileId(tileNumber: number): string {
         return tileNumber.toString(16).padStart(3, '0');
     }
+
+    export function getTileCoords(grid: WorldGrid, tileIndex: number): [number, number, number] {
+        return grid.coords.slice(tileIndex * 3, tileIndex * 3 + 3) as [number, number, number];
+    }
 }

@@ -5,6 +5,10 @@
     gap: 8px;
 
     padding: 8px 12px;
+    margin-top: 4px;
+}
+.header:not(:first-child) {
+    margin-top: 12px;
 }
 
 .iconWrapper {

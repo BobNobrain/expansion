@@ -3,15 +3,22 @@
     position: relative;
 }
 
-.form::after {
+.overlay {
     position: absolute;
-    opacity: 0.5;
+    z-index: 1;
+
+    transition: all 300ms ease-in-out;
+}
+
+.overlay-loading {
+    composes: overlay;
+
+    opacity: 0;
     top: 0;
-    bottom: 16px;
+    bottom: 0;
     left: 0;
     right: 100%;
-    display: block;
-    content: ' ';
+
     cursor: wait;
 
     background: repeating-linear-gradient(
@@ -22,13 +29,31 @@
         transparent 16px
     );
     background-size: 45.254834px 45.254834px;
-    animation: moving-stripes 1s linear infinite;
 
-    transition: all 300ms ease-in-out;
+    animation: moving-stripes 1s linear infinite;
+}
+.overlay-loading.overlay-visible {
+    opacity: 0.5;
+    right: -1px;
 }
 
-.loading::after {
-    right: -1px;
+.overlay-error {
+    composes: overlay;
+
+    opacity: 0;
+    top: -100%;
+    left: 0;
+    right: 0;
+
+    background: var(--p-red-300-75);
+    box-shadow: inset 0 0 32px var(--p-red-500);
+
+    padding: 8px 16px;
+    color: var(--p-red-900);
+}
+.overlay-error.overlay-visible {
+    top: 0;
+    opacity: 1;
 }
 
 @keyframes moving-stripes {

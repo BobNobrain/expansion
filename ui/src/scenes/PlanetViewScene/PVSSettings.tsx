@@ -8,8 +8,8 @@ import {
     IconEyeCog,
     IconLeaf,
     IconPlanet,
-    IconPlot,
-    IconPlotOutline,
+    IconTile,
+    IconTileOutline,
     IconRadius,
     IconRocks,
 } from '../../icons';
@@ -31,7 +31,7 @@ const SettingsModeTrigger: Component<{
 
 const modeIcons: Record<RenderMode, Icon> = {
     natural: IconEye,
-    biomes: IconPlot,
+    biomes: IconTile,
     soil: IconLeaf,
     moisture: IconCloud,
     elevations: IconRadius,
@@ -71,7 +71,7 @@ export const PVSSettings: Component<PVSSettingsProps> = (props) => {
                 </For>
             </SceneControlsRadioGroup>
             <SceneControlsButton
-                icon={IconPlotOutline}
+                icon={IconTileOutline}
                 isActive={props.showBorders()}
                 onClick={props.toggleShowBorders}
             />

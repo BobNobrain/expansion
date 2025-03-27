@@ -48,12 +48,15 @@ func (query *TrackableTableQuery[P]) Query(
 	ctx DFRequestContext,
 ) (map[string]any, common.Error) {
 	var payload P
-	err := json.Unmarshal(req.Payload, &payload)
-	if err != nil {
-		return nil, common.NewDecodingError(err)
+	jerr := json.Unmarshal(req.Payload, &payload)
+	if jerr != nil {
+		return nil, common.NewDecodingError(jerr)
 	}
 
 	rows, err := query.dataSource(payload, req, ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	if query.listeners[payload] == nil {
 		query.listeners[payload] = utils.NewUndeterministicSet[domain.ClientID]()

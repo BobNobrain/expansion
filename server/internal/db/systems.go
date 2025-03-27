@@ -56,7 +56,7 @@ func (s *systemsRepoImpl) GetContentMany(ids []game.StarSystemID) ([]game.StarSy
 		return nil, makeDBError(err, "StarSystemsRepo::GetContent")
 	}
 
-	return utils.MapFailable(rows, decodeStarSystem)
+	return utils.MapSliceFailable(rows, decodeStarSystem)
 }
 
 func (s *systemsRepoImpl) GetSystemsOnMap(rq components.StarSystemRepoMapRequest) ([]game.StarSystemOverview, common.Error) {

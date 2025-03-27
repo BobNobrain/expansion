@@ -58,7 +58,15 @@ func CreateStarID(systemId StarSystemID, starIndex int, isOnlyStar bool) Celesti
 }
 
 func (cid CelestialID) IsStarID() bool {
-	return len(cid) == 6 || len(cid) == 7
+	if len(cid) == 6 {
+		return true
+	}
+
+	if len(cid) == 7 {
+		return cid[6] >= 'A' && cid[6] <= 'Z'
+	}
+
+	return false
 }
 
 func CreatePlanetID(starId CelestialID, index int) CelestialID {

@@ -1,7 +1,7 @@
 -- name: ResolveUsers :many
 SELECT *
 FROM users
-WHERE uid = ANY($1::TEXT [ ]);
+WHERE uid = ANY($1::UUID [ ]);
 
 -- name: GetUserByID :one
 SELECT *

@@ -3,7 +3,9 @@ import { useNavigate } from '@solidjs/router';
 import { SceneRenderer } from '../../../components/three/SceneRenderer/SceneRenderer';
 import { SectorContentTable } from '../../../components/SectorContentTable/SectorContentTable';
 import { WorldInfo } from '../../../components/WorldInfo/WorldInfo';
-import { WorldTileInfo } from '../../../components/WorldTileInfo/WorldTileInfo';
+import { WorldPopulation } from '../../../components/WorldPopulation';
+import { WorldResources } from '../../../components/WorldResources/WorldResources';
+import { WorldTileInfo } from '../../../components/WorldTileInfo';
 import { IconAsteroid, IconFlag, IconPeople, IconPlanet, IconRocks, IconSpaceStation, IconStar } from '../../../icons';
 import {
     getExploreRoute,
@@ -19,7 +21,6 @@ import { TouchCurtain, type TouchCurtainTab } from '../../components/TouchCurtai
 import { usePageContextBinding } from '../../components/TouchPage';
 import { SystemContentPlanets } from './tabs/SystemContentPlanets';
 import { SystemContentStars } from './tabs/SystemContentStars';
-import { WorldResources } from '../../../components/WorldResources/WorldResources';
 
 const RedirectToTab: Component<{ tab: string }> = (props) => {
     const navigate = useNavigate();
@@ -176,7 +177,9 @@ export const CartographyPage: Component = () => {
                         <Match when={routeInfo().tab === WorldContentTab.Info}>
                             <WorldInfo />
                         </Match>
-                        <Match when={routeInfo().tab === WorldContentTab.Population}>Population...</Match>
+                        <Match when={routeInfo().tab === WorldContentTab.Population}>
+                            <WorldPopulation />
+                        </Match>
                         <Match when={routeInfo().tab === WorldContentTab.Resources}>
                             <WorldResources />
                         </Match>

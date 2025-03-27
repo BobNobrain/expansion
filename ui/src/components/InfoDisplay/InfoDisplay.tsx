@@ -14,7 +14,9 @@ export const InfoDisplay: ParentComponent<InfoDisplayProps> = (props) => {
             </Show>
             <p class={styles.text}>{props.children}</p>
 
-            <div class={styles.actions}>{props.actions}</div>
+            <Show when={props.actions}>
+                <div class={styles.actions}>{props.actions}</div>
+            </Show>
         </div>
     );
 };

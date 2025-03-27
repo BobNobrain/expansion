@@ -95,15 +95,12 @@ export function createDatafrontTable<ApiEntity, Entity>({
 
             cache.useIds(requestedIds);
             cache.releaseIds(prevIds);
-            // cleanupUnusedSignals();
 
             return requestedIds;
         }, []);
 
         onCleanup(() => {
-            console.log(name, 'table cleanup: releasing', ids());
             cache.releaseIds(ids());
-            // cleanupUnusedSignals();
         });
 
         return {
@@ -121,13 +118,14 @@ export function createDatafrontTable<ApiEntity, Entity>({
     };
 
     const useSingle = (id: () => string | null): UseTableSingleResult<Entity> => {
-        const { isLoading, error, result } = useMany(() => {
+        const ids = createMemo(() => {
             const resolved = id();
             if (resolved === null) {
                 return [];
             }
             return [resolved];
         });
+        const { isLoading, error, result } = useMany(ids);
 
         return {
             isLoading,

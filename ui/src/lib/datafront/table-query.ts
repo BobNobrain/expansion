@@ -115,7 +115,7 @@ export function createTableQuery<Payload, ApiEntity, Entity>({
                 }
 
                 const ids = instance.resultIds();
-                console.log(name, 'table query cleanup: releasing', ids);
+                console.log(name, 'table query cleanup: releasing', ids, instance.uses - 1);
                 tableCache.releaseIds(ids);
                 instance.uses--;
             });
@@ -165,6 +165,7 @@ function createQueryInstance(fetch: () => Promise<string[]>): QueryInstance {
     const [error, setError] = createSignal<DatafrontError | null>(null);
     const [resultIds, setResultIds] = createSignal<string[]>([]);
     let isInProgress = false;
+    let isDone = false;
 
     const entry: QueryInstance = {
         isLoading,
@@ -173,7 +174,7 @@ function createQueryInstance(fetch: () => Promise<string[]>): QueryInstance {
         uses: 0,
 
         trigger: () => {
-            if (isInProgress) {
+            if (isInProgress || isDone) {
                 return;
             }
 
@@ -185,11 +186,15 @@ function createQueryInstance(fetch: () => Promise<string[]>): QueryInstance {
                 .then((ids) => {
                     setResultIds(ids);
                     setLoading(false);
+                    isDone = true;
                     isInProgress = false;
                 })
                 .catch((err) => {
-                    setError(toDatafrontError(err, entry.trigger));
+                    const dfError = toDatafrontError(err, entry.trigger);
+                    setError(dfError);
                     setLoading(false);
+                    // ! warning: the next line is a potential source of bugs
+                    isDone = dfError.retry === undefined; // block further triggering, as the error is not retriable
                     isInProgress = false;
                 });
         },

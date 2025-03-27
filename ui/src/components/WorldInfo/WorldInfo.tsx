@@ -5,10 +5,10 @@ import {
     IconFlag,
     IconG,
     IconPeople,
-    IconPlot,
     IconPressure,
     IconRadius,
     IconTemperature,
+    IconTile,
 } from '../../icons';
 import { formatDegreesCelsius, formatInteger, formatScalar } from '../../lib/strings';
 import { getExploreRoute, useExploreRouteInfo, useExploreRouteObjectId } from '../../routes/explore';
@@ -77,7 +77,7 @@ const defProps: DefinitionListProperties<DefListValue> = {
         title: 'Size',
         render: (v) => (
             <div class={styles.badgeList}>
-                <Badge iconLeft={IconPlot} style="trasparent">
+                <Badge iconLeft={IconTile} style="trasparent">
                     {v.size.plots}
                 </Badge>
                 <Badge iconLeft={IconRadius} style="trasparent">
@@ -190,7 +190,7 @@ export const WorldInfo: Component = () => {
             <PageHeader>
                 <PageHeaderTitle>Summary</PageHeaderTitle>
                 <Show when={world.result()}>
-                    <Badge style="trasparent" iconLeft={IconPlot} color="accent">
+                    <Badge style="trasparent" iconLeft={IconTile} color="accent">
                         {world.result()?.grid.edges.length}
                     </Badge>
                 </Show>

@@ -37,3 +37,32 @@ export function useLazyAnimation(onFrame: AnimationHandler): () => void {
 
     return notifyForUpdate;
 }
+
+export type ControlledAnimation = {
+    start: () => void;
+    stop: () => void;
+};
+
+export function useControlledAnimation(onFrame: AnimationHandler): ControlledAnimation {
+    const { animation } = useSceneRenderer();
+    let id: number | undefined;
+
+    const start = () => {
+        id = animation.on(onFrame);
+    };
+    const stop = () => {
+        if (id !== undefined) {
+            animation.off(id);
+        }
+    };
+
+    onMount(() => {
+        start();
+
+        onCleanup(() => {
+            stop();
+        });
+    });
+
+    return { start, stop };
+}

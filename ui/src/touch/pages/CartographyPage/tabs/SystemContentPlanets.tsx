@@ -9,7 +9,7 @@ import {
     IconMoon,
     IconPeople,
     IconPlanet,
-    IconPlot,
+    IconTile,
     IconPressure,
     IconTemperature,
 } from '../../../../icons';
@@ -53,7 +53,7 @@ const WORLDS_COLUMNS: DataTableColumn<TableRow>[] = [
         width: 120,
     },
     {
-        header: { icon: IconPlot },
+        header: { icon: IconTile },
         content: (row) => {
             if (row.isLoading) {
                 return <SkeletonText length={3} />;

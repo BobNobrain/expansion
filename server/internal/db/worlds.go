@@ -186,7 +186,7 @@ func (w *worldsRepoImpl) GetDataMany(ids []game.CelestialID) ([]game.WorldData, 
 		return nil, makeDBError(dberr, "WorldsRepo::GetDataMany")
 	}
 
-	return utils.MapFailable(rows, decodeWorld)
+	return utils.MapSliceFailable(rows, decodeWorld)
 }
 
 func (w *worldsRepoImpl) GetOverviews(systemID game.StarSystemID) ([]game.WorldOverview, common.Error) {

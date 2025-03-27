@@ -9,9 +9,9 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func parseUUID(value string) (pgtype.UUID, common.Error) {
+func parseUUID[S ~string](value S) (pgtype.UUID, common.Error) {
 	uuid := pgtype.UUID{}
-	err := (&uuid).Scan(value)
+	err := (&uuid).Scan(string(value))
 	if err != nil {
 		return uuid, common.NewDecodingError(err)
 	}

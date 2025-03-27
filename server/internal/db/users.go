@@ -106,17 +106,17 @@ func (db *userRepoImpl) GetCredentials(username domain.Username) (domain.UserCre
 }
 
 func (db *userRepoImpl) GetManyByIDs(uids []domain.UserID) ([]domain.User, common.Error) {
-	dbUsers, err := db.q.ResolveUsers(db.ctx, utils.ConvertStrings[domain.UserID, string](uids))
+	uuids, err := utils.MapSliceFailable(uids, parseUUID)
 	if err != nil {
-		return nil, makeDBError(err, "UserRepo::GetManyByIDs")
+		return nil, err
 	}
 
-	users := make([]domain.User, 0, len(dbUsers))
-	for _, dbUser := range dbUsers {
-		users = append(users, decodeUser(dbUser))
+	dbUsers, dberr := db.q.ResolveUsers(db.ctx, uuids)
+	if dberr != nil {
+		return nil, makeDBError(dberr, "UserRepo::GetManyByIDs")
 	}
 
-	return users, nil
+	return utils.MapSlice(dbUsers, decodeUser), nil
 }
 
 func (db *userRepoImpl) GetManyByUsernames([]domain.Username) ([]domain.User, common.Error) {

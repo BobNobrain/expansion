@@ -1,4 +1,4 @@
-import type { Predictable } from '../lib/predictables';
+import { sumPredictables, type Predictable } from '../lib/predictables';
 
 export type City = {
     id: number;
@@ -16,6 +16,12 @@ export type City = {
 
     buildings: Record<string, number>;
 };
+
+export namespace City {
+    export function getTotalPopulation(city: City): Predictable {
+        return sumPredictables(Object.values(city.population.counts));
+    }
+}
 
 export type WorkforceType =
     | 'intern'

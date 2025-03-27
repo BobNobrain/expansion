@@ -21,8 +21,8 @@ type citiesTable struct {
 }
 
 func (gdf *GameDataFront) InitCities(repo components.CitiesRepoReadonly) {
-	if gdf.worldOverviews != nil {
-		panic("GameDataFront.InitWorldOverviews() has already been called!")
+	if gdf.cities != nil {
+		panic("GameDataFront.InitCities() has already been called!")
 	}
 
 	cities := &citiesTable{

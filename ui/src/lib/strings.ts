@@ -5,9 +5,14 @@ export type FormatScalarOptions = {
     unit?: string;
     /** If disable shortening 5000 -> 5K, etc. */
     noShortenings?: boolean;
+    /** If positive numbers should be rendered with an explicit '+' sign in front */
+    explicitPlusSign?: boolean;
 };
 
-export function formatScalar(scalar: number, { digits = 3, unit, noShortenings }: FormatScalarOptions = {}): string {
+export function formatScalar(
+    scalar: number,
+    { digits = 3, unit, noShortenings, explicitPlusSign }: FormatScalarOptions = {},
+): string {
     let suffix = '';
     if (!noShortenings) {
         const abs = Math.abs(scalar);
@@ -28,8 +33,10 @@ export function formatScalar(scalar: number, { digits = 3, unit, noShortenings }
         suffix += ' ' + unit;
     }
 
+    const prefix = explicitPlusSign && scalar > 0 ? '+' : '';
+
     const num = scalar.toFixed(digits);
-    return num + suffix;
+    return prefix + num + suffix;
 }
 
 export function formatDegreesCelsius(temp: number, options: { unit?: 'K' | 'C' } = {}): string {

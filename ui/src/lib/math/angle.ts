@@ -15,4 +15,13 @@ export namespace Angle {
             yield FULL_CIRCLE;
         }
     }
+
+    export function normalize(radians: number): number {
+        radians = radians % FULL_CIRCLE;
+        if (radians < 0) {
+            radians += FULL_CIRCLE;
+        }
+
+        return radians;
+    }
 }

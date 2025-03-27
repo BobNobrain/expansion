@@ -1,16 +1,15 @@
 import { type Component, createMemo, Show } from 'solid-js';
 import { useNavigate } from '@solidjs/router';
-import { CommodityIconWithLabel } from '../CommodityIcon';
-import { DataTable, type DataTableColumn } from '../DataTable';
-import { InlineLoader } from '../InlineLoader/InlineLoader';
 import { World } from '../../domain/World';
-import { IconPlot, IconRocks } from '../../icons';
+import { IconTile, IconRocks } from '../../icons';
 import { formatScalar } from '../../lib/strings';
 import { getExploreRoute, useExploreRouteObjectId } from '../../routes/explore';
 import { dfWorlds } from '../../store/datafront';
+import { CommodityIconWithLabel } from '../CommodityIcon';
 import { Container } from '../Container/Container';
-import { PageHeader, PageHeaderTitle } from '../PageHeader';
-import { Badge } from '../Badge/Badge';
+import { DataTable, type DataTableColumn } from '../DataTable';
+import { InlineLoader } from '../InlineLoader/InlineLoader';
+import { PageHeader, PageHeaderIcon, PageHeaderTitle } from '../PageHeader';
 
 type ResourceRow = {
     tileId: string;
@@ -35,7 +34,7 @@ const COLUMNS: DataTableColumn<ResourceRow>[] = [
             }),
     },
     {
-        header: { icon: IconPlot },
+        header: { icon: IconTile },
         width: 64,
         content: (row) => row.tileId,
     },
@@ -74,9 +73,7 @@ export const WorldResources: Component = () => {
             <PageHeader>
                 <PageHeaderTitle>All Deposits</PageHeaderTitle>
                 <Show when={!world.isLoading()}>
-                    <Badge iconLeft={IconRocks} style="trasparent">
-                        {rows().length}
-                    </Badge>
+                    <PageHeaderIcon icon={IconRocks} text={rows().length.toString()} />
                 </Show>
             </PageHeader>
             <DataTable columns={COLUMNS} rows={rows()} onRowClick={handleRowClick}>

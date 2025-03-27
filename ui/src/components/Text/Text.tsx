@@ -13,6 +13,8 @@ export type TextProps = {
     italic?: boolean;
     underline?: boolean;
     size?: TextSize;
+
+    onClick?: (ev: MouseEvent) => void;
 };
 
 export const Text: ParentComponent<TextProps> = (props) => {
@@ -27,6 +29,7 @@ export const Text: ParentComponent<TextProps> = (props) => {
                 [colors.inverted]: props.inverted,
                 [sizes[props.size ?? 'normal']]: Boolean(props.size),
             }}
+            onClick={props.onClick}
         >
             {props.children}
         </span>

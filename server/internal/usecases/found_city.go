@@ -3,7 +3,9 @@ package usecases
 import (
 	"context"
 	"srv/internal/components"
+	"srv/internal/events"
 	"srv/internal/game"
+	"srv/internal/globals/eb"
 	"srv/internal/utils"
 	"srv/internal/utils/common"
 )
@@ -70,6 +72,8 @@ func (uc *foundCityUsecase) Run(ctx context.Context, input FoundCityUsecaseInput
 	if err != nil {
 		return err
 	}
+
+	eb.PublishNew(events.SourceGalaxy, events.EventGalaxyCityCreation, events.GalaxyCityCreation{WorldID: world.ID})
 
 	return tx.Commit()
 }

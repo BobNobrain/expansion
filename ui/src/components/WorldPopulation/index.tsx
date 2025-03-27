@@ -1,0 +1,1 @@
+export { WorldPopulation } from './WorldPopulation';

@@ -6,7 +6,7 @@ import { SkeletonBlock } from '../Skeleton';
 
 export type OperationDisplayProps = {
     title?: string;
-    error: DatafrontError | null;
+    error: DatafrontError | null | undefined;
     loading?: boolean;
     skeleton?: JSX.Element;
 };

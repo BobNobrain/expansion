@@ -1,6 +1,7 @@
 import './_global';
 
 export * from './actions';
+export * from './cities';
 export * from './galaxy';
 export * from './me';
 export * from './online';
