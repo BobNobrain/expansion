@@ -3,11 +3,10 @@ package usecases
 import (
 	"context"
 	"srv/internal/components"
-	"srv/internal/events"
 	"srv/internal/game"
 	"srv/internal/game/planetgen"
 	"srv/internal/game/worldgen"
-	"srv/internal/globals/eb"
+	"srv/internal/globals/events"
 	"srv/internal/globals/globaldata"
 	"srv/internal/globals/logger"
 	"srv/internal/utils/common"
@@ -97,7 +96,7 @@ func (e *exploreWorldUsecase) Run(
 		return err
 	}
 
-	eb.PublishNew(events.SourceGalaxy, events.EventGalaxyWorldUpdate, events.GalaxyWorldUpdate{WorldID: input.WorldID})
+	events.WorldUpdated.Publish(events.WorldUpdatedPayload{WorldID: input.WorldID})
 
 	return tx.Commit()
 }

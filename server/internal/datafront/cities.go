@@ -3,9 +3,8 @@ package datafront
 import (
 	"srv/internal/components"
 	"srv/internal/datafront/dfcore"
-	"srv/internal/events"
 	"srv/internal/game"
-	"srv/internal/globals/eb"
+	"srv/internal/globals/events"
 	"srv/internal/utils"
 	"srv/internal/utils/common"
 	"srv/pkg/api"
@@ -14,7 +13,7 @@ import (
 
 type citiesTable struct {
 	repo components.CitiesRepoReadonly
-	sub  eb.Subscription
+	sub  *events.Subscription
 
 	table      *dfcore.QueryableTable
 	qByWorldID *dfcore.TrackableTableQuery[api.CitiesQueryByWorldID]
@@ -27,12 +26,12 @@ func (gdf *GameDataFront) InitCities(repo components.CitiesRepoReadonly) {
 
 	cities := &citiesTable{
 		repo: repo,
-		sub:  eb.CreateSubscription(),
+		sub:  events.NewSubscription(),
 	}
 	cities.table = dfcore.NewQueryableTable(cities.queryByIDs)
 	cities.qByWorldID = dfcore.NewTrackableTableQuery(cities.queryByWorldID, cities.table)
 
-	eb.SubscribeTyped(cities.sub, events.SourceGalaxy, events.EventGalaxyCityCreation, cities.onNewCityFounded)
+	events.SubscribeTyped(cities.sub, events.CityCreated, cities.onNewCityFounded)
 
 	gdf.cities = cities
 	gdf.df.AttachTable("cities", cities.table)
@@ -43,7 +42,10 @@ func (t *citiesTable) dispose() {
 	t.sub.UnsubscribeAll()
 }
 
-func (t *citiesTable) queryByIDs(req dfapi.DFTableRequest, ctx dfcore.DFRequestContext) (*dfcore.TableResponse, common.Error) {
+func (t *citiesTable) queryByIDs(
+	req dfapi.DFTableRequest,
+	ctx dfcore.DFRequestContext,
+) (*dfcore.TableResponse, common.Error) {
 	return nil, common.NewError(common.WithCode("ERR_TODO"), common.WithMessage("cities[id] is not implemented yet"))
 }
 
@@ -70,7 +72,7 @@ func (t *citiesTable) queryByWorldID(
 	return result, nil
 }
 
-func (t *citiesTable) onNewCityFounded(payload events.GalaxyCityCreation, ev eb.Event) {
+func (t *citiesTable) onNewCityFounded(payload events.CityCreatedPayload) {
 	t.qByWorldID.PublishChangedNotification(api.CitiesQueryByWorldID{WorldID: string(payload.WorldID)})
 }
 

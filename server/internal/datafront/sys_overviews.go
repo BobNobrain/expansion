@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"srv/internal/components"
 	"srv/internal/datafront/dfcore"
-	"srv/internal/events"
 	"srv/internal/game"
-	"srv/internal/globals/eb"
+	"srv/internal/globals/events"
 	"srv/internal/globals/logger"
 	"srv/internal/utils/common"
 	"srv/internal/utils/geom"
@@ -16,7 +15,7 @@ import (
 
 type sysOverviewsTable struct {
 	repo components.StarSystemsRepoReadonly
-	sub  eb.Subscription
+	sub  *events.Subscription
 
 	table       *dfcore.QueryableTable
 	qBySectorId *dfcore.TrackableTableQuery[api.SysOverviewsQueryBySectorID]
@@ -30,13 +29,13 @@ func (gdf *GameDataFront) InitSysOverviews(repo components.StarSystemsRepoReadon
 
 	overviews := &sysOverviewsTable{
 		repo: repo,
-		sub:  eb.CreateSubscription(),
+		sub:  events.NewSubscription(),
 	}
 	overviews.table = dfcore.NewQueryableTable(overviews.queryByID)
 	overviews.qBySectorId = dfcore.NewTrackableTableQuery(overviews.queryBySectorID, overviews.table)
 	overviews.qByCoords = dfcore.NewTrackableTableQuery(overviews.queryByCoords, overviews.table)
 
-	eb.SubscribeTyped(overviews.sub, events.SourceGalaxy, events.EventGalaxySystemUpdate, overviews.onSystemUpdated)
+	events.SubscribeTyped(overviews.sub, events.SystemUpdated, overviews.onSystemUpdated)
 
 	gdf.sysOverviews = overviews
 	gdf.df.AttachTable("sys_overviews", overviews.table)
@@ -48,7 +47,7 @@ func (u *sysOverviewsTable) dispose() {
 	u.sub.UnsubscribeAll()
 }
 
-func (u *sysOverviewsTable) onSystemUpdated(payload events.GalaxySystemUpdate, _ eb.Event) {
+func (u *sysOverviewsTable) onSystemUpdated(payload events.SystemUpdatedPayload) {
 	system, err := u.repo.GetContent(payload.SystemID)
 	if err != nil {
 		logger.Error(logger.FromError("DF/sys_overviews", err).WithDetail("event", "galaxy:systemUpdate"))

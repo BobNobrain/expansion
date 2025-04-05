@@ -3,10 +3,9 @@ package usecases
 import (
 	"context"
 	"srv/internal/components"
-	"srv/internal/events"
 	"srv/internal/game"
 	"srv/internal/game/worldgen"
-	"srv/internal/globals/eb"
+	"srv/internal/globals/events"
 	"srv/internal/utils/common"
 )
 
@@ -71,7 +70,7 @@ func (e *exploreSystemUsecase) Run(
 	}
 	tx.Worlds().CreateWorlds(generatedWorlds)
 
-	eb.PublishNew(events.SourceGalaxy, events.EventGalaxySystemUpdate, events.GalaxySystemUpdate{SystemID: input.SystemID})
+	events.SystemUpdated.Publish(events.SystemUpdatedPayload{SystemID: input.SystemID})
 
 	return tx.Commit()
 }

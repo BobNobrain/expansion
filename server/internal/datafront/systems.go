@@ -3,9 +3,8 @@ package datafront
 import (
 	"srv/internal/components"
 	"srv/internal/datafront/dfcore"
-	"srv/internal/events"
 	"srv/internal/game"
-	"srv/internal/globals/eb"
+	"srv/internal/globals/events"
 	"srv/internal/globals/logger"
 	"srv/internal/utils/common"
 	"srv/pkg/api"
@@ -15,7 +14,7 @@ import (
 type systemsTable struct {
 	repo  components.StarSystemsRepoReadonly
 	table *dfcore.QueryableTable
-	sub   eb.Subscription
+	sub   *events.Subscription
 }
 
 func (gdf *GameDataFront) InitSystems(repo components.StarSystemsRepoReadonly) {
@@ -25,11 +24,11 @@ func (gdf *GameDataFront) InitSystems(repo components.StarSystemsRepoReadonly) {
 
 	systems := &systemsTable{
 		repo: repo,
-		sub:  eb.CreateSubscription(),
+		sub:  events.NewSubscription(),
 	}
 	systems.table = dfcore.NewQueryableTable(systems.queryByIDs)
 
-	eb.SubscribeTyped(systems.sub, events.SourceGalaxy, events.EventGalaxySystemUpdate, systems.onSystemUpdated)
+	events.SubscribeTyped(systems.sub, events.SystemUpdated, systems.onSystemUpdated)
 
 	gdf.systems = systems
 	gdf.df.AttachTable(dfcore.DFPath("systems"), systems.table)
@@ -66,7 +65,7 @@ func (t *systemsTable) queryByIDs(
 	return response, nil
 }
 
-func (t *systemsTable) onSystemUpdated(payload events.GalaxySystemUpdate, _ eb.Event) {
+func (t *systemsTable) onSystemUpdated(payload events.SystemUpdatedPayload) {
 	system, err := t.repo.GetContent(payload.SystemID)
 	if err != nil {
 		logger.Error(logger.FromError("DF/systems", err).WithDetail("event", "galaxy:systemUpdate"))

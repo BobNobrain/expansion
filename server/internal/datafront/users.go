@@ -4,8 +4,7 @@ import (
 	"srv/internal/components"
 	"srv/internal/datafront/dfcore"
 	"srv/internal/domain"
-	"srv/internal/events"
-	"srv/internal/globals/eb"
+	"srv/internal/globals/events"
 	"srv/internal/utils/common"
 	"srv/pkg/api"
 	"srv/pkg/dfapi"
@@ -15,7 +14,7 @@ type usersTable struct {
 	repo    components.UserRepoReadonly
 	tracker components.OnlinePresenceTracker
 	table   *dfcore.QueryableTable
-	sub     eb.Subscription
+	sub     *events.Subscription
 }
 
 func (gdf *GameDataFront) InitUsers(repo components.UserRepoReadonly, tracker components.OnlinePresenceTracker) {
@@ -26,15 +25,15 @@ func (gdf *GameDataFront) InitUsers(repo components.UserRepoReadonly, tracker co
 	users := &usersTable{
 		repo:    repo,
 		tracker: tracker,
-		sub:     eb.CreateSubscription(),
+		sub:     events.NewSubscription(),
 	}
 	users.table = dfcore.NewQueryableTable(users.queryByIds)
 
-	eb.SubscribeTyped(users.sub, events.SourceUsers, events.EventUserCreate, users.onUserCreated)
-	eb.SubscribeTyped(users.sub, events.SourceUsers, events.EventUserUpdate, users.onUserUpdated)
+	events.SubscribeTyped(users.sub, events.UserCreated, users.onUserCreated)
+	events.SubscribeTyped(users.sub, events.UserUpdated, users.onUserUpdated)
 
-	eb.SubscribeTyped(users.sub, events.SourceComms, events.EventClientOnline, users.onUserOnline)
-	eb.SubscribeTyped(users.sub, events.SourceComms, events.EventClientOffline, users.onUserOffline)
+	events.SubscribeTyped(users.sub, events.ClientOnline, users.onUserOnline)
+	events.SubscribeTyped(users.sub, events.ClientOffline, users.onUserOffline)
 
 	gdf.users = users
 	gdf.df.AttachTable(dfcore.DFPath("users"), users.table)
@@ -44,19 +43,19 @@ func (u *usersTable) dispose() {
 	u.sub.UnsubscribeAll()
 }
 
-func (u *usersTable) onUserCreated(payload events.UserUpdated, _ eb.Event) {
+func (u *usersTable) onUserCreated(payload events.UserUpdatedPayload) {
 	update := make(map[dfcore.EntityID]common.Encodable)
 	update[dfcore.EntityID(payload.User.ID)] = encodeUser(payload.User, nil)
 	u.table.PublishEntities(update)
 }
 
-func (u *usersTable) onUserUpdated(payload events.UserUpdated, _ eb.Event) {
+func (u *usersTable) onUserUpdated(payload events.UserUpdatedPayload) {
 	update := make(map[dfcore.EntityID]common.Encodable)
 	update[dfcore.EntityID(payload.User.ID)] = encodeUser(payload.User, nil)
 	u.table.PublishEntities(update)
 }
 
-func (u *usersTable) onUserOnline(payload events.ClientConnected, _ eb.Event) {
+func (u *usersTable) onUserOnline(payload events.ClientConnected) {
 	update := make(map[dfcore.EntityID]common.Encodable)
 	isOnline := true
 	update[dfcore.EntityID(payload.User.ID)] = common.AsEncodable(api.UsersTableRow{
@@ -65,7 +64,7 @@ func (u *usersTable) onUserOnline(payload events.ClientConnected, _ eb.Event) {
 	u.table.PublishEntities(update)
 }
 
-func (u *usersTable) onUserOffline(payload events.ClientConnected, _ eb.Event) {
+func (u *usersTable) onUserOffline(payload events.ClientConnected) {
 	update := make(map[dfcore.EntityID]common.Encodable)
 	isOnline := false
 	update[dfcore.EntityID(payload.User.ID)] = common.AsEncodable(api.UsersTableRow{

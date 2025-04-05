@@ -3,8 +3,7 @@ package dfcore
 import (
 	"srv/internal/components"
 	"srv/internal/domain"
-	"srv/internal/events"
-	"srv/internal/globals/eb"
+	"srv/internal/globals/events"
 	"srv/internal/utils/common"
 	"sync"
 )
@@ -17,7 +16,7 @@ type DataFront struct {
 	singletons   map[DFPath]QueryableSingletonFrontend
 	actions      map[DFPath]ActionFrontend
 
-	ebs                   eb.Subscription
+	ebs                   *events.Subscription
 	updatesQueue          *dfUpdatesQueue
 	actionsCleanupStopper chan bool
 }
@@ -34,8 +33,8 @@ func NewDataFront() *DataFront {
 		actionsCleanupStopper: make(chan bool, 1),
 	}
 
-	result.ebs = eb.CreateSubscription()
-	eb.SubscribeTyped(result.ebs, events.SourceComms, events.EventClientOffline, result.handleClientOffline)
+	result.ebs = events.NewSubscription()
+	events.SubscribeTyped(result.ebs, events.ClientOffline, result.handleClientOffline)
 	return result
 }
 
@@ -158,7 +157,7 @@ func (df *DataFront) Dispose() {
 	df.updatesQueue.stop()
 }
 
-func (d *DataFront) handleClientOffline(payload events.ClientConnected, evt eb.Event) {
+func (d *DataFront) handleClientOffline(payload events.ClientConnected) {
 	d.unsubscribeFromAll(payload.CliendID)
 }
 

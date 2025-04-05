@@ -3,9 +3,8 @@ package datafront
 import (
 	"srv/internal/components"
 	"srv/internal/datafront/dfcore"
-	"srv/internal/events"
 	"srv/internal/game"
-	"srv/internal/globals/eb"
+	"srv/internal/globals/events"
 	"srv/internal/globals/logger"
 	"srv/internal/utils/common"
 	"srv/pkg/api"
@@ -16,7 +15,7 @@ import (
 type worldsTable struct {
 	repo  components.WorldsRepoReadonly
 	table *dfcore.QueryableTable
-	sub   eb.Subscription
+	sub   *events.Subscription
 }
 
 func (gdf *GameDataFront) InitWorlds(repo components.WorldsRepoReadonly) {
@@ -26,11 +25,11 @@ func (gdf *GameDataFront) InitWorlds(repo components.WorldsRepoReadonly) {
 
 	worlds := &worldsTable{
 		repo: repo,
-		sub:  eb.CreateSubscription(),
+		sub:  events.NewSubscription(),
 	}
 	worlds.table = dfcore.NewQueryableTable(worlds.queryByIDs)
 
-	eb.SubscribeTyped(worlds.sub, events.SourceGalaxy, events.EventGalaxyWorldUpdate, worlds.onWorldUpdated)
+	events.SubscribeTyped(worlds.sub, events.WorldUpdated, worlds.onWorldUpdated)
 
 	gdf.worlds = worlds
 	gdf.df.AttachTable(dfcore.DFPath("worlds"), worlds.table)
@@ -66,12 +65,12 @@ func (w *worldsTable) queryByIDs(
 	return response, nil
 }
 
-func (t *worldsTable) onWorldUpdated(payload events.GalaxyWorldUpdate, ev eb.Event) {
+func (t *worldsTable) onWorldUpdated(payload events.WorldUpdatedPayload) {
 	update := make(map[dfcore.EntityID]common.Encodable)
 
 	worldData, err := t.repo.GetData(payload.WorldID)
 	if err != nil {
-		logger.Error(logger.FromError("DF/world_overviews", err).WithDetail("event", ev))
+		logger.Error(logger.FromError("DF/world_overviews", err).WithDetail("payload", payload))
 		return
 	}
 

@@ -3,9 +3,8 @@ package datafront
 import (
 	"srv/internal/components"
 	"srv/internal/datafront/dfcore"
-	"srv/internal/events"
 	"srv/internal/game"
-	"srv/internal/globals/eb"
+	"srv/internal/globals/events"
 	"srv/internal/globals/logger"
 	"srv/internal/utils/common"
 	"srv/pkg/api"
@@ -14,7 +13,7 @@ import (
 
 type worldOverviewsTable struct {
 	repo components.WorldsRepoReadonly
-	sub  eb.Subscription
+	sub  *events.Subscription
 
 	table       *dfcore.QueryableTable
 	qBySystemID *dfcore.TrackableTableQuery[api.WorldOverviewsQueryBySystemID]
@@ -27,13 +26,13 @@ func (gdf *GameDataFront) InitWorldOverviews(repo components.WorldsRepoReadonly)
 
 	overviews := &worldOverviewsTable{
 		repo: repo,
-		sub:  eb.CreateSubscription(),
+		sub:  events.NewSubscription(),
 	}
 	overviews.table = dfcore.NewQueryableTable(overviews.queryByIDs)
 	overviews.qBySystemID = dfcore.NewTrackableTableQuery(overviews.queryBySystemID, overviews.table)
 
-	eb.SubscribeTyped(overviews.sub, events.SourceGalaxy, events.EventGalaxySystemUpdate, overviews.onSystemUpdated)
-	eb.SubscribeTyped(overviews.sub, events.SourceGalaxy, events.EventGalaxyWorldUpdate, overviews.onWorldUpdated)
+	events.SubscribeTyped(overviews.sub, events.SystemUpdated, overviews.onSystemUpdated)
+	events.SubscribeTyped(overviews.sub, events.WorldUpdated, overviews.onWorldUpdated)
 
 	gdf.worldOverviews = overviews
 	gdf.df.AttachTable("world_overviews", overviews.table)
@@ -44,7 +43,10 @@ func (t *worldOverviewsTable) dispose() {
 	t.sub.UnsubscribeAll()
 }
 
-func (t *worldOverviewsTable) queryByIDs(req dfapi.DFTableRequest, ctx dfcore.DFRequestContext) (*dfcore.TableResponse, common.Error) {
+func (t *worldOverviewsTable) queryByIDs(
+	req dfapi.DFTableRequest,
+	ctx dfcore.DFRequestContext,
+) (*dfcore.TableResponse, common.Error) {
 	return nil, common.NewError(common.WithCode("ERR_TODO"), common.WithMessage("world_overviews[id] is not implemented yet"))
 }
 
@@ -71,14 +73,14 @@ func (t *worldOverviewsTable) queryBySystemID(
 	return result, nil
 }
 
-func (t *worldOverviewsTable) onSystemUpdated(payload events.GalaxySystemUpdate, _ eb.Event) {
+func (t *worldOverviewsTable) onSystemUpdated(payload events.SystemUpdatedPayload) {
 	t.qBySystemID.PublishChangedNotification(api.WorldOverviewsQueryBySystemID{SystemID: string(payload.SystemID)})
 }
 
-func (t *worldOverviewsTable) onWorldUpdated(payload events.GalaxyWorldUpdate, ev eb.Event) {
+func (t *worldOverviewsTable) onWorldUpdated(payload events.WorldUpdatedPayload) {
 	worldData, err := t.repo.GetData(payload.WorldID)
 	if err != nil {
-		logger.Error(logger.FromError("DF/world_overviews", err).WithDetail("event", ev))
+		logger.Error(logger.FromError("DF/world_overviews", err).WithDetail("payload", payload))
 		return
 	}
 

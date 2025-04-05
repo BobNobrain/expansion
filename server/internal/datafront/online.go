@@ -3,27 +3,26 @@ package datafront
 import (
 	"srv/internal/components"
 	"srv/internal/datafront/dfcore"
-	"srv/internal/events"
-	"srv/internal/globals/eb"
+	"srv/internal/globals/events"
 	"srv/internal/utils/common"
 	"srv/pkg/api"
 )
 
 type onlineSingleton struct {
 	value   dfcore.QueryableSingleton
-	sub     eb.Subscription
+	sub     *events.Subscription
 	tracker components.OnlinePresenceTracker
 }
 
 func (gdf *GameDataFront) InitOnline(tracker components.OnlinePresenceTracker) {
 	online := &onlineSingleton{
-		sub:     eb.CreateSubscription(),
+		sub:     events.NewSubscription(),
 		tracker: tracker,
 	}
 	online.value = dfcore.NewQueryableSingleton(online.getValue)
 
-	eb.SubscribeTyped(online.sub, events.SourceComms, events.EventClientOffline, online.onOnlineChanged)
-	eb.SubscribeTyped(online.sub, events.SourceComms, events.EventClientOffline, online.onOnlineChanged)
+	events.SubscribeTyped(online.sub, events.ClientOnline, online.onOnlineChanged)
+	events.SubscribeTyped(online.sub, events.ClientOffline, online.onOnlineChanged)
 
 	gdf.online = online
 	gdf.df.AttachSingleton(dfcore.DFPath("online"), online.value)
@@ -44,7 +43,7 @@ func (oc *onlineSingleton) getValue(_ dfcore.DFRequestContext) (common.Encodable
 	}), nil
 }
 
-func (oc *onlineSingleton) onOnlineChanged(payload events.ClientConnected, _ eb.Event) {
+func (oc *onlineSingleton) onOnlineChanged(payload events.ClientConnected) {
 	onlineCount, err := oc.tracker.GetOnlineCount()
 	if err != nil {
 		return

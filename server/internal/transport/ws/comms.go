@@ -3,8 +3,7 @@ package ws
 import (
 	"srv/internal/components"
 	"srv/internal/domain"
-	"srv/internal/events"
-	"srv/internal/globals/eb"
+	"srv/internal/globals/events"
 	"srv/internal/utils"
 	"srv/internal/utils/common"
 	"srv/pkg/dfapi"
@@ -39,7 +38,7 @@ func (impl *WSComms) HandleNewConnection(conn *websocket.Conn, user domain.User)
 	client := newClient(conn, user, impl)
 	impl.attachClient(client)
 
-	eb.PublishNew(events.SourceComms, events.EventClientOnline, events.ClientConnected{User: user, CliendID: client.id})
+	events.ClientOnline.Publish(events.ClientConnected{User: user, CliendID: client.id})
 }
 
 func (impl *WSComms) Broadcast(rq components.CommsBroadcastRequest) common.Error {
@@ -108,5 +107,5 @@ func (impl *WSComms) detachClient(cid domain.ClientID) {
 		delete(impl.clientsByUserID, c.user.ID)
 	}
 
-	eb.PublishNew(events.SourceComms, events.EventClientOffline, events.ClientConnected{User: c.user, CliendID: cid})
+	events.ClientOffline.Publish(events.ClientConnected{User: c.user, CliendID: cid})
 }
