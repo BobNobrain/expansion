@@ -142,8 +142,8 @@ export const CartographyPage: Component = () => {
                 <PlanetViewScene
                     isActive={routeInfo().objectType === 'world'}
                     worldId={routeInfo().objectId!}
-                    selectedPlotId={routeInfo().tileId}
-                    onPlotSelected={(plot) => {
+                    selectedTileId={routeInfo().tileId}
+                    onTileSelected={(plot) => {
                         if (!plot) {
                             navigate(getExploreRoute({ objectId: routeInfo().objectId, tab: WorldContentTab.Info }));
                             return;

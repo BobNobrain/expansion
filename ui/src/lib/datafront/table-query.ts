@@ -52,7 +52,7 @@ export function createTableQuery<Payload, ApiEntity, Entity>({
             return;
         }
 
-        instance.trigger();
+        instance.trigger({ force: true });
     });
 
     cleaner.addCleanup(() => {
@@ -155,7 +155,7 @@ type QueryInstance = {
     isLoading: () => boolean;
     resultIds: () => string[];
     error: () => DatafrontError | null;
-    trigger: () => void;
+    trigger: (opts?: { force?: boolean }) => void;
 
     uses: number;
 };
@@ -173,8 +173,8 @@ function createQueryInstance(fetch: () => Promise<string[]>): QueryInstance {
         resultIds,
         uses: 0,
 
-        trigger: () => {
-            if (isInProgress || isDone) {
+        trigger: ({ force = false } = {}) => {
+            if (isInProgress || (isDone && !force)) {
                 return;
             }
 
@@ -190,7 +190,7 @@ function createQueryInstance(fetch: () => Promise<string[]>): QueryInstance {
                     isInProgress = false;
                 })
                 .catch((err) => {
-                    const dfError = toDatafrontError(err, entry.trigger);
+                    const dfError = toDatafrontError(err, () => entry.trigger({ force: false }));
                     setError(dfError);
                     setLoading(false);
                     // ! warning: the next line is a potential source of bugs

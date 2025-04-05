@@ -22,6 +22,7 @@ export class MeshBuilder {
     private materials: MaterialData[] = [];
     private hasRoughnessAttribute = false;
     private faces: Poly[] = [];
+    private duplicatesToOriginals = new Map<number, number>();
 
     size(): MeshBuilderSize {
         return {
@@ -34,7 +35,9 @@ export class MeshBuilder {
         const clone = new MeshBuilder();
         clone.verticies = this.verticies.slice();
         clone.materials = this.materials.slice();
+        clone.hasRoughnessAttribute = this.hasRoughnessAttribute;
         clone.faces = this.faces.slice();
+        clone.duplicatesToOriginals = new Map(this.duplicatesToOriginals.entries());
         return clone;
     }
 
@@ -58,6 +61,9 @@ export class MeshBuilder {
     }
     setCoords(vertexIndex: number, coords: RawVertex) {
         this.verticies[vertexIndex] = coords;
+    }
+    getAllCoords(): readonly RawVertex[] {
+        return this.verticies;
     }
 
     mapVerticies(f: (v: RawVertex, i: number) => RawVertex) {
@@ -106,6 +112,9 @@ export class MeshBuilder {
 
     face(faceIndex: number): Poly {
         return this.faces[faceIndex];
+    }
+    getAllFaces(): readonly Poly[] {
+        return this.faces;
     }
     findConnectedFaces(vertexIndicies: number[]): number[] {
         const result: number[] = [];
@@ -172,6 +181,7 @@ export class MeshBuilder {
                 if (!duplicates[vi][ci]) {
                     const dupedVi = this.add(...this.verticies[vi]);
                     duplicates[vi][ci] = dupedVi;
+                    this.duplicatesToOriginals.set(dupedVi, vi);
                     this.materials[dupedVi] = color;
                 }
 
@@ -179,8 +189,22 @@ export class MeshBuilder {
             }
         }
     }
+    paintVertex(vi: number, mat: MaterialData) {
+        this.materials[vi] = mat;
+    }
+    getVertexMaterial(vi: number): MaterialData | undefined {
+        return this.materials[vi];
+    }
 
-    buildTriangulated(): { geometry: T.BufferGeometry; faceIndexMap: Record<number, number> } {
+    /** After mesh faces have been painted, this method will map duplicated vertex index back to original one */
+    getOriginalVertexIndex(dvi: number) {
+        return this.duplicatesToOriginals.get(dvi) ?? dvi;
+    }
+
+    buildTriangulated(triangulator: (vs: number[], builder: MeshBuilder) => RawFace[] = triangulatePoly): {
+        geometry: T.BufferGeometry;
+        faceIndexMap: Record<number, number>;
+    } {
         const triangleFaceIndicies: Record<number, number> = {};
         const faces: RawFace[] = [];
         for (let fi = 0; fi < this.faces.length; fi++) {
@@ -191,7 +215,7 @@ export class MeshBuilder {
                 continue;
             }
 
-            const triangles = triangulatePoly(poly);
+            const triangles = triangulator(poly, this);
             for (const t of triangles) {
                 triangleFaceIndicies[faces.length] = fi;
                 faces.push(t);

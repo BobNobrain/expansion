@@ -21,6 +21,14 @@ export namespace City {
     export function getTotalPopulation(city: City): Predictable {
         return sumPredictables(Object.values(city.population.counts));
     }
+
+    export function hasClaimedTileId(city: City, tileId: string | undefined): boolean {
+        if (!tileId) {
+            return false;
+        }
+
+        return tileId === city.centerTileId || city.claimedTileIds.includes(tileId);
+    }
 }
 
 export type WorkforceType =

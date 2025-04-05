@@ -3,12 +3,13 @@ import * as T from 'three';
 import { type World } from '../../domain/World';
 import { type MeshBuilder } from '../../lib/3d/MeshBuilder';
 import { type MaterialData } from '../../lib/3d/material';
+import { type RawFace } from '../../lib/3d/types';
 import { Color } from '../../lib/color';
 import { pickRenderer } from './colors';
 import { getInvertedMesh } from './mesh/invert';
 import { restorePlanetGrid } from './mesh/grid';
 import { PlanetTileManager } from './mesh/tiles';
-import { scale } from './mesh/utils';
+import { scale, calcCenter, normz } from './mesh/utils';
 import { type RenderMode } from './settings';
 
 export type UsePlanetResult = {
@@ -83,7 +84,7 @@ export function usePlanet(getWorld: () => World | null, getMode: () => RenderMod
             return null;
         }
 
-        return builder.buildTriangulated();
+        return builder.clone().buildTriangulated(planetTriangulator);
     });
 
     const surfaceMesh = createMemo(() => {
@@ -94,12 +95,12 @@ export function usePlanet(getWorld: () => World | null, getMode: () => RenderMod
 
         const surfaceGeom = builderResult.geometry;
         const surfaceMat = new T.MeshStandardMaterial({
-            // roughness: 0.2,
-            // metalness: 0.2,
+            roughness: 0.9,
             userData: true,
-            flatShading: true,
+            flatShading: false,
             vertexColors: true,
         });
+
         return new T.Mesh(surfaceGeom, surfaceMat);
     });
     const gridMesh = createMemo(() => {
@@ -129,4 +130,19 @@ export function usePlanet(getWorld: () => World | null, getMode: () => RenderMod
         gridMesh,
         faceIndexMap,
     };
+}
+
+// Adds a center point on each tile
+function planetTriangulator(vs: number[], builder: MeshBuilder): RawFace[] {
+    const middleCoords = normz(calcCenter(vs.map((vi) => builder.coords(vi))));
+    const result: RawFace[] = [];
+    const middle = builder.add(...middleCoords);
+    builder.paintVertex(middle, builder.getVertexMaterial(vs[0])!);
+
+    for (let i = 0; i < vs.length - 1; i++) {
+        result.push([middle, vs[i], vs[i + 1]]);
+    }
+    result.push([middle, vs[vs.length - 1], vs[0]]);
+
+    return result;
 }

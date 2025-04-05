@@ -8,14 +8,15 @@ import { PVSLights } from './PVSLights';
 import { PVSObjects } from './PVSObjects';
 import { PVSPlanet } from './PVSPlanet';
 import { PVSSettings } from './PVSSettings';
+import { usePlanet } from './planet';
 import { createPlanetViewSceneSettings } from './settings';
 
 export type PlanetViewSceneProps = {
     isActive: boolean;
     worldId: string;
 
-    selectedPlotId?: string;
-    onPlotSelected?: (plotId: string | undefined) => void;
+    selectedTileId?: string;
+    onTileSelected?: (plotId: string | undefined) => void;
 };
 
 export const PlanetViewScene: Component<PlanetViewSceneProps> = (props) => {
@@ -23,16 +24,16 @@ export const PlanetViewScene: Component<PlanetViewSceneProps> = (props) => {
     const renderSettings = createPlanetViewSceneSettings();
 
     const activeTileIndex = createMemo(() => {
-        if (!props.selectedPlotId) {
+        if (!props.selectedTileId) {
             return undefined;
         }
 
-        return World.parseTileId(props.selectedPlotId);
+        return World.parseTileId(props.selectedTileId);
     });
 
     const onTileClick = (tile: number | undefined) => {
-        if (props.onPlotSelected) {
-            props.onPlotSelected(tile === undefined ? undefined : World.makeTileId(tile));
+        if (props.onTileSelected) {
+            props.onTileSelected(tile === undefined ? undefined : World.makeTileId(tile));
         }
     };
 
@@ -53,11 +54,11 @@ export const PlanetViewScene: Component<PlanetViewSceneProps> = (props) => {
     });
 
     const currentTileCoords = createMemo(() => {
-        if (!props.selectedPlotId) {
+        if (!props.selectedTileId) {
             return null;
         }
 
-        const tileIndex = World.parseTileId(props.selectedPlotId);
+        const tileIndex = World.parseTileId(props.selectedTileId);
         if (tileIndex === undefined) {
             return null;
         }
@@ -70,18 +71,21 @@ export const PlanetViewScene: Component<PlanetViewSceneProps> = (props) => {
         return World.getTileCoords(w.grid, tileIndex);
     });
 
+    const { surfaceBuilder, surfaceMesh, faceIndexMap } = usePlanet(world.result, renderSettings.getMode);
+
     return (
         <Show when={props.isActive && world.result()}>
             <PVSCamera selectedTileCoords={currentTileCoords()} />
             <PVSLights isNatural={renderSettings.hasNaturalLighting()} />
             <PVSPlanet
-                world={world.result()}
                 activeTileIndex={activeTileIndex()}
                 onTileClick={onTileClick}
-                tileRenderMode={renderSettings.getMode()}
                 showBorders={renderSettings.showBorders()}
+                surfaceBuilder={surfaceBuilder()}
+                surfaceMesh={surfaceMesh()}
+                faceIndexMap={faceIndexMap()}
             />
-            <PVSObjects world={world.result()} />
+            <PVSObjects world={world.result()} surface={surfaceBuilder()} />
             <PVSAtmosphere isNatural={renderSettings.hasNaturalLighting()} density={atmDensity()} />
 
             <PVSSettings {...renderSettings} isFertilePlanet={Boolean(world.result()?.soilFertilities)} />
