@@ -18,7 +18,10 @@ type ExploreSystemUsecaseInput struct {
 	SystemID game.StarSystemID
 }
 
-func NewExploreSystemUsecase(wg *worldgen.WorldGen, store components.Storage) components.Usecase[ExploreSystemUsecaseInput] {
+func NewExploreSystemUsecase(
+	wg *worldgen.WorldGen,
+	store components.Storage,
+) components.Usecase[ExploreSystemUsecaseInput] {
 	return &exploreSystemUsecase{
 		wg:    wg,
 		store: store,

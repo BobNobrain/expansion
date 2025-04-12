@@ -63,10 +63,10 @@ const tileDefProps: DefinitionListProperties<TileInfo> = {
 
             return (
                 <Container direction="row" hasGap>
-                    <Badge iconLeft={IconEnergy} style="trasparent">
+                    <Badge iconLeft={IconEnergy} style="transparent">
                         {formatInteger(v.infraLevels.power)}/4
                     </Badge>
-                    <Badge iconLeft={IconRails} style="trasparent">
+                    <Badge iconLeft={IconRails} style="transparent">
                         {formatInteger(v.infraLevels.transport)}/4
                     </Badge>
                 </Container>
@@ -101,10 +101,10 @@ const tileDefProps: DefinitionListProperties<TileInfo> = {
 
             return (
                 <Container direction="row" hasGap>
-                    <Badge style="trasparent" iconLeft={IconLeaf}>
+                    <Badge style="transparent" iconLeft={IconLeaf}>
                         {fertility}
                     </Badge>
-                    <Badge style="trasparent" iconLeft={IconCloud}>
+                    <Badge style="transparent" iconLeft={IconCloud}>
                         {formatScalar(v.soil.moisture * 100, { digits: 1, unit: '%', noShortenings: true })}
                     </Badge>
                 </Container>

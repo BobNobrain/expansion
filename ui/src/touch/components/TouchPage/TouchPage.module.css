@@ -1,4 +1,4 @@
-.page {
+.wrapper {
     display: flex;
     flex-flow: column;
     align-items: stretch;
@@ -20,13 +20,20 @@
     height: 72px;
 }
 
-.content {
+.page {
     flex: 1 1 auto;
     overflow: auto;
 
     --content-padding-bottom: 72px;
 }
 
-.content.stretch > * {
+.page.stretch > * {
     height: 100%;
+}
+
+@media (min-width: 600px) {
+    .footer {
+        left: calc(50% - 300px);
+        right: calc(50% - 300px);
+    }
 }

@@ -1,7 +1,7 @@
-import { type ParentComponent, createSignal, type JSX, Show, For } from 'solid-js';
+import { type ParentComponent, createSignal, Show, For } from 'solid-js';
 import { A } from '@solidjs/router';
-import { Button } from '../../../components/Button/Button';
-import { type Icon, IconCurtainExpand } from '../../../icons';
+import { Button } from '../../../../components/Button/Button';
+import { type Icon, IconCurtainExpand } from '../../../../icons';
 import styles from './TouchCurtain.module.css';
 import { Dynamic } from 'solid-js/web';
 
@@ -11,7 +11,6 @@ export type TouchCurtainTab = {
 };
 
 export type TouchCurtainProps = {
-    static?: JSX.Element;
     initiallyExpanded?: boolean;
     expandable?: boolean;
     height?: 's' | 'm' | 'l';
@@ -58,7 +57,6 @@ export const TouchCurtain: ParentComponent<TouchCurtainProps> = (props) => {
                 [styles[SIZE_CLS[props.height ?? 'm']]]: true,
             }}
         >
-            <div class={styles.static}>{props.static}</div>
             <div class={styles.placeholder} onTransitionStart={onStart} onTransitionEnd={onEnd}>
                 <div
                     class={styles.curtain}

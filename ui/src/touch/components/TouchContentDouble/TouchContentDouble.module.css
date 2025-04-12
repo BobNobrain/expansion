@@ -1,0 +1,23 @@
+.double {
+    display: flex;
+    flex-direction: column;
+    justify-content: stretch;
+    align-items: stretch;
+
+    height: 100%;
+}
+
+.display {
+    flex: 1 1 auto;
+    min-height: 300px;
+}
+
+@media (min-width: 800px) and (orientation: landscape) {
+    .double {
+        flex-direction: row;
+    }
+
+    .display {
+        min-width: 300px;
+    }
+}

@@ -1,9 +1,9 @@
+import { A } from '@solidjs/router';
 import { type Component, Show, type JSX, For, createSignal } from 'solid-js';
 import { Dynamic } from 'solid-js/web';
 import { IconChevronRight, IconUnknown } from '../../icons';
 import { type ContentItem } from './types';
 import styles from './ContentList.module.css';
-import { A } from '@solidjs/router';
 
 export type ContentListProps = {
     header?: string | JSX.Element;

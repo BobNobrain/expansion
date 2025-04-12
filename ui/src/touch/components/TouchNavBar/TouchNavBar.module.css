@@ -47,3 +47,11 @@
     white-space: nowrap;
     max-width: 100%;
 }
+
+@media (min-width: 600px) {
+    .bar {
+        border-left: 1px solid var(--p-main-900);
+        border-right: 1px solid var(--p-main-900);
+        border-radius: 16px 16px 0 0;
+    }
+}

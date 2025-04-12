@@ -27,10 +27,10 @@ const tileCityDefs: DefinitionListProperties<TileCityInfo> = {
         render: (value) => {
             return (
                 <Container direction="row" hasGap>
-                    <Badge style="trasparent" iconLeft={IconUser}>
+                    <Badge style="transparent" iconLeft={IconUser}>
                         <UserLink id={value.founded.byId} />
                     </Badge>
-                    <Badge style="trasparent" iconLeft={IconCalendar}>
+                    <Badge style="transparent" iconLeft={IconCalendar}>
                         <GameTimeLabel value={value.founded.at} color="bright" />
                     </Badge>
                 </Container>
@@ -51,7 +51,7 @@ const tileCityDefs: DefinitionListProperties<TileCityInfo> = {
                 return formatInteger(total);
             };
             return (
-                <Badge iconLeft={IconPeople} style="trasparent">
+                <Badge iconLeft={IconPeople} style="transparent">
                     {totalPops()}
                 </Badge>
             );

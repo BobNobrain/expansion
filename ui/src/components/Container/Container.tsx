@@ -2,7 +2,7 @@ import { type Component, type ParentComponent } from 'solid-js';
 import styles from './Container.module.css';
 
 export type ContainerProps = {
-    padded?: boolean;
+    padded?: boolean | 'h' | 'v' | 'both';
     hasGap?: boolean;
     size?: 's' | 'm' | 'l';
     direction?: 'row' | 'column';
@@ -27,7 +27,8 @@ export const Container: ParentComponent<ContainerProps> = (props) => {
         <div
             class={styles.container}
             classList={{
-                [styles.padded]: props.padded,
+                [styles.paddedH]: props.padded === true || props.padded === 'both' || props.padded === 'h',
+                [styles.paddedV]: props.padded === true || props.padded === 'both' || props.padded === 'v',
                 [styles.gap]: props.hasGap,
                 [styles[props.direction ?? 'column']]: true,
                 [styles.grid]: !isFlex(),

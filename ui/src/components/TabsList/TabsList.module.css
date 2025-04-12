@@ -1,10 +1,17 @@
 .tabs {
     list-style: none;
     margin: 0;
-    padding: 0 4px;
 
     display: flex;
+}
+
+.scrollable {
     overflow: auto;
+    scrollbar-width: none;
+}
+
+.standalone {
+    padding: 0 4px;
     height: 48px;
     gap: 8px;
     align-items: center;
@@ -15,19 +22,33 @@
     background-color: var(--p-main-100-50);
 }
 
+.pagetop {
+    padding: 0 12px;
+    background: linear-gradient(to top, var(--p-main-500), var(--p-main-500) 4px, var(--p-main-100-50) 4px, var(--p-main-100-50));
+}
+
 .header {
-    height: 36px;
     flex: 1 1 auto;
+}
+
+.standalone .header {
+    height: 36px;
     min-width: 50px;
+}
+
+.pagetop .header {
+    min-width: 50px;
+}
+
+.scrollable .header {
+    flex: 0 0 auto;
 }
 
 .link {
     text-decoration: none;
-    height: 36px;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 4px 12px;
 
     color: var(--p-main-800);
     font-size: 18px;
@@ -38,7 +59,33 @@
     font-variation-settings: "wght" 600;
 }
 
-.active {
+.label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.label:not(:first-child) {
+    margin-left: 4px;
+}
+
+.standalone .link {
+    height: 36px;
+    padding: 4px 8px;
+}
+
+.pagetop .link {
+    padding: 16px 12px 8px;
+    border-bottom: 4px solid transparent;
+}
+
+.standalone .active {
     background-color: var(--p-main-900-25);
     color: var(--p-main-900);
+}
+
+.pagetop .active {
+    background: linear-gradient(to bottom, var(--p-main-700-50), var(--p-main-900-25));
+    color: var(--p-main-900);
+
+    border-bottom-color: var(--p-main-800);
 }

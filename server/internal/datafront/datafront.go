@@ -20,8 +20,6 @@ type GameDataFront struct {
 
 	sysOverviews   *sysOverviewsTable
 	worldOverviews *worldOverviewsTable
-
-	actions *gameActions
 }
 
 func NewDataFront() *GameDataFront {

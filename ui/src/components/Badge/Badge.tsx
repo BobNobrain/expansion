@@ -4,7 +4,7 @@ import { type Icon } from '../../icons';
 import { type SemanticColor } from '../../lib/appearance';
 import styles from './Badge.module.css';
 
-export type BadgeStyle = 'default' | 'trasparent';
+export type BadgeStyle = 'default' | 'transparent';
 
 export type BadgeProps = {
     color?: SemanticColor;

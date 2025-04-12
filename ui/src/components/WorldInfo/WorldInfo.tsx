@@ -77,10 +77,10 @@ const defProps: DefinitionListProperties<DefListValue> = {
         title: 'Size',
         render: (v) => (
             <div class={styles.badgeList}>
-                <Badge iconLeft={IconTile} style="trasparent">
+                <Badge iconLeft={IconTile} style="transparent">
                     {v.size.plots}
                 </Badge>
-                <Badge iconLeft={IconRadius} style="trasparent">
+                <Badge iconLeft={IconRadius} style="transparent">
                     {formatScalar(v.size.rKm, { digits: 0, unit: 'km', noShortenings: true })}
                 </Badge>
             </div>
@@ -90,13 +90,13 @@ const defProps: DefinitionListProperties<DefListValue> = {
         title: 'Population',
         render: (v) => (
             <div class={styles.badgeList}>
-                <Badge iconLeft={IconCity} style="trasparent">
+                <Badge iconLeft={IconCity} style="transparent">
                     {formatInteger(v.habitants.cities)}
                 </Badge>
-                <Badge iconLeft={IconPeople} style="trasparent">
+                <Badge iconLeft={IconPeople} style="transparent">
                     {formatInteger(v.habitants.population)}
                 </Badge>
-                <Badge iconLeft={IconFlag} style="trasparent">
+                <Badge iconLeft={IconFlag} style="transparent">
                     {formatInteger(v.habitants.bases)}
                 </Badge>
             </div>
@@ -106,13 +106,13 @@ const defProps: DefinitionListProperties<DefListValue> = {
         title: 'Environment',
         render: (v) => (
             <div class={styles.badgeList}>
-                <Badge iconLeft={IconTemperature} style="trasparent">
+                <Badge iconLeft={IconTemperature} style="transparent">
                     {formatDegreesCelsius(v.environment.tK, { unit: 'K' })}
                 </Badge>
-                <Badge iconLeft={IconPressure} style="trasparent">
+                <Badge iconLeft={IconPressure} style="transparent">
                     {formatScalar(v.environment.pBar, { unit: 'bar', digits: 0, noShortenings: true })}
                 </Badge>
-                <Badge iconLeft={IconG} style="trasparent">
+                <Badge iconLeft={IconG} style="transparent">
                     {formatScalar(v.environment.g, { digits: 1, noShortenings: true })}
                 </Badge>
             </div>
@@ -190,7 +190,7 @@ export const WorldInfo: Component = () => {
             <PageHeader>
                 <PageHeaderTitle>Summary</PageHeaderTitle>
                 <Show when={world.result()}>
-                    <Badge style="trasparent" iconLeft={IconTile} color="accent">
+                    <Badge style="transparent" iconLeft={IconTile} color="accent">
                         {world.result()?.grid.edges.length}
                     </Badge>
                 </Show>

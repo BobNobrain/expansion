@@ -1,7 +1,7 @@
 import { type Component, createMemo } from 'solid-js';
 import { Dynamic } from 'solid-js/web';
-import { type Icon, IconConstruction, IconLeaf, IconRocks, IconUnknown } from '../../icons';
-import { type CommodityCategory, getCommodityCategory } from '../../domain/Commodities';
+import { type Icon, IconConstruction, IconIngot, IconLeaf, IconRocks, IconUnknown } from '../../icons';
+import { type CommodityCategory, getCommodityCategory } from '../../domain/Commodity';
 import styles from './CommodityIcon.module.css';
 
 export type CommodityIconProps = {
@@ -12,7 +12,7 @@ const iconsByCategory: Record<CommodityCategory, Icon> = {
     resources: IconRocks,
     construction: IconConstruction,
     crops: IconLeaf,
-    metals: IconUnknown,
+    metals: IconIngot,
 };
 
 export const CommodityIcon: Component<CommodityIconProps> = (props) => {

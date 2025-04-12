@@ -2,8 +2,13 @@
     overflow: auto;
 }
 
-.padded {
-    padding: var(--container-padding);
+.padded-h {
+    padding-left: var(--container-padding);
+    padding-right: var(--container-padding);
+}
+.padded-v {
+    padding-top: var(--container-padding);
+    padding-bottom: var(--container-padding);
 }
 .gap {
     gap: var(--container-gap);

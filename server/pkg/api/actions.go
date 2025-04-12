@@ -6,8 +6,8 @@ const (
 	ActionExploreWorld  = "exploreWorld"
 
 	// base management
-	ActionEstablishBase = "establishBase"
-	ActionRemoveBase    = "removeBase"
+	ActionCreateBase = "createBase"
+	ActionRemoveBase = "removeBase"
 
 	// cities
 	ActionFoundCity = "foundCity"
@@ -39,4 +39,9 @@ type FoundCityPayload struct {
 	WorldID string `json:"worldId"`
 	TileID  int    `json:"tileId"`
 	Name    string `json:"name"`
+}
+
+type CreateBasePayload struct {
+	WorldID string `json:"worldId"`
+	TileID  int    `json:"tileId"`
 }

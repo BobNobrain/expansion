@@ -80,7 +80,10 @@ type EquipmentData struct {
 	Building    BaseBuildingID
 }
 
+type RecipeID int
+
 type Recipe struct {
+	RecipeID     RecipeID
 	Inputs       map[CommodityID]int
 	Outputs      map[CommodityID]int
 	Equipment    EquipmentID

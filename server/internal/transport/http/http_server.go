@@ -24,13 +24,12 @@ func NewHTTPServer(auth components.Authenticator, comms *ws.WSComms) (HTTPServer
 	}
 
 	srv.serveAuthAPI()
+	srv.serveSocket()
 
 	err := srv.serveStatic()
 	if err != nil {
 		return nil, err
 	}
-
-	srv.serveSocket()
 
 	return srv, nil
 }

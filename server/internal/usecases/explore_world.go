@@ -22,7 +22,10 @@ type ExploreWorldUsecaseInput struct {
 	WorldID game.CelestialID
 }
 
-func NewExploreWorldUsecase(wg *worldgen.WorldGen, store components.Storage) components.Usecase[ExploreWorldUsecaseInput] {
+func NewExploreWorldUsecase(
+	wg *worldgen.WorldGen,
+	store components.Storage,
+) components.Usecase[ExploreWorldUsecaseInput] {
 	return &exploreWorldUsecase{
 		wg:    wg,
 		store: store,

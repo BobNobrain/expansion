@@ -13,6 +13,7 @@ type CompanyOverview struct {
 	OwnerID domain.UserID
 	Est     time.Time
 	NBases  int
+	Logo    []any
 }
 
 type CompanyData struct {
@@ -21,6 +22,7 @@ type CompanyData struct {
 	OwnerID domain.UserID
 	Est     time.Time
 	Bases   []CompanyBase
+	Logo    []any
 }
 
 type CompanyBase struct {
@@ -28,15 +30,5 @@ type CompanyBase struct {
 	Created time.Time
 	WorldID CelestialID
 	// A share of base area that is in use, 0-1
-	DevelopedArea float64
-}
-
-type BaseID string
-
-type BaseOverview struct {
-	ID            BaseID
-	Created       time.Time
-	WorldID       CelestialID
-	OwnerID       domain.UserID
 	DevelopedArea float64
 }

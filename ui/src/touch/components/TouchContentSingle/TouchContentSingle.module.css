@@ -1,0 +1,5 @@
+.single {
+    padding-bottom: var(--content-padding-bottom);
+    max-width: 500px;
+    margin: auto;
+}

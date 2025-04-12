@@ -25,7 +25,11 @@ func NewFoundCityUsecase(store components.Storage) components.Usecase[FoundCityU
 	}
 }
 
-func (uc *foundCityUsecase) Run(ctx context.Context, input FoundCityUsecaseInput, uctx components.UsecaseContext) common.Error {
+func (uc *foundCityUsecase) Run(
+	ctx context.Context,
+	input FoundCityUsecaseInput,
+	uctx components.UsecaseContext,
+) common.Error {
 	tx, err := uc.store.StartTransaction(ctx)
 	if err != nil {
 		return err

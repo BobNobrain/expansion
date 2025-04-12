@@ -17,7 +17,8 @@ import {
 import { PlanetViewScene } from '../../../scenes/PlanetViewScene/PlanetViewScene';
 import { SystemMapScene } from '../../../scenes/SystemMapScene/SystemMapScene';
 import { GalaxyMapScene } from '../../../scenes/GalaxyMapScene/GalaxyMapScene';
-import { TouchCurtain, type TouchCurtainTab } from '../../components/TouchCurtain/TouchCurtain';
+import { TouchContentDouble } from '../../components/TouchContentDouble/TouchContentDouble';
+import { type TouchCurtainTab } from '../../components/TouchContentDouble/TouchCurtain/TouchCurtain';
 import { usePageContextBinding } from '../../components/TouchPage';
 import { SystemContentPlanets } from './tabs/SystemContentPlanets';
 import { SystemContentStars } from './tabs/SystemContentStars';
@@ -131,67 +132,72 @@ export const CartographyPage: Component = () => {
     });
 
     return (
-        <>
-            <SceneRenderer clearColor="#000000">
-                <GalaxyMapScene
-                    isActive={routeInfo().objectType === 'galaxy' || routeInfo().objectType === 'sector'}
-                    selectedSector={routeInfo().objectId ?? null}
-                    onSectorClick={onOpenSector}
-                />
-                <SystemMapScene isActive={routeInfo().objectType === 'system'} systemId={routeInfo().objectId!} />
-                <PlanetViewScene
-                    isActive={routeInfo().objectType === 'world'}
-                    worldId={routeInfo().objectId!}
-                    selectedTileId={routeInfo().tileId}
-                    onTileSelected={(plot) => {
-                        if (!plot) {
-                            navigate(getExploreRoute({ objectId: routeInfo().objectId, tab: WorldContentTab.Info }));
-                            return;
-                        }
-                        navigate(getExploreRoute({ objectId: routeInfo().objectId, tab: plot }));
-                    }}
-                />
-            </SceneRenderer>
-            <TouchCurtain height={routeInfo().objectType === 'galaxy' ? 's' : 'm'} tabs={tabs()}>
-                <Show when={routeInfo().objectType === 'galaxy'}>Galaxy Overview</Show>
+        <TouchContentDouble
+            height={routeInfo().objectType === 'galaxy' ? 's' : 'm'}
+            tabs={tabs()}
+            display={
+                <SceneRenderer clearColor="#000000">
+                    <GalaxyMapScene
+                        isActive={routeInfo().objectType === 'galaxy' || routeInfo().objectType === 'sector'}
+                        selectedSector={routeInfo().objectId ?? null}
+                        onSectorClick={onOpenSector}
+                    />
+                    <SystemMapScene isActive={routeInfo().objectType === 'system'} systemId={routeInfo().objectId!} />
+                    <PlanetViewScene
+                        isActive={routeInfo().objectType === 'world'}
+                        worldId={routeInfo().objectId!}
+                        selectedTileId={routeInfo().tileId}
+                        onTileSelected={(plot) => {
+                            if (!plot) {
+                                navigate(
+                                    getExploreRoute({ objectId: routeInfo().objectId, tab: WorldContentTab.Info }),
+                                );
+                                return;
+                            }
+                            navigate(getExploreRoute({ objectId: routeInfo().objectId, tab: plot }));
+                        }}
+                    />
+                </SceneRenderer>
+            }
+        >
+            <Show when={routeInfo().objectType === 'galaxy'}>Galaxy Overview</Show>
 
-                <Show when={routeInfo().objectType === 'sector'}>
-                    <SectorContentTable sectorId={routeInfo().objectId!} />
-                </Show>
+            <Show when={routeInfo().objectType === 'sector'}>
+                <SectorContentTable sectorId={routeInfo().objectId!} />
+            </Show>
 
-                <Show when={routeInfo().objectType === 'system'}>
-                    <Switch fallback={<RedirectToTab tab={SystemContentTab.Planets} />}>
-                        <Match when={routeInfo().tab === SystemContentTab.Planets}>
-                            <SystemContentPlanets />
-                        </Match>
-                        <Match when={routeInfo().tab === SystemContentTab.Infra}>No infra yet</Match>
-                        <Match when={routeInfo().tab === SystemContentTab.Asteroids}>No asteroids yet</Match>
-                        <Match when={routeInfo().tab === SystemContentTab.Stars}>
-                            <SystemContentStars />
-                        </Match>
-                    </Switch>
-                </Show>
+            <Show when={routeInfo().objectType === 'system'}>
+                <Switch fallback={<RedirectToTab tab={SystemContentTab.Planets} />}>
+                    <Match when={routeInfo().tab === SystemContentTab.Planets}>
+                        <SystemContentPlanets />
+                    </Match>
+                    <Match when={routeInfo().tab === SystemContentTab.Infra}>No infra yet</Match>
+                    <Match when={routeInfo().tab === SystemContentTab.Asteroids}>No asteroids yet</Match>
+                    <Match when={routeInfo().tab === SystemContentTab.Stars}>
+                        <SystemContentStars />
+                    </Match>
+                </Switch>
+            </Show>
 
-                <Show when={routeInfo().objectType === 'world'}>
-                    <Switch fallback={<WorldTileInfo />}>
-                        <Match when={routeInfo().tab === WorldContentTab.Info}>
-                            <WorldInfo />
-                        </Match>
-                        <Match when={routeInfo().tab === WorldContentTab.Population}>
-                            <WorldPopulation />
-                        </Match>
-                        <Match when={routeInfo().tab === WorldContentTab.Resources}>
-                            <WorldResources />
-                        </Match>
-                        <Match when={routeInfo().tab === WorldContentTab.Infra}>Infra...</Match>
-                        <Match when={routeInfo().tab === WorldContentTab.Bases}>Bases...</Match>
+            <Show when={routeInfo().objectType === 'world'}>
+                <Switch fallback={<WorldTileInfo />}>
+                    <Match when={routeInfo().tab === WorldContentTab.Info}>
+                        <WorldInfo />
+                    </Match>
+                    <Match when={routeInfo().tab === WorldContentTab.Population}>
+                        <WorldPopulation />
+                    </Match>
+                    <Match when={routeInfo().tab === WorldContentTab.Resources}>
+                        <WorldResources />
+                    </Match>
+                    <Match when={routeInfo().tab === WorldContentTab.Infra}>Infra...</Match>
+                    <Match when={routeInfo().tab === WorldContentTab.Bases}>Bases...</Match>
 
-                        <Match when={!routeInfo().tab && !routeInfo().tileId}>
-                            <RedirectToTab tab={WorldContentTab.Info} />
-                        </Match>
-                    </Switch>
-                </Show>
-            </TouchCurtain>
-        </>
+                    <Match when={!routeInfo().tab && !routeInfo().tileId}>
+                        <RedirectToTab tab={WorldContentTab.Info} />
+                    </Match>
+                </Switch>
+            </Show>
+        </TouchContentDouble>
     );
 };

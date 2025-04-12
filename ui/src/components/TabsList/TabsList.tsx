@@ -6,6 +6,8 @@ import styles from './TabsList.module.css';
 
 export type TabsListProps = {
     tabs: TabHeader[];
+    style?: 'standalone' | 'pagetop';
+    scrollable?: boolean;
 };
 
 export type TabHeader = {
@@ -15,32 +17,24 @@ export type TabHeader = {
     href: string;
 };
 
-const TabHeader: Component<{ header: TabHeader }> = (props) => {
-    return (
-        <>
-            <Show when={props.header.icon}>
-                <Dynamic component={props.header.icon} size={16} />
-            </Show>
-            <span class={props.header.title}>{props.header.title}</span>
-            <Show when={props.header.badge}>
-                <span class={props.header.badge}>{props.header.badge}</span>
-            </Show>
-        </>
-    );
-};
-
 export const TabsList: Component<TabsListProps> = (props) => {
     return (
-        <ul class={styles.tabs}>
+        <ul
+            class={styles.tabs}
+            classList={{
+                [styles[props.style ?? 'standalone']]: true,
+                [styles.scrollable]: props.scrollable,
+            }}
+        >
             <For each={props.tabs}>
                 {(tabHeader) => {
                     return (
                         <li class={styles.header}>
                             <A href={tabHeader.href} class={styles.link} activeClass={styles.active}>
                                 <Show when={tabHeader.icon}>
-                                    <Dynamic component={tabHeader.icon} size={16} />
+                                    <Dynamic component={tabHeader.icon} size={24} />
                                 </Show>
-                                <span class={tabHeader.title}>{tabHeader.title}</span>
+                                <span class={styles.label}>{tabHeader.title}</span>
                                 <Show when={tabHeader.badge}>
                                     <span class={tabHeader.badge}>{tabHeader.badge}</span>
                                 </Show>

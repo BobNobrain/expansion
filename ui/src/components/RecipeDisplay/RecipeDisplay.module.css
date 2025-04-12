@@ -1,0 +1,88 @@
+.recipe {
+    display: flex;
+}
+
+.arrow-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    flex: 0 0 64px;
+    width: 64px;
+    min-height: 64px;
+}
+
+.arrow-label {
+    height: 16px;
+
+    line-height: 16px;
+    font-size: 14px;
+}
+.above {
+    composes: arrow-label;
+    margin-bottom: -4px;
+}
+.below {
+    composes: arrow-label;
+    margin-top: -4px;
+}
+
+.ingridients-list {
+    flex: 1 1 calc(50% - 32px);
+    min-width: 128px;
+
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+}
+
+.ingridient {
+    display: flex;
+    align-items: center;
+}
+.ingridient + .ingridient {
+    margin-top: 2px;
+}
+
+.ingridient-speed {
+    flex: 0 0 auto;
+    text-align: right;
+    margin-left: auto;
+}
+.ingridient.red .ingridient-speed {
+    color: var(--p-red-500);
+}
+.ingridient.green .ingridient-speed {
+    color: var(--p-green-500);
+}
+
+.arrow {
+    width: 32px;
+    height: 32px;
+    clip-path: polygon(0 33%, 34% 33%, 34% 0, 100% 50%, 34% 100%, 34% 67%, 0 67%);
+    background-color: var(--p-main-700-50);
+}
+
+.arrow.animated {
+    background:
+        repeating-linear-gradient(45deg, var(--p-primary-700) 0, var(--p-primary-900) 8px, var(--p-primary-700) 16px),
+        repeating-linear-gradient(135deg, var(--p-primary-700) 0, var(--p-primary-900) 8px, var(--p-primary-700) 16px);
+    background-size: 22.627416997969522px 16px;
+    background-repeat: repeat-x;
+
+    animation: arrow-animation linear infinite normal 1s;
+}
+
+@keyframes arrow-animation {
+    0% {
+        background-position: 0 0, 0 16px;
+    }
+    100% {
+        background-position: 22.627416997969522px 0, 22.627416997969522px 16px;
+    }
+}
