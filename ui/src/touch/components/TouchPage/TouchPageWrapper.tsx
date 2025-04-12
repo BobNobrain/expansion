@@ -40,7 +40,6 @@ export const TouchPageWrapper: ParentComponent = (props) => {
 
     return (
         <TouchPage
-            stretch
             header={
                 <TouchHeader>
                     <TouchHeaderButton onClick={ctx.get().goBack}>

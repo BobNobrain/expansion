@@ -27,10 +27,6 @@
     --content-padding-bottom: 72px;
 }
 
-.page.stretch > * {
-    height: 100%;
-}
-
 @media (min-width: 600px) {
     .footer {
         left: calc(50% - 300px);
