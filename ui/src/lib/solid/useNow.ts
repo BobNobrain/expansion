@@ -1,6 +1,6 @@
 import { createSignal, onCleanup } from 'solid-js';
 
-type Precision = 's';
+type Precision = 's' | '10s';
 
 type SignalData = {
     signal: () => Date;
@@ -23,6 +23,16 @@ function createNowSignal(precision: Precision): SignalData {
                     updateNow(new Date());
                     scheduleNextUpdate();
                 }, nextSecondStartsIn);
+            };
+            break;
+
+        case '10s':
+            scheduleNextUpdate = () => {
+                const nextTenSecondsStartIn = 10000 - (Date.now() % 10000);
+                timeoutId = setTimeout(() => {
+                    updateNow(new Date());
+                    scheduleNextUpdate();
+                }, nextTenSecondsStartIn);
             };
             break;
 

@@ -5,7 +5,7 @@ import { type CommodityCategory, getCommodityCategory } from '../../domain/Commo
 import styles from './CommodityIcon.module.css';
 
 export type CommodityIconProps = {
-    resource: string;
+    commodity: string;
 };
 
 const iconsByCategory: Record<CommodityCategory, Icon> = {
@@ -17,7 +17,7 @@ const iconsByCategory: Record<CommodityCategory, Icon> = {
 
 export const CommodityIcon: Component<CommodityIconProps> = (props) => {
     const icon = createMemo(() => {
-        const cat = getCommodityCategory(props.resource);
+        const cat = getCommodityCategory(props.commodity);
         if (!cat) {
             return IconUnknown;
         }
@@ -36,7 +36,7 @@ export const CommodityIconWithLabel: Component<CommodityIconProps> = (props) => 
     return (
         <div class={styles.labeled}>
             <CommodityIcon {...props} />
-            <div class={styles.label}>{props.resource}</div>
+            <div class={styles.label}>{props.commodity}</div>
         </div>
     );
 };

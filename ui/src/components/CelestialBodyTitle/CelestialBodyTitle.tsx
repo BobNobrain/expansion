@@ -7,6 +7,7 @@ export type CelestialBodyTitleProps = {
     name?: string;
     id: string;
     icon?: Icon;
+    tileId?: string;
 };
 
 export const CelestialBodyTitle: Component<CelestialBodyTitleProps> = (props) => {
@@ -25,6 +26,10 @@ export const CelestialBodyTitle: Component<CelestialBodyTitleProps> = (props) =>
                     <Dynamic component={props.icon} size={16} />
                 </Show>
                 <span class={styles.id}>{props.id}</span>
+                <Show when={props.tileId}>
+                    {' '}
+                    <span class={styles.tileId}>#{props.tileId}</span>
+                </Show>
             </div>
         </div>
     );

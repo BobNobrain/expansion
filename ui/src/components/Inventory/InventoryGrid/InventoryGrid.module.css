@@ -1,0 +1,54 @@
+.grid {
+    display: grid;
+    grid-auto-rows: 64px;
+    grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 12px;
+}
+
+.item {
+    height: 100%;
+    overflow: hidden;
+
+    display: flex;
+    flex-flow: column;
+    align-items: stretch;
+
+    border-bottom: 1px solid var(--p-main-700);
+    border-radius: 8px;
+    background-color: var(--p-main-900-10);
+}
+
+.item-top {
+    display: flex;
+    padding: 4px 4px 0;
+}
+
+.mass {
+    flex: 1 1 auto;
+
+    display: flex;
+    flex-flow: column;
+    text-align: right;
+}
+
+.label {
+    margin-top: auto;
+    align-self: flex-start;
+    display: flex;
+    align-items: flex-end;
+
+    padding: 0 4px 2px;
+
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.quantity {
+    margin-left: auto;
+    display: block;
+}

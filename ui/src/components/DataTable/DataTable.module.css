@@ -68,6 +68,9 @@
 
     background-clip: padding-box;
     border: 0 none;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .cell + .cell {
     border-left: 2px solid transparent;
@@ -124,4 +127,18 @@
 .emptyBanner {
     padding: 32px 16px;
     text-align: center;
+}
+
+.cell-link {
+    display: block;
+    margin: -4px -8px;
+    padding: 4px 8px;
+    height: 100%;
+
+    text-decoration: none;
+    color: unset;
+}
+.no-padding > .cell-link {
+    margin: 0;
+    padding: 0;
 }

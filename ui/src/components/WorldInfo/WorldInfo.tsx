@@ -19,7 +19,7 @@ import { DefinitionList, type DefinitionListProperties } from '../DefinitionList
 import { InfoDisplay } from '../InfoDisplay/InfoDisplay';
 import { OperationDisplay } from '../OperationDisplay/OperationDisplay';
 import styles from './WorldInfo.module.css';
-import { PageHeader, PageHeaderTitle } from '../PageHeader';
+import { PageHeader, PageHeaderIcon, PageHeaderTitle } from '../PageHeader';
 
 type DefListValue = {
     id: string;
@@ -190,9 +190,7 @@ export const WorldInfo: Component = () => {
             <PageHeader>
                 <PageHeaderTitle>Summary</PageHeaderTitle>
                 <Show when={world.result()}>
-                    <Badge style="transparent" iconLeft={IconTile} color="accent">
-                        {world.result()?.grid.edges.length}
-                    </Badge>
+                    <PageHeaderIcon icon={IconTile} text={String(world.result()!.grid.edges.length)} />
                 </Show>
             </PageHeader>
             <OperationDisplay error={world.error()}>

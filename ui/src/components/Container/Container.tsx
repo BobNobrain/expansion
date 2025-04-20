@@ -11,6 +11,8 @@ export type ContainerProps = {
     stretch?: boolean;
     fullHeight?: boolean;
     wrap?: boolean;
+    primaryAlignment?: 'start' | 'end' | 'center';
+    secondaryAlignment?: 'start' | 'end' | 'center';
 };
 
 const SIZE_CLS: Record<NonNullable<ContainerProps['size']>, string> = {
@@ -23,6 +25,7 @@ export const Spacer: Component = () => <div class={styles.spacer} />;
 
 export const Container: ParentComponent<ContainerProps> = (props) => {
     const isFlex = () => props.threads === undefined || props.threads === 1 || props.threads === '1';
+
     return (
         <div
             class={styles.container}
@@ -39,6 +42,10 @@ export const Container: ParentComponent<ContainerProps> = (props) => {
                 [styles.stretch]: props.stretch,
                 [styles.fullHeight]: props.fullHeight,
                 [styles.wrap]: props.wrap,
+                [styles[`primaryAlignmentF${props.primaryAlignment ?? 'start'}`]]: Boolean(props.primaryAlignment),
+                [styles[`secondaryAlignmentF${props.secondaryAlignment ?? 'start'}`]]: Boolean(
+                    props.secondaryAlignment,
+                ),
             }}
         >
             {props.children}

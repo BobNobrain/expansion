@@ -36,3 +36,8 @@
 .id {
     margin-left: 2px;
 }
+
+.tile-id {
+    color: var(--p-main-900);
+    margin-left: 4px;
+}

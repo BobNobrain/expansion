@@ -28,7 +28,7 @@ const RecipeIngridients: Component<{ items: RecipeDisplayIngridient[] }> = (prop
                             [styles[ingridient.style ?? 'default']]: true,
                         }}
                     >
-                        <CommodityIconWithLabel resource={ingridient.commodityId} />
+                        <CommodityIconWithLabel commodity={ingridient.commodityId} />
                         <div class={styles.ingridientSpeed}>{ingridient.speed}</div>
                     </li>
                 )}

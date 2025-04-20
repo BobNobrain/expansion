@@ -1,5 +1,5 @@
 import { type Component, createMemo, createSignal } from 'solid-js';
-import { renderGameTime, renderGameTimeRelative } from '../../domain/GameTime';
+import { GameTime, renderGameTimeRelative } from '../../domain/GameTime';
 import { useNow } from '../../lib/solid/useNow';
 import { Text, type TextProps } from '../Text/Text';
 import { renderRealTime, renderRealTimeRelative } from '../../lib/time';
@@ -10,6 +10,7 @@ export type GameTimeLabelProps = Omit<TextProps, 'children'> & {
     value: Date | null;
     mode?: GameTimeLabelMode;
     nullText?: string;
+    gameTimeWithHours?: boolean;
 };
 
 // TODO: put this into user settings
@@ -35,7 +36,7 @@ export const GameTimeLabel: Component<GameTimeLabelProps> = (props) => {
         const mode = props.mode ?? globalMode();
         switch (mode) {
             case 'gameAbsolute':
-                return renderGameTime(date);
+                return GameTime.toString(GameTime.fromReal(date), { withHours: props.gameTimeWithHours });
 
             case 'gameRelative':
                 return renderGameTimeRelative(date, now());

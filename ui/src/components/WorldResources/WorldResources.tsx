@@ -20,7 +20,7 @@ type ResourceRow = {
 const COLUMNS: DataTableColumn<ResourceRow>[] = [
     {
         header: { text: 'Resource' },
-        content: (row) => <CommodityIconWithLabel resource={row.resource} />,
+        content: (row) => <CommodityIconWithLabel commodity={row.resource} />,
     },
     {
         header: { text: 'Quality' },

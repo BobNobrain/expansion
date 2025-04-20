@@ -1,0 +1,42 @@
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.bar {
+    border: 1px solid var(--progress-bar-border-color);
+    width: 100%;
+}
+
+.fill {
+    height: 6px;
+    background-color: var(--progress-bar-fill-color);
+
+    transition: width 0.5s ease-in-out;
+}
+
+.primary {
+    --progress-bar-border-color: var(--p-primary-900);
+    --progress-bar-fill-color: var(--p-primary-500);
+}
+
+.secondary {
+    --progress-bar-border-color: var(--p-main-900);
+    --progress-bar-fill-color: var(--p-main-700);
+}
+
+.warn {
+    --progress-bar-border-color: var(--p-orange-900);
+    --progress-bar-fill-color: var(--p-orange-500);
+}
+
+.error {
+    --progress-bar-border-color: var(--p-red-900);
+    --progress-bar-fill-color: var(--p-red-500);
+}
+
+.success {
+    --progress-bar-border-color: var(--p-green-900);
+    --progress-bar-fill-color: var(--p-green-500);
+}

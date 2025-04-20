@@ -1,0 +1,22 @@
+.scroller {
+    overflow: hidden;
+}
+
+.content {
+    animation: autoscroller-move-x infinite alternate linear;
+    animation-duration: var(--auto-scroller-duration);
+    animation-play-state: paused;
+    width: fit-content;
+}
+.content.running {
+    animation-play-state: running;
+}
+
+@keyframes autoscroller-move-x {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(calc(var(--auto-scroller-width) - 100%));
+    }
+}

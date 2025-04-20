@@ -1,40 +1,19 @@
 import { createMemo, type Component } from 'solid-js';
-import { useNavigate } from '@solidjs/router';
 import { type TabHeader, TabsList } from '../../../components/TabsList/TabsList';
 import { TabContent } from '../../../components/TabContent/TabContent';
-import { usePageContextBinding } from '../../components/TouchPage';
-import { IconFactory, IconPeople, IconStorage } from '../../../icons';
-import { useTileBaseRouteInfo, getBasesRoute, TileBaseTab, getUpperRoute } from '../../../routes/bases';
+import { IconConstruction, IconFactory, IconPeople, IconStorage } from '../../../icons';
+import { useTileBaseRouteInfo, getBasesRoute, TileBaseTab } from '../../../routes/bases';
 import { TileBaseProduction } from './tabs/TileBaseProduction';
 import { TileBaseInventory } from './tabs/TileBaseInventory';
 import { TileBaseWorkforce } from './tabs/TileBaseWorkforce';
 import { TouchContentSingle } from '../../components/TouchContentSingle/TouchContentSingle';
+import { TileBaseConstructionSites } from './tabs/TileBaseConstructionSites';
+import { useBasesPageContextBinding } from '../WorldBasesPage/binding';
 
 export const TileBasePage: Component = () => {
     const routeInfo = useTileBaseRouteInfo();
-    const navigate = useNavigate();
 
-    const goBack = () => navigate(getUpperRoute(routeInfo()));
-
-    usePageContextBinding(() => {
-        const info = routeInfo();
-        let title = 'All Bases';
-        let subtitle: string | undefined;
-
-        if (info.tileId) {
-            title = 'Base';
-            subtitle = `${info.worldId}#${info.tileId}`;
-        } else if (info.worldId) {
-            title = `World Bases`;
-            subtitle = info.worldId;
-        }
-
-        return {
-            title,
-            subtitle,
-            goBack,
-        };
-    });
+    useBasesPageContextBinding();
 
     const tabs = createMemo<TabHeader[]>(() => {
         const route = routeInfo();
@@ -44,6 +23,11 @@ export const TileBasePage: Component = () => {
                 title: 'Production',
                 icon: IconFactory,
                 href: getBasesRoute({ ...route, tab: TileBaseTab.Production }),
+            },
+            {
+                title: 'Sites',
+                icon: IconConstruction,
+                href: getBasesRoute({ ...route, tab: TileBaseTab.ConstructionSites }),
             },
             {
                 title: 'Inventory',
@@ -65,6 +49,7 @@ export const TileBasePage: Component = () => {
                 active={routeInfo().tab}
                 components={{
                     [TileBaseTab.Production]: TileBaseProduction,
+                    [TileBaseTab.ConstructionSites]: TileBaseConstructionSites,
                     [TileBaseTab.Inventory]: TileBaseInventory,
                     [TileBaseTab.Workers]: TileBaseWorkforce,
                 }}

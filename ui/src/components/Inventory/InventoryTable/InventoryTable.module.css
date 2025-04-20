@@ -1,0 +1,25 @@
+.item-cell {
+    display: flex;
+    align-items: center;
+}
+
+.item-cell-labels {
+    flex: 1 1 auto;
+    display: flex;
+    margin-left: 6px;
+    overflow: hidden;
+}
+
+.item-cell-title {
+    flex: 1 1 auto;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+.item-cell-amount {
+    margin-left: auto;
+    color: var(--p-main-900);
+    flex: 0 0 auto;
+}

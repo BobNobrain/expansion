@@ -10,7 +10,7 @@ import { PageHeader, PageHeaderTitle, PageHeaderIcon } from '../PageHeader';
 
 const RESOURCE_COLUMNS: DataTableColumn<ResourceDeposit>[] = [
     {
-        content: (row) => <CommodityIcon resource={row.resource} />,
+        content: (row) => <CommodityIcon commodity={row.resource} />,
         width: 48,
     },
     {

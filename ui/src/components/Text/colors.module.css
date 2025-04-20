@@ -3,7 +3,7 @@
 }
 
 .secondary {
-    color: var(--color-secondary);
+    color: var(--p-main-800);
 }
 
 .info {

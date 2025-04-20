@@ -1,15 +1,18 @@
 import { Show, type Component } from 'solid-js';
 import { IconCross, IconUser } from '../../icons';
+import { useNow } from '../../lib/solid/useNow';
 import { dfMe } from '../../store/datafront';
+import { useAuth } from '../../store/auth';
 import { Button } from '../Button/Button';
 import { Container, Spacer } from '../Container/Container';
+import { GameTimeLabel } from '../GameTimeLabel/GameTimeLabel';
 import { SkeletonText } from '../Skeleton';
 import { Text } from '../Text/Text';
-import { useAuth } from '../../store/auth';
 
 export const UserFeed: Component = () => {
     const { logout } = useAuth();
     const me = dfMe.use();
+    const now = useNow();
 
     return (
         <Container hasGap padded fullHeight direction="column">
@@ -40,7 +43,9 @@ export const UserFeed: Component = () => {
             <div>Other notifications</div>
 
             <Spacer />
-            <div>Expansion v0.0.1 - (debug not supported)</div>
+            <div>
+                Expansion v0.0.1 &bull; <GameTimeLabel value={now()} mode="gameAbsolute" gameTimeWithHours />
+            </div>
         </Container>
     );
 };

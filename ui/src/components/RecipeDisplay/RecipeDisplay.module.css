@@ -86,3 +86,9 @@
         background-position: 22.627416997969522px 0, 22.627416997969522px 16px;
     }
 }
+
+@media (prefers-reduced-motion) {
+    .arrow.animated {
+        animation-duration: 5s;
+    }
+}

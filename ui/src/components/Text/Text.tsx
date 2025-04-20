@@ -4,7 +4,7 @@ import colors from './colors.module.css';
 import sizes from './sizes.module.css';
 import styles from './Text.module.css';
 
-export type TextSize = 'h1' | 'h2' | 'h3' | 'normal' | 'small';
+export type TextSize = 'h1' | 'h2' | 'h3' | 'large' | 'normal' | 'small';
 
 export type TextProps = {
     color?: SemanticColor | 'dim' | 'bright' | 'default';
@@ -15,13 +15,15 @@ export type TextProps = {
     size?: TextSize;
 
     onClick?: (ev: MouseEvent) => void;
+    class?: string;
 };
 
 export const Text: ParentComponent<TextProps> = (props) => {
     return (
         <span
-            class={styles.text}
+            class={props.class}
             classList={{
+                [styles.text]: true,
                 [styles.bold]: props.bold,
                 [styles.italic]: props.italic,
                 [styles.underline]: props.underline,

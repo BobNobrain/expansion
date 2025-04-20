@@ -92,6 +92,13 @@
     height: 100%;
 }
 
+.primary-alignment-fstart { justify-content: flex-start; }
+.primary-alignment-fcenter { justify-content: center; }
+.primary-alignment-fend { justify-content: flex-end; }
+.secondary-alignment-fstart { align-items: flex-start; }
+.secondary-alignment-fcenter { align-items: center; }
+.secondary-alignment-fend { align-items: flex-end; }
+
 .spacer {
     flex: 1 1 auto;
 }
