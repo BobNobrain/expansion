@@ -48,33 +48,41 @@
                 "operators": {
                     "type": "object",
                     "properties": {
-                        "workers": { "$ref": "#/$defs/OperatorsPerProfession" },
-                        "engineers": { "$ref": "#/$defs/OperatorsPerProfession" },
-                        "managers": { "$ref": "#/$defs/OperatorsPerProfession" }
+                        "intern": { "$ref": "#/$defs/OperatorsCount" },
+                        "worker": { "$ref": "#/$defs/OperatorsCount" },
+                        "foreman": { "$ref": "#/$defs/OperatorsCount" },
+                        "engineer": { "$ref": "#/$defs/OperatorsCount" },
+                        "senior": { "$ref": "#/$defs/OperatorsCount" },
+                        "manager": { "$ref": "#/$defs/OperatorsCount" },
+                        "clevel": { "$ref": "#/$defs/OperatorsCount" },
+                        "researcher": { "$ref": "#/$defs/OperatorsCount" },
+                        "scientist": { "$ref": "#/$defs/OperatorsCount" }
                     },
                     "additionalProperties": false,
                     "required": [ ]
-                }
+                },
+                "requiresSoil": { "type": "boolean" },
+                "requiresMinerals": { "type": "boolean" },
+                "requiresLiquids": { "type": "boolean" },
+                "requiresGases": { "type": "boolean" }
             },
             "required": [ "area", "operators", "building" ]
         },
-        "OperatorsPerProfession": {
+        "OperatorsCount": {
             "type": "object",
             "properties": {
-                "counts": {
-                    "type": "array",
-                    "description": "Amount of workers per tier: intern / apprentice / master",
-                    "minItems": 3,
-                    "maxItems": 3,
-                    "items": { "type": "integer", "min": 0 }
+                "count": {
+                    "type": "integer",
+                    "min": 1,
+                    "description": "How much workers of this workforce are needed to operate the equipment"
                 },
                 "contribution": {
                     "type": "number",
-                    "minExclusive": 0
+                    "min": 0,
+                    "description": "A productivity share this worker gives to the equipment. Default value is 1 (each worker contributes equally)"
                 }
             },
-            "required": [ "counts" ],
-            "additionalProperties": false
+            "required": [ "count" ]
         }
     }
 }

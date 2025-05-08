@@ -6,6 +6,9 @@
 
     padding: 8px 12px;
     margin-top: 4px;
+
+    margin-left: calc(-1 * var(--container-actual-padding-h));
+    margin-right: calc(-1 * var(--container-actual-padding-h));
 }
 .header:not(:first-child) {
     margin-top: 12px;
@@ -27,4 +30,7 @@
 .actions {
     display: flex;
     gap: 8px;
+}
+.actions.push-right {
+    margin-left: auto;
 }

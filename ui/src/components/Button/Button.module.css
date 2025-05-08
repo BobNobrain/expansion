@@ -11,6 +11,10 @@
     text-overflow: ellipsis;
 
     position: relative;
+
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
 }
 
 .solid {
@@ -52,6 +56,13 @@
     --button-border: var(--p-main-700);
     --button-text: var(--p-main-700);
 }
+.light.disabled {
+    --button-bg: transparent;
+    --button-border: transparent;
+    --button-text: var(--p-main-700);
+    --button-shadow: transparent;
+    outline: 1px solid var(--p-main-300-50);
+}
 
 .s {
     height: 28px;
@@ -82,6 +93,13 @@
     position: relative;
     animation: solid-loading linear infinite 0.5s alternate;
     cursor: wait;
+}
+
+.button > svg:first-child:not(:last-child) {
+    margin-left: -8px;
+}
+.button > svg:last-child:not(:first-child) {
+    margin-right: -8px;
 }
 
 @keyframes solid-loading {

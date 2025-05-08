@@ -7,7 +7,7 @@ import { formatScalar, formatInteger } from '../../lib/strings';
 import { getExploreRoute } from '../../routes/explore';
 import { Badge } from '../Badge/Badge';
 import { Button } from '../Button/Button';
-import { Container, Spacer } from '../Container/Container';
+import { Container } from '../Container/Container';
 import { DefinitionList, type DefinitionListProperties } from '../DefinitionList/DefinitionList';
 import { Link } from '../Link/Link';
 import { PageHeader, PageHeaderTitle, PageHeaderIcon, PageHeaderActions } from '../PageHeader';
@@ -183,8 +183,7 @@ export const TileInfoDefList: Component<Props> = (props) => {
             <PageHeader>
                 <PageHeaderTitle>Tile</PageHeaderTitle>
                 <PageHeaderIcon icon={IconTile} />
-                <Spacer />
-                <PageHeaderActions>
+                <PageHeaderActions pushRight>
                     <Show when={availableActions().base}>
                         <Button square style="light">
                             <IconFlag size={32} block />

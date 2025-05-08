@@ -31,6 +31,14 @@ export const PageHeaderIcon: Component<PageHeaderIconProps> = (props) => {
     );
 };
 
-export const PageHeaderActions: ParentComponent = (props) => {
-    return <div class={styles.actions}>{props.children}</div>;
+export type PageHeaderActionsProps = {
+    pushRight?: boolean;
+};
+
+export const PageHeaderActions: ParentComponent<PageHeaderActionsProps> = (props) => {
+    return (
+        <div class={styles.actions} classList={{ [styles.pushRight]: props.pushRight }}>
+            {props.children}
+        </div>
+    );
 };

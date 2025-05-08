@@ -17,7 +17,7 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
-                "equipment": { "type": "array", "items": { "type": "string" } },
+                "equipment": { "type": "string" },
                 "inputs": { "$ref": "#/$defs/MaterialAmounts" },
                 "outputs": { "$ref": "#/$defs/MaterialAmounts" },
                 "baseTime": { "type": "string", "pattern": "^([0-9]+[dhms])+$" },

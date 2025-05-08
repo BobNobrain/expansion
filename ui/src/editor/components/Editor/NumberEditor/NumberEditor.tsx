@@ -1,7 +1,7 @@
 import { createSignal, type Component, untrack } from 'solid-js';
 import { type EditorComponentProps } from '../types';
 import { type NumberSchema } from '../../../../lib/jsonschema';
-import { NumberInput } from '../../../../components/NumberInput/NumberInput';
+import { NumberInputOld } from '../../../../components/NumberInputOld/NumberInput';
 import { useController } from '../hooks';
 
 export type NumberEditorProps = EditorComponentProps<NumberSchema>;
@@ -17,7 +17,7 @@ export const NumberEditor: Component<NumberEditorProps> = (props) => {
     });
 
     return (
-        <NumberInput
+        <NumberInputOld
             value={getValue()}
             onUpdate={setValue}
             min={props.schema.minimum}

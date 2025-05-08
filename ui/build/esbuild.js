@@ -52,7 +52,7 @@ async function main() {
                 assets: [
                     {
                         from: './assets/**/*',
-                        to: './out',
+                        to: './out/assets',
                     },
                 ],
             }),

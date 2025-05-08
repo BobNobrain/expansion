@@ -9,7 +9,7 @@ export const TouchLoginModal: Component = () => {
     const { login, error, isLoading, isLoggedIn } = useAuth();
 
     return (
-        <TouchModal isOpen={!isLoggedIn()}>
+        <TouchModal top isOpen={!isLoggedIn()}>
             <Show when={!isLoggedIn() && !ws.isConnecting()}>
                 <LogInForm loading={isLoading()} onSubmit={login} error={error()} />
             </Show>

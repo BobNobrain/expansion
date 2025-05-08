@@ -1,0 +1,64 @@
+.wrapper {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-level-modal);
+    --z: var(--z-level-modal);
+
+    overflow: auto;
+    scroll-snap-type: y mandatory;
+    scroll-snap-stop: always;
+    scrollbar-width: none;
+
+    pointer-events: none;
+
+    background-color: transparent;
+    transition: background-color ease-in-out 0.15s;
+}
+.wrapper.visible {
+    background-color: var(--p-main-100-75);
+    pointer-events: all;
+}
+
+.backdrop {
+    scroll-snap-align: start;
+    height: 100dvh;
+    pointer-events: none;
+}
+
+.content {
+    scroll-snap-align: end;
+    overflow: auto;
+    max-height: calc(100% - 128px);
+    min-height: 256px;
+    width: 100%;
+    max-width: 600px;
+
+    padding: 0;
+    margin-left: auto;
+    margin-right: auto;
+
+    background: fixed url('../../../components/App/bg.svg');
+    border: solid var(--p-main-700);
+    border-width: 1px 0 0 0;
+    border-radius: 16px 16px 0 0;
+
+    pointer-events: all;
+}
+
+@media (min-width: 606px) {
+    .content {
+        border-width: 2px 1px 0 1px;
+    }
+}
+
+.header {
+    position: sticky;
+    top: 0;
+    overflow: hidden;
+
+    /* background: linear-gradient(to bottom, var(--p-main-500), var(--p-main-500-35) 80%, transparent); */
+    background: linear-gradient(to bottom, var(--p-main-500), var(--p-main-500-35));
+    box-shadow: 0 16px 16px var(--p-main-500-35);
+
+    z-index: calc(var(--z, 0) + 1);
+}

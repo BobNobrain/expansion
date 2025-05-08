@@ -8,37 +8,37 @@
             "expiry": "14d"
         },
         "limestone": {
-            "category": "resources",
+            "category": "minerals",
             "mass": 2.4,
             "volume": 1
         },
         "ironOre": {
-            "category": "resources",
+            "category": "minerals",
             "mass": 2.5,
             "volume": 1
         },
         "aluminiumOre": {
-            "category": "resources",
+            "category": "minerals",
             "mass": 1.4,
             "volume": 1
         },
         "copperOre": {
-            "category": "resources",
+            "category": "minerals",
             "mass": 3.2,
             "volume": 1
         },
         "water": {
-            "category": "resources",
+            "category": "liquids",
             "mass": 1,
             "volume": 1
         },
         "oxygen": {
-            "category": "resources",
+            "category": "gases",
             "mass": 1.1,
             "volume": 1
         },
         "coal": {
-            "category": "resources",
+            "category": "minerals",
             "mass": 1.3,
             "volume": 1
         },

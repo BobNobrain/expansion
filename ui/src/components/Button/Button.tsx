@@ -18,6 +18,7 @@ export type ButtonProps = ParentProps & {
     disabled?: boolean;
     loading?: boolean;
 
+    stopPropagation?: boolean;
     onClick?: (ev: MouseEvent) => void;
     type?: 'button' | 'submit'; // TODO: add 'link'?
 };
@@ -30,6 +31,10 @@ export const Button: Component<ButtonProps> = (props) => {
         }
 
         props.onClick?.(ev);
+
+        if (props.stopPropagation) {
+            ev.stopPropagation();
+        }
     };
 
     const classList = createMemo<Record<string, boolean | undefined>>(() => {

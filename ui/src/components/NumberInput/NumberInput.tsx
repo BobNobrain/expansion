@@ -1,224 +1,114 @@
-import { createSignal, type Component, createEffect, Show } from 'solid-js';
-import Decimal from 'decimal.js';
-import styles from './NumberInput.module.css';
+import { type Component, createMemo } from 'solid-js';
+import { type ValidationState } from '../Form';
+import { TextInput } from '../TextInput/TextInput';
+import { createParser } from './utils';
+import { useCombinedValidationState } from '../Form/validation';
 import { Button } from '../Button/Button';
-import { useValidationState } from '../Form/validation';
-import { registerInFormContext } from '../Form/context';
+import { IconMinus, IconPlus } from '../../icons';
+import { Container } from '../Container/Container';
 
 export type NumberInputProps = {
     value: number | undefined;
-    onUpdate: (value: number, ev: MouseEvent | InputEvent) => void;
+    onUpdate?: (value: number, ev: MouseEvent | InputEvent) => void;
 
-    placeholder?: string | number;
+    label?: string;
+    placeholder?: string;
     readonly?: boolean;
     disabled?: boolean;
+    noIcon?: boolean;
     hint?: string;
+    noErrorMessage?: boolean;
+    validity?: ValidationState;
 
     min?: number;
     max?: number;
-    multipleOf?: number;
-
-    formKey?: string;
+    integer?: boolean;
 };
 
 export const NumberInput: Component<NumberInputProps> = (props) => {
-    const validation = useValidationState();
-    const [getText, setText] = createSignal(toString(props.value));
-    let lastParsedValue = props.value ?? NaN;
+    const { getText, updateText, parserValidation } = createParser(props.value, props);
+    const allValidators = createMemo(() => [parserValidation.get(), props.validity]);
+    const validity = useCombinedValidationState(allValidators);
 
-    const validate = (input: string): boolean => {
-        if (!input) {
-            validation.setError('The value must be a number');
-            return false;
-        }
-
-        const parsed = Number(input);
-        if (Number.isNaN(parsed)) {
-            validation.setError('The value must be a number');
+    const canDecrement = () => {
+        if (!props.onUpdate) {
             return false;
         }
 
-        lastParsedValue = parsed;
-        if (lastParsedValue < (props.min ?? -Infinity)) {
-            validation.setError(`The value must be greater than ${props.min}`);
-            return false;
-        }
-        if (lastParsedValue > (props.max ?? Infinity)) {
-            validation.setError(`The value must be less than ${props.max}`);
-            return false;
-        }
-        if (props.multipleOf !== undefined && lastParsedValue % props.multipleOf != 0) {
-            validation.setError(`The value must be a multiple of ${props.multipleOf}`);
-            return false;
+        if (props.value === undefined) {
+            return true;
         }
 
-        validation.setOk();
-        return true;
+        return props.value - 1 >= (props.min ?? -Infinity);
     };
 
-    if (props.formKey) {
-        registerInFormContext(props, {
-            validate: () => {
-                const state = validation.get();
-                if (state === undefined) {
-                    return validate(getText());
-                }
-                return state.type === 'ok';
-            },
-        });
-    }
-
-    createEffect(() => {
-        const value = props.value;
-        if (value === lastParsedValue) {
-            return;
-        }
-        setText(toString(value));
-        lastParsedValue = value ?? NaN;
-    });
-
-    const onTextUpdated = (ev: InputEvent) => {
-        if (props.disabled) {
-            return;
+    const canIncrement = () => {
+        if (!props.onUpdate) {
+            return false;
         }
 
-        const newText = (ev.target as HTMLInputElement).value;
-        setText(newText);
-
-        const valid = validate(newText);
-
-        if (valid) {
-            props.onUpdate(lastParsedValue, ev);
+        if (props.value === undefined) {
+            return true;
         }
+
+        return props.value + 1 <= (props.max ?? Infinity);
     };
-
-    const onStep = (step: 1 | -1) => (ev: MouseEvent) => {
-        if (props.disabled) {
-            return;
-        }
-
-        let initialValue = props.value;
-        if (initialValue === undefined) {
-            initialValue = step > 0 ? props.min : props.max;
-            initialValue ??= props.min ?? props.max ?? 0;
-        }
-
-        let stepSize = 1;
-        if (props.multipleOf !== undefined) {
-            stepSize = props.multipleOf;
-        } else if (props.max !== undefined || props.min !== undefined) {
-            const gridSizeOfMax = props.max === undefined ? undefined : getDecimalGridSize(props.max);
-            const gridSizeOfMin = props.min === undefined ? undefined : getDecimalGridSize(props.min);
-            let gridSize = 0;
-            if (gridSizeOfMin !== undefined && gridSizeOfMax !== undefined) {
-                gridSize = gridSizeOfMin === gridSizeOfMax ? gridSizeOfMin - 1 : Math.min(gridSizeOfMin, gridSizeOfMax);
-            } else if (gridSizeOfMin !== undefined) {
-                gridSize = gridSizeOfMin ?? 0;
-            } else if (gridSizeOfMax !== undefined) {
-                gridSize = gridSizeOfMax - 1;
-            }
-            stepSize = Math.pow(10, gridSize);
-        }
-        const change = new Decimal(stepSize).mul(step);
-        const newValue = change.add(initialValue).clamp(props.min ?? -Infinity, props.max ?? Infinity);
-
-        validation.setOk();
-        lastParsedValue = newValue.toNumber();
-        setText(newValue.toString());
-        props.onUpdate(lastParsedValue, ev);
-    };
-    const incr = onStep(1);
-    const decr = onStep(-1);
-
-    const onBlur = () => {
-        if (validate(getText())) {
-            setText(toString(props.value));
-        }
-    };
-
-    const hintText = () => validation.getErrorMessage() ?? props.hint;
 
     return (
-        <div
-            class={styles.wrapper}
-            classList={{
-                [styles[validation.getColor()]]: true,
-            }}
-        >
-            <Button
-                square
-                disabled={
-                    props.disabled || (props.value === undefined ? false : props.value <= (props.min ?? -Infinity))
-                }
-                onClick={decr}
-            >
-                -
-            </Button>
-            <input
-                class={styles.input}
-                value={getText()}
-                onInput={onTextUpdated}
-                onBlur={onBlur}
-                readOnly={props.readonly}
-                disabled={props.disabled}
-                type="text"
-                lang="en-US"
-                inputMode="numeric"
-                min={props.min}
-                max={props.max}
-                placeholder={typeof props.placeholder === 'number' ? props.placeholder.toString() : props.placeholder}
-            />
+        <TextInput
+            value={getText()}
+            onUpdate={updateText}
+            disabled={props.disabled}
+            noIcon={props.noIcon}
+            readonly={props.readonly || !props.onUpdate}
+            validity={validity()}
+            hint={props.hint}
+            noErrorMessage={props.noErrorMessage}
+            inputMode={props.integer ? 'numeric' : 'decimal'}
+            placeholder={props.placeholder}
+            label={props.label}
+            controls={
+                <Container direction="row" hasGap size="s">
+                    <Button
+                        square
+                        size="s"
+                        style="light"
+                        disabled={!canDecrement()}
+                        onClick={(ev) => {
+                            ev.preventDefault();
+                            if (!props.onUpdate) {
+                                return;
+                            }
 
-            <Show when={hintText()}>
-                {(hintText) => (
-                    <div
-                        class={styles.hint}
-                        classList={{
-                            [styles.errorMessage]: Boolean(validation.getErrorMessage()),
+                            props.onUpdate(
+                                props.value === undefined ? props.max ?? props.min ?? 0 : props.value - 1,
+                                ev,
+                            );
                         }}
                     >
-                        {hintText()}
-                    </div>
-                )}
-            </Show>
-            <Button
-                compact
-                disabled={
-                    props.disabled || (props.value === undefined ? false : props.value >= (props.max ?? Infinity))
-                }
-                onClick={incr}
-            >
-                +
-            </Button>
-        </div>
+                        <IconMinus block />
+                    </Button>
+                    <Button
+                        square
+                        size="s"
+                        style="light"
+                        disabled={!canIncrement()}
+                        onClick={(ev) => {
+                            ev.preventDefault();
+                            if (!props.onUpdate) {
+                                return;
+                            }
+
+                            props.onUpdate(
+                                props.value === undefined ? props.min ?? props.max ?? 0 : props.value + 1,
+                                ev,
+                            );
+                        }}
+                    >
+                        <IconPlus block />
+                    </Button>
+                </Container>
+            }
+        />
     );
 };
-
-function getDecimalGridSize(n: number): number | undefined {
-    if (n === 0) {
-        return undefined;
-    }
-
-    const [whole, decimals] = n.toFixed(20).split('.');
-    for (let i = decimals.length - 1; i >= 0; i--) {
-        const digit = decimals[i];
-        if (digit !== '0') {
-            return i - 1;
-        }
-    }
-    for (let i = whole.length - 1; i >= 0; i--) {
-        const digit = whole[i];
-        if (digit !== '0') {
-            return whole.length - i - 1;
-        }
-    }
-
-    return undefined; // somehow we got here
-}
-
-function toString(n: number | undefined): string {
-    if (n === undefined || Number.isNaN(n)) {
-        return '';
-    }
-    return n.toString();
-}

@@ -7,7 +7,7 @@ export type ContainerProps = {
     size?: 's' | 'm' | 'l';
     direction?: 'row' | 'column';
     threads?: 1 | 2 | 3 | 4 | '1' | '2' | '3' | '4';
-    clearSelfPadding?: boolean;
+    clearSelfPadding?: boolean; // TODO: rename to `inset`?
     stretch?: boolean;
     fullHeight?: boolean;
     wrap?: boolean;

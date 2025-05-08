@@ -73,6 +73,11 @@
     --color-warn: var(--p-orange-500);
     --color-warn-700: var(--p-orange-700);
     --color-warn-900: var(--p-orange-900);
+
+    --z-level-inline: 1;
+    --z-level-modal: 100;
+    --z-level-lock: 200;
+    --z-top: 1000;
 }
 
 html, body {

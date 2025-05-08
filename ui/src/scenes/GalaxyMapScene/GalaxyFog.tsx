@@ -37,7 +37,7 @@ export const GalaxyFog: Component<GalaxyFogProps> = (props) => {
     }
 
     const txLoader = new TextureLoader();
-    txLoader.load(`/tx/galaxy-${txSize}.png`, setTx);
+    txLoader.load(`/assets/tx/galaxy-${txSize}.png`, setTx);
 
     const getQuad = createMemo(() => {
         const tx = getTx();

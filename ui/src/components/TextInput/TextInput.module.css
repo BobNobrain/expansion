@@ -24,6 +24,10 @@
     background-color: var(--p-main-100-50);
 }
 
+.wrapper.no-left-padding {
+    padding-left: 0;
+}
+
 .label {
     font-weight: 500;
     font-variation-settings: "wght" 500;

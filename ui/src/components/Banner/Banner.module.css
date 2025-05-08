@@ -1,0 +1,32 @@
+.banner {
+    border-left: 1px solid var(--banner-color);
+    box-shadow: inset 8px 0 16px var(--banner-shadow);
+    background-color: var(--banner-bg);
+    color: var(--banner-text);
+    padding: 8px 16px;
+}
+
+.info {
+    --banner-color: var(--p-blue-500);
+    --banner-shadow: var(--p-blue-500-25);
+    --banner-bg: var(--p-blue-500-25);
+    --banner-text: var(--p-blue-800);
+}
+
+.warn {
+    --banner-color: var(--p-orange-500);
+    --banner-shadow: var(--p-orange-500-25);
+    --banner-bg: var(--p-orange-500-25);
+    --banner-text: var(--p-orange-800);
+}
+
+.error {
+    --banner-color: var(--p-red-500);
+    --banner-shadow: var(--p-red-500-25);
+    --banner-bg: var(--p-red-500-25);
+    --banner-text: var(--p-red-800);
+}
+
+.margin-bottom {
+    margin-bottom: 8px;
+}

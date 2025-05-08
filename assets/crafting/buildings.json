@@ -46,121 +46,138 @@
             "building": "mine",
             "area": 80,
             "operators": {
-                "workers": { "counts": [ 5, 2, 0 ] }
-            }
+                "intern": { "count": 3, "contribution": 0.1 },
+                "worker": { "count": 1, "contribution": 0.5 }
+            },
+            "requiresMinerals": true
         },
         "pump": {
             "building": "rig",
             "area": 20,
             "operators": {
-                "workers": { "counts": [ 5, 2, 0 ] }
-            }
+                "intern": { "count": 3, "contribution": 0.1 },
+                "worker": { "count": 1, "contribution": 0.5 }
+            },
+            "requiresLiquids": true
         },
         "airFilter": {
             "building": "rig",
             "area": 40,
             "operators": {
-                "workers": { "counts": [ 5, 2, 0 ] }
-            }
+                "intern": { "count": 2, "contribution": 0.1 },
+                "worker": { "count": 2, "contribution": 0.5 }
+            },
+            "requiresGases": true
         },
         "field": {
             "building": "farmland",
             "area": 50,
             "operators": {
-                "workers": { "counts": [ 3, 1, 0 ] }
-            }
+                "intern": { "count": 5, "contribution": 0.1 },
+                "worker": { "count": 3, "contribution": 0.5 }
+            },
+            "requiresSoil": true
         },
         "foodProcessor": {
             "building": "facility",
             "area": 10,
             "operators": {
-                "workers": { "counts": [ 3, 1, 1 ] }
+                "intern": { "count": 1, "contribution": 0.1 },
+                "worker": { "count": 2, "contribution": 0.5 }
             }
         },
         "smelter": {
             "building": "facility",
             "area": 20,
             "operators": {
-                "workers": { "counts": [ 3, 1, 0 ], "contribution": 1.5 },
-                "engineers": { "counts": [ 1, 0, 0 ], "contribution": 1 }
+                "intern": { "count": 3, "contribution": 0.1 },
+                "worker": { "count": 1, "contribution": 0.5 },
+                "engineer": { "count": 1, "contribution": 0.3 }
             }
         },
         "constructionMixer": {
             "building": "facility",
             "area": 10,
             "operators": {
-                "workers": { "counts": [ 3, 0, 0 ] }
+                "intern": { "count": 3, "contribution": 0.1 }
             }
         },
         "constructionPress": {
             "building": "facility",
             "area": 10,
             "operators": {
-                "workers": { "counts": [ 3, 1, 0 ] }
+                "intern": { "count": 3, "contribution": 0.1 },
+                "worker": { "count": 1, "contribution": 0.5 }
             }
         },
         "machineAssembler": {
             "building": "facility",
             "area": 20,
             "operators": {
-                "workers": { "counts": [ 3, 0, 0 ], "contribution": 1 },
-                "engineers": { "counts": [ 2, 1, 0 ], "contribution": 1 }
+                "intern": { "count": 5, "contribution": 0.1 },
+                "engineer": { "count": 1, "contribution": 1.0 }
             }
         },
         "plasticPrinter": {
             "building": "facility",
             "area": 30,
             "operators": {
-                "workers": { "counts": [ 2, 0, 0 ], "contribution": 1 },
-                "engineers": { "counts": [ 3, 3, 0 ], "contribution": 2 }
+                "intern": { "count": 2, "contribution": 0.1 },
+                "engineer": { "count": 3, "contribution": 0.3 }
             }
         },
         "metalsmithing": {
             "building": "facility",
             "area": 30,
             "operators": {
-                "workers": { "counts": [ 3, 3, 0 ], "contribution": 1 },
-                "engineers": { "counts": [ 2, 1, 0 ], "contribution": 1 }
+                "intern": { "count": 5, "contribution": 0.2 },
+                "worker": { "count": 3, "contribution": 0.5 },
+                "engineer": { "count": 2, "contribution": 0.5 }
             }
         },
         "electronicsAssembler": {
             "building": "facility",
             "area": 40,
             "operators": {
-                "workers": { "counts": [ 3, 1, 0 ], "contribution": 1 },
-                "engineers": { "counts": [ 5, 3, 1 ], "contribution": 3 }
+                "intern": { "count": 5, "contribution": 0.1 },
+                "worker": { "count": 1, "contribution": 0.3 },
+                "engineer": { "count": 3, "contribution": 0.5 }
             }
         },
         "chemicalMixer": {
             "building": "facility",
             "area": 20,
             "operators": {
-                "workers": { "counts": [ 2, 0, 0 ], "contribution": 1 },
-                "engineers": { "counts": [ 3, 1, 0 ], "contribution": 2 }
+                "intern": { "count": 3, "contribution": 0.1 },
+                "worker": { "count": 1, "contribution": 0.3 },
+                "engineer": { "count": 1, "contribution": 0.3 }
             }
         },
         "chemicalLab": {
             "building": "facility",
             "area": 30,
             "operators": {
-                "workers": { "counts": [ 2, 0, 0 ], "contribution": 1 },
-                "engineers": { "counts": [ 6, 5, 2 ], "contribution": 3 }
+                "worker": { "count": 1, "contribution": 0.3 },
+                "engineer": { "count": 3, "contribution": 0.3 },
+                "researcher": { "count": 3, "contribution": 0.3 },
+                "scientist": { "count": 1, "contribution": 1 }
             }
         },
         "openSpace": {
             "building": "office",
             "area": 20,
             "operators": {
-                "workers": { "counts": [ 2, 0, 0 ], "contribution": 1 },
-                "managers": { "counts": [ 5, 2, 0 ], "contribution": 2 }
+                "intern": { "count": 3, "contribution": 0.1 },
+                "manager": { "count": 2, "contribution": 0.2 }
             }
         },
         "managementCabinets": {
             "building": "office",
             "area": 10,
             "operators": {
-                "workers": { "counts": [ 1, 0, 0 ], "contribution": 1 },
-                "managers": { "counts": [ 5, 5, 1 ], "contribution": 3 }
+                "intern": { "count": 1, "contribution": 0.1 },
+                "manager": { "count": 5, "contribution": 0.3 },
+                "clevel": { "count": 1, "contribution": 1.0 }
             }
         }
     }

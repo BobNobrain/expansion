@@ -1,7 +1,7 @@
 .list.inset {
-    margin-left: calc(-1 * var(--container-padding));
-    margin-right: calc(-1 * var(--container-padding));
-    width: calc(100% + 2 * var(--container-padding));
+    margin-left: calc(-1 * var(--container-actual-padding-h));
+    margin-right: calc(-1 * var(--container-actual-padding-h));
+    width: calc(100% + 2 * var(--container-actual-padding-h));
 }
 
 .row {
@@ -41,8 +41,8 @@
 }
 
 .inset .property {
-    padding-left: calc(8px + var(--container-padding));
+    padding-left: var(--container-actual-padding-h);
 }
 .inset .value {
-    padding-right: calc(8px + var(--container-padding));
+    padding-right: var(--container-actual-padding-h);
 }

@@ -1,4 +1,5 @@
 import { type ParentComponent } from 'solid-js';
+import { Dynamic } from 'solid-js/web';
 import { type SemanticColor } from '../../lib/appearance';
 import colors from './colors.module.css';
 import sizes from './sizes.module.css';
@@ -16,11 +17,13 @@ export type TextProps = {
 
     onClick?: (ev: MouseEvent) => void;
     class?: string;
+    tag?: 'span' | 'div';
 };
 
 export const Text: ParentComponent<TextProps> = (props) => {
     return (
-        <span
+        <Dynamic
+            component={props.tag ?? 'span'}
             class={props.class}
             classList={{
                 [styles.text]: true,
@@ -34,6 +37,6 @@ export const Text: ParentComponent<TextProps> = (props) => {
             onClick={props.onClick}
         >
             {props.children}
-        </span>
+        </Dynamic>
     );
 };

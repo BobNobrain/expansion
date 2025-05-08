@@ -47,7 +47,9 @@
                     "type": "string",
                     "enum": [
                         "metals",
-                        "resources",
+                        "minerals",
+                        "liquids",
+                        "gases",
                         "crops",
                         "consumables",
                         "construction",

@@ -2,9 +2,9 @@
     width: 100%;
 }
 .wrapper.inset {
-    margin-left: calc(-1 * var(--container-padding));
-    margin-right: calc(-1 * var(--container-padding));
-    width: calc(100% + 2 * var(--container-padding));
+    margin-left: calc(-1 * var(--container-actual-padding-h));
+    margin-right: calc(-1 * var(--container-actual-padding-h));
+    width: calc(100% + 2 * var(--container-actual-padding-h));
 }
 
 .has-scroll {
@@ -79,14 +79,14 @@
     padding: 0;
 }
 .stick-right .cell.no-padding:last-child {
-    padding-right: var(--container-padding);
+    padding-right: var(--container-actual-padding-h);
 }
 
 .inset .cell:first-child {
-    padding-left: calc(var(--container-padding) + 8px);
+    padding-left: var(--container-actual-padding-h);
 }
 .inset .cell:last-child {
-    padding-right: calc(var(--container-padding) + 8px);
+    padding-right: var(--container-actual-padding-h);
 }
 .stick-left .cell:first-child {
     position: sticky;

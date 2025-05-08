@@ -3,6 +3,9 @@
 
     position: fixed;
     inset: 0;
+    z-index: var(--z-level-modal);
+    --z: var(--z-level-modal);
+
     display: flex;
     align-items: center;
     justify-content: center;
@@ -14,6 +17,10 @@
 .backdrop.visible {
     opacity: 1;
     pointer-events: all;
+}
+.backdrop.top {
+    z-index: var(--z-level-lock);
+    --z: var(--z-level-lock);
 }
 
 .content {

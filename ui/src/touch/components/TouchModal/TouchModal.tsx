@@ -7,6 +7,7 @@ import styles from './TouchModal.module.css';
 export type TouchModalProps = {
     title?: string | JSX.Element;
     isOpen: boolean;
+    top?: boolean;
     onClose?: () => void;
 };
 
@@ -16,6 +17,7 @@ export const TouchModal: ParentComponent<TouchModalProps> = (props) => {
             class={styles.backdrop}
             classList={{
                 [styles.visible]: props.isOpen,
+                [styles.top]: props.top,
             }}
             onClick={props.onClose}
         >

@@ -1,4 +1,4 @@
-import { createSignal } from 'solid-js';
+import { createMemo, createSignal } from 'solid-js';
 import { type ValidationState } from './types';
 
 export type ValidationStateController = {
@@ -13,7 +13,7 @@ export type ValidationStateController = {
     clear: () => void;
 };
 
-export function useValidationState(onChange?: (vs: ValidationState | undefined) => void): ValidationStateController {
+export function createValidationState(onChange?: (vs: ValidationState | undefined) => void): ValidationStateController {
     const [getVs, setVs] = createSignal<ValidationState | undefined>();
 
     const setOk = () => {
@@ -73,4 +73,34 @@ export function useValidationState(onChange?: (vs: ValidationState | undefined) 
         setLoading,
         clear,
     };
+}
+
+export function useCombinedValidationState(states: () => (ValidationState | undefined)[]): () => ValidationState {
+    return createMemo((): ValidationState => {
+        let explicitSuccess = false;
+        let message: string | undefined;
+
+        for (const state of states()) {
+            if (!state) {
+                continue;
+            }
+
+            if (state.type === 'error') {
+                return state;
+            }
+
+            if (state.type === 'loading') {
+                return state;
+            }
+
+            if (state.explicitSuccess) {
+                explicitSuccess = true;
+            }
+            if (state.message && !message) {
+                message = state.message;
+            }
+        }
+
+        return { type: 'ok', explicitSuccess, message };
+    });
 }

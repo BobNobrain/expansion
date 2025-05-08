@@ -1,5 +1,5 @@
 import { type Component, createMemo, createSignal, onCleanup, onMount } from 'solid-js';
-import { NumberInput } from '../../../../../components/NumberInput/NumberInput';
+import { NumberInputOld } from '../../../../../components/NumberInputOld/NumberInput';
 import { MouseButton } from '../../../../../lib/mouse';
 import { PhaseDiagramCanvas, type PhaseDiagramCanvasClickEvent, type PhaseDiagramGraph } from './PhaseDiagramCanvas';
 import {
@@ -17,7 +17,7 @@ import {
     type PhaseDiagramPoint,
 } from './types';
 import styles from './PhaseDiagram.module.css';
-import { registerInFormContext, useValidationState } from '../../../../../components/Form';
+import { registerInFormContext, createValidationState } from '../../../../../components/Form';
 import { KeyCodes } from '../../../../../lib/keyboard';
 
 export type PhaseDiagramInputProps = {
@@ -33,7 +33,7 @@ const colors: Record<PhaseDiagramLineName, string> = {
 };
 
 export const PhaseDiagramInput: Component<PhaseDiagramInputProps> = (props) => {
-    const validity = useValidationState();
+    const validity = createValidationState();
 
     const lines = createMemo<PhaseDiagramGraph[]>(() => {
         const lines: PhaseDiagramGraph[] = [];
@@ -243,17 +243,17 @@ export const PhaseDiagramInput: Component<PhaseDiagramInputProps> = (props) => {
         <div>
             <div>{props.state.type}</div>
             <div class={styles.inputLine}>
-                <NumberInput value={maxTempK()} onUpdate={setMaxTempK} min={10} max={5000} />
-                <NumberInput value={maxPressureOrder()} onUpdate={setMaxPressureOrder} min={2} max={12} />
+                <NumberInputOld value={maxTempK()} onUpdate={setMaxTempK} min={10} max={5000} />
+                <NumberInputOld value={maxPressureOrder()} onUpdate={setMaxPressureOrder} min={2} max={12} />
             </div>
             <div class={styles.inputLine}>
-                <NumberInput
+                <NumberInputOld
                     value={selectedPointValue()?.T ?? 0}
                     onUpdate={updateSelectedPointTemp}
                     min={0}
                     max={5000}
                 />
-                <NumberInput
+                <NumberInputOld
                     value={selectedPointValue()?.P ?? 1}
                     onUpdate={updateSelectedPointPressure}
                     min={1}

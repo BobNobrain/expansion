@@ -5,7 +5,7 @@ import { InputIcon } from '../InputIcon/InputIcon';
 
 export type TextInputProps = {
     value: string;
-    onUpdate?: (newValue: string, ev: Event) => void;
+    onUpdate?: (newValue: string, ev: InputEvent) => void;
 
     onKeyUp?: (ev: KeyboardEvent) => void;
     onFocus?: (ev: FocusEvent) => void;
@@ -16,10 +16,12 @@ export type TextInputProps = {
     prefix?: string;
     placeholder?: string;
     hint?: string | JSX.Element;
+    noErrorMessage?: boolean;
     controls?: JSX.Element;
 
     readonly?: boolean;
     disabled?: boolean;
+    noIcon?: boolean;
     password?: boolean;
     clearable?: boolean;
     inputMode?: JSX.InputHTMLAttributes<'text'>['inputMode'];
@@ -36,7 +38,7 @@ export const TextInput: Component<TextInputProps> = (props) => {
     const [isHintVisible, setIsHintVisible] = createSignal(false);
     let inputRef!: HTMLInputElement;
 
-    const updateValue = (ev: Event) => {
+    const updateValue = (ev: InputEvent) => {
         props.onUpdate?.((ev.target as HTMLInputElement).value, ev);
     };
 
@@ -51,7 +53,7 @@ export const TextInput: Component<TextInputProps> = (props) => {
 
         if (props.validity) {
             if (props.validity.type === 'error') {
-                return { appearance: 'error', hint: props.validity.message };
+                return { appearance: 'error', hint: props.noErrorMessage ? undefined : props.validity.message };
             }
             if (props.validity.type === 'ok' && props.validity.explicitSuccess) {
                 return { appearance: 'success', hint: props.validity.message ?? hintText };
@@ -85,30 +87,35 @@ export const TextInput: Component<TextInputProps> = (props) => {
             class={styles.wrapper}
             classList={{
                 [styles[visuals().appearance]]: true,
+                [styles.noLeftPadding]: Boolean(props.controls && !props.label),
             }}
             onClick={focusTheInput}
         >
-            <div class={styles.label}>{props.label}</div>
-            <Show when={visuals().appearance === 'error'}>
-                <div class={styles.icon}>
-                    <InputIcon type="error" />
-                </div>
+            <Show when={props.label}>
+                <div class={styles.label}>{props.label}</div>
             </Show>
-            <Show when={visuals().appearance === 'success'}>
-                <div class={styles.icon}>
-                    <InputIcon type="success" />
-                </div>
-            </Show>
-            <Show when={visuals().appearance === 'disabled'}>
-                <div class={styles.icon} classList={{ [styles.iconLock]: true }}>
-                    <InputIcon type="lock" />
-                </div>
-            </Show>
-            <Show when={visuals().appearance === 'normal'}>
-                <Show when={props.hint} fallback={<div class={styles.iconPlaceholder} />}>
-                    <div class={styles.icon} onClick={toggleHint}>
-                        <InputIcon type="hint" />
+            <Show when={!props.noIcon}>
+                <Show when={visuals().appearance === 'error'}>
+                    <div class={styles.icon}>
+                        <InputIcon type="error" />
                     </div>
+                </Show>
+                <Show when={visuals().appearance === 'success'}>
+                    <div class={styles.icon}>
+                        <InputIcon type="success" />
+                    </div>
+                </Show>
+                <Show when={visuals().appearance === 'disabled'}>
+                    <div class={styles.icon} classList={{ [styles.iconLock]: true }}>
+                        <InputIcon type="lock" />
+                    </div>
+                </Show>
+                <Show when={visuals().appearance === 'normal'}>
+                    <Show when={props.hint} fallback={<div class={styles.iconPlaceholder} />}>
+                        <div class={styles.icon} onClick={toggleHint}>
+                            <InputIcon type="hint" />
+                        </div>
+                    </Show>
                 </Show>
             </Show>
             <Show when={props.controls}>

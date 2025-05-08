@@ -1,6 +1,6 @@
 import { createSignal, type Component, onCleanup, untrack } from 'solid-js';
 import { type StringSchema } from '../../../../lib/jsonschema';
-import { registerInFormContext, useValidationState } from '../../../../components/Form';
+import { registerInFormContext, createValidationState } from '../../../../components/Form';
 import { type EditorComponentProps } from '../types';
 import styles from './UnknownEditor.module.css';
 
@@ -8,7 +8,7 @@ export type UnknownEditorProps = EditorComponentProps<StringSchema>;
 
 export const UnknownEditor: Component<UnknownEditorProps> = (props) => {
     const [getJSON, setJSON] = createSignal(props.initialValue === undefined ? '' : JSON.stringify(props.initialValue));
-    const validity = useValidationState();
+    const validity = createValidationState();
 
     const onInput = (ev: InputEvent) => {
         const json = (ev.target as HTMLInputElement).value;

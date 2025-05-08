@@ -53,3 +53,26 @@ export const WORKFORCE_TYPES: WorkforceType[] = [
     'researcher',
     'scientist',
 ];
+
+export type WorkforceData<T> = { [key in WorkforceType]?: T };
+
+export namespace WorkforceData {
+    export function empty<T>(): WorkforceData<T> {
+        return {};
+    }
+
+    export function filled<T>(fill: T): WorkforceData<T> {
+        return Object.fromEntries(WORKFORCE_TYPES.map((type) => [type, fill]));
+    }
+
+    export function mix<T>(target: WorkforceData<T>, mixin: WorkforceData<T>, mixer: (current: T, incoming: T) => T) {
+        for (const [type, data] of Object.entries(mixin) as [WorkforceType, T][]) {
+            if (!target[type]) {
+                target[type] = data;
+                continue;
+            }
+
+            target[type] = mixer(target[type], data);
+        }
+    }
+}

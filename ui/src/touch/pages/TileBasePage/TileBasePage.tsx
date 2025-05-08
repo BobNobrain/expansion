@@ -1,7 +1,7 @@
 import { createMemo, type Component } from 'solid-js';
 import { type TabHeader, TabsList } from '../../../components/TabsList/TabsList';
 import { TabContent } from '../../../components/TabContent/TabContent';
-import { IconConstruction, IconFactory, IconPeople, IconStorage } from '../../../icons';
+import { IconFactory, IconFence, IconPeople, IconStorage } from '../../../icons';
 import { useTileBaseRouteInfo, getBasesRoute, TileBaseTab } from '../../../routes/bases';
 import { TileBaseProduction } from './tabs/TileBaseProduction';
 import { TileBaseInventory } from './tabs/TileBaseInventory';
@@ -26,7 +26,7 @@ export const TileBasePage: Component = () => {
             },
             {
                 title: 'Sites',
-                icon: IconConstruction,
+                icon: IconFence,
                 href: getBasesRoute({ ...route, tab: TileBaseTab.ConstructionSites }),
             },
             {

@@ -1,6 +1,5 @@
 import { createMemo, createSignal, Show, type Component } from 'solid-js';
 import { Button } from '../../../../components/Button/Button';
-import { Spacer } from '../../../../components/Container/Container';
 import { type InventoryEntry, InventoryTable, InventoryGrid } from '../../../../components/Inventory';
 import { PageHeader, PageHeaderActions, PageHeaderIcon, PageHeaderTitle } from '../../../../components/PageHeader';
 import { IconCalendar, IconContext, IconStorage, IconUnknown } from '../../../../icons';
@@ -35,6 +34,10 @@ export const TileBaseInventory: Component = () => {
             commodity: 'steelBeams',
             amount: createConstantPredictable(58),
         },
+        {
+            commodity: 'water',
+            amount: createLinearPredictable({ t0, x0: 25, deltaT: 1000, deltaX: -0.003 }),
+        },
     ]);
 
     const [displayMode, setDisplayMode] = createSignal<DisplayMode>('grid');
@@ -47,8 +50,7 @@ export const TileBaseInventory: Component = () => {
                 <PageHeaderTitle>Inventory</PageHeaderTitle>
                 <PageHeaderIcon icon={IconStorage} text="35%" />
                 <PageHeaderIcon icon={IconCalendar} text="14d" />
-                <Spacer />
-                <PageHeaderActions>
+                <PageHeaderActions pushRight>
                     <Button
                         square
                         style="light"

@@ -39,8 +39,8 @@
     --badge-text-color: var(--p-blue-100);
 }
 .warn {
-    --badge-color: var(--p-yellow-500);
-    --badge-text-color: var(--p-yellow-100);
+    --badge-color: var(--p-orange-500);
+    --badge-text-color: var(--p-orange-100);
 }
 .accent {
     --badge-color: var(--p-secondary-500);

@@ -6,19 +6,22 @@ import { Group, GroupHeader } from '../../../../components/Group';
 import { PageHeader, PageHeaderActions, PageHeaderIcon, PageHeaderTitle } from '../../../../components/PageHeader';
 import { RecipeDisplay } from '../../../../components/RecipeDisplay/RecipeDisplay';
 import { Text } from '../../../../components/Text/Text';
-import { IconArea, IconCog, IconConstruction, IconCross, IconFactory, IconPlus } from '../../../../icons';
+import { IconArea, IconCog, IconCross, IconFactory, IconHammer, IconPlus } from '../../../../icons';
+import { useModalRouteState } from '../../../../routes/modals';
+import { TileBaseConstructSheet } from './TileBaseConstructSheet';
 
 export const TileBaseProduction: Component = () => {
+    const constructModal = useModalRouteState('construct');
+
     return (
         <>
             <PageHeader>
                 <PageHeaderTitle>Equipment</PageHeaderTitle>
                 <PageHeaderIcon icon={IconFactory} text="3" />
                 <PageHeaderIcon icon={IconArea} text="145" />
-                <Spacer />
-                <PageHeaderActions>
-                    <Button square style="light">
-                        <IconConstruction size={32} block />
+                <PageHeaderActions pushRight>
+                    <Button square style="light" onClick={constructModal.open}>
+                        <IconHammer size={32} block />
                     </Button>
                 </PageHeaderActions>
             </PageHeader>
@@ -104,6 +107,8 @@ export const TileBaseProduction: Component = () => {
                     </Container>
                 </Group>
             </Container>
+
+            <TileBaseConstructSheet modal={constructModal} />
         </>
     );
 };
