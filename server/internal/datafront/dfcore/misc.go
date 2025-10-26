@@ -12,6 +12,20 @@ func NewTableResponse() *TableResponse {
 	return &TableResponse{results: make(map[EntityID]common.Encodable)}
 }
 
+func NewTableResponseFromList[T any](objects []T, identify func(T) EntityID, encode func(T) common.Encodable) *TableResponse {
+	response := NewTableResponse()
+	for _, object := range objects {
+		response.Add(identify(object), encode(object))
+	}
+	return response
+}
+
+func NewTableResponseFromSingle(id EntityID, entity common.Encodable) *TableResponse {
+	response := NewTableResponse()
+	response.Add(id, entity)
+	return response
+}
+
 func (t *TableResponse) Add(eid EntityID, data common.Encodable) {
 	t.results[eid] = data
 }

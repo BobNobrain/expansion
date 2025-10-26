@@ -32,8 +32,8 @@ export function useOrbitControls(setOrbit: Setter<CameraOrbit>, opts: OrbitContr
             lastDragEventTime = performance.now();
         },
         onDrag: (ev) => {
-            const dpitch = -ev.lastChange.y * (Math.PI / MOUSE_DRAG_SENSITIVITY);
-            const dyaw = -ev.lastChange.x * (Math.PI / MOUSE_DRAG_SENSITIVITY);
+            const dpitch = -ev.last.y * (Math.PI / MOUSE_DRAG_SENSITIVITY);
+            const dyaw = -ev.last.x * (Math.PI / MOUSE_DRAG_SENSITIVITY);
 
             const now = performance.now();
             updateRotationWithInertia(dyaw, dpitch, now - lastDragEventTime);

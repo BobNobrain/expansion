@@ -18,7 +18,19 @@ func Init() {
 	if err != nil {
 		panic(err)
 	}
-	globalCraftingRegistry.fill(craftingData)
+	globalCraftingRegistry.FillCommodities(craftingData)
+
+	equipmentData, err := assets.LoadEquipment()
+	if err != nil {
+		panic(err)
+	}
+	globalCraftingRegistry.FillEquipment(equipmentData)
+
+	recipesData, err := assets.LoadRecipes()
+	if err != nil {
+		panic(err)
+	}
+	globalCraftingRegistry.FillRecipes(recipesData)
 }
 
 func Materials() *MaterialRegistry {

@@ -1,6 +1,6 @@
 export type DatafrontTable<Entity> = {
-    useMany: (ids: () => string[]) => UseTableResult<Entity>;
-    useSingle: (id: () => string | null) => UseTableSingleResult<Entity>;
+    useMany: (ids: () => string[] | number[]) => UseTableResult<Entity>;
+    useSingle: (id: () => string | number | null) => UseTableSingleResult<Entity>;
 
     createQuery: <Payload>(
         name: string,

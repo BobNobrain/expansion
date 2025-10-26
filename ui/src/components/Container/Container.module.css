@@ -106,3 +106,7 @@
 .spacer {
     flex: 1 1 auto;
 }
+
+.bg-light {
+    background-color: var(--p-main-900-10);
+}

@@ -49,4 +49,7 @@ type TileData struct {
 	Pressure  phys.Pressure
 	Surface   BiomeSurface
 	Resource  ResourceDeposit
+
+	TransportLevel byte
+	EnergyLevel    byte
 }

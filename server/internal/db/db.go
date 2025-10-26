@@ -16,10 +16,13 @@ import (
 type storageImpl struct {
 	conn *pgxpool.Pool
 
-	users   *userRepoImpl
-	systems *systemsRepoImpl
-	worlds  *worldsRepoImpl
-	cities  *citiesRepoImpl
+	users     *userRepoImpl
+	companies *companiesRepoImpl
+	systems   *systemsRepoImpl
+	worlds    *worldsRepoImpl
+	cities    *citiesRepoImpl
+	bases     *basesRepoImpl
+	factories *factoriesRepoImpl
 }
 
 type storageWithTx struct {
@@ -27,12 +30,14 @@ type storageWithTx struct {
 	tx  pgx.Tx
 	ctx context.Context
 
-	users   *userRepoImpl
-	orgs    *orgRepoImpl
-	systems *systemsRepoImpl
-	worlds  *worldsRepoImpl
-	cnr     *namesRegistryImpl
-	cities  *citiesRepoImpl
+	users     *userRepoImpl
+	companies *companiesRepoImpl
+	systems   *systemsRepoImpl
+	worlds    *worldsRepoImpl
+	cnr       *namesRegistryImpl
+	cities    *citiesRepoImpl
+	bases     *basesRepoImpl
+	factories *factoriesRepoImpl
 }
 
 func NewDBStorage() components.Storage {
@@ -49,11 +54,14 @@ func NewDBStorage() components.Storage {
 
 	q := dbq.New(pool)
 	db := &storageImpl{
-		conn:    pool,
-		users:   &userRepoImpl{q: q, ctx: context.Background()},
-		systems: &systemsRepoImpl{q: q, ctx: context.Background()},
-		worlds:  &worldsRepoImpl{q: q, ctx: context.Background()},
-		cities:  &citiesRepoImpl{q: q, ctx: context.Background()},
+		conn:      pool,
+		users:     &userRepoImpl{q: q, ctx: context.Background()},
+		companies: &companiesRepoImpl{q: q, ctx: context.Background()},
+		systems:   &systemsRepoImpl{q: q, ctx: context.Background()},
+		worlds:    &worldsRepoImpl{q: q, ctx: context.Background()},
+		cities:    &citiesRepoImpl{q: q, ctx: context.Background()},
+		bases:     &basesRepoImpl{q: q, ctx: context.Background()},
+		factories: &factoriesRepoImpl{q: q, ctx: context.Background()},
 	}
 
 	return db
@@ -68,6 +76,9 @@ func (db *storageImpl) Dispose() {
 func (db *storageImpl) Users() components.UserRepoReadonly {
 	return db.users
 }
+func (db *storageImpl) Companies() components.CompaniesRepoReadonly {
+	return db.companies
+}
 func (db *storageImpl) Systems() components.StarSystemsRepoReadonly {
 	return db.systems
 }
@@ -76,6 +87,12 @@ func (db *storageImpl) Worlds() components.WorldsRepoReadonly {
 }
 func (db *storageImpl) Cities() components.CitiesRepoReadonly {
 	return db.cities
+}
+func (db *storageImpl) Bases() components.BasesRepoReadonly {
+	return db.bases
+}
+func (db *storageImpl) Factories() components.FactoriesRepoReadonly {
+	return db.factories
 }
 
 func (db *storageImpl) StartTransaction(ctx context.Context) (components.StorageRepos, common.Error) {
@@ -91,12 +108,14 @@ func (db *storageImpl) StartTransaction(ctx context.Context) (components.Storage
 		tx:  tx,
 		ctx: ctx,
 
-		users:   &userRepoImpl{q: q, ctx: ctx},
-		orgs:    &orgRepoImpl{q: q, ctx: ctx},
-		systems: &systemsRepoImpl{q: q, ctx: ctx},
-		worlds:  &worldsRepoImpl{q: q, ctx: ctx},
-		cnr:     &namesRegistryImpl{q: q, ctx: ctx},
-		cities:  &citiesRepoImpl{q: q, ctx: ctx},
+		users:     &userRepoImpl{q: q, ctx: ctx},
+		companies: &companiesRepoImpl{q: q, ctx: ctx},
+		systems:   &systemsRepoImpl{q: q, ctx: ctx},
+		worlds:    &worldsRepoImpl{q: q, ctx: ctx},
+		cnr:       &namesRegistryImpl{q: q, ctx: ctx},
+		cities:    &citiesRepoImpl{q: q, ctx: ctx},
+		bases:     &basesRepoImpl{q: q, ctx: ctx},
+		factories: &factoriesRepoImpl{q: q, ctx: ctx},
 	}, nil
 }
 
@@ -104,7 +123,7 @@ func (stx *storageWithTx) Users() components.UserRepo {
 	return stx.users
 }
 func (stx *storageWithTx) Companies() components.CompaniesRepo {
-	return nil
+	return stx.companies
 }
 func (stx *storageWithTx) NamesRegistry() components.NamesRegistry {
 	return stx.cnr
@@ -117,6 +136,12 @@ func (stx *storageWithTx) Worlds() components.WorldsRepo {
 }
 func (stx *storageWithTx) Cities() components.CitiesRepo {
 	return stx.cities
+}
+func (stx *storageWithTx) Bases() components.BasesRepo {
+	return stx.bases
+}
+func (stx *storageWithTx) Factories() components.FactoriesRepo {
+	return stx.factories
 }
 
 func (stx *storageWithTx) Commit() common.Error {

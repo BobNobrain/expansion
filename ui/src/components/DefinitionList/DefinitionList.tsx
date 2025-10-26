@@ -11,7 +11,7 @@ export type DefinitionListItem<V> = {
 export type DefinitionListProperties<V> = Record<keyof V, DefinitionListItem<V>>;
 
 export type DefinitionListProps<V extends Record<string, unknown>> = {
-    items: DefinitionListProperties<V>;
+    items: DefinitionListItem<V>[];
     inset?: boolean;
     value: V | null;
     isLoading?: boolean;
@@ -26,8 +26,7 @@ type RenderedItem = {
 export function DefinitionList<V extends Record<string, unknown>>(props: DefinitionListProps<V>) {
     const renderedItems = createMemo<RenderedItem[]>(() => {
         const items: RenderedItem[] = [];
-        for (const key of Object.keys(props.items) as (keyof V)[]) {
-            const definition = props.items[key];
+        for (const definition of Object.values(props.items)) {
             const rendered: RenderedItem = {
                 title: definition.title,
                 description: definition.description,

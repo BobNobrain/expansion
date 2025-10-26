@@ -13,10 +13,13 @@ type GameDataFront struct {
 	galaxy *galaxyMapSingleton
 	me     *meSingleton
 
-	systems *systemsTable
-	users   *usersTable
-	worlds  *worldsTable
-	cities  *citiesTable
+	systems   *systemsTable
+	users     *usersTable
+	companies *companiesTable
+	worlds    *worldsTable
+	cities    *citiesTable
+	bases     *basesTable
+	factories *factoriesTable
 
 	sysOverviews   *sysOverviewsTable
 	worldOverviews *worldOverviewsTable
@@ -37,12 +40,15 @@ func (gdf *GameDataFront) Run(comms components.Comms) {
 func (gdf *GameDataFront) Dispose() {
 	gdf.users.dispose()
 	gdf.online.dispose()
+	gdf.companies.dispose()
 
 	gdf.systems.dispose()
 	gdf.sysOverviews.dispose()
 	gdf.worldOverviews.dispose()
 	gdf.worlds.dispose()
 	gdf.cities.dispose()
+	gdf.bases.dispose()
+	gdf.factories.dispose()
 
 	gdf.df.Dispose()
 }

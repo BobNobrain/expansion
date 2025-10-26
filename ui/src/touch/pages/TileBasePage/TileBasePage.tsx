@@ -5,7 +5,7 @@ import { IconFactory, IconFence, IconPeople, IconStorage } from '../../../icons'
 import { useTileBaseRouteInfo, getBasesRoute, TileBaseTab } from '../../../routes/bases';
 import { TileBaseProduction } from './tabs/TileBaseProduction';
 import { TileBaseInventory } from './tabs/TileBaseInventory';
-import { TileBaseWorkforce } from './tabs/TileBaseWorkforce';
+import { TileBaseOverview } from './tabs/TileBaseOverview';
 import { TouchContentSingle } from '../../components/TouchContentSingle/TouchContentSingle';
 import { TileBaseConstructionSites } from './tabs/TileBaseConstructionSites';
 import { useBasesPageContextBinding } from '../WorldBasesPage/binding';
@@ -19,6 +19,11 @@ export const TileBasePage: Component = () => {
         const route = routeInfo();
 
         return [
+            {
+                title: 'Workers',
+                icon: IconPeople,
+                href: getBasesRoute({ ...route, tab: TileBaseTab.Overview }),
+            },
             {
                 title: 'Production',
                 icon: IconFactory,
@@ -34,11 +39,6 @@ export const TileBasePage: Component = () => {
                 icon: IconStorage,
                 href: getBasesRoute({ ...route, tab: TileBaseTab.Inventory }),
             },
-            {
-                title: 'Workers',
-                icon: IconPeople,
-                href: getBasesRoute({ ...route, tab: TileBaseTab.Workers }),
-            },
         ];
     });
 
@@ -48,10 +48,10 @@ export const TileBasePage: Component = () => {
             <TabContent
                 active={routeInfo().tab}
                 components={{
+                    [TileBaseTab.Overview]: TileBaseOverview,
                     [TileBaseTab.Production]: TileBaseProduction,
                     [TileBaseTab.ConstructionSites]: TileBaseConstructionSites,
                     [TileBaseTab.Inventory]: TileBaseInventory,
-                    [TileBaseTab.Workers]: TileBaseWorkforce,
                 }}
             />
         </TouchContentSingle>

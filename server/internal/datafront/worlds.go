@@ -117,7 +117,7 @@ func encodeWorld(w game.WorldData) common.Encodable {
 	resourceDeposits := make(map[int][]api.WorldsTableRowResourceDeposit)
 	for tileId, deposits := range w.TileResources {
 		for _, deposit := range deposits {
-			resourceDeposits[tileId] = append(resourceDeposits[tileId], api.WorldsTableRowResourceDeposit{
+			resourceDeposits[int(tileId)] = append(resourceDeposits[int(tileId)], api.WorldsTableRowResourceDeposit{
 				ResourceID: string(deposit.ResourceID),
 				Abundance:  deposit.Abundance,
 			})

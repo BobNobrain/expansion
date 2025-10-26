@@ -3,6 +3,11 @@ SELECT *
 FROM companies
 WHERE owner_id = $1;
 
+-- name: ResolveCompanies :many
+SELECT *
+FROM companies
+WHERE id = ANY($1::UUID [ ]);
+
 -- name: CreateCompany :exec
 INSERT INTO companies (owner_id, name, logo)
 VALUES ($1, $2, $3);

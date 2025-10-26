@@ -3,6 +3,7 @@ import { Dynamic } from 'solid-js/web';
 import { type Icon } from '../../icons';
 import { Text } from '../Text/Text';
 import styles from './PageHeader.module.css';
+import { SkeletonText } from '../Skeleton';
 
 export const PageHeader: ParentComponent = (props) => {
     return <header class={styles.header}>{props.children}</header>;
@@ -19,13 +20,19 @@ export const PageHeaderTitle: ParentComponent = (props) => {
 export type PageHeaderIconProps = {
     icon: Icon;
     text?: string;
+    isTextLoading?: boolean;
+    loadingSkeletonLength?: number;
 };
 export const PageHeaderIcon: Component<PageHeaderIconProps> = (props) => {
     return (
         <div class={styles.iconWrapper}>
             <Dynamic component={props.icon} size={20} />
             <Show when={props.text}>
-                <span class={styles.iconText}>{props.text}</span>
+                <span class={styles.iconText}>
+                    <Show when={props.isTextLoading} fallback={props.text}>
+                        <SkeletonText length={props.loadingSkeletonLength} />
+                    </Show>
+                </span>
             </Show>
         </div>
     );

@@ -1,6 +1,26 @@
-import { type Component, type ParentProps } from 'solid-js';
+import { type ParentComponent } from 'solid-js';
 import styles from './FormActions.module.css';
 
-export const FormActions: Component<ParentProps> = (props) => {
-    return <div class={styles.actions}>{props.children}</div>;
+type FormActionsAlignment = 'center' | 'right';
+
+export type FormActionsProps = {
+    align?: FormActionsAlignment;
+};
+
+const cns: Record<FormActionsAlignment, string> = {
+    center: styles.center,
+    right: styles.right,
+};
+
+export const FormActions: ParentComponent<FormActionsProps> = (props) => {
+    return (
+        <div
+            class={styles.actions}
+            classList={{
+                [cns[props.align ?? 'right']]: true,
+            }}
+        >
+            {props.children}
+        </div>
+    );
 };

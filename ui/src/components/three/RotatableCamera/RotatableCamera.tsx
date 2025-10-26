@@ -146,8 +146,8 @@ export const RotatableCamera: Component<RotatableCameraProps> = (props) => {
             cameraState.hold();
         },
         onDrag: (ev) => {
-            const dpitch = -ev.lastChange.y * (Math.PI / 1000);
-            const dyaw = -ev.lastChange.x * (Math.PI / 1000);
+            const dpitch = -ev.last.y * (Math.PI / 1000);
+            const dyaw = -ev.last.x * (Math.PI / 1000);
 
             cameraState.updateRotationWithInertia(dyaw, dpitch);
             updateCamera();

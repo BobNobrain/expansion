@@ -6,7 +6,7 @@ import solidStyleColors from './solid.module.css';
 import textStyleColors from './text.module.css';
 
 export type ButtonStyle = 'solid' | 'text' | 'light';
-export type ButtonSize = 's' | 'm';
+export type ButtonSize = 's' | 'm' | 'l';
 
 export type ButtonProps = ParentProps & {
     color?: SemanticColor;

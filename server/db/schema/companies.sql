@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS companies (
     id UUID PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
-    owner_id UUID NOT NULL,
+    owner_id UUID NOT NULL REFERENCES users,
     name TEXT NOT NULL,
-    logo JSONB NOT NULL DEFAULT '[]'::JSONB,
+    logo JSONB NOT NULL DEFAULT '{}'::JSONB,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     hq_data JSONB NOT NULL DEFAULT '{}'::JSONB

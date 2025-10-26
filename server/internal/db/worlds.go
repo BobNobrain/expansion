@@ -294,9 +294,10 @@ func decodeWorld(row dbq.ResolveWorldsRow) (game.WorldData, common.Error) {
 		}
 	}
 
-	resourceDeposits := make(map[int][]game.ResourceDeposit)
+	resourceDeposits := make(map[game.TileID][]game.ResourceDeposit)
 	for _, depositData := range dbWorldData.TileResources {
-		resourceDeposits[depositData.TileID] = append(resourceDeposits[depositData.TileID], game.ResourceDeposit{
+		tid := game.TileID(depositData.TileID)
+		resourceDeposits[tid] = append(resourceDeposits[tid], game.ResourceDeposit{
 			ResourceID: game.ResourceID(depositData.ResourceID),
 			Abundance:  depositData.Abundance,
 		})

@@ -1,6 +1,9 @@
 package utils
 
-import "srv/internal/utils/common"
+import (
+	"srv/internal/utils/common"
+	"strconv"
+)
 
 func ConvertStrings[T ~string, U ~string](ids []T) []U {
 	result := make([]U, 0, len(ids))
@@ -8,6 +11,14 @@ func ConvertStrings[T ~string, U ~string](ids []T) []U {
 		result = append(result, U(id))
 	}
 	return result
+}
+
+func ConvertStringKeys[K1 ~string, K2 ~string, V any](m map[K1]V) map[K2]V {
+	dest := make(map[K2]V)
+	for k, v := range m {
+		dest[K2(k)] = v
+	}
+	return dest
 }
 
 type Integer interface {
@@ -18,6 +29,18 @@ func ConvertInts[T Integer, U Integer](ids []T) []U {
 	result := make([]U, 0, len(ids))
 	for _, id := range ids {
 		result = append(result, U(id))
+	}
+	return result
+}
+func ParseInts[T Integer](ids []string) []T {
+	result := make([]T, 0, len(ids))
+	for _, id := range ids {
+		parsed, err := strconv.Atoi(id)
+		if err != nil {
+			continue
+		}
+
+		result = append(result, T(parsed))
 	}
 	return result
 }
@@ -41,4 +64,12 @@ func MapSliceFailable[T any, U any](ts []T, f func(T) (U, common.Error)) ([]U, c
 		us = append(us, u)
 	}
 	return us, nil
+}
+
+func MapKeys[K1 comparable, K2 comparable, V any](src map[K1]V, f func(K1) K2) map[K2]V {
+	dest := make(map[K2]V)
+	for k, v := range src {
+		dest[f(k)] = v
+	}
+	return dest
 }

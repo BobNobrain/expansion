@@ -8,6 +8,10 @@ import (
 
 type CommodityID string
 
+func (c CommodityID) IsNil() bool {
+	return len(c) == 0
+}
+
 // Represents a game commodity (item type that can be produced/bought/stored)
 type Commodity struct {
 	CommodityID CommodityID
@@ -76,16 +80,38 @@ type EquipmentID string
 type EquipmentData struct {
 	EquipmentID EquipmentID
 	Area        float64
-	Jobs        map[WorkforceType]int
+	Jobs        map[WorkforceType]EquipmentDataJob
 	Building    BaseBuildingID
+}
+
+type EquipmentDataJob struct {
+	Count        int
+	Contribution float64
 }
 
 type RecipeID int
 
-type Recipe struct {
-	RecipeID     RecipeID
-	Inputs       map[CommodityID]int
-	Outputs      map[CommodityID]int
-	Equipment    EquipmentID
-	BaseDuration time.Duration
+type RecipeTemplate struct {
+	RecipeID      RecipeID
+	StaticInputs  map[CommodityID]float64
+	StaticOutputs map[CommodityID]float64
+	Equipment     EquipmentID
+	BaseDuration  time.Duration
+
+	AffectedByFertility  bool
+	AffectedByResources  bool
+	AffectedBySnow       bool
+	AffectedByOcean      bool
+	AffectedByAtmosphere bool
+}
+
+func (r RecipeTemplate) HasDynamicOutputs() bool {
+	return r.AffectedByFertility || r.AffectedByResources || r.AffectedByOcean || r.AffectedByAtmosphere
+}
+
+func (r RecipeTemplate) GetProductionItemBase() FactoryProductionItem {
+	item := FactoryProductionItem{
+		Template: r.RecipeID,
+	}
+	return item
 }

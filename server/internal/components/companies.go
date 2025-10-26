@@ -11,9 +11,15 @@ type CreateCompanyPayload struct {
 	Name    string
 }
 
-type CompaniesRepo interface {
-	Create(CreateCompanyPayload) (game.CompanyOverview, common.Error)
-	ResolveOverviews([]game.CompanyID) (map[game.CompanyID]game.CompanyOverview, common.Error)
+type CompaniesRepoReadonly interface {
+	ResolveCompanies([]game.CompanyID) ([]game.Company, common.Error)
 
-	GetCompanyData(game.CompanyID) (game.CompanyData, common.Error)
+	GetCompanyData(game.CompanyID) (game.Company, common.Error)
+	GetOwnedCompanies(domain.UserID) ([]game.Company, common.Error)
+}
+
+type CompaniesRepo interface {
+	CompaniesRepoReadonly
+
+	Create(CreateCompanyPayload) common.Error
 }

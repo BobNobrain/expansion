@@ -8,3 +8,7 @@ sql:
         package: "dbq"
         out: "internal/db/dbq"
         sql_package: "pgx/v5"
+overrides:
+  go:
+    rename:
+      basis: Base

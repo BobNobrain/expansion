@@ -3,8 +3,8 @@ import { World } from '../../domain/World';
 import { createDatafrontTable } from '../../lib/datafront/table';
 import type { CitiesTableRow, CitiesQueryByWorldID } from '../../lib/net/types.generated';
 import { ws } from '../../lib/net/ws';
-import { type Predictable, createConstantPredictable, createLinearPredictable } from '../../lib/predictables';
-import { updater, cleaner } from './misc';
+import { type Predictable, createConstantPredictable } from '../../lib/predictables';
+import { updater, cleaner, parsePredictable } from './misc';
 
 export const dfCities = createDatafrontTable<CitiesTableRow, City>({
     name: 'cities',
@@ -31,12 +31,7 @@ export const dfCities = createDatafrontTable<CitiesTableRow, City>({
                             return counts;
                         }
 
-                        counts[type] = createLinearPredictable({
-                            x0: opts.x,
-                            t0: new Date(opts.t),
-                            deltaX: opts.v,
-                            deltaT: 3600_000, // 1h
-                        });
+                        counts[type] = parsePredictable(opts);
                         return counts;
                     },
                     {} as Record<WorkforceType, Predictable>,

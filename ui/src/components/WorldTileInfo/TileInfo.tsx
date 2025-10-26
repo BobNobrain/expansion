@@ -8,7 +8,7 @@ import { getExploreRoute } from '../../routes/explore';
 import { Badge } from '../Badge/Badge';
 import { Button } from '../Button/Button';
 import { Container } from '../Container/Container';
-import { DefinitionList, type DefinitionListProperties } from '../DefinitionList/DefinitionList';
+import { DefinitionList, type DefinitionListItem } from '../DefinitionList/DefinitionList';
 import { Link } from '../Link/Link';
 import { PageHeader, PageHeaderTitle, PageHeaderIcon, PageHeaderActions } from '../PageHeader';
 import { SkeletonText } from '../Skeleton';
@@ -29,12 +29,12 @@ type TileInfo = {
     city?: { name: string; centerTileLink?: string };
 };
 
-const tileDefProps: DefinitionListProperties<TileInfo> = {
-    id: {
+const tileDefProps: DefinitionListItem<TileInfo>[] = [
+    {
         title: 'ID',
         render: 'id',
     },
-    elevation: {
+    {
         title: 'Altitude',
         render: (v) => {
             if (!v.elevation) {
@@ -46,15 +46,15 @@ const tileDefProps: DefinitionListProperties<TileInfo> = {
             return `${km} (${rel})`;
         },
     },
-    biome: {
+    {
         title: 'Biome',
         render: 'biome',
     },
-    occupation: {
+    {
         title: 'Occupation',
         render: 'occupation',
     },
-    infraLevels: {
+    {
         title: 'Infrastructure',
         render: (v) => {
             if (!v.infraLevels) {
@@ -73,7 +73,7 @@ const tileDefProps: DefinitionListProperties<TileInfo> = {
             );
         },
     },
-    city: {
+    {
         title: 'City',
         render: (v) => {
             if (!v.city) {
@@ -87,7 +87,7 @@ const tileDefProps: DefinitionListProperties<TileInfo> = {
             return <Link href={v.city.centerTileLink}>{v.city.name}</Link>;
         },
     },
-    soil: {
+    {
         title: 'Soil',
         render: (v) => {
             if (!v.soil) {
@@ -111,7 +111,7 @@ const tileDefProps: DefinitionListProperties<TileInfo> = {
             );
         },
     },
-};
+];
 
 type Props = {
     world: UseTableSingleResult<World>;
@@ -120,6 +120,7 @@ type Props = {
 
     tileCity: City | null;
 
+    onCreateBaseClick: () => void;
     onFoundCityClick: () => void;
 };
 
@@ -172,7 +173,7 @@ export const TileInfoDefList: Component<Props> = (props) => {
         const isCityCenter = props.tileCity !== null && props.tileCity.centerTileId === props.tileId;
 
         return {
-            base: !isCityCenter,
+            base: !isCityCenter && isClaimedByCity,
             city: !isClaimedByCity,
             infra: !isCityCenter,
         };
@@ -185,7 +186,7 @@ export const TileInfoDefList: Component<Props> = (props) => {
                 <PageHeaderIcon icon={IconTile} />
                 <PageHeaderActions pushRight>
                     <Show when={availableActions().base}>
-                        <Button square style="light">
+                        <Button square style="light" onClick={props.onCreateBaseClick}>
                             <IconFlag size={32} block />
                         </Button>
                     </Show>

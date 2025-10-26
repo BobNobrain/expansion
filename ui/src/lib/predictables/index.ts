@@ -27,6 +27,21 @@ export function createLinearPredictable(opts: LinearPredictableOptions): Predict
     };
 }
 
+export enum LimitedPredictableMode {
+    Max = 'max',
+    Min = 'min',
+}
+
+export function createLimitedPredictable(inner: Predictable, x: number, mode: LimitedPredictableMode): Predictable {
+    return {
+        predict(at) {
+            const innerValue = inner.predict(at);
+            const isMaxMode = mode === LimitedPredictableMode.Max;
+            return isMaxMode ? Math.max(innerValue, x) : Math.min(innerValue, x);
+        },
+    };
+}
+
 export function sumPredictables(ps: Predictable[]): Predictable {
     return {
         predict: (at) => {

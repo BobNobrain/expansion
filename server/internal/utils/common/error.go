@@ -65,8 +65,10 @@ func WithInnerError(inner error) errorConstructor {
 		ce.msg = inner.Error()
 	}
 }
-func WithRetriable(ce *customError) {
-	ce.isRetriable = true
+func WithRetriable() errorConstructor {
+	return func(ce *customError) {
+		ce.isRetriable = true
+	}
 }
 
 func NewUnknownError(e error) Error {

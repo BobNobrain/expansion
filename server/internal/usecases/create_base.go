@@ -2,8 +2,10 @@ package usecases
 
 import (
 	"context"
+	"slices"
 	"srv/internal/components"
 	"srv/internal/game"
+	"srv/internal/globals/events"
 	"srv/internal/utils/common"
 )
 
@@ -12,8 +14,9 @@ type createBaseUsecase struct {
 }
 
 type CreateBaseUsecaseInput struct {
-	WorldID game.CelestialID
-	TileID  game.TileID
+	WorldID  game.CelestialID
+	TileID   game.TileID
+	Operator game.CompanyID
 }
 
 func NewCreateBaseUsecase(store components.Storage) components.Usecase[CreateBaseUsecaseInput] {
@@ -27,8 +30,48 @@ func (uc *createBaseUsecase) Run(
 	input CreateBaseUsecaseInput,
 	uctx components.UsecaseContext,
 ) common.Error {
-	return common.NewError(
-		common.WithCode("ERR_NOT_IMPLEMENTED"),
-		common.WithMessage("base creation not implemented yet"),
-	)
+	tx, err := uc.store.StartTransaction(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	// find the city that the base will be attached to
+	cities, err := tx.Cities().GetByWorldID(input.WorldID)
+	if err != nil {
+		return err
+	}
+
+	var cityID game.CityID
+	for _, city := range cities {
+		idx := slices.Index(city.CityTiles, input.TileID)
+		if idx != -1 {
+			cityID = city.CityID
+			break
+		}
+	}
+
+	if cityID == 0 {
+		return common.NewValidationError(
+			"CreateBaseUsecaseInput.TileID",
+			"No city for tile ID provided",
+			common.WithRetriable(),
+			common.WithDetails(common.NewDictEncodable().Set("citiesScanned", len(cities))),
+		)
+	}
+
+	tx.Bases().CreateBase(components.CreateBasePayload{
+		WorldID:  input.WorldID,
+		TileID:   input.TileID,
+		CityID:   cityID,
+		Operator: input.Operator,
+	})
+
+	events.BaseCreated.Publish(events.BaseCreatedPayload{
+		WorldID:  input.WorldID,
+		TileID:   input.TileID,
+		Operator: input.Operator,
+	})
+
+	return tx.Commit()
 }

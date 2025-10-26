@@ -5,7 +5,7 @@ import { Button } from '../../../../components/Button/Button';
 import { CommodityIconWithLabel } from '../../../../components/CommodityIcon';
 import { Container } from '../../../../components/Container/Container';
 import { DataTable, type DataTableColumn } from '../../../../components/DataTable';
-import { DefinitionList, type DefinitionListProperties } from '../../../../components/DefinitionList/DefinitionList';
+import { DefinitionList, type DefinitionListItem } from '../../../../components/DefinitionList/DefinitionList';
 import { EquipmentSelectionList } from '../../../../components/EquipmentSelectionList/EquipmentSelectionList';
 import { PageHeader, PageHeaderTitle, PageHeaderIcon, PageHeaderActions } from '../../../../components/PageHeader';
 import { Text } from '../../../../components/Text/Text';
@@ -34,8 +34,8 @@ type SiteInfo = {
     workers: WorkforceData<number>;
 };
 
-const DEFS: DefinitionListProperties<SiteInfo> = {
-    totals: {
+const DEFS: DefinitionListItem<SiteInfo>[] = [
+    {
         title: 'Total',
         render: (v) => (
             <Container direction="row" hasGap>
@@ -48,7 +48,7 @@ const DEFS: DefinitionListProperties<SiteInfo> = {
             </Container>
         ),
     },
-    workers: {
+    {
         title: 'Workforce',
         render: (v) => (
             <Container direction="row" hasGap wrap>
@@ -56,7 +56,7 @@ const DEFS: DefinitionListProperties<SiteInfo> = {
             </Container>
         ),
     },
-};
+];
 
 type SiteCostRow = {
     commodity: string;

@@ -36,22 +36,3 @@ WHERE id = $1;
 UPDATE cities
 SET city_data = $2
 WHERE id = $1;
-
--- name: CreateBase :exec
-INSERT INTO bases (
-        system_id,
-        world_id,
-        tile_id,
-        company_id,
-        base_content
-    )
-VALUES ($1, $2, $3, $4, $5);
-
--- name: UpdateBase :exec
-UPDATE bases
-SET base_content = $2
-WHERE id = $1;
-
--- name: DestroyBase :exec
-DELETE FROM bases
-WHERE id = $1;

@@ -50,10 +50,11 @@ export function createDatafrontTable<ApiEntity, Entity>({
         cache.patch(update.eid, patch);
     });
 
-    const useMany = (ids: () => string[]): UseTableResult<Entity> => {
+    const useMany = (ids: () => (string | number)[]): UseTableResult<Entity> => {
         let latestRequestId = 0;
         const [isLoading, setIsLoading] = createSignal(false);
         const [error, setError] = createSignal<DatafrontError | null>(null);
+        const strIds = createMemo(() => ids().map(String));
 
         const goFetchEntities = (ids: string[]) => {
             if (!ids.length) {
@@ -90,7 +91,7 @@ export function createDatafrontTable<ApiEntity, Entity>({
         };
 
         createEffect<string[]>((prevIds) => {
-            const requestedIds = ids();
+            const requestedIds = strIds();
             goFetchEntities(requestedIds.filter((id) => !cache.hasDataFor(id)));
 
             cache.useIds(requestedIds);
@@ -100,14 +101,14 @@ export function createDatafrontTable<ApiEntity, Entity>({
         }, []);
 
         onCleanup(() => {
-            cache.releaseIds(ids());
+            cache.releaseIds(strIds());
         });
 
         return {
             isLoading,
             error,
             result: createMemo(() => {
-                const requestedIds = ids();
+                const requestedIds = strIds();
                 if (!requestedIds.length) {
                     return {};
                 }
@@ -117,7 +118,7 @@ export function createDatafrontTable<ApiEntity, Entity>({
         };
     };
 
-    const useSingle = (id: () => string | null): UseTableSingleResult<Entity> => {
+    const useSingle = (id: () => string | number | null): UseTableSingleResult<Entity> => {
         const ids = createMemo(() => {
             const resolved = id();
             if (resolved === null) {

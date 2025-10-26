@@ -5,7 +5,7 @@ import { type Predictable } from '../../lib/predictables';
 import { useNow } from '../../lib/solid/useNow';
 import { formatInteger } from '../../lib/strings';
 import { Badge } from '../Badge/Badge';
-import { DefinitionList, type DefinitionListProperties } from '../DefinitionList/DefinitionList';
+import { DefinitionList, type DefinitionListItem } from '../DefinitionList/DefinitionList';
 import { PageHeader, PageHeaderIcon, PageHeaderTitle } from '../PageHeader';
 import { Container } from '../Container/Container';
 import { UserLink } from '../UserLink/UserLink';
@@ -17,12 +17,12 @@ type TileCityInfo = {
     populationCounts: Record<WorkforceType, Predictable>;
 };
 
-const tileCityDefs: DefinitionListProperties<TileCityInfo> = {
-    name: {
+const tileCityDefs: DefinitionListItem<TileCityInfo>[] = [
+    {
         title: 'Name',
         render: 'name',
     },
-    founded: {
+    {
         title: 'Founded',
         render: (value) => {
             return (
@@ -37,7 +37,7 @@ const tileCityDefs: DefinitionListProperties<TileCityInfo> = {
             );
         },
     },
-    populationCounts: {
+    {
         title: 'Population',
         render: (value) => {
             const nowSignal = useNow();
@@ -57,7 +57,7 @@ const tileCityDefs: DefinitionListProperties<TileCityInfo> = {
             );
         },
     },
-};
+];
 
 type Props = {
     city: City | null;

@@ -82,13 +82,9 @@ func encodeCity(city game.City) common.Encodable {
 		buildings[string(bid)] = count
 	}
 
-	popCounts := make(map[string]api.LinearEV)
+	popCounts := make(map[string]api.Predictable)
 	for wf, count := range city.Population.ByWorkforceType {
-		popCounts[wf.String()] = api.LinearEV{
-			X: count.InitialValue,
-			T: count.LastUpdated,
-			V: count.Speed,
-		}
+		popCounts[wf.String()] = serializePredictable(count.Wrap())
 	}
 
 	return common.AsEncodable(api.CitiesTableRow{

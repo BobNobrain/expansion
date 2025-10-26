@@ -1,9 +1,15 @@
 .actions {
     display: flex;
-    justify-content: flex-end;
     flex-wrap: wrap;
 
     margin-top: 12px;
+}
+
+.actions.right {
+    justify-content: flex-end;
+}
+.actions.center {
+    justify-content: center;
 }
 
 .actions > * {

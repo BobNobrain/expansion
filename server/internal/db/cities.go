@@ -9,6 +9,7 @@ import (
 	"srv/internal/game"
 	"srv/internal/utils"
 	"srv/internal/utils/common"
+	"srv/internal/utils/predictable"
 	"time"
 )
 
@@ -18,7 +19,7 @@ type citiesRepoImpl struct {
 }
 
 type cityPopulationDataJSON struct {
-	Counts map[int]*utils.LinearEV `json:"counts"`
+	Counts map[int]predictable.EncodedPredictable `json:"counts"`
 }
 type cityDataJSON struct {
 	Buildings map[string]int `json:"buildings"`
@@ -46,10 +47,10 @@ func (c *citiesRepoImpl) Create(payload components.CreateCityPayload) common.Err
 	totalPops := int32(0)
 	now := time.Now()
 	populationData := cityPopulationDataJSON{
-		Counts: make(map[int]*utils.LinearEV),
+		Counts: make(map[int]predictable.EncodedPredictable),
 	}
 	for wf, count := range payload.Population.ByWorkforceType {
-		populationData.Counts[int(wf)] = count
+		populationData.Counts[int(wf)] = count.Wrap()
 		totalPops += int32(count.Sample(now))
 	}
 	populationDataEncoded, jerr := json.Marshal(populationData)
@@ -96,7 +97,7 @@ func decodeCity(dbCity dbq.City) (game.City, common.Error) {
 	buildings := make(map[game.CityBuildingID]int)
 	cityTiles := make([]game.TileID, 0)
 	population := game.CityPopulationData{
-		ByWorkforceType: make(map[game.WorkforceType]*utils.LinearEV),
+		ByWorkforceType: make(map[game.WorkforceType]predictable.Predictable),
 	}
 
 	cityData, err := parseJSON[cityDataJSON](dbCity.CityData)
@@ -115,11 +116,12 @@ func decodeCity(dbCity dbq.City) (game.City, common.Error) {
 		cityTiles = append(cityTiles, game.TileID(tileId))
 	}
 	for wf, count := range populationData.Counts {
-		if count == nil {
+		decodedCount := count.ToPredictable()
+		if decodedCount == nil {
 			continue
 		}
 
-		population.ByWorkforceType[game.WorkforceType(wf)] = count
+		population.ByWorkforceType[game.WorkforceType(wf)] = decodedCount
 	}
 
 	return game.City{

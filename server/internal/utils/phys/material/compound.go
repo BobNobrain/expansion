@@ -227,6 +227,10 @@ func (mc *MaterialCompound) ToString() string {
 	return b.String()
 }
 
+func (mc *MaterialCompound) GetPercentage(mid MaterialID) float64 {
+	return mc.components[mid].amount / mc.totalAmount
+}
+
 func (mc *MaterialCompound) ToMap() map[string]float64 {
 	if mc == nil {
 		return nil

@@ -24,13 +24,7 @@ type CitiesTableRow struct {
 	CityBuildings map[string]int `json:"buildings"`
 	// UnderConstruction []CityContructionSite `json:"construction"`
 
-	PopulationCounts map[string]LinearEV `json:"popCounts"`
+	PopulationCounts map[string]Predictable `json:"popCounts"`
 
 	CityTiles []int `json:"tiles"`
-}
-
-type LinearEV struct {
-	X float64   `json:"x"`
-	T time.Time `json:"t"`
-	V float64   `json:"v"`
 }

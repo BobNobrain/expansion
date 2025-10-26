@@ -26,6 +26,7 @@ func newEventBus[T any]() *EventBus[T] {
 }
 
 func (eb *EventBus[T]) start() {
+	// TODO: maybe we want a single inbox queue for all the events
 	go eb.run()
 }
 func (eb *EventBus[T]) run() {

@@ -22,7 +22,9 @@ export type OnDragEvent = {
     offset: Point2D;
     globalStart: Point2D;
     globalCurrent: Point2D;
-    lastChange: Point2D;
+
+    last: Point2D;
+    total: Point2D;
 };
 
 export type DragOptions = {
@@ -70,7 +72,8 @@ export function useDrag({ onDrag, onEnd, onStart, isEnabled }: DragOptions): Use
             offset: state.offset,
             globalStart: state.globalStart,
             globalCurrent: { x: ev.screenX, y: ev.screenY },
-            lastChange: { x: dx, y: dy },
+            last: { x: dx, y: dy },
+            total: { x: ev.screenX - state.globalStart.x, y: ev.screenY - state.globalStart.y },
         });
         state.globalPrev = { x: ev.screenX, y: ev.screenY };
     };

@@ -2,6 +2,10 @@ package game
 
 type ResourceID string
 
+func (r ResourceID) IsNil() bool {
+	return len(r) == 0
+}
+
 type ResourceDeposit struct {
 	ResourceID ResourceID
 	Abundance  float64

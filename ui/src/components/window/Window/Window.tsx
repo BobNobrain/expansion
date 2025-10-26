@@ -27,8 +27,8 @@ export const Window: Component<WindowProps> = (props) => {
         onDrag(ev) {
             props.controller.updatePosition((pos) => ({
                 ...pos,
-                x: pos.x + ev.lastChange.x,
-                y: pos.y + ev.lastChange.y,
+                x: pos.x + ev.last.x,
+                y: pos.y + ev.last.y,
             }));
         },
     });

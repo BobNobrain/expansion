@@ -15,11 +15,11 @@ import { getExploreRoute, useExploreRouteInfo, useExploreRouteObjectId } from '.
 import { dfExploreWorld, dfWorlds } from '../../store/datafront';
 import { Badge } from '../Badge/Badge';
 import { Button } from '../Button/Button';
-import { DefinitionList, type DefinitionListProperties } from '../DefinitionList/DefinitionList';
+import { DefinitionList, type DefinitionListItem } from '../DefinitionList/DefinitionList';
 import { InfoDisplay } from '../InfoDisplay/InfoDisplay';
 import { OperationDisplay } from '../OperationDisplay/OperationDisplay';
-import styles from './WorldInfo.module.css';
 import { PageHeader, PageHeaderIcon, PageHeaderTitle } from '../PageHeader';
+import styles from './WorldInfo.module.css';
 
 type DefListValue = {
     id: string;
@@ -64,16 +64,16 @@ const Mixture: Component<{ content: Record<string, number> }> = (props) => {
     );
 };
 
-const defProps: DefinitionListProperties<DefListValue> = {
-    id: {
+const defProps: DefinitionListItem<DefListValue>[] = [
+    {
         title: 'ID',
         render: 'id',
     },
-    name: {
+    {
         title: 'Name',
         render: (v) => v.name ?? '--',
     },
-    size: {
+    {
         title: 'Size',
         render: (v) => (
             <div class={styles.badgeList}>
@@ -86,7 +86,7 @@ const defProps: DefinitionListProperties<DefListValue> = {
             </div>
         ),
     },
-    habitants: {
+    {
         title: 'Population',
         render: (v) => (
             <div class={styles.badgeList}>
@@ -102,7 +102,7 @@ const defProps: DefinitionListProperties<DefListValue> = {
             </div>
         ),
     },
-    environment: {
+    {
         title: 'Environment',
         render: (v) => (
             <div class={styles.badgeList}>
@@ -118,19 +118,19 @@ const defProps: DefinitionListProperties<DefListValue> = {
             </div>
         ),
     },
-    atmosphere: {
+    {
         title: 'Atmosphere',
         render: (v) => <Mixture content={v.atmosphere} />,
     },
-    oceans: {
+    {
         title: 'Oceans',
         render: (v) => <Mixture content={v.oceans} />,
     },
-    snow: {
+    {
         title: 'Snow',
         render: (v) => <Mixture content={v.snow} />,
     },
-};
+];
 
 export const WorldInfo: Component = () => {
     const routeInfo = useExploreRouteInfo();

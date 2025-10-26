@@ -13,12 +13,17 @@ export type ContainerProps = {
     wrap?: boolean;
     primaryAlignment?: 'start' | 'end' | 'center';
     secondaryAlignment?: 'start' | 'end' | 'center';
+    background?: 'none' | 'light';
 };
 
 const SIZE_CLS: Record<NonNullable<ContainerProps['size']>, string> = {
     s: 'sizeS',
     m: 'sizeM',
     l: 'sizeL',
+};
+const BG_CLS: Record<NonNullable<ContainerProps['background']>, string> = {
+    none: styles.bgNone,
+    light: styles.bgLight,
 };
 
 export const Spacer: Component = () => <div class={styles.spacer} />;
@@ -46,6 +51,7 @@ export const Container: ParentComponent<ContainerProps> = (props) => {
                 [styles[`secondaryAlignmentF${props.secondaryAlignment ?? 'start'}`]]: Boolean(
                     props.secondaryAlignment,
                 ),
+                [BG_CLS[props.background ?? 'none']]: true,
             }}
         >
             {props.children}

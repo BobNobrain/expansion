@@ -55,7 +55,7 @@ const COLUMNS: DataTableColumn<BaseOverview>[] = [
 
             return (
                 <DataTableCellLink
-                    href={getBasesRoute({ worldId: row.worldId, tileId: row.tileId, tab: TileBaseTab.Workers })}
+                    href={getBasesRoute({ worldId: row.worldId, tileId: row.tileId, tab: TileBaseTab.Overview })}
                 >
                     <ProgressBar value={row.employment} color={color} />
                 </DataTableCellLink>

@@ -3,7 +3,7 @@ package game
 import (
 	"fmt"
 	"srv/internal/domain"
-	"srv/internal/utils"
+	"srv/internal/utils/predictable"
 	"time"
 )
 
@@ -39,19 +39,17 @@ type CityContructionSite struct {
 }
 
 type CityPopulationData struct {
-	ByWorkforceType map[WorkforceType]*utils.LinearEV
+	ByWorkforceType map[WorkforceType]predictable.Predictable
 }
 
 func GetInitialCityPopulation() CityPopulationData {
 	data := CityPopulationData{
-		ByWorkforceType: make(map[WorkforceType]*utils.LinearEV),
+		ByWorkforceType: make(map[WorkforceType]predictable.Predictable),
 	}
 
-	now := time.Now()
-
-	data.ByWorkforceType[WorkforceTypeIntern] = &utils.LinearEV{InitialValue: 150, LastUpdated: now, Speed: 0}
-	data.ByWorkforceType[WorkforceTypeWorker] = &utils.LinearEV{InitialValue: 100, LastUpdated: now, Speed: 0}
-	data.ByWorkforceType[WorkforceTypeEngineer] = &utils.LinearEV{InitialValue: 50, LastUpdated: now, Speed: 0}
+	data.ByWorkforceType[WorkforceTypeIntern] = predictable.NewConstant(150)
+	data.ByWorkforceType[WorkforceTypeWorker] = predictable.NewConstant(100)
+	data.ByWorkforceType[WorkforceTypeEngineer] = predictable.NewConstant(50)
 
 	return data
 }

@@ -1,6 +1,7 @@
 import { type Component } from 'solid-js';
 import { HashRouter, Route } from '@solidjs/router';
 import { App } from '../../../components/App/App';
+import { BaseProductionGraphPage } from '../../pages/BaseProductionGraphPage/BaseProductionGraphPage';
 import { BasesPage } from '../../pages/BasesPage/BasesPage';
 import { CartographyPage } from '../../pages/CartographyPage/CartographyPage';
 import { HomePage } from '../../pages/HomePage/HomePage';
@@ -19,6 +20,7 @@ export const TouchUI: Component = () => {
                 <Route path="/bases" component={BasesPage} />
                 <Route path="/bases/:worldId" component={WorldBasesPage} />
                 <Route path="/bases/:worldId/:tileId/:tab?" component={TileBasePage} />
+                <Route path="/production" component={BaseProductionGraphPage} />
 
                 <Route path="*" component={NotFoundPage} />
             </HashRouter>

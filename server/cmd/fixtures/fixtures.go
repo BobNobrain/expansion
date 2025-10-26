@@ -28,6 +28,7 @@ func main() {
 	defer tx.Rollback()
 
 	userRepo := tx.Users()
+	companiesRepo := tx.Companies()
 	hasher := auth.NewAuthenticator(userRepo)
 
 	users := cmdutils.Require(assets.LoadDevUsers())
@@ -38,6 +39,13 @@ func main() {
 			PasswordHash: cmdutils.Require(hasher.HashPassword(user.Password)),
 		}))
 		fmt.Printf("  created @%s: #%s\n", created.Username, created.ID)
+
+		if user.Org != nil {
+			cmdutils.Ensure(companiesRepo.Create(components.CreateCompanyPayload{
+				Founder: created.ID,
+				Name:    user.Org.Name,
+			}))
+		}
 	}
 
 	cmdutils.Ensure(tx.Commit())

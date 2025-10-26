@@ -46,7 +46,8 @@ func foundCityMapper(payload api.FoundCityPayload) usecases.FoundCityUsecaseInpu
 
 func createBaseMapper(payload api.CreateBasePayload) usecases.CreateBaseUsecaseInput {
 	return usecases.CreateBaseUsecaseInput{
-		WorldID: game.CelestialID(payload.WorldID),
-		TileID:  game.TileID(payload.TileID),
+		WorldID:  game.CelestialID(payload.WorldID),
+		TileID:   game.TileID(payload.TileID),
+		Operator: game.CompanyID(payload.Operator),
 	}
 }

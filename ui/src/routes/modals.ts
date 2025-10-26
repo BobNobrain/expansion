@@ -7,7 +7,7 @@ export type ModalRouteState = {
 };
 
 type ModalSearchParams = {
-    modal: string;
+    modal?: string;
 };
 
 export function useModalRouteState(modalName: string): ModalRouteState {
