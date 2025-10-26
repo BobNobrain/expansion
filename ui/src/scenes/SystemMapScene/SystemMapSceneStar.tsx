@@ -1,8 +1,8 @@
 import { type Component, createMemo, createEffect } from 'solid-js';
 import * as T from 'three';
-import { useInScene } from '../../components/three/hooks/useInScene';
-import { Orbit } from '../../domain/Orbit';
-import { Star } from '../../domain/Star';
+import { Orbit } from '@/domain/Orbit';
+import { Star } from '@/domain/Star';
+import { useInScene } from '@/three/hooks/useInScene';
 
 export type SystemMapSceneStarProps = {
     star: Star;

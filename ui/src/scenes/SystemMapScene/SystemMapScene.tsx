@@ -1,7 +1,7 @@
 import { type Component, createMemo, For, Show } from 'solid-js';
-import { type PanLimits, RotatableCamera } from '../../components/three/RotatableCamera/RotatableCamera';
-import { type RawVertex } from '../../lib/3d/types';
-import { dfSystems } from '../../store/datafront';
+import { type RawVertex } from '@/lib/3d/types';
+import { dfSystems } from '@/store/datafront';
+import { type PanLimits, RotatableCamera } from '@/three/RotatableCamera/RotatableCamera';
 import { SystemMapSceneOrbit } from './SystemMapSceneOrbit';
 import { SystemMapSceneStar } from './SystemMapSceneStar';
 import { SystemMapSceneGrid } from './SystemMapSceneGrid';

@@ -1,6 +1,6 @@
-import { type BaseContent } from '../../domain/Base';
-import { World } from '../../domain/World';
-import { createDatafrontTable } from '../../lib/datafront/table';
+import { type BaseContent } from '@/domain/Base';
+import { World } from '@/domain/World';
+import { createDatafrontTable } from '@/lib/datafront/table';
 import {
     type BasesQueryByBranch,
     type BasesQueryByCompanyID,
@@ -9,8 +9,8 @@ import {
     BasesQueryTypeByCompanyID,
     BasesQueryTypeByLocation,
     type BasesTableRow,
-} from '../../lib/net/types.generated';
-import { ws } from '../../lib/net/ws';
+} from '@/lib/net/types.generated';
+import { ws } from '@/lib/net/ws';
 import { updater, cleaner } from './misc';
 
 export const dfBases = createDatafrontTable<BasesTableRow, BaseContent>({

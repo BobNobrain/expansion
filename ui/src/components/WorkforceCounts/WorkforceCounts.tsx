@@ -1,5 +1,6 @@
 import { type Component, createMemo, For } from 'solid-js';
-import { WORKFORCE_TYPES, type WorkforceData, type WorkforceType } from '../../domain/City';
+import { Badge } from '@/atoms';
+import { WORKFORCE_TYPES, type WorkforceData, type WorkforceType } from '@/domain/City';
 import {
     type Icon,
     IconFlask,
@@ -11,8 +12,7 @@ import {
     IconWorkerChevron,
     IconWrenchCog,
     IconWrenchCogChevron,
-} from '../../icons';
-import { Badge } from '../Badge/Badge';
+} from '@/icons';
 
 export type WorkforceCountsProps = {
     counts: WorkforceData<number>;

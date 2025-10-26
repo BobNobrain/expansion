@@ -1,10 +1,17 @@
 import { createMemo, type Component } from 'solid-js';
-import { type DatafrontError } from '../../../lib/datafront/types';
-import type * as api from '../../../lib/net/api';
-import { Button } from '../../Button/Button';
-import { Form, FormActions, FormField, type ValidationState, FormHeader } from '../../Form';
-import { createFormFieldState, useValidateAll } from '../../Form/utils';
-import { TextInput } from '../../TextInput/TextInput';
+import {
+    Button,
+    Form,
+    FormActions,
+    FormField,
+    type ValidationState,
+    FormHeader,
+    TextInput,
+    createFormFieldState,
+    useValidateAll,
+} from '@/atoms';
+import { type DatafrontError } from '@/lib/datafront/types';
+import type * as api from '@/lib/net/api';
 import styles from './LogInForm.module.css';
 
 export type LogInFormProps = {

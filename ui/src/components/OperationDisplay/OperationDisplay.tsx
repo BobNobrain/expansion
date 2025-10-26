@@ -1,8 +1,6 @@
 import { type JSX, type ParentComponent, Show } from 'solid-js';
-import { type DatafrontError } from '../../lib/datafront/types';
-import { Button } from '../Button/Button';
-import { InfoDisplay } from '../InfoDisplay/InfoDisplay';
-import { SkeletonBlock } from '../Skeleton';
+import { Button, InfoDisplay, SkeletonBlock } from '@/atoms';
+import { type DatafrontError } from '@/lib/datafront/types';
 
 export type OperationDisplayProps = {
     title?: string;

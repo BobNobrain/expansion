@@ -1,14 +1,20 @@
 import { createMemo, type Component } from 'solid-js';
-import { CelestialBodyTitle } from '../../../components/CelestialBodyTitle/CelestialBodyTitle';
-import { DataTable, DataTableCellLink, type DataTableColumn } from '../../../components/DataTable';
-import { GameTimeLabel } from '../../../components/GameTimeLabel/GameTimeLabel';
-import { PageHeader, PageHeaderIcon, PageHeaderTitle } from '../../../components/PageHeader';
-import { ProgressBar } from '../../../components/ProgressBar/ProgressBar';
-import { type BaseOverview } from '../../../domain/Base';
-import { IconArea, IconCalendar, IconFactory, IconFlag, IconPeople, IconPlanet, IconStorage } from '../../../icons';
-import { type SemanticColor } from '../../../lib/appearance';
+import {
+    DataTable,
+    DataTableCellLink,
+    type DataTableColumn,
+    PageHeader,
+    PageHeaderIcon,
+    PageHeaderTitle,
+    ProgressBar,
+} from '@/atoms';
+import { CelestialBodyTitle } from '@/components/CelestialBodyTitle/CelestialBodyTitle';
+import { GameTimeLabel } from '@/components/GameTimeLabel/GameTimeLabel';
+import { type BaseOverview } from '@/domain/Base';
+import { IconArea, IconCalendar, IconFactory, IconFlag, IconPeople, IconPlanet, IconStorage } from '@/icons';
+import { type SemanticColor } from '@/lib/appearance';
+import { getBasesRoute, TileBaseTab } from '@/routes/bases';
 import { useBasesPageContextBinding } from './binding';
-import { getBasesRoute, TileBaseTab } from '../../../routes/bases';
 
 const COLUMNS: DataTableColumn<BaseOverview>[] = [
     {
@@ -102,6 +108,7 @@ export const WorldBasesPage: Component = () => {
                 worldId: 'TH-044c',
                 tileId: '0da',
                 created: new Date('2025-04-01T12:00:00Z'),
+                operator: '',
                 nEquipment: 3,
                 areaUsage: 0.35,
                 employment: 1,
@@ -112,6 +119,7 @@ export const WorldBasesPage: Component = () => {
                 worldId: 'TH-044c',
                 tileId: '0df',
                 created: new Date('2025-04-02T12:00:00Z'),
+                operator: '',
                 nEquipment: 7,
                 areaUsage: 0.91,
                 employment: 1,
@@ -122,6 +130,7 @@ export const WorldBasesPage: Component = () => {
                 worldId: 'TH-044d',
                 tileId: '00e',
                 created: new Date('2025-04-03T12:00:00Z'),
+                operator: '',
                 nEquipment: 1,
                 areaUsage: 0.07,
                 employment: 0.2,

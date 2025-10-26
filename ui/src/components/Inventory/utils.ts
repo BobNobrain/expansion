@@ -1,4 +1,4 @@
-import type { SemanticColor } from '../../lib/appearance';
+import type { SemanticColor } from '@/lib/appearance';
 import type { InventoryEntry, InventoryEntryWithData } from './types';
 
 export function enrichWithCommodityData(entry: InventoryEntry): InventoryEntryWithData {

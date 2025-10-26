@@ -1,8 +1,8 @@
 import { BufferAttribute, type BufferGeometry } from 'three';
-import { type MeshBuilder } from '../../../lib/3d/MeshBuilder';
-import { type MaterialData } from '../../../lib/3d/material';
-import { type RawVertex } from '../../../lib/3d/types';
-import { Color } from '../../../lib/color';
+import { type MeshBuilder } from '@/lib/3d/MeshBuilder';
+import { type MaterialData } from '@/lib/3d/material';
+import { type RawVertex } from '@/lib/3d/types';
+import { Color } from '@/lib/color';
 
 export class PlanetTileManager<TileData> {
     private palette: MaterialData[] = [];

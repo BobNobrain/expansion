@@ -1,8 +1,8 @@
-import { type World } from '../../domain/World';
-import { type MaterialData } from '../../lib/3d/material';
-import type { RawColor } from '../../lib/3d/types';
-import { Color } from '../../lib/color';
-import { remap } from '../../lib/math/misc';
+import { type World } from '@/domain/World';
+import { type MaterialData } from '@/lib/3d/material';
+import type { RawColor } from '@/lib/3d/types';
+import { Color } from '@/lib/color';
+import { remap } from '@/lib/math/misc';
 import { type RenderMode } from './settings';
 
 export type ColorRenderer = (surface: World) => MaterialData[];

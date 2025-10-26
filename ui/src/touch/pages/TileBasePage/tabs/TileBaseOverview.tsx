@@ -1,12 +1,17 @@
 import { createMemo, type Component } from 'solid-js';
-import { type BaseContent } from '../../../../domain/Base';
-import { useTileBaseRouteInfo } from '../../../../routes/bases';
-import { DefinitionList, type DefinitionListItem } from '../../../../components/DefinitionList/DefinitionList';
-import { Badge } from '../../../../components/Badge/Badge';
-import { IconContext, IconHammer, IconPeople } from '../../../../icons';
-import { PageHeader, PageHeaderActions, PageHeaderTitle } from '../../../../components/PageHeader';
-import { Button } from '../../../../components/Button/Button';
-import { GameTimeLabel } from '../../../../components/GameTimeLabel/GameTimeLabel';
+import {
+    Badge,
+    Button,
+    DefinitionList,
+    type DefinitionListItem,
+    PageHeader,
+    PageHeaderActions,
+    PageHeaderTitle,
+} from '@/atoms';
+import { GameTimeLabel } from '@/components/GameTimeLabel/GameTimeLabel';
+import { type BaseContent } from '@/domain/Base';
+import { IconContext, IconHammer, IconPeople } from '@/icons';
+import { useTileBaseRouteInfo } from '@/routes/bases';
 
 const DEFS: DefinitionListItem<BaseContent>[] = [
     {
@@ -53,6 +58,7 @@ export const TileBaseOverview: Component = () => {
     const base = createMemo(() => {
         const base: BaseContent = {
             id: 42,
+            cityId: 1,
             worldId: routeInfo().worldId,
             tileId: routeInfo().tileId,
             created: new Date(),

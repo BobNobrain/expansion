@@ -1,6 +1,6 @@
 import { createSignal, Show, type ParentComponent } from 'solid-js';
-import { UserFeed } from '../../../components/UserFeed/UserFeed';
-import { IconBack, IconContext, IconFlag, IconGalaxy, IconShip, IconUser } from '../../../icons';
+import { IconBack, IconContext, IconFlag, IconGalaxy, IconShip, IconUser } from '@/icons';
+import { UserFeed } from '@/views/UserFeed/UserFeed';
 import { TouchHeader, TouchHeaderButton, TouchHeaderTitle } from '../TouchHeader/TouchHeader';
 import { TouchLoginModal } from '../TouchLoginModal/TouchLoginModal';
 import { type TouchNavBarItem } from '../TouchNavBar/TouchNavBar';

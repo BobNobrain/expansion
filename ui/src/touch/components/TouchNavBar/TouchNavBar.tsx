@@ -1,7 +1,7 @@
 import { type Component, For } from 'solid-js';
-import { type Icon } from '../../../icons';
-import styles from './TouchNavBar.module.css';
 import { A } from '@solidjs/router';
+import { type Icon } from '@/icons';
+import styles from './TouchNavBar.module.css';
 
 export type TouchNavBarItem = {
     icon: Icon;

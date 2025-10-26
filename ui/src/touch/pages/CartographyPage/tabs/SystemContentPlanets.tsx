@@ -1,6 +1,9 @@
 import { createMemo, Show, type Component } from 'solid-js';
 import { useNavigate } from '@solidjs/router';
-import { type WorldOverview, type WorldClass } from '../../../../domain/WorldOverview';
+import { Button, DataTable, type DataTableColumn, InfoDisplay, SkeletonText } from '@/atoms';
+import { CelestialBodyTitle } from '@/components/CelestialBodyTitle/CelestialBodyTitle';
+import { OperationDisplay } from '@/components/OperationDisplay/OperationDisplay';
+import { type WorldOverview, type WorldClass } from '@/domain/WorldOverview';
 import {
     type Icon,
     IconFlag,
@@ -12,17 +15,11 @@ import {
     IconTile,
     IconPressure,
     IconTemperature,
-} from '../../../../icons';
-import { emulateLinkClick } from '../../../../lib/solid/emulateLinkClick';
-import { formatDegreesCelsius, formatScalar } from '../../../../lib/strings';
-import { getExploreRoute, useExploreRouteInfo, useExploreRouteObjectId } from '../../../../routes/explore';
-import { CelestialBodyTitle } from '../../../../components/CelestialBodyTitle/CelestialBodyTitle';
-import { DataTable, type DataTableColumn } from '../../../../components/DataTable';
-import { dfExploreSystem, dfSystems, dfWorldOverviewsBySystemId } from '../../../../store/datafront';
-import { Button } from '../../../../components/Button/Button';
-import { InfoDisplay } from '../../../../components/InfoDisplay/InfoDisplay';
-import { OperationDisplay } from '../../../../components/OperationDisplay/OperationDisplay';
-import { SkeletonText } from '../../../../components/Skeleton';
+} from '@/icons';
+import { emulateLinkClick } from '@/lib/solid/emulateLinkClick';
+import { formatDegreesCelsius, formatScalar } from '@/lib/strings';
+import { getExploreRoute, useExploreRouteInfo, useExploreRouteObjectId } from '@/routes/explore';
+import { dfExploreSystem, dfSystems, dfWorldOverviewsBySystemId } from '@/store/datafront';
 
 type BodyClass = WorldClass | 'moon';
 

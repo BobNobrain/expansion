@@ -1,5 +1,5 @@
-import { NumericLimits } from '../../../lib/math/numeric-limits';
-import { type UseDragResult, useDrag } from '../../../lib/solid/drag';
+import { NumericLimits } from '@/lib/math/numeric-limits';
+import { type UseDragResult, useDrag } from '@/lib/solid/drag';
 import { type WindowController } from '../controllers';
 import { type WindowPosition } from '../types';
 

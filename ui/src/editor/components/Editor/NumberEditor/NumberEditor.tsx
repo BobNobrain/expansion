@@ -1,7 +1,7 @@
 import { createSignal, type Component, untrack } from 'solid-js';
+import { NumberInputOld } from '@/atoms/NumberInputOld/NumberInput';
+import { type NumberSchema } from '@/lib/jsonschema';
 import { type EditorComponentProps } from '../types';
-import { type NumberSchema } from '../../../../lib/jsonschema';
-import { NumberInputOld } from '../../../../components/NumberInputOld/NumberInput';
 import { useController } from '../hooks';
 
 export type NumberEditorProps = EditorComponentProps<NumberSchema>;

@@ -1,5 +1,5 @@
 import { createContext, createEffect, createSignal, onCleanup, untrack, useContext } from 'solid-js';
-import type { Icon } from '../../../icons';
+import type { Icon } from '@/icons';
 
 export type PageContextRelatedItem = {
     title: string;

@@ -1,24 +1,31 @@
 import { createMemo, createSignal, Show, type Component } from 'solid-js';
-import { Badge } from '../../../../components/Badge/Badge';
-import { Banner } from '../../../../components/Banner/Banner';
-import { Button } from '../../../../components/Button/Button';
-import { CommodityIconWithLabel } from '../../../../components/CommodityIcon';
-import { Container } from '../../../../components/Container/Container';
-import { DataTable, type DataTableColumn } from '../../../../components/DataTable';
-import { DefinitionList, type DefinitionListItem } from '../../../../components/DefinitionList/DefinitionList';
-import { EquipmentSelectionList } from '../../../../components/EquipmentSelectionList/EquipmentSelectionList';
-import { PageHeader, PageHeaderTitle, PageHeaderIcon, PageHeaderActions } from '../../../../components/PageHeader';
-import { Text } from '../../../../components/Text/Text';
-import { TouchBottomSheet } from '../../../components/TouchBottomSheet/TouchBottomSheet';
-import { WorkforceCounts } from '../../../../components/WorkforceCounts/WorkforceCounts';
-import { Equipment } from '../../../../domain/Base';
-import { WorkforceData } from '../../../../domain/City';
-import { Commodity, ConstructionCost } from '../../../../domain/Commodity';
-import { IconConstruction, IconArea, IconFactory } from '../../../../icons';
-import { buildingsAsset, commoditiesAsset } from '../../../../lib/assetmanager';
-import { mapValues } from '../../../../lib/misc';
-import { useAsset } from '../../../../lib/solid/asset';
-import { type ModalRouteState } from '../../../../routes/modals';
+import {
+    Badge,
+    Banner,
+    Button,
+    Container,
+    DataTable,
+    type DataTableColumn,
+    DefinitionList,
+    type DefinitionListItem,
+    PageHeader,
+    PageHeaderTitle,
+    PageHeaderIcon,
+    PageHeaderActions,
+    Text,
+} from '@/atoms';
+import { CommodityIconWithLabel } from '@/components/CommodityIcon';
+import { EquipmentSelectionList } from '@/components/EquipmentSelectionList/EquipmentSelectionList';
+import { WorkforceCounts } from '@/components/WorkforceCounts/WorkforceCounts';
+import { Equipment } from '@/domain/Base';
+import { WorkforceData } from '@/domain/City';
+import { Commodity, ConstructionCost } from '@/domain/Commodity';
+import { IconConstruction, IconArea, IconFactory } from '@/icons';
+import { buildingsAsset, commoditiesAsset } from '@/lib/assetmanager';
+import { mapValues } from '@/lib/misc';
+import { useAsset } from '@/lib/solid/asset';
+import { type ModalRouteState } from '@/routes/modals';
+import { TouchBottomSheet } from '@/touch/components/TouchBottomSheet/TouchBottomSheet';
 
 type Props = {
     modal: ModalRouteState;

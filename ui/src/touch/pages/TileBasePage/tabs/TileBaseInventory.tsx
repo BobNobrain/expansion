@@ -1,9 +1,8 @@
 import { createMemo, createSignal, Show, type Component } from 'solid-js';
-import { Button } from '../../../../components/Button/Button';
-import { type InventoryEntry, InventoryTable, InventoryGrid } from '../../../../components/Inventory';
-import { PageHeader, PageHeaderActions, PageHeaderIcon, PageHeaderTitle } from '../../../../components/PageHeader';
-import { IconCalendar, IconContext, IconStorage, IconUnknown } from '../../../../icons';
-import { createConstantPredictable, createLinearPredictable } from '../../../../lib/predictables';
+import { Button, PageHeader, PageHeaderActions, PageHeaderIcon, PageHeaderTitle } from '@/atoms';
+import { type InventoryEntry, InventoryTable, InventoryGrid } from '@/components/Inventory';
+import { IconCalendar, IconContext, IconStorage, IconUnknown } from '@/icons';
+import { createConstantPredictable, createLinearPredictable } from '@/lib/predictables';
 
 const t0 = new Date();
 type DisplayMode = 'grid' | 'table';

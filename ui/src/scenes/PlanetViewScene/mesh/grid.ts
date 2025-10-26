@@ -1,5 +1,5 @@
-import { type World } from '../../../domain/World';
-import { MeshBuilder } from '../../../lib/3d/MeshBuilder';
+import { type World } from '@/domain/World';
+import { MeshBuilder } from '@/lib/3d/MeshBuilder';
 
 export function restorePlanetGrid({ grid }: World): MeshBuilder {
     const { coords, edges } = grid;

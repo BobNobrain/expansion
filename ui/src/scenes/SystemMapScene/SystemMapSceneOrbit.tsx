@@ -1,9 +1,9 @@
 import { createMemo, type Component } from 'solid-js';
 import * as T from 'three';
-import { useInScene } from '../../components/three/hooks/useInScene';
-import { Orbit } from '../../domain/Orbit';
-import { type RawVertex } from '../../lib/3d/types';
-import { Angle } from '../../lib/math/angle';
+import { Orbit } from '@/domain/Orbit';
+import { type RawVertex } from '@/lib/3d/types';
+import { Angle } from '@/lib/math/angle';
+import { useInScene } from '@/three/hooks/useInScene';
 
 export type SystemMapSceneOrbitProps = {
     orbit: Orbit;

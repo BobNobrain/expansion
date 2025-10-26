@@ -1,9 +1,9 @@
 import { type Component } from 'solid-js';
 import type * as T from 'three';
-import { DirectionalLight } from '../../components/three/DirectionalLight/DirectionalLight';
-import { createRef } from '../../lib/solid/ref';
-import { useAnimation } from '../../components/three/hooks/useAnimation';
-import { AmbientLight } from '../../components/three/AmbientLight/AmbientLight';
+import { createRef } from '@/lib/solid/ref';
+import { AmbientLight } from '@/three/AmbientLight/AmbientLight';
+import { DirectionalLight } from '@/three/DirectionalLight/DirectionalLight';
+import { useAnimation } from '@/three/hooks/useAnimation';
 
 const SUN_Y = 0.3;
 const SUN_ROTATION_PERIOD = 30000;

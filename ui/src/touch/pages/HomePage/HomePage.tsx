@@ -1,12 +1,9 @@
 import { For, type Component, type JSX } from 'solid-js';
 import { A } from '@solidjs/router';
-import { Button } from '../../../components/Button/Button';
-import { Island } from '../../../components/Island/Island';
-import { Text } from '../../../components/Text/Text';
-import { IconPlanet } from '../../../icons/planet';
-import { type SemanticColor } from '../../../lib/appearance';
-import { Container } from '../../../components/Container/Container';
-import { usePageContextBinding } from '../../components/TouchPage';
+import { Button, Container, Island, Text } from '@/atoms';
+import { IconPlanet } from '@/icons';
+import { type SemanticColor } from '@/lib/appearance';
+import { usePageContextBinding } from '@/touch/components/TouchPage';
 import styles from './HomePage.module.css';
 
 type FeedElement = {

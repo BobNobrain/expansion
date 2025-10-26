@@ -1,9 +1,9 @@
 import { type ParentComponent, createSignal, Show, For } from 'solid-js';
-import { A } from '@solidjs/router';
-import { Button } from '../../../../components/Button/Button';
-import { type Icon, IconCurtainExpand } from '../../../../icons';
-import styles from './TouchCurtain.module.css';
 import { Dynamic } from 'solid-js/web';
+import { A } from '@solidjs/router';
+import { Button } from '@/atoms';
+import { type Icon, IconCurtainExpand } from '@/icons';
+import styles from './TouchCurtain.module.css';
 
 export type TouchCurtainTab = {
     icon: Icon;

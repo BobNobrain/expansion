@@ -1,7 +1,7 @@
 import { createSignal, type Component } from 'solid-js';
 import { QueryClient, QueryClientProvider } from '@tanstack/solid-query';
 import { App } from '../../components/App/App';
-import { Container } from '../../components/Container/Container';
+import { Container } from '../../atoms/Container/Container';
 import { EditorMenu } from '../components/EditorMenu/EditorMenu';
 import { EditorPanel } from '../components/EditorPanel/EditorPanel';
 import { EditorTree } from '../components/EditorTree/EditorTree';

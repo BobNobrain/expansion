@@ -1,6 +1,5 @@
 import { createMemo, For, type Component } from 'solid-js';
-import { type PlanetViewSceneSettingsState, type RenderMode } from './settings';
-import { SceneControls, SceneControlsButton, SceneControlsRadioGroup } from '../../components/SceneControls';
+import { SceneControls, SceneControlsButton, SceneControlsRadioGroup } from '@/components/SceneControls';
 import {
     type Icon,
     IconCloud,
@@ -12,7 +11,8 @@ import {
     IconTileOutline,
     IconRadius,
     IconRocks,
-} from '../../icons';
+} from '@/icons';
+import { type PlanetViewSceneSettingsState, type RenderMode } from './settings';
 
 export type PVSSettingsProps = PlanetViewSceneSettingsState & {
     isFertilePlanet: boolean;

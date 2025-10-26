@@ -11,12 +11,12 @@ import {
     Vector3,
     type Object3D,
 } from 'three';
-import { SceneObject } from '../../components/three/SceneObject/SceneObject';
-import { type City } from '../../domain/City';
-import { World } from '../../domain/World';
-import type { MeshBuilder } from '../../lib/3d/MeshBuilder';
-import { getTilesOutline } from '../../lib/3d/utils';
-import { dfCitiesByWorldId } from '../../store/datafront';
+import { type City } from '@/domain/City';
+import { World } from '@/domain/World';
+import type { MeshBuilder } from '@/lib/3d/MeshBuilder';
+import { getTilesOutline } from '@/lib/3d/utils';
+import { dfCitiesByWorldId } from '@/store/datafront';
+import { SceneObject } from '@/three/SceneObject/SceneObject';
 
 export type PVSObjectsProps = {
     world: World | null;

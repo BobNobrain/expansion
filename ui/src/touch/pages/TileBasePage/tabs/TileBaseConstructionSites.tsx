@@ -1,10 +1,8 @@
 import { createMemo, For, type Component } from 'solid-js';
-import { Button } from '../../../../components/Button/Button';
-import { ConstructionSite } from '../../../../components/ConstructionSite/ConstructionSite';
-import { PageHeader, PageHeaderActions, PageHeaderIcon, PageHeaderTitle } from '../../../../components/PageHeader';
-import { type BaseConstructionSite } from '../../../../domain/Base';
-import { IconConstruction, IconHammer } from '../../../../icons';
-import { Container } from '../../../../components/Container/Container';
+import { Button, Container, PageHeader, PageHeaderActions, PageHeaderIcon, PageHeaderTitle } from '@/atoms';
+import { ConstructionSite } from '@/components/ConstructionSite/ConstructionSite';
+import { type BaseConstructionSite } from '@/domain/Base';
+import { IconConstruction, IconHammer } from '@/icons';
 
 export const TileBaseConstructionSites: Component = () => {
     const sites = createMemo(() => {

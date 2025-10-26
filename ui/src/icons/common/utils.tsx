@@ -1,5 +1,5 @@
 import { type Component, type JSX, createMemo } from 'solid-js';
-import { type SemanticColor } from '../../lib/appearance';
+import { type SemanticColor } from '@/lib/appearance';
 import styles from './icon.module.css';
 import colors from './colors.module.css';
 

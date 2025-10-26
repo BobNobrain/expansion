@@ -1,7 +1,7 @@
 import { createMemo, Show, type Component } from 'solid-js';
-import { World } from '../../domain/World';
-import { remap } from '../../lib/math/misc';
-import { dfWorlds } from '../../store/datafront';
+import { World } from '@/domain/World';
+import { remap } from '@/lib/math/misc';
+import { dfWorlds } from '@/store/datafront';
 import { PVSAtmosphere } from './PVSAtmosphere';
 import { PVSCamera } from './PVSCamera';
 import { PVSLights } from './PVSLights';

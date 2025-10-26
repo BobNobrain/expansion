@@ -1,12 +1,9 @@
 import { type Component, createMemo, Show } from 'solid-js';
-import { renderGameTimeSpeed } from '../../../domain/GameTime';
-import { useNow } from '../../../lib/solid/useNow';
-import { formatScalar } from '../../../lib/strings';
-import { CommodityIcon } from '../../CommodityIcon';
-import { Container } from '../../Container/Container';
-import { DataTable, type DataTableColumn } from '../../DataTable';
-import { InlineLoader } from '../../InlineLoader/InlineLoader';
-import { Text } from '../../Text/Text';
+import { Container, DataTable, type DataTableColumn, InlineLoader, Text } from '@/atoms';
+import { CommodityIcon } from '@/components/CommodityIcon';
+import { renderGameTimeSpeed } from '@/domain/GameTime';
+import { useNow } from '@/lib/solid/useNow';
+import { formatScalar } from '@/lib/strings';
 import type { InventoryEntryWithData, InventoryEntry } from '../types';
 import { enrichWithCommodityData, getDeltaColor } from '../utils';
 import styles from './InventoryTable.module.css';

@@ -1,6 +1,8 @@
 import { type Component, createMemo, createSignal, onCleanup, onMount } from 'solid-js';
-import { NumberInputOld } from '../../../../../components/NumberInputOld/NumberInput';
-import { MouseButton } from '../../../../../lib/mouse';
+import { NumberInputOld } from '@/atoms/NumberInputOld/NumberInput';
+import { registerInFormContext, createValidationState } from '@/atoms/Form';
+import { KeyCodes } from '@/lib/keyboard';
+import { MouseButton } from '@/lib/mouse';
 import { PhaseDiagramCanvas, type PhaseDiagramCanvasClickEvent, type PhaseDiagramGraph } from './PhaseDiagramCanvas';
 import {
     getPoint,
@@ -17,8 +19,6 @@ import {
     type PhaseDiagramPoint,
 } from './types';
 import styles from './PhaseDiagram.module.css';
-import { registerInFormContext, createValidationState } from '../../../../../components/Form';
-import { KeyCodes } from '../../../../../lib/keyboard';
 
 export type PhaseDiagramInputProps = {
     state: PhaseDiagramInternalState;

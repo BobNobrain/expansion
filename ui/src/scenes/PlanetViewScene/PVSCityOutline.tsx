@@ -1,11 +1,11 @@
 import { type Component, createMemo } from 'solid-js';
 import { BufferAttribute, BufferGeometry, LineBasicMaterial, LineLoop } from 'three';
-import { SceneObject } from '../../components/three/SceneObject/SceneObject';
-import { World } from '../../domain/World';
-import { City } from '../../domain/City';
-import { type MeshBuilder } from '../../lib/3d/MeshBuilder';
-import { getTilesOutline } from '../../lib/3d/utils';
-import { dfCitiesByWorldId } from '../../store/datafront';
+import { City } from '@/domain/City';
+import { World } from '@/domain/World';
+import { type MeshBuilder } from '@/lib/3d/MeshBuilder';
+import { getTilesOutline } from '@/lib/3d/utils';
+import { dfCitiesByWorldId } from '@/store/datafront';
+import { SceneObject } from '@/three/SceneObject/SceneObject';
 
 type Props = {
     world: World | null;

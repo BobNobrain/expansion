@@ -1,13 +1,20 @@
 import { type Component } from 'solid-js';
-import { Badge } from '../../../../components/Badge/Badge';
-import { Button } from '../../../../components/Button/Button';
-import { Container, Spacer } from '../../../../components/Container/Container';
-import { Group, GroupHeader } from '../../../../components/Group';
-import { PageHeader, PageHeaderActions, PageHeaderIcon, PageHeaderTitle } from '../../../../components/PageHeader';
-import { RecipeDisplay } from '../../../../components/RecipeDisplay/RecipeDisplay';
-import { Text } from '../../../../components/Text/Text';
-import { IconArea, IconCog, IconCross, IconFactory, IconHammer, IconPlus } from '../../../../icons';
-import { useModalRouteState } from '../../../../routes/modals';
+import {
+    Badge,
+    Button,
+    Container,
+    Group,
+    GroupHeader,
+    PageHeader,
+    PageHeaderActions,
+    PageHeaderIcon,
+    PageHeaderTitle,
+    Spacer,
+    Text,
+} from '@/atoms';
+import { RecipeDisplay } from '@/components/RecipeDisplay/RecipeDisplay';
+import { IconArea, IconCog, IconCross, IconFactory, IconHammer, IconPlus } from '@/icons';
+import { useModalRouteState } from '@/routes/modals';
 import { TileBaseConstructSheet } from './TileBaseConstructSheet';
 
 export const TileBaseProduction: Component = () => {

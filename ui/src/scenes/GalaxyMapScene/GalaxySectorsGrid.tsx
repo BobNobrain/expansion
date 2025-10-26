@@ -1,16 +1,16 @@
 import { createEffect, type Component, createMemo, For } from 'solid-js';
 import * as T from 'three';
-import { useSceneRenderer } from '../../components/three/context';
-import { type GalacticGrid, type GalacticGridSector } from '../../domain/GalacticOverview';
-import { Point2D } from '../../lib/math/2d';
-import { useEventListener } from '../../lib/solid/useEventListener';
-import { GridBuilder } from './GridBuilder';
-import { SceneObject } from '../../components/three/SceneObject/SceneObject';
-import { useAnimatedNumber } from '../../components/three/hooks/useAnimatedValue';
-import { useCanvasListener } from '../../components/three/hooks/useCanvasListener';
+import { type GalacticGrid, type GalacticGridSector } from '@/domain/GalacticOverview';
+import { Point2D } from '@/lib/math/2d';
+import { useEventListener } from '@/lib/solid/useEventListener';
+import { dfSysOverviewsBySectorId } from '@/store/datafront';
+import { GraphicsQuality, useDeviceSettings } from '@/store/settings';
+import { useAnimatedNumber } from '@/three/hooks/useAnimatedValue';
+import { useSceneRenderer } from '@/three/context';
+import { useCanvasListener } from '@/three/hooks/useCanvasListener';
+import { SceneObject } from '@/three/SceneObject/SceneObject';
 import { GalaxyStars } from './GalaxyStars';
-import { GraphicsQuality, useDeviceSettings } from '../../store/settings';
-import { dfSysOverviewsBySectorId } from '../../store/datafront';
+import { GridBuilder } from './GridBuilder';
 
 export type GalaxySectorsGridProps = {
     grid: GalacticGrid;

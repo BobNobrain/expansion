@@ -1,8 +1,8 @@
 import { For, type Component } from 'solid-js';
-import styles from './WindowManager.module.css';
+import { createBoundsTracker } from '@/lib/solid/BoundsTracker';
 import { type WindowManagerController, createWindowManagerController } from '../controllers';
-import { createBoundsTracker } from '../../../lib/solid/BoundsTracker';
 import { Window } from '../Window/Window';
+import styles from './WindowManager.module.css';
 
 export interface WindowManagerProps {
     mode?: 'static' | 'fixed';

@@ -1,16 +1,21 @@
 import { createMemo, Show, type Component } from 'solid-js';
 import { useNavigate } from '@solidjs/router';
-import { CelestialBodyTitle } from '../../../components/CelestialBodyTitle/CelestialBodyTitle';
-import { DataTable, type DataTableColumn } from '../../../components/DataTable';
-import { InlineLoader } from '../../../components/InlineLoader/InlineLoader';
-import { PageHeader, PageHeaderIcon, PageHeaderTitle } from '../../../components/PageHeader';
-import { SkeletonText } from '../../../components/Skeleton';
-import { type City } from '../../../domain/City';
-import { IconCity, IconFactory, IconFlag } from '../../../icons';
-import { emulateLinkClick } from '../../../lib/solid/emulateLinkClick';
-import { formatInteger } from '../../../lib/strings';
-import { getBasesRoute } from '../../../routes/bases';
-import { dfBasesByCompanyId, dfCities, useOwnCompanies } from '../../../store/datafront';
+import {
+    DataTable,
+    type DataTableColumn,
+    InlineLoader,
+    PageHeader,
+    PageHeaderIcon,
+    PageHeaderTitle,
+    SkeletonText,
+} from '@/atoms';
+import { CelestialBodyTitle } from '@/components/CelestialBodyTitle/CelestialBodyTitle';
+import { type City } from '@/domain/City';
+import { IconCity, IconFactory, IconFlag } from '@/icons';
+import { emulateLinkClick } from '@/lib/solid/emulateLinkClick';
+import { formatInteger } from '@/lib/strings';
+import { getBasesRoute } from '@/routes/bases';
+import { dfBasesByCompanyId, dfCities, useOwnCompanies } from '@/store/datafront';
 
 type BasesListRow = {
     id: number;

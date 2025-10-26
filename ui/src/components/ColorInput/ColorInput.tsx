@@ -1,7 +1,7 @@
 import { createMemo, type Component, Show } from 'solid-js';
-import { type RGBColor, Color } from '../../lib/color';
+import { registerInFormContext } from '@/atoms/Form';
+import { type RGBColor, Color } from '@/lib/color';
 import styles from './ColorInput.module.css';
-import { registerInFormContext } from '../Form';
 
 export type ColorInputProps = {
     value: Color;

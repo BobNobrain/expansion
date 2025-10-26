@@ -1,6 +1,6 @@
 import { type Component } from 'solid-js';
 import { Dynamic } from 'solid-js/web';
-import { type Icon } from '../../icons';
+import { type Icon } from '@/icons';
 import styles from './SceneControls.module.css';
 
 export type SceneControlsButtonProps = {

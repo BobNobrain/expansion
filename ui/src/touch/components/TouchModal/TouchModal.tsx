@@ -1,7 +1,7 @@
 import { type ParentComponent, Show, type JSX } from 'solid-js';
-import { Button } from '../../../components/Button/Button';
-import { IconCross } from '../../../icons';
-import { stopPropagation } from '../../../lib/misc';
+import { Button } from '@/atoms';
+import { IconCross } from '@/icons';
+import { stopPropagation } from '@/lib/misc';
 import styles from './TouchModal.module.css';
 
 export type TouchModalProps = {

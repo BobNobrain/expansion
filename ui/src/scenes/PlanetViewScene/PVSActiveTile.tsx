@@ -1,7 +1,7 @@
 import { type Component, createMemo } from 'solid-js';
 import { BufferGeometry, Float32BufferAttribute, Line, LineBasicMaterial } from 'three';
-import { useInScene } from '../../components/three/hooks/useInScene';
-import { type MeshBuilder } from '../../lib/3d/MeshBuilder';
+import { type MeshBuilder } from '@/lib/3d/MeshBuilder';
+import { useInScene } from '@/three/hooks/useInScene';
 import { scale } from './mesh/utils';
 
 export type PVSActiveTileProps = {

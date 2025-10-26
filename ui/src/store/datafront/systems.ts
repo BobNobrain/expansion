@@ -1,11 +1,11 @@
 import { mapValues } from 'lodash';
-import { type Orbit } from '../../domain/Orbit';
-import { type Star } from '../../domain/Star';
-import { type StarSystemContent } from '../../domain/StarSystem';
-import { ExplorationData } from '../../domain/misc';
-import { createDatafrontTable } from '../../lib/datafront/table';
-import { type SystemsTableRow } from '../../lib/net/types.generated';
-import { ws } from '../../lib/net/ws';
+import { type Orbit } from '@/domain/Orbit';
+import { type Star } from '@/domain/Star';
+import { type StarSystemContent } from '@/domain/StarSystem';
+import { ExplorationData } from '@/domain/misc';
+import { createDatafrontTable } from '@/lib/datafront/table';
+import { type SystemsTableRow } from '@/lib/net/types.generated';
+import { ws } from '@/lib/net/ws';
 import { updater, cleaner } from './misc';
 
 export const dfSystems = createDatafrontTable<SystemsTableRow, StarSystemContent>({

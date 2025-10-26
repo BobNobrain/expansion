@@ -1,8 +1,9 @@
 import { createEffect, untrack, type Component } from 'solid-js';
 import { Spherical, Vector3 } from 'three';
-import { PerspectiveCamera } from '../../components/three/PerspectiveCamera/PerspectiveCamera';
-import { useSceneRenderer } from '../../components/three/context';
-import { easeOut, useValueAnimator } from '../../components/three/hooks/useValueAnimator';
+import { type RawVertex } from '@/lib/3d/types';
+import { PerspectiveCamera } from '@/three/PerspectiveCamera/PerspectiveCamera';
+import { useSceneRenderer } from '@/three/context';
+import { easeOut, useValueAnimator } from '@/three/hooks/useValueAnimator';
 import {
     type CameraOrbit,
     createOrbitInertia,
@@ -11,8 +12,7 @@ import {
     interpolateCameraOrbits,
     useOrbitControls,
     useZoomControls,
-} from '../../components/three/TargetedCamera';
-import { type RawVertex } from '../../lib/3d/types';
+} from '@/three/TargetedCamera';
 
 export type PVSCameraProps = {
     selectedTileCoords: RawVertex | null;

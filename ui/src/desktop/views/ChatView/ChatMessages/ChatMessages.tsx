@@ -1,8 +1,8 @@
 import { For, type Component, onMount, Show } from 'solid-js';
 import throttle from 'lodash/throttle';
 import { type ChatData, useChats } from '../../../../store/chats';
-import { InlineLoader } from '../../../../components/InlineLoader/InlineLoader';
-import { Text } from '../../../../components/Text/Text';
+import { InlineLoader } from '../../../../atoms/InlineLoader/InlineLoader';
+import { Text } from '../../../../atoms/Text/Text';
 import styles from './ChatMessages.module.css';
 
 export type ChatMessagesProps = {

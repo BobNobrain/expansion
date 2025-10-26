@@ -12,10 +12,11 @@
         "skipDefaultLibCheck": true,
         "target": "ES2021",
         "outDir": "./out",
+        "paths": {
+            "@/*": ["./src/*"]
+        },
         "jsx": "preserve",
         "jsxImportSource": "solid-js"
     },
-    "include": [
-        "src"
-    ]
+    "include": ["src"]
 }

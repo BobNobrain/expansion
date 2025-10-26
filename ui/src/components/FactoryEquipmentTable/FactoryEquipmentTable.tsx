@@ -1,7 +1,7 @@
 import { type Component, createMemo } from 'solid-js';
-import type { Factory, FactoryEquipment } from '../../domain/Base';
-import { IconUnknown } from '../../icons';
-import { DataTable, type DataTableColumn } from '../DataTable';
+import { DataTable, type DataTableColumn } from '@/atoms';
+import type { Factory, FactoryEquipment } from '@/domain/Base';
+import { IconUnknown } from '@/icons';
 
 export type FactoryEquipmentTableProps = {
     factory: Factory;

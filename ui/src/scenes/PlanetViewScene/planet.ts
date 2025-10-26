@@ -1,10 +1,10 @@
 import { createMemo } from 'solid-js';
 import * as T from 'three';
-import { type World } from '../../domain/World';
-import { type MeshBuilder } from '../../lib/3d/MeshBuilder';
-import { type MaterialData } from '../../lib/3d/material';
-import { type RawFace } from '../../lib/3d/types';
-import { Color } from '../../lib/color';
+import { type World } from '@/domain/World';
+import { type MaterialData } from '@/lib/3d/material';
+import { type MeshBuilder } from '@/lib/3d/MeshBuilder';
+import { type RawFace } from '@/lib/3d/types';
+import { Color } from '@/lib/color';
 import { pickRenderer } from './colors';
 import { getInvertedMesh } from './mesh/invert';
 import { restorePlanetGrid } from './mesh/grid';

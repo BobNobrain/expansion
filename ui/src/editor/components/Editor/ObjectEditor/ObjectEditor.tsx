@@ -3,8 +3,8 @@ import { type EditorController, type EditorComponentProps } from '../types';
 import { getSchemaForPath, type Schema, type ObjectSchema } from '../../../../lib/jsonschema';
 import styles from './ObjectEditor.module.css';
 import { getSchemaType, isSimpleEditor } from '../utils';
-import { Form, FormField } from '../../../../components/Form';
-import { Button } from '../../../../components/Button/Button';
+import { Form, FormField } from '../../../../atoms/Form';
+import { Button } from '../../../../atoms/Button/Button';
 
 export type ObjectEditorProps = EditorComponentProps<ObjectSchema>;
 

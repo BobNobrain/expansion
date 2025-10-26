@@ -1,5 +1,5 @@
-import { MeshBuilder } from '../../../lib/3d/MeshBuilder';
-import { type RawVertex } from '../../../lib/3d/types';
+import { MeshBuilder } from '@/lib/3d/MeshBuilder';
+import { type RawVertex } from '@/lib/3d/types';
 import * as utils from './utils';
 
 export function getInvertedMesh(source: MeshBuilder): MeshBuilder {

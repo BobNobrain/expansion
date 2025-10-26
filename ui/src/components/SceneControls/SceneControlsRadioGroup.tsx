@@ -1,7 +1,7 @@
 import { createSignal, type ParentComponent } from 'solid-js';
-import styles from './SceneControls.module.css';
-import { type Icon } from '../../icons';
+import { type Icon } from '@/icons';
 import { SceneControlsButton } from './SceneControlsButton';
+import styles from './SceneControls.module.css';
 
 export type SceneControlsRadioGroupProps = {
     triggerIcon: Icon;

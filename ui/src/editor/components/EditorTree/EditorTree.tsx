@@ -1,5 +1,5 @@
 import { For, Show, createSignal, type Component } from 'solid-js';
-import { Button } from '../../../components/Button/Button';
+import { Button } from '../../../atoms/Button/Button';
 import type { FileTreeEntry } from '../../../lib/net/editorapi.generated';
 import { useEditorTree, useFileDuplicator } from '../../../store/editor';
 import styles from './EditorTree.module.css';

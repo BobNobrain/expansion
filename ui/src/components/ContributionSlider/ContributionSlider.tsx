@@ -1,10 +1,9 @@
 import { createMemo, Show, type Component } from 'solid-js';
-import { Commodity } from '../../domain/Commodity';
-import { commoditiesAsset } from '../../lib/assetmanager';
-import { useAsset } from '../../lib/solid/asset';
-import { CommodityIconWithLabel } from '../CommodityIcon';
-import { HBar, HBarRow, HBarSlider } from '../HBar';
-import { Text } from '../Text/Text';
+import { HBar, HBarRow, HBarSlider, Text } from '@/atoms';
+import { CommodityIconWithLabel } from '@/components/CommodityIcon';
+import { Commodity } from '@/domain/Commodity';
+import { commoditiesAsset } from '@/lib/assetmanager';
+import { useAsset } from '@/lib/solid/asset';
 import styles from './ContributionSlider.module.css';
 
 export type ContributionSliderProps = {

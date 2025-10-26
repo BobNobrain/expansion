@@ -1,4 +1,4 @@
-import { type RawVertex } from '../../../lib/3d/types';
+import { type RawVertex } from '@/lib/3d/types';
 
 export function calcCenter(vs: RawVertex[]): RawVertex {
     let x = 0;

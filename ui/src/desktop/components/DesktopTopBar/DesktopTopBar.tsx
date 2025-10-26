@@ -1,6 +1,6 @@
 import { type Component } from 'solid-js';
 import { useAuthenticated } from '../../../components/LogInGuard';
-import { Text } from '../../../components/Text/Text';
+import { Text } from '../../../atoms/Text/Text';
 import { TopBar } from '../../../components/TopBar/TopBar';
 import { dfOnline } from '../../../store/datafront';
 // import { useWindowManager } from '../../window/context';

@@ -1,13 +1,13 @@
 import { type Component } from 'solid-js';
 import { HashRouter, Route } from '@solidjs/router';
-import { App } from '../../../components/App/App';
-import { BaseProductionGraphPage } from '../../pages/BaseProductionGraphPage/BaseProductionGraphPage';
-import { BasesPage } from '../../pages/BasesPage/BasesPage';
-import { CartographyPage } from '../../pages/CartographyPage/CartographyPage';
-import { HomePage } from '../../pages/HomePage/HomePage';
-import { NotFoundPage } from '../../pages/NotFoundPage/NotFoundPage';
-import { TileBasePage } from '../../pages/TileBasePage/TileBasePage';
-import { WorldBasesPage } from '../../pages/WorldBasesPage/WorldBasesPage';
+import { App } from '@/components/App/App';
+import { BaseProductionGraphPage } from '@/touch/pages/BaseProductionGraphPage/BaseProductionGraphPage';
+import { BasesPage } from '@/touch/pages/BasesPage/BasesPage';
+import { CartographyPage } from '@/touch/pages/CartographyPage/CartographyPage';
+import { HomePage } from '@/touch/pages/HomePage/HomePage';
+import { NotFoundPage } from '@/touch/pages/NotFoundPage/NotFoundPage';
+import { TileBasePage } from '@/touch/pages/TileBasePage/TileBasePage';
+import { WorldBasesPage } from '@/touch/pages/WorldBasesPage/WorldBasesPage';
 import { TouchPageWrapper } from '../TouchPage';
 import './touch.css';
 

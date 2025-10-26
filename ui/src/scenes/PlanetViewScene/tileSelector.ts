@@ -1,8 +1,8 @@
-import { type Mesh, Raycaster, Vector2 } from 'three';
-import { useSceneRenderer } from '../../components/three/context';
-import { type TapGestureData } from '../../lib/gestures/types';
 import { onCleanup, onMount } from 'solid-js';
-import { useEventListener } from '../../lib/solid/useEventListener';
+import { type Mesh, Raycaster, Vector2 } from 'three';
+import { type TapGestureData } from '@/lib/gestures/types';
+import { useEventListener } from '@/lib/solid/useEventListener';
+import { useSceneRenderer } from '@/three/context';
 
 export type UseTileSelectorOptions = {
     onTileClick?: (index: number | undefined) => void;

@@ -1,7 +1,7 @@
-import { type CurrentUserData } from '../../domain/User';
-import { createDatafrontSingleton } from '../../lib/datafront/singleton';
-import { type MeSingletonValue } from '../../lib/net/types.generated';
-import { ws } from '../../lib/net/ws';
+import { type CurrentUserData } from '@/domain/User';
+import { createDatafrontSingleton } from '@/lib/datafront/singleton';
+import { type MeSingletonValue } from '@/lib/net/types.generated';
+import { ws } from '@/lib/net/ws';
 import { dfCompaniesByOwnerId } from './companies';
 import { updater } from './misc';
 

@@ -1,8 +1,8 @@
 import { type Component, createMemo, For } from 'solid-js';
 import * as T from 'three';
-import { SceneObject } from '../../components/three/SceneObject/SceneObject';
-import { type RawVertex } from '../../lib/3d/types';
-import { Angle } from '../../lib/math/angle';
+import { type RawVertex } from '@/lib/3d/types';
+import { Angle } from '@/lib/math/angle';
+import { SceneObject } from '@/three/SceneObject/SceneObject';
 
 export type SystemMapSceneGridProps = {
     outsideBorder: number;

@@ -1,9 +1,9 @@
-import { ExplorationData } from '../../domain/misc';
-import { type World } from '../../domain/World';
-import { WorldClass } from '../../domain/WorldOverview';
-import { createDatafrontTable } from '../../lib/datafront/table';
-import { type WorldsTableRow } from '../../lib/net/types.generated';
-import { ws } from '../../lib/net/ws';
+import { ExplorationData } from '@/domain/misc';
+import { type World } from '@/domain/World';
+import { WorldClass } from '@/domain/WorldOverview';
+import { createDatafrontTable } from '@/lib/datafront/table';
+import { type WorldsTableRow } from '@/lib/net/types.generated';
+import { ws } from '@/lib/net/ws';
 import { updater, cleaner } from './misc';
 
 export const dfWorlds = createDatafrontTable<WorldsTableRow, World>({

@@ -1,11 +1,11 @@
 import { type Component, createMemo } from 'solid-js';
-import { DataTable, type DataTableColumn } from '../../../../components/DataTable';
-import { useExploreRouteObjectId } from '../../../../routes/explore';
-import { type Star } from '../../../../domain/Star';
-import { CelestialBodyTitle } from '../../../../components/CelestialBodyTitle/CelestialBodyTitle';
-import { IconRadius, IconStar, IconTemperature, IconUnknown } from '../../../../icons';
-import { formatScalar } from '../../../../lib/strings';
-import { dfSystems } from '../../../../store/datafront';
+import { DataTable, type DataTableColumn } from '@/atoms';
+import { CelestialBodyTitle } from '@/components/CelestialBodyTitle/CelestialBodyTitle';
+import { type Star } from '@/domain/Star';
+import { IconRadius, IconStar, IconTemperature, IconUnknown } from '@/icons';
+import { formatScalar } from '@/lib/strings';
+import { useExploreRouteObjectId } from '@/routes/explore';
+import { dfSystems } from '@/store/datafront';
 
 const COLUMNS: DataTableColumn<Star>[] = [
     {

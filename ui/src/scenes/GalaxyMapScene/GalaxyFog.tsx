@@ -1,8 +1,8 @@
 import { createEffect, type Component, createSignal, createMemo } from 'solid-js';
 import { Mesh, PlaneGeometry, type Texture, TextureLoader } from 'three';
-import { SceneObject } from '../../components/three/SceneObject/SceneObject';
-import { useSceneRenderer } from '../../components/three/context';
-import { GraphicsQuality, useDeviceSettings } from '../../store/settings';
+import { GraphicsQuality, useDeviceSettings } from '@/store/settings';
+import { SceneObject } from '@/three/SceneObject/SceneObject';
+import { useSceneRenderer } from '@/three/context';
 import { GalaxyFogMaterial, type NoiseLayer } from './GalaxyFogMaterial';
 
 export type GalaxyFogProps = {

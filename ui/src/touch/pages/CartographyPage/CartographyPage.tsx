@@ -1,25 +1,25 @@
 import { type Component, createMemo, Match, onMount, Show, Switch } from 'solid-js';
 import { useNavigate } from '@solidjs/router';
-import { SceneRenderer } from '../../../components/three/SceneRenderer/SceneRenderer';
-import { SectorContentTable } from '../../../components/SectorContentTable/SectorContentTable';
-import { WorldInfo } from '../../../components/WorldInfo/WorldInfo';
-import { WorldPopulation } from '../../../components/WorldPopulation';
-import { WorldResources } from '../../../components/WorldResources/WorldResources';
-import { WorldTileInfo } from '../../../components/WorldTileInfo';
-import { IconAsteroid, IconFlag, IconPeople, IconPlanet, IconRocks, IconSpaceStation, IconStar } from '../../../icons';
+import { IconAsteroid, IconFlag, IconPeople, IconPlanet, IconRocks, IconSpaceStation, IconStar } from '@/icons';
 import {
     getExploreRoute,
     WorldContentTab,
     SystemContentTab,
     useExploreRouteInfo,
     getUpperRoute,
-} from '../../../routes/explore';
-import { PlanetViewScene } from '../../../scenes/PlanetViewScene/PlanetViewScene';
-import { SystemMapScene } from '../../../scenes/SystemMapScene/SystemMapScene';
-import { GalaxyMapScene } from '../../../scenes/GalaxyMapScene/GalaxyMapScene';
-import { TouchContentDouble } from '../../components/TouchContentDouble/TouchContentDouble';
-import { type TouchCurtainTab } from '../../components/TouchContentDouble/TouchCurtain/TouchCurtain';
-import { usePageContextBinding } from '../../components/TouchPage';
+} from '@/routes/explore';
+import { PlanetViewScene } from '@/scenes/PlanetViewScene/PlanetViewScene';
+import { SystemMapScene } from '@/scenes/SystemMapScene/SystemMapScene';
+import { GalaxyMapScene } from '@/scenes/GalaxyMapScene/GalaxyMapScene';
+import { SceneRenderer } from '@/three/SceneRenderer/SceneRenderer';
+import { TouchContentDouble } from '@/touch/components/TouchContentDouble/TouchContentDouble';
+import { type TouchCurtainTab } from '@/touch/components/TouchContentDouble/TouchCurtain/TouchCurtain';
+import { usePageContextBinding } from '@/touch/components/TouchPage';
+import { SectorContentTable } from '@/views/SectorContentTable/SectorContentTable';
+import { WorldInfo } from '@/views/WorldInfo/WorldInfo';
+import { WorldPopulation } from '@/views/WorldPopulation';
+import { WorldResources } from '@/views/WorldResources/WorldResources';
+import { WorldTileInfo } from '@/views/WorldTileInfo';
 import { SystemContentPlanets } from './tabs/SystemContentPlanets';
 import { SystemContentStars } from './tabs/SystemContentStars';
 

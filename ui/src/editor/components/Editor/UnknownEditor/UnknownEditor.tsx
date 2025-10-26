@@ -1,6 +1,6 @@
 import { createSignal, type Component, onCleanup, untrack } from 'solid-js';
 import { type StringSchema } from '../../../../lib/jsonschema';
-import { registerInFormContext, createValidationState } from '../../../../components/Form';
+import { registerInFormContext, createValidationState } from '../../../../atoms/Form';
 import { type EditorComponentProps } from '../types';
 import styles from './UnknownEditor.module.css';
 

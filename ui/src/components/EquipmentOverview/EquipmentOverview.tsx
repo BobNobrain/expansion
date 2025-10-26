@@ -1,6 +1,7 @@
 import { createMemo, createSignal, For, Show, type Component } from 'solid-js';
 import { Dynamic } from 'solid-js/web';
-import { type WorkforceType } from '../../domain/City';
+import { Badge, Button, NumberInput, Text } from '@/atoms';
+import { type WorkforceType } from '@/domain/City';
 import {
     type Icon,
     IconArea,
@@ -22,15 +23,11 @@ import {
     IconWorkerChevron,
     IconWrenchCog,
     IconWrenchCogChevron,
-} from '../../icons';
-import { type SemanticColor } from '../../lib/appearance';
-import { Badge } from '../Badge/Badge';
-import { Button } from '../Button/Button';
+} from '@/icons';
+import { type SemanticColor } from '@/lib/appearance';
+import { stopPropagation } from '@/lib/misc';
 import { CommodityIconWithLabel } from '../CommodityIcon';
-import { NumberInput } from '../NumberInput/NumberInput';
-import { Text } from '../Text/Text';
 import styles from './EquipmentOverview.module.css';
-import { stopPropagation } from '../../lib/misc';
 
 export type EquipmentRequirementStatus = 'none' | 'bad' | 'ok' | 'good';
 

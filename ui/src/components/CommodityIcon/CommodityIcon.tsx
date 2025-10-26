@@ -9,9 +9,9 @@ import {
     IconLeaf,
     IconRocks,
     IconUnknown,
-} from '../../icons';
-import { commoditiesAsset } from '../../lib/assetmanager';
-import { useAsset } from '../../lib/solid/asset';
+} from '@/icons';
+import { commoditiesAsset } from '@/lib/assetmanager';
+import { useAsset } from '@/lib/solid/asset';
 import styles from './CommodityIcon.module.css';
 
 export type CommodityIconProps = {

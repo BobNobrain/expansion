@@ -1,8 +1,8 @@
 import { type Component, createMemo, createSignal } from 'solid-js';
-import { GameTime, renderGameTimeRelative } from '../../domain/GameTime';
-import { useNow } from '../../lib/solid/useNow';
-import { Text, type TextProps } from '../Text/Text';
-import { renderRealTime, renderRealTimeRelative } from '../../lib/time';
+import { Text, type TextProps } from '@/atoms';
+import { GameTime, renderGameTimeRelative } from '@/domain/GameTime';
+import { useNow } from '@/lib/solid/useNow';
+import { renderRealTime, renderRealTimeRelative } from '@/lib/time';
 
 export type GameTimeLabelMode = 'gameAbsolute' | 'gameRelative' | 'realAbsolute' | 'realRelative';
 

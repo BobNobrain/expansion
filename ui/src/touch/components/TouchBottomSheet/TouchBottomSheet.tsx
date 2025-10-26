@@ -1,6 +1,6 @@
 import { type JSX, Show, type ParentComponent, createEffect } from 'solid-js';
-import { stopPropagation } from '../../../lib/misc';
-import { useDebouncedScrollHandler } from '../../../lib/solid/scroll';
+import { stopPropagation } from '@/lib/misc';
+import { useDebouncedScrollHandler } from '@/lib/solid/scroll';
 import styles from './TouchBottomSheet.module.css';
 
 export type TouchBottomSheetProps = {

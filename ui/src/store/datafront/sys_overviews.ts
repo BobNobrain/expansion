@@ -1,11 +1,11 @@
-import { type StarSystemOverview } from '../../domain/StarSystem';
-import { createDatafrontTable } from '../../lib/datafront/table';
+import { type StarSystemOverview } from '@/domain/StarSystem';
+import { createDatafrontTable } from '@/lib/datafront/table';
 import {
     type SysOverviewsQueryByCoords,
     type SysOverviewsQueryBySectorID,
     type SysOverviewsTableRow,
-} from '../../lib/net/types.generated';
-import { ws } from '../../lib/net/ws';
+} from '@/lib/net/types.generated';
+import { ws } from '@/lib/net/ws';
 import { updater, cleaner } from './misc';
 
 export const dfSysOverviews = createDatafrontTable<SysOverviewsTableRow, StarSystemOverview>({

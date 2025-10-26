@@ -1,4 +1,4 @@
-import { createDatafrontAction } from '../../lib/datafront/action';
+import { createDatafrontAction } from '@/lib/datafront/action';
 import {
     ActionExploreSystem,
     ActionExploreWorld,
@@ -8,8 +8,8 @@ import {
     type ExploreSystemPayload,
     type FoundCityPayload,
     type CreateBasePayload,
-} from '../../lib/net/types.generated';
-import { ws } from '../../lib/net/ws';
+} from '@/lib/net/types.generated';
+import { ws } from '@/lib/net/ws';
 
 export const dfExploreSystem = createDatafrontAction<ExploreSystemPayload>({ name: ActionExploreSystem, ws });
 export const dfExploreWorld = createDatafrontAction<ExploreWorldPayload>({ name: ActionExploreWorld, ws });

@@ -1,7 +1,7 @@
-import { type User } from '../../domain/User';
-import { createDatafrontTable } from '../../lib/datafront/table';
-import { type UsersTableRow } from '../../lib/net/types.generated';
-import { ws } from '../../lib/net/ws';
+import { type User } from '@/domain/User';
+import { createDatafrontTable } from '@/lib/datafront/table';
+import { type UsersTableRow } from '@/lib/net/types.generated';
+import { ws } from '@/lib/net/ws';
 import { updater, cleaner } from './misc';
 
 export const dfUsers = createDatafrontTable<UsersTableRow, User>({

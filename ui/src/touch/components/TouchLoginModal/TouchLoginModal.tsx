@@ -1,8 +1,8 @@
 import { Show, type Component } from 'solid-js';
-import { InlineLoader } from '../../../components/InlineLoader/InlineLoader';
-import { LogInForm } from '../../../components/LogInGuard/LogInForm/LogInForm';
-import { ws } from '../../../lib/net/ws';
-import { useAuth } from '../../../store/auth';
+import { InlineLoader } from '@/atoms';
+import { LogInForm } from '@/components/LogInGuard/LogInForm/LogInForm';
+import { ws } from '@/lib/net/ws';
+import { useAuth } from '@/store/auth';
 import { TouchModal } from '../TouchModal';
 
 export const TouchLoginModal: Component = () => {

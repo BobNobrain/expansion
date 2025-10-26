@@ -1,8 +1,8 @@
 import { createSignal } from 'solid-js';
-import { toDatafrontError } from '../lib/datafront/error';
-import { type DatafrontError } from '../lib/datafront/types';
-import * as api from '../lib/net/api';
-import { ws } from '../lib/net/ws';
+import { toDatafrontError } from '@/lib/datafront/error';
+import { type DatafrontError } from '@/lib/datafront/types';
+import * as api from '@/lib/net/api';
+import { ws } from '@/lib/net/ws';
 
 export type UseAuthResult = {
     login: (payload: api.LoginRequest) => void;

@@ -1,12 +1,12 @@
 import { type Component, createMemo, createSignal, For, Show } from 'solid-js';
-import { CommodityIcon } from '../../CommodityIcon';
+import { Text } from '@/atoms';
+import { CommodityIcon } from '@/components/CommodityIcon';
+import { renderGameTimeSpeed } from '@/domain/GameTime';
+import { useNow } from '@/lib/solid/useNow';
+import { formatScalar } from '@/lib/strings';
 import { type InventoryEntryWithData, type InventoryEntry } from '../types';
 import { enrichWithCommodityData, getDeltaColor } from '../utils';
 import styles from './InventoryGrid.module.css';
-import { useNow } from '../../../lib/solid/useNow';
-import { Text } from '../../Text/Text';
-import { renderGameTimeSpeed } from '../../../domain/GameTime';
-import { formatScalar } from '../../../lib/strings';
 
 export type InventoryGridProps = {
     loading?: boolean;

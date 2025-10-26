@@ -1,14 +1,13 @@
 import { createMemo, type Component } from 'solid-js';
-import { type TabHeader, TabsList } from '../../../components/TabsList/TabsList';
-import { TabContent } from '../../../components/TabContent/TabContent';
-import { IconFactory, IconFence, IconPeople, IconStorage } from '../../../icons';
-import { useTileBaseRouteInfo, getBasesRoute, TileBaseTab } from '../../../routes/bases';
+import { TabContent, type TabHeader, TabsList } from '@/atoms';
+import { IconFactory, IconFence, IconPeople, IconStorage } from '@/icons';
+import { useTileBaseRouteInfo, getBasesRoute, TileBaseTab } from '@/routes/bases';
+import { TouchContentSingle } from '@/touch/components/TouchContentSingle/TouchContentSingle';
+import { useBasesPageContextBinding } from '../WorldBasesPage/binding';
 import { TileBaseProduction } from './tabs/TileBaseProduction';
 import { TileBaseInventory } from './tabs/TileBaseInventory';
 import { TileBaseOverview } from './tabs/TileBaseOverview';
-import { TouchContentSingle } from '../../components/TouchContentSingle/TouchContentSingle';
 import { TileBaseConstructionSites } from './tabs/TileBaseConstructionSites';
-import { useBasesPageContextBinding } from '../WorldBasesPage/binding';
 
 export const TileBasePage: Component = () => {
     const routeInfo = useTileBaseRouteInfo();

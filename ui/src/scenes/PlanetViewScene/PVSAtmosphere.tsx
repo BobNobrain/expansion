@@ -1,5 +1,5 @@
 import { type Component } from 'solid-js';
-import { ScreenspaceShader, u } from '../../components/three/ScreenspaceShader';
+import { ScreenspaceShader, u } from '@/three/ScreenspaceShader';
 import fragmentShader from './atmosphere.glsl';
 
 export type PVSAtmosphereProps = {

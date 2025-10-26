@@ -1,14 +1,14 @@
 import { createMemo, For, Show, type Component } from 'solid-js';
-import { type Building, type Equipment } from '../../domain/Base';
-import { buildingsAsset } from '../../lib/assetmanager';
-import { mapValues } from '../../lib/misc';
-import { useAsset } from '../../lib/solid/asset';
+import { Group } from '@/atoms';
+import { type Building, type Equipment } from '@/domain/Base';
+import { buildingsAsset } from '@/lib/assetmanager';
+import { mapValues } from '@/lib/misc';
+import { useAsset } from '@/lib/solid/asset';
 import {
     EquipmentOverview,
     type EquipmentRequirement,
     type EquipmentRequirementStatus,
 } from '../EquipmentOverview/EquipmentOverview';
-import { Group } from '../Group';
 import styles from './EquipmentSelectionList.module.css';
 
 export type EquipmentSelectionListProps = {

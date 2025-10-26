@@ -1,6 +1,6 @@
-import { GalacticCoords } from '../../domain/GalacticCoords';
-import { type GalacticGrid, type GalacticGridSector } from '../../domain/GalacticOverview';
-import { type RawVertex } from '../../lib/3d/types';
+import { GalacticCoords } from '@/domain/GalacticCoords';
+import { type GalacticGrid, type GalacticGridSector } from '@/domain/GalacticOverview';
+import { type RawVertex } from '@/lib/3d/types';
 import { FULL_CIRCLE } from './constants';
 
 function captureGridTheta(thetas: number[], targetTheta: number): [number, number] {

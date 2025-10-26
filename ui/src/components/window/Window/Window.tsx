@@ -1,10 +1,10 @@
 import { type ParentProps, type Component, type JSX, createMemo, Show } from 'solid-js';
+import { Button } from '@/atoms';
+import { useDrag } from '@/lib/solid/drag';
 import { type WindowController } from '../controllers';
-import styles from './Window.module.css';
-import { useDrag } from '../../../lib/solid/drag';
-import { Button } from '../../Button/Button';
 import { WindowState } from '../types';
 import { useWindowResizers } from './resizeDrags';
+import styles from './Window.module.css';
 
 export interface WindowProps extends ParentProps {
     controller: WindowController;

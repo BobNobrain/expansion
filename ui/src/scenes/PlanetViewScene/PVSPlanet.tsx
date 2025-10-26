@@ -1,7 +1,7 @@
 import { type Component, createMemo } from 'solid-js';
 import * as T from 'three';
-import { SceneObject } from '../../components/three/SceneObject/SceneObject';
-import { type MeshBuilder } from '../../lib/3d/MeshBuilder';
+import { type MeshBuilder } from '@/lib/3d/MeshBuilder';
+import { SceneObject } from '@/three/SceneObject/SceneObject';
 import { useTileSelector } from './tileSelector';
 import { PVSActiveTile } from './PVSActiveTile';
 import { PVSTileBorders } from './PVSTileBorders';

@@ -1,7 +1,7 @@
-import { GalacticGrid, type GalacticOverview } from '../../domain/GalacticOverview';
-import { createDatafrontSingleton } from '../../lib/datafront/singleton';
-import { type DFGalaxyValue } from '../../lib/net/types.generated';
-import { ws } from '../../lib/net/ws';
+import { GalacticGrid, type GalacticOverview } from '@/domain/GalacticOverview';
+import { createDatafrontSingleton } from '@/lib/datafront/singleton';
+import { type DFGalaxyValue } from '@/lib/net/types.generated';
+import { ws } from '@/lib/net/ws';
 import { updater } from './misc';
 
 export const dfGalaxy = createDatafrontSingleton<DFGalaxyValue, GalacticOverview>({

@@ -1,7 +1,7 @@
 import { type Component } from 'solid-js';
+import { ws } from '@/lib/net/ws';
+import { useAuth } from '@/store/auth';
 import styles from './TouchOfflineIndicator.module.css';
-import { useAuth } from '../../../store/auth';
-import { ws } from '../../../lib/net/ws';
 
 export const TouchOfflineIndicator: Component = () => {
     const { isLoggedIn } = useAuth();

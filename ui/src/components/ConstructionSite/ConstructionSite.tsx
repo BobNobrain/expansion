@@ -1,12 +1,8 @@
 import { createMemo, createSignal, For, type Component } from 'solid-js';
-import { type BaseConstructionSite } from '../../domain/Base';
-import { IconArea, IconHammer, IconPlus } from '../../icons';
-import { Badge } from '../Badge/Badge';
-import { Button } from '../Button/Button';
-import { Container, Spacer } from '../Container/Container';
+import { Badge, Button, Container, Group, GroupHeader, Spacer, Text } from '@/atoms';
+import { type BaseConstructionSite } from '@/domain/Base';
+import { IconArea, IconHammer, IconPlus } from '@/icons';
 import { ContributionSlider } from '../ContributionSlider/ContributionSlider';
-import { Group, GroupHeader } from '../Group';
-import { Text } from '../Text/Text';
 
 export type ConstructionSiteProps = {
     site: BaseConstructionSite;

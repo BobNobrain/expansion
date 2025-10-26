@@ -1,8 +1,8 @@
 import { type ParentComponent, Show, createSignal, onMount } from 'solid-js';
-import * as api from '../../lib/net/api';
-import { ws } from '../../lib/net/ws';
-import { LogInForm } from './LogInForm/LogInForm';
+import * as api from '@/lib/net/api';
+import { ws } from '@/lib/net/ws';
 import { AuthenticatedContext, type AuthenticatedData } from './context';
+import { LogInForm } from './LogInForm/LogInForm';
 import { SplashScreen } from './SplashScreen/SplashScreen';
 
 export const LogInGuard: ParentComponent = (props) => {

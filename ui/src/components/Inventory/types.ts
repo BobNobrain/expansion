@@ -1,4 +1,4 @@
-import type { Predictable } from '../../lib/predictables';
+import type { Predictable } from '@/lib/predictables';
 
 export type InventoryEntry = {
     commodity: string;

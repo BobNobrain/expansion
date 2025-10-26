@@ -1,7 +1,7 @@
 import { Show, type Component } from 'solid-js';
 import styles from './EditorPanel.module.css';
-import { Button } from '../../../components/Button/Button';
-import { FormContext, type FormFieldController } from '../../../components/Form';
+import { Button } from '../../../atoms/Button/Button';
+import { FormContext, type FormFieldController } from '../../../atoms/Form';
 import { type SchemaFile, type ObjectWithSchema } from '../../../lib/jsonschema/types';
 import { useFileContent, useFileSaver } from '../../../store/editor';
 import { FileEditor } from '../FileEditor/FileEditor';

@@ -1,9 +1,9 @@
-import { type City, WORKFORCE_TYPES, type WorkforceType } from '../../domain/City';
-import { World } from '../../domain/World';
-import { createDatafrontTable } from '../../lib/datafront/table';
-import type { CitiesTableRow, CitiesQueryByWorldID } from '../../lib/net/types.generated';
-import { ws } from '../../lib/net/ws';
-import { type Predictable, createConstantPredictable } from '../../lib/predictables';
+import { type City, WORKFORCE_TYPES, type WorkforceType } from '@/domain/City';
+import { World } from '@/domain/World';
+import { createDatafrontTable } from '@/lib/datafront/table';
+import type { CitiesTableRow, CitiesQueryByWorldID } from '@/lib/net/types.generated';
+import { ws } from '@/lib/net/ws';
+import { type Predictable, createConstantPredictable } from '@/lib/predictables';
 import { updater, cleaner, parsePredictable } from './misc';
 
 export const dfCities = createDatafrontTable<CitiesTableRow, City>({

@@ -1,7 +1,7 @@
-import { WorldClass, type WorldOverview } from '../../domain/WorldOverview';
-import { createDatafrontTable } from '../../lib/datafront/table';
-import { type WorldOverviewsQueryBySystemID, type WorldOverviewsTableRow } from '../../lib/net/types.generated';
-import { ws } from '../../lib/net/ws';
+import { WorldClass, type WorldOverview } from '@/domain/WorldOverview';
+import { createDatafrontTable } from '@/lib/datafront/table';
+import { type WorldOverviewsQueryBySystemID, type WorldOverviewsTableRow } from '@/lib/net/types.generated';
+import { ws } from '@/lib/net/ws';
 import { updater, cleaner } from './misc';
 
 export const dfWorldOverviews = createDatafrontTable<WorldOverviewsTableRow, WorldOverview>({

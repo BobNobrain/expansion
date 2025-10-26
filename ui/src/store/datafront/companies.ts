@@ -1,11 +1,11 @@
-import { type Company } from '../../domain/Company';
-import { createDatafrontTable } from '../../lib/datafront/table';
+import { type Company } from '@/domain/Company';
+import { createDatafrontTable } from '@/lib/datafront/table';
 import {
     CompaniesQueryTypeByOwner,
     type CompaniesQueryByOwner,
     type CompaniesTableRow,
-} from '../../lib/net/types.generated';
-import { ws } from '../../lib/net/ws';
+} from '@/lib/net/types.generated';
+import { ws } from '@/lib/net/ws';
 import { updater, cleaner } from './misc';
 
 export const dfCompanies = createDatafrontTable<CompaniesTableRow, Company>({

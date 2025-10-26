@@ -1,5 +1,5 @@
 import type { Component } from 'solid-js';
-import { type ProductionGraphEdge, type ProductionGraphNode, type ProductionGraph } from '../../domain/Base';
+import { type ProductionGraphEdge, type ProductionGraphNode, type ProductionGraph } from '@/domain/Base';
 import { Viewport } from '../Viewport/Viewport';
 import styles from './ProductionGraphView.module.css';
 

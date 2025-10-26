@@ -1,5 +1,5 @@
 import { createMutation, createQuery, useQueryClient } from '@tanstack/solid-query';
-import { EditorAPI } from '../lib/net/editorapi';
+import { EditorAPI } from '@/lib/net/editorapi';
 
 const api = new EditorAPI();
 
