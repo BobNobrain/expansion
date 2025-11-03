@@ -9,6 +9,7 @@ export type CreateBaseFormProps = {
     worldId: string;
     tileId: string;
     tileCity: City;
+    onSuccess?: () => void;
 };
 
 export const CreateBaseForm: Component<CreateBaseFormProps> = (props) => {
@@ -32,11 +33,16 @@ export const CreateBaseForm: Component<CreateBaseFormProps> = (props) => {
             return;
         }
 
-        action.run({
-            worldId: props.worldId,
-            tileId: World.parseTileId(props.tileId)!,
-            operator: operator.id,
-        });
+        action.run(
+            {
+                worldId: props.worldId,
+                tileId: World.parseTileId(props.tileId)!,
+                operator: operator.id,
+            },
+            {
+                onSuccess: props.onSuccess,
+            },
+        );
     };
 
     return (

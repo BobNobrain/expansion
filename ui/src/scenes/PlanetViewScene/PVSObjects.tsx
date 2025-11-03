@@ -8,6 +8,7 @@ import {
     Mesh,
     MeshPhongMaterial,
     Quaternion,
+    SphereGeometry,
     Vector3,
     type Object3D,
 } from 'three';
@@ -29,6 +30,12 @@ const cityBoxMat = new MeshPhongMaterial({
     emissive: 0xffdd88,
     emissiveIntensity: 0.05,
 });
+const baseSphereMat = new MeshPhongMaterial({
+    color: 0x557755,
+    reflectivity: 0.6,
+    emissive: 0xddeeff,
+    emissiveIntensity: 0.02,
+});
 
 const cityOutlineMat = new LineBasicMaterial({
     color: 0xd4d4f9,
@@ -44,19 +51,28 @@ export const PVSObjects: Component<PVSObjectsProps> = (props) => {
         const builder = props.surface;
 
         if (!world || !builder) {
-            return null;
+            return [];
         }
 
         const cities = Object.values(worldCities.result());
 
         for (const city of cities) {
             const tileIndex = World.parseTileId(city.centerTileId);
-            if (!tileIndex) {
+            if (tileIndex === undefined) {
                 continue;
             }
 
             result.push(createCityBox(world, city, tileIndex));
             result.push(createCityOutline(city, builder));
+        }
+
+        for (const [tileId, baseId] of Object.entries(world.tileBaseIDs)) {
+            const tileIndex = World.parseTileId(tileId);
+            if (tileIndex === undefined) {
+                continue;
+            }
+
+            result.push(createBaseSphere(world, { id: baseId }, tileIndex));
         }
 
         return result;
@@ -86,4 +102,14 @@ function createCityOutline(city: City, builder: MeshBuilder): Object3D {
     const outline = new LineLoop(geom, cityOutlineMat);
     outline.name = `PVSCityOutline_${city.id}`;
     return outline;
+}
+
+function createBaseSphere(world: World, base: { id: number }, tileIndex: number): Object3D {
+    const pos = World.getTileCoords(world.grid, tileIndex);
+    const sphere = new SphereGeometry(0.04);
+    const mesh = new Mesh(sphere, baseSphereMat);
+
+    mesh.name = `PVSBaseSphere_${base.id}`;
+    mesh.position.set(...pos);
+    return mesh;
 }

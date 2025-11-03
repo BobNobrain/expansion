@@ -40,9 +40,10 @@ type WorldsTableRow struct {
 	OceansContent     map[string]float64 `json:"oceans,omitempty"`
 	AtmosphereContent map[string]float64 `json:"atmosphere,omitempty"`
 
-	NPops   int `json:"nPops"`
-	NBases  int `json:"nBases"`
-	NCities int `json:"nCities"`
+	NPops Predictable `json:"nPops"`
+
+	TileCities map[int]int `json:"tileCities"`
+	TileBases  map[int]int `json:"tileBases"`
 }
 
 type WorldsTableRowResourceDeposit struct {

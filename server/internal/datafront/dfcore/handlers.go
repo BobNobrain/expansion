@@ -176,7 +176,11 @@ func (df *DataFront) handleAction(rq components.DataFrontRequest) (common.Encoda
 
 	action, found := df.actions[DFPath(query.Name)]
 	if !found {
-		return nil, common.NewValidationError("DFActionRequest::Name", "action name does not exist")
+		return nil, common.NewValidationError(
+			"DFActionRequest::Name",
+			"action name does not exist",
+			common.WithDetail("actionName", query.Name),
+		)
 	}
 
 	result, err := action.Run(query, rq.OnBehalf)

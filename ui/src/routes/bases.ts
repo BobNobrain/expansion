@@ -64,7 +64,7 @@ export type GetBasesRouteParams = {
 };
 
 export function getBasesRoute(params: GetBasesRouteParams): string {
-    const tab = params.tileId ? params.tab ?? TileBaseTab.Production : undefined;
+    const tab = params.tileId ? params.tab ?? TileBaseTab.Overview : undefined;
 
     return [ROUTE_BASE, params.worldId, params.tileId, tab].filter(Boolean).join('/');
 }

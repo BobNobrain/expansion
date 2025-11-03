@@ -1,6 +1,6 @@
 import { createMemo, type Component } from 'solid-js';
 import { TabContent, type TabHeader, TabsList } from '@/atoms';
-import { IconFactory, IconFence, IconPeople, IconStorage } from '@/icons';
+import { IconFactory, IconFence, IconFlag, IconStorage } from '@/icons';
 import { useTileBaseRouteInfo, getBasesRoute, TileBaseTab } from '@/routes/bases';
 import { TouchContentSingle } from '@/touch/components/TouchContentSingle/TouchContentSingle';
 import { useBasesPageContextBinding } from '../WorldBasesPage/binding';
@@ -19,8 +19,8 @@ export const TileBasePage: Component = () => {
 
         return [
             {
-                title: 'Workers',
-                icon: IconPeople,
+                title: 'Overview',
+                icon: IconFlag,
                 href: getBasesRoute({ ...route, tab: TileBaseTab.Overview }),
             },
             {

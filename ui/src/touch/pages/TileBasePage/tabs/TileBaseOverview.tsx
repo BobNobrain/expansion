@@ -1,22 +1,33 @@
-import { createMemo, type Component } from 'solid-js';
+import { type Component } from 'solid-js';
 import {
     Badge,
     Button,
     DefinitionList,
     type DefinitionListItem,
+    Link,
     PageHeader,
     PageHeaderActions,
     PageHeaderTitle,
 } from '@/atoms';
 import { GameTimeLabel } from '@/components/GameTimeLabel/GameTimeLabel';
 import { type BaseContent } from '@/domain/Base';
+import { World } from '@/domain/World';
 import { IconContext, IconHammer, IconPeople } from '@/icons';
+import { useSingleEntity } from '@/lib/datafront/utils';
 import { useTileBaseRouteInfo } from '@/routes/bases';
+import { dfBasesByLocation } from '@/store/datafront';
+import { getExploreRoute } from '@/routes/explore';
 
 const DEFS: DefinitionListItem<BaseContent>[] = [
     {
         title: 'Location',
-        render: (value) => `${value.worldId}#${value.tileId}`,
+        render: (value) => {
+            return (
+                <Link
+                    href={getExploreRoute({ objectId: value.worldId, tab: value.tileId })}
+                >{`${value.worldId}#${value.tileId}`}</Link>
+            );
+        },
     },
     {
         title: 'Created',
@@ -55,32 +66,15 @@ const DEFS: DefinitionListItem<BaseContent>[] = [
 export const TileBaseOverview: Component = () => {
     const routeInfo = useTileBaseRouteInfo();
 
-    const base = createMemo(() => {
-        const base: BaseContent = {
-            id: 42,
-            cityId: 1,
-            worldId: routeInfo().worldId,
-            tileId: routeInfo().tileId,
-            created: new Date(),
-
-            factories: [
-                {
-                    id: '1',
-                    equipment: [
-                        {
-                            equipmentId: 'drill',
-                            count: 2,
-                            employees: { intern: 3, worker: 2 },
-                            production: {},
-                        },
-                    ],
-                },
-            ],
-            constructionSites: [],
+    const bases = dfBasesByLocation.use(() => {
+        const info = routeInfo();
+        return {
+            tileId: World.parseTileId(info.tileId)!,
+            worldId: info.worldId,
         };
-
-        return base;
     });
+
+    const base = useSingleEntity(bases);
 
     return (
         <>
@@ -95,7 +89,7 @@ export const TileBaseOverview: Component = () => {
                     </Button>
                 </PageHeaderActions>
             </PageHeader>
-            <DefinitionList items={DEFS} value={base()} />;
+            <DefinitionList items={DEFS} value={base()} />
         </>
     );
 };

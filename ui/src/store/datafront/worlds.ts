@@ -1,10 +1,10 @@
 import { ExplorationData } from '@/domain/misc';
-import { type World } from '@/domain/World';
+import { World } from '@/domain/World';
 import { WorldClass } from '@/domain/WorldOverview';
 import { createDatafrontTable } from '@/lib/datafront/table';
 import { type WorldsTableRow } from '@/lib/net/types.generated';
 import { ws } from '@/lib/net/ws';
-import { updater, cleaner } from './misc';
+import { updater, cleaner, parsePredictable } from './misc';
 
 export const dfWorlds = createDatafrontTable<WorldsTableRow, World>({
     name: 'worlds',
@@ -33,11 +33,7 @@ export const dfWorlds = createDatafrontTable<WorldsTableRow, World>({
                 pressureBar: data.surfacePressureBar,
                 g: data.g,
             },
-            population: {
-                bases: data.nBases,
-                cities: data.nCities,
-                pops: data.nPops,
-            },
+            population: parsePredictable(data.nPops),
 
             elevationsScaleKm: data.elevationsScaleKm,
             elevations: data.elevations ?? [],
@@ -53,6 +49,23 @@ export const dfWorlds = createDatafrontTable<WorldsTableRow, World>({
             atmosphere: data.atmosphere ?? {},
             oceans: data.oceans ?? {},
             snow: data.snow ?? {},
+
+            tileBaseIDs: Object.entries(data.tileBases).reduce<Record<string, number>>(
+                (acc, [strTileNumber, baseId]) => {
+                    const tileId = World.makeTileId(Number.parseInt(strTileNumber));
+                    acc[tileId] = baseId;
+                    return acc;
+                },
+                {},
+            ),
+            tileCityCenterIDs: Object.entries(data.tileCities).reduce<Record<string, number>>(
+                (acc, [strTileNumber, cityId]) => {
+                    const tileId = World.makeTileId(Number.parseInt(strTileNumber));
+                    acc[tileId] = cityId;
+                    return acc;
+                },
+                {},
+            ),
         };
     },
 });

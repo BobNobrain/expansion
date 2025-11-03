@@ -13,6 +13,7 @@ import { FoundCityForm } from '@/views/FoundCityForm/FoundCityForm';
 import { TileInfoDefList } from './TileInfo';
 import { TileResources } from './TileResources';
 import { TileCityInfo } from './TileCityInfo';
+import { TileBaseInfo } from './TileBaseInfo';
 
 export const WorldTileInfo: Component = () => {
     const routeInfo = useExploreRouteInfo();
@@ -62,6 +63,7 @@ export const WorldTileInfo: Component = () => {
         <>
             <OperationDisplay error={world.error()} loading={world.isLoading()}>
                 <TileCityInfo city={tileCity()} tileId={tileIds().tileId} />
+                <TileBaseInfo />
 
                 <TileInfoDefList
                     world={world}
@@ -89,7 +91,12 @@ export const WorldTileInfo: Component = () => {
                     }
                 >
                     <Container padded>
-                        <CreateBaseForm worldId={worldId()!} tileId={routeInfo().tileId!} tileCity={tileCity()!} />
+                        <CreateBaseForm
+                            worldId={worldId()!}
+                            tileId={routeInfo().tileId!}
+                            tileCity={tileCity()!}
+                            onSuccess={createBaseModal.close}
+                        />
                     </Container>
                 </TouchBottomSheet>
             </Show>

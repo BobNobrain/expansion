@@ -124,6 +124,15 @@ func encodeWorld(w game.WorldData) common.Encodable {
 		}
 	}
 
+	tileCities := make(map[int]int)
+	for tid, cid := range w.TileCityCenters {
+		tileCities[int(tid)] = int(cid)
+	}
+	tileBases := make(map[int]int)
+	for tid, cid := range w.TileBases {
+		tileBases[int(tid)] = int(cid)
+	}
+
 	return common.AsEncodable(api.WorldsTableRow{
 		ID:         string(w.ID),
 		ExploredBy: exploredBy,
@@ -156,9 +165,9 @@ func encodeWorld(w game.WorldData) common.Encodable {
 		OceansContent:     w.Composition.Oceans.ToMap(),
 		AtmosphereContent: w.Composition.Atmosphere.ToMap(),
 
-		NPops:   w.Population.NPops,
-		NBases:  w.Population.NBases,
-		NCities: w.Population.NCities,
+		NPops:      serializePredictable(w.NPops.Wrap()),
+		TileCities: tileCities,
+		TileBases:  tileBases,
 	})
 }
 

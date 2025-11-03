@@ -1,5 +1,6 @@
+import type { Predictable } from '@/lib/predictables';
 import { type RGBColor } from '../lib/color';
-import { type WorldPopulationOverview, type WorldParams, type WorldSurfaceConditions } from './WorldOverview';
+import { type WorldParams, type WorldSurfaceConditions } from './WorldOverview';
 import { type ExplorationData } from './misc';
 
 export type World = {
@@ -24,8 +25,18 @@ export type World = {
     atmosphere: Record<string, number>;
     snow: Record<string, number>;
 
-    population: WorldPopulationOverview;
+    population: Predictable;
+    tileCityCenterIDs: Record<string, number>;
+    tileBaseIDs: Record<string, number>;
 };
+
+export enum WorldTileOccupation {
+    Free = 'free',
+    City = 'city',
+    Base = 'base',
+    Infra = 'infra',
+    Unknown = 'unknown',
+}
 
 export type WorldGrid = {
     coords: number[];

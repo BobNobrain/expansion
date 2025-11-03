@@ -9,8 +9,8 @@ type BasesRepoReadonly interface {
 	GetCompanyBases(game.CompanyID) ([]game.Base, common.Error)
 	GetCompanyBasesOnPlanet(game.CompanyID, game.CelestialID) ([]game.Base, common.Error)
 
-	GetBase(game.BaseID) (game.Base, common.Error)
-	GetBaseAt(game.CelestialID, game.TileID) (game.Base, common.Error)
+	GetBase(game.BaseID) (*game.Base, common.Error)
+	GetBaseAt(game.CelestialID, game.TileID) (*game.Base, common.Error)
 	ResolveBases([]game.BaseID) ([]game.Base, common.Error)
 }
 

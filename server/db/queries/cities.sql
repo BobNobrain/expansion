@@ -6,7 +6,7 @@ WHERE world_id = $1;
 -- name: ResolveCityIDs :many
 SELECT *
 FROM cities
-WHERE id = ANY($1::SERIAL [ ]);
+WHERE id = ANY($1::INTEGER [ ]);
 
 -- name: GetWorldBases :many
 SELECT *

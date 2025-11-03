@@ -3,11 +3,14 @@ package db
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"srv/internal/components"
 	"srv/internal/db/dbq"
 	"srv/internal/game"
 	"srv/internal/utils"
 	"srv/internal/utils/common"
+
+	"github.com/jackc/pgx/v5"
 )
 
 type basesRepoImpl struct {
@@ -17,22 +20,30 @@ type basesRepoImpl struct {
 
 type baseDataJSON struct{}
 
-func (b *basesRepoImpl) GetBase(id game.BaseID) (game.Base, common.Error) {
+func (b *basesRepoImpl) GetBase(id game.BaseID) (*game.Base, common.Error) {
 	row, dberr := b.q.GetBaseByID(b.ctx, int32(id))
 	if dberr != nil {
-		return game.Base{}, makeDBError(dberr, "BasesRepo::GetBase")
+		if errors.Is(dberr, pgx.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, makeDBError(dberr, "BasesRepo::GetBase")
 	}
 
-	return decodeBase(row), nil
+	decoded := decodeBase(row)
+	return &decoded, nil
 }
 
-func (b *basesRepoImpl) GetBaseAt(worldID game.CelestialID, tileID game.TileID) (game.Base, common.Error) {
+func (b *basesRepoImpl) GetBaseAt(worldID game.CelestialID, tileID game.TileID) (*game.Base, common.Error) {
 	row, dberr := b.q.GetBaseByLocation(b.ctx, dbq.GetBaseByLocationParams{WorldID: string(worldID), TileID: int16(tileID)})
 	if dberr != nil {
-		return game.Base{}, makeDBError(dberr, "BasesRepo::GetBaseAt")
+		if errors.Is(dberr, pgx.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, makeDBError(dberr, "BasesRepo::GetBaseAt")
 	}
 
-	return decodeBase(row), nil
+	decoded := decodeBase(row)
+	return &decoded, nil
 }
 
 func (b *basesRepoImpl) ResolveBases(ids []game.BaseID) ([]game.Base, common.Error) {

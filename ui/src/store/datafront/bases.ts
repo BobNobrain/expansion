@@ -26,6 +26,7 @@ export const dfBases = createDatafrontTable<BasesTableRow, BaseContent>({
             cityId: data.cityId,
 
             created: new Date(data.established),
+            operator: data.companyId,
             factories: [],
             constructionSites: [],
         };

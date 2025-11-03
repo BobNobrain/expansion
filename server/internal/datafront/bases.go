@@ -96,7 +96,11 @@ func (t *basesTable) queryByLocation(
 		return nil, err
 	}
 
-	return dfcore.NewTableResponseFromSingle(identifyBase(base), encodeBase(base)), nil
+	if base == nil {
+		return dfcore.NewTableResponse(), nil
+	}
+
+	return dfcore.NewTableResponseFromSingle(identifyBase(*base), encodeBase(*base)), nil
 }
 
 func (t *basesTable) onBaseCreated(ev events.BaseCreatedPayload) {

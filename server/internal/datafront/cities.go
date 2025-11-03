@@ -46,7 +46,12 @@ func (t *citiesTable) queryByIDs(
 	req dfapi.DFTableRequest,
 	ctx dfcore.DFRequestContext,
 ) (*dfcore.TableResponse, common.Error) {
-	return nil, common.NewError(common.WithCode("ERR_TODO"), common.WithMessage("cities[id] is not implemented yet"))
+	cities, err := t.repo.ResolveIDs(utils.ParseInts[game.CityID](req.IDs))
+	if err != nil {
+		return nil, err
+	}
+
+	return dfcore.NewTableResponseFromList(cities, identifyCity, encodeCity), nil
 }
 
 func (t *citiesTable) queryByWorldID(
@@ -74,6 +79,10 @@ func (t *citiesTable) queryByWorldID(
 
 func (t *citiesTable) onNewCityFounded(payload events.CityCreatedPayload) {
 	t.qByWorldID.PublishChangedNotification(api.CitiesQueryByWorldID{WorldID: string(payload.WorldID)})
+}
+
+func identifyCity(city game.City) dfcore.EntityID {
+	return dfcore.EntityID(city.CityID.String())
 }
 
 func encodeCity(city game.City) common.Encodable {

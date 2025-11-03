@@ -6,7 +6,7 @@ type Encodable interface {
 
 type emptyEncodable struct{}
 
-func (*emptyEncodable) Encode() interface{} {
+func (*emptyEncodable) Encode() any {
 	return nil
 }
 
@@ -18,7 +18,7 @@ type customEncodable struct {
 	value any
 }
 
-func (e *customEncodable) Encode() interface{} {
+func (e *customEncodable) Encode() any {
 	return e.value
 }
 
@@ -36,7 +36,10 @@ func NewDictEncodable() *DictEncodable {
 	}
 }
 
-func (dict *DictEncodable) Encode() interface{} {
+func (dict *DictEncodable) Encode() any {
+	if dict == nil {
+		return nil
+	}
 	return dict.props
 }
 

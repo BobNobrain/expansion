@@ -56,7 +56,7 @@ func (uc *createBaseUsecase) Run(
 			"CreateBaseUsecaseInput.TileID",
 			"No city for tile ID provided",
 			common.WithRetriable(),
-			common.WithDetails(common.NewDictEncodable().Set("citiesScanned", len(cities))),
+			common.WithDetail("citiesScanned", len(cities)),
 		)
 	}
 

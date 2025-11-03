@@ -57,7 +57,7 @@ func (m *Monolith) Start() error {
 		usecases.NewExploreWorldUsecase(worldGen, store),
 	)
 	gdf.InitCityActions(usecases.NewFoundCityUsecase(store))
-	// gdf.InitBaseActions(...)
+	gdf.InitBaseActions(usecases.NewCreateBaseUsecase(store))
 
 	srv, herr := http.NewHTTPServer(auth, comms)
 	if herr != nil {

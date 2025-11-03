@@ -27,6 +27,7 @@ export type BaseContent = {
     cityId: number;
 
     created: Date;
+    operator: string;
 
     factories: Factory[];
     constructionSites: BaseConstructionSite[];

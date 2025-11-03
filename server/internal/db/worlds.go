@@ -13,6 +13,7 @@ import (
 	"srv/internal/utils/common"
 	"srv/internal/utils/geom"
 	"srv/internal/utils/phys"
+	"srv/internal/utils/predictable"
 )
 
 type worldsRepoImpl struct {
@@ -171,9 +172,7 @@ func (w *worldsRepoImpl) GetData(worldID game.CelestialID) (game.WorldData, comm
 		return game.WorldData{}, common.NewError(
 			common.WithCode("ERR_NOT_FOUND"),
 			common.WithMessage("specified world not found"),
-			common.WithDetails(
-				common.NewDictEncodable().Set("worldId", worldID),
-			),
+			common.WithDetail("worldId", worldID),
 		)
 	}
 
@@ -254,7 +253,7 @@ func decodeWorld(row dbq.ResolveWorldsRow) (game.WorldData, common.Error) {
 	coords := make([]geom.Vec3, 0, nTiles)
 	tiles := make([]game.WorldDataTile, 0, nTiles)
 
-	for i := 0; i < nTiles; i++ {
+	for i := range nTiles {
 		coords = append(coords, geom.Vec3{
 			X: dbWorldData.Coords[i*3+0],
 			Y: dbWorldData.Coords[i*3+1],
@@ -303,6 +302,25 @@ func decodeWorld(row dbq.ResolveWorldsRow) (game.WorldData, common.Error) {
 		})
 	}
 
+	cityTilesData, err := parseJSON[map[int]int](row.CityCenters)
+	cityTiles := make(map[game.TileID]game.CityID)
+	if err != nil {
+		return game.WorldData{}, err
+	}
+	for tid, cid := range cityTilesData {
+		cityTiles[game.TileID(tid)] = game.CityID(cid)
+	}
+
+	baseTilesData, err := parseJSON[map[int]int](row.BaseTiles)
+	baseTiles := make(map[game.TileID]game.BaseID)
+	if err != nil {
+		return game.WorldData{}, err
+	}
+
+	for tid, bid := range baseTilesData {
+		baseTiles[game.TileID(tid)] = game.BaseID(bid)
+	}
+
 	return game.WorldData{
 		ID:           game.CelestialID(row.BodyID),
 		Grid:         geom.RestoreSpatialGraph(coords, dbWorldData.Graph),
@@ -327,11 +345,9 @@ func decodeWorld(row dbq.ResolveWorldsRow) (game.WorldData, common.Error) {
 			Age:    phys.BillionYears(row.AgeByrs),
 			Class:  decodeWorldClass(row.Class),
 		},
-		Population: game.WorldPopulationOverview{
-			NPops:   int(row.Population),
-			NCities: int(row.NCities),
-			NBases:  int(row.NBases),
-		},
-		TileResources: resourceDeposits,
+		NPops:           predictable.NewConstant(float64(row.Population)), // TODO: pop growth and stuff
+		TileResources:   resourceDeposits,
+		TileCityCenters: cityTiles,
+		TileBases:       baseTiles,
 	}, nil
 }

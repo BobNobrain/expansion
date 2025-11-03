@@ -10,7 +10,7 @@ type Error interface {
 type customError struct {
 	msg         string
 	code        string
-	details     Encodable
+	details     *DictEncodable
 	inner       error
 	isRetriable bool
 }
@@ -27,6 +27,9 @@ func (e *customError) IsRetriable() bool {
 func (e *customError) Details() Encodable {
 	return e.details
 }
+func (e *customError) Unwrap() error {
+	return e.inner
+}
 
 type errorConstructor func(*customError)
 
@@ -35,7 +38,7 @@ func NewError(options ...errorConstructor) Error {
 		code:        "ERR_UNKNOWN",
 		msg:         "something terribly wrong happened",
 		inner:       nil,
-		details:     EmptyEncodable(),
+		details:     nil,
 		isRetriable: false,
 	}
 	for _, opt := range options {
@@ -54,9 +57,13 @@ func WithMessage(msg string) errorConstructor {
 		ce.msg = msg
 	}
 }
-func WithDetails(details Encodable) errorConstructor {
+func WithDetail(name string, value any) errorConstructor {
 	return func(ce *customError) {
-		ce.details = details
+		if ce.details == nil {
+			ce.details = NewDictEncodable()
+		}
+
+		ce.details.Set(name, value)
 	}
 }
 func WithInnerError(inner error) errorConstructor {
@@ -75,7 +82,12 @@ func NewUnknownError(e error) Error {
 	return NewError(WithInnerError(e))
 }
 func NewValidationError(field string, msg string, opts ...errorConstructor) Error {
-	return NewError(WithCode("ERR_VALIDATION"), WithMessage(msg), WithDetails(NewDictEncodable().Set("field", field)))
+	allArgs := append([]errorConstructor{
+		WithCode("ERR_VALIDATION"),
+		WithMessage(msg),
+		WithDetail("field", field),
+	}, opts...)
+	return NewError(allArgs...)
 }
 func NewDecodingError(inner error) Error {
 	return NewError(WithCode("ERR_DECODE"), WithInnerError(inner))

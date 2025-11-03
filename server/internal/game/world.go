@@ -5,6 +5,7 @@ import (
 	"srv/internal/utils/geom"
 	"srv/internal/utils/phys"
 	"srv/internal/utils/phys/material"
+	"srv/internal/utils/predictable"
 )
 
 type CelestialBodyClass byte
@@ -50,12 +51,15 @@ type WorldData struct {
 	Conditions  WorldConditions
 	Params      WorldParams
 	Composition WorldComposition
-	Population  WorldPopulationOverview
+	NPops       predictable.Predictable
 
 	Tiles               []WorldDataTile
 	FertileTiles        []FertileWorldDataTile
 	TileResources       map[TileID][]ResourceDeposit
 	TileElevationsScale phys.Distance
+
+	TileCityCenters map[TileID]CityID
+	TileBases       map[TileID]BaseID
 }
 
 type WorldDataTile struct {

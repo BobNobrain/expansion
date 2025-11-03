@@ -48,22 +48,20 @@ func getAssetFileName(w http.ResponseWriter, r *http.Request, v assetFileNameOpt
 		isDir = stat.IsDir()
 	}
 
-	details := common.NewDictEncodable().Set("path", path)
-
 	if v.shouldExist && !exists {
-		respondError(w, 404, common.NewValidationError(paramName, "file does not exist", common.WithDetails(details)))
+		respondError(w, 404, common.NewValidationError(paramName, "file does not exist", common.WithDetail("path", path)))
 		return ""
 	}
 	if v.shouldNotExist && exists {
-		respondError(w, 400, common.NewValidationError(paramName, "file already exists", common.WithDetails(details)))
+		respondError(w, 400, common.NewValidationError(paramName, "file already exists", common.WithDetail("path", path)))
 		return ""
 	}
 	if v.shouldBeFile && (isDir || !exists) {
-		respondError(w, 400, common.NewValidationError(paramName, "file is a directory", common.WithDetails(details)))
+		respondError(w, 400, common.NewValidationError(paramName, "file is a directory", common.WithDetail("path", path)))
 		return ""
 	}
 	if v.shouldBeDirectory && (!isDir || !exists) {
-		respondError(w, 400, common.NewValidationError(paramName, "file is not a directory", common.WithDetails(details)))
+		respondError(w, 400, common.NewValidationError(paramName, "file is not a directory", common.WithDetail("path", path)))
 		return ""
 	}
 
