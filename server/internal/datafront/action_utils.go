@@ -5,10 +5,7 @@ import (
 	"srv/internal/components"
 	"srv/internal/datafront/dfcore"
 	"srv/internal/domain"
-	"srv/internal/game"
-	"srv/internal/usecases"
 	"srv/internal/utils/common"
-	"srv/pkg/api"
 )
 
 func newActionFromUsecase[APIInput any, UCInput any](
@@ -24,30 +21,22 @@ func newActionFromUsecase[APIInput any, UCInput any](
 	})
 }
 
-// api -> usecase input mappers
-func exploreSystemMapper(payload api.ExploreSystemPayload) usecases.ExploreSystemUsecaseInput {
-	return usecases.ExploreSystemUsecaseInput{
-		SystemID: game.StarSystemID(payload.SystemID),
-	}
-}
-func exploreWorldMapper(payload api.ExploreWorldPayload) usecases.ExploreWorldUsecaseInput {
-	return usecases.ExploreWorldUsecaseInput{
-		WorldID: game.CelestialID(payload.WorldID),
-	}
-}
+func newActionFromUsecaseWithResult[APIInput any, UCInput any, UCOutput any](
+	uc components.UsecaseWithOutput[UCInput, UCOutput],
+	inputMapper func(APIInput) UCInput,
+	outputMapper func(UCOutput) common.Encodable,
+) *dfcore.Action[APIInput] {
+	return dfcore.NewAction(func(apiInput APIInput, userID domain.UserID) (common.Encodable, common.Error) {
+		result, err := uc.Run(
+			context.TODO(),
+			inputMapper(apiInput),
+			components.UsecaseContext{Author: userID},
+		)
 
-func foundCityMapper(payload api.FoundCityPayload) usecases.FoundCityUsecaseInput {
-	return usecases.FoundCityUsecaseInput{
-		Name:    payload.Name,
-		WorldID: game.CelestialID(payload.WorldID),
-		TileID:  game.TileID(payload.TileID),
-	}
-}
+		if err != nil {
+			return nil, err
+		}
 
-func createBaseMapper(payload api.CreateBasePayload) usecases.CreateBaseUsecaseInput {
-	return usecases.CreateBaseUsecaseInput{
-		WorldID:  game.CelestialID(payload.WorldID),
-		TileID:   game.TileID(payload.TileID),
-		Operator: game.CompanyID(payload.Operator),
-	}
+		return outputMapper(result), nil
+	})
 }

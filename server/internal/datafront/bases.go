@@ -5,6 +5,7 @@ import (
 	"srv/internal/datafront/dfcore"
 	"srv/internal/game"
 	"srv/internal/globals/events"
+	"srv/internal/globals/logger"
 	"srv/internal/utils"
 	"srv/internal/utils/common"
 	"srv/pkg/api"
@@ -36,6 +37,7 @@ func (gdf *GameDataFront) InitBases(repo components.BasesRepoReadonly) {
 	bases.qByLocation = dfcore.NewTrackableTableQuery(bases.queryByLocation, bases.table)
 
 	events.SubscribeTyped(bases.sub, events.BaseCreated, bases.onBaseCreated)
+	events.SubscribeTyped(bases.sub, events.BaseUpdated, bases.onBaseUpdated)
 
 	gdf.bases = bases
 	gdf.df.AttachTable("bases", bases.table)
@@ -107,6 +109,31 @@ func (t *basesTable) onBaseCreated(ev events.BaseCreatedPayload) {
 	t.qByCompany.PublishChangedNotification(api.BasesQueryByCompanyID{CompanyID: string(ev.Operator)})
 	t.qByBranch.PublishChangedNotification(api.BasesQueryByBranch{WorldID: string(ev.WorldID)})
 	t.qByLocation.PublishChangedNotification(api.BasesQueryByLocation{WorldID: string(ev.WorldID), TileID: int(ev.TileID)})
+}
+func (t *basesTable) onBaseUpdated(ev events.BaseUpdatedPayload) {
+	var base game.Base
+	if ev.Base != nil {
+		base = *ev.Base
+	} else {
+		basePtr, err := t.repo.GetBase(ev.BaseID)
+
+		if err != nil {
+			logger.Error(logger.FromError("DF/bases.onBaseUpdated", err))
+			return
+		}
+
+		if basePtr == nil {
+			logger.Error(logger.FromMessage("DF/bases.onBaseUpdated", "specified base not found").WithDetail("baseId", ev.BaseID))
+			return
+		}
+
+		base = *basePtr
+	}
+
+	t.table.PublishEntities(dfcore.NewTableResponseFromSingle(
+		identifyBase(base),
+		encodeBase(base),
+	))
 }
 
 func identifyBase(b game.Base) dfcore.EntityID {

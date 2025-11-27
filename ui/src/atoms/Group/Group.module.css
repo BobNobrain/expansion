@@ -29,10 +29,20 @@
     margin-top: -8px;
 }
 
-.content {
-    padding: 0 8px;
+.content-padding-h {
+    padding-left: 8px;
+    padding-right: 8px;
 
     --container-actual-padding-h: 8px;
+}
+.content-padding-v {
+    padding-top: 8px;
+    padding-bottom: 8px;
+
+    --container-actual-padding-v: 8px;
+}
+.content-padding-both {
+    composes: content-padding-v content-padding-h;
 }
 
 .header {
@@ -40,4 +50,17 @@
     gap: 4px;
     align-items: center;
     margin-bottom: 8px;
+    overflow: hidden;
+}
+
+.header-padding-h {
+    padding-left: 8px;
+    padding-right: 8px;
+}
+.header-padding-v {
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+.header-padding-both {
+    composes: header-padding-v header-padding-h;
 }

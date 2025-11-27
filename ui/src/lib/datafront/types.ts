@@ -40,6 +40,7 @@ export type DatafrontAction<Payload, Result> = {
 
 export type DatafrontActionCallbacks = {
     onSuccess?: () => void;
+    onError?: () => void;
 };
 
 export type UseActionResult<Payload, Result> = {

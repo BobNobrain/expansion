@@ -98,11 +98,11 @@ func (table *QueryableTable) UnsubscribeFromIDs(req dfapi.DFTableUnsubscribeRequ
 	}
 }
 
-func (table *QueryableTable) PublishEntities(entities map[EntityID]common.Encodable) {
+func (table *QueryableTable) PublishEntities(entities *TableResponse) {
 	table.lock.RLock()
 	defer table.lock.RUnlock()
 
-	for eid, entity := range entities {
+	for eid, entity := range entities.results {
 		subs := table.idSubs[eid]
 		if subs == nil {
 			continue

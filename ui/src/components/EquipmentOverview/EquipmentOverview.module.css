@@ -1,6 +1,5 @@
 .main {
-    display: flex;
-    gap: 4px;
+    padding: 2px 0;
 }
 
 .icon {
@@ -15,18 +14,12 @@
     box-shadow: inset 0 0 16px var(--p-main-900-25);
 }
 
-.info {
-    flex: 1 1 auto;
-    overflow: hidden;
-    padding-top: 4px;
-}
-
 .top-line {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     height: 36px;
     margin-bottom: 4px;
+    gap: 8px;
 }
 
 .name {
@@ -45,6 +38,7 @@
 .badges {
     display: flex;
     overflow: hidden;
+    align-items: center;
     margin-left: -6px;
     margin-top: auto;
 }

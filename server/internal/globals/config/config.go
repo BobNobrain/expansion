@@ -17,6 +17,7 @@ type CNRConfig struct {
 type WorldConfig struct {
 	Seed           string
 	AutoSavePeriod time.Duration
+	AllowCheats    bool
 }
 
 type HTTPConfig struct {

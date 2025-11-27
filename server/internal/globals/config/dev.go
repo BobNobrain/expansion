@@ -41,6 +41,7 @@ func getDevConfig() *SrvConfig {
 		World: WorldConfig{
 			Seed:           "deadmouse",
 			AutoSavePeriod: time.Minute * 3,
+			AllowCheats:    true,
 		},
 	}
 }

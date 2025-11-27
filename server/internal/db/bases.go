@@ -18,7 +18,16 @@ type basesRepoImpl struct {
 	ctx context.Context
 }
 
-type baseDataJSON struct{}
+type baseDataJSON struct {
+	Sites     []baseDataJSONSite `json:"sites"`
+	Inventory map[string]float64 `json:"inventory"`
+	// TBD: storage capacity
+}
+type baseDataJSONSite struct {
+	ID           int                        `json:"id"`
+	Target       []factoryDataEquipmentJSON `json:"target"`
+	Contribution contributionJSON           `json:"contrib"`
+}
 
 func (b *basesRepoImpl) GetBase(id game.BaseID) (*game.Base, common.Error) {
 	row, dberr := b.q.GetBaseByID(b.ctx, int32(id))
@@ -29,7 +38,10 @@ func (b *basesRepoImpl) GetBase(id game.BaseID) (*game.Base, common.Error) {
 		return nil, makeDBError(dberr, "BasesRepo::GetBase")
 	}
 
-	decoded := decodeBase(row)
+	decoded, err := decodeBase(row)
+	if err != nil {
+		return nil, err
+	}
 	return &decoded, nil
 }
 
@@ -42,7 +54,10 @@ func (b *basesRepoImpl) GetBaseAt(worldID game.CelestialID, tileID game.TileID) 
 		return nil, makeDBError(dberr, "BasesRepo::GetBaseAt")
 	}
 
-	decoded := decodeBase(row)
+	decoded, err := decodeBase(row)
+	if err != nil {
+		return nil, err
+	}
 	return &decoded, nil
 }
 
@@ -52,7 +67,7 @@ func (b *basesRepoImpl) ResolveBases(ids []game.BaseID) ([]game.Base, common.Err
 		return nil, makeDBError(dberr, "BasesRepo::ResolveBases")
 	}
 
-	return utils.MapSlice(rows, decodeBase), nil
+	return utils.MapSliceFailable(rows, decodeBase)
 }
 
 func (b *basesRepoImpl) GetCompanyBases(cid game.CompanyID) ([]game.Base, common.Error) {
@@ -66,7 +81,7 @@ func (b *basesRepoImpl) GetCompanyBases(cid game.CompanyID) ([]game.Base, common
 		return nil, makeDBError(dberr, "BasesRepo::GetCompanyBases")
 	}
 
-	return utils.MapSlice(rows, decodeBase), nil
+	return utils.MapSliceFailable(rows, decodeBase)
 }
 
 func (b *basesRepoImpl) GetCompanyBasesOnPlanet(cid game.CompanyID, worldID game.CelestialID) ([]game.Base, common.Error) {
@@ -83,7 +98,7 @@ func (b *basesRepoImpl) GetCompanyBasesOnPlanet(cid game.CompanyID, worldID game
 		return nil, makeDBError(dberr, "BasesRepo::GetCompanyBasesOnPlanet")
 	}
 
-	return utils.MapSlice(rows, decodeBase), nil
+	return utils.MapSliceFailable(rows, decodeBase)
 }
 
 func (b *basesRepoImpl) CreateBase(payload components.CreateBasePayload) common.Error {
@@ -92,7 +107,10 @@ func (b *basesRepoImpl) CreateBase(payload components.CreateBasePayload) common.
 		return err
 	}
 
-	baseData, jerr := json.Marshal(baseDataJSON{})
+	baseData, jerr := json.Marshal(baseDataJSON{
+		Sites:     nil,
+		Inventory: make(map[string]float64),
+	})
 	if jerr != nil {
 		return makeDBError(jerr, "BasesRepo::CreateCompanyBase")
 	}
@@ -112,6 +130,23 @@ func (b *basesRepoImpl) CreateBase(payload components.CreateBasePayload) common.
 	return nil
 }
 
+func (b *basesRepoImpl) UpdateBaseContent(base game.Base) common.Error {
+	data, jerr := json.Marshal(encodeBaseData(base))
+	if jerr != nil {
+		return makeDBError(jerr, "BasesRepo::UpdateBaseContent(encodeBaseData)")
+	}
+
+	dberr := b.q.UpdateBase(b.ctx, dbq.UpdateBaseParams{
+		ID:   int32(base.ID),
+		Data: data,
+	})
+	if dberr != nil {
+		return makeDBError(jerr, "BasesRepo::UpdateBaseContent")
+	}
+
+	return nil
+}
+
 func (b *basesRepoImpl) DeleteBase(bid game.BaseID) common.Error {
 	dberr := b.q.DestroyBase(b.ctx, int32(bid))
 	if dberr != nil {
@@ -121,14 +156,48 @@ func (b *basesRepoImpl) DeleteBase(bid game.BaseID) common.Error {
 	return nil
 }
 
-func decodeBase(row dbq.Base) game.Base {
-	return game.Base{
-		ID:       game.BaseID(row.ID),
-		Created:  row.EstablishedAt.Time,
-		Operator: game.CompanyID(row.CompanyID.String()),
-		WorldID:  game.CelestialID(row.WorldID),
-		TileID:   game.TileID(row.TileID),
-		CityID:   game.CityID(row.CityID),
-		Sites:    nil,
+func encodeBaseData(base game.Base) baseDataJSON {
+	data := baseDataJSON{
+		Sites:     make([]baseDataJSONSite, len(base.Sites)),
+		Inventory: base.Inventory.ToMap(),
 	}
+
+	for _, site := range base.Sites {
+		data.Sites = append(data.Sites, baseDataJSONSite{
+			ID:           site.SiteID,
+			Target:       utils.MapSlice(site.Target, encodeFactoryEquipment),
+			Contribution: encodeContributionJSON(site.Contributed),
+		})
+	}
+
+	return data
+}
+
+func decodeBase(row dbq.Base) (game.Base, common.Error) {
+	baseData, err := parseJSON[baseDataJSON](row.Data)
+	if err != nil {
+		return game.Base{}, err
+	}
+
+	sites := make(map[int]game.BaseConstructionSite)
+	for _, siteData := range baseData.Sites {
+		sites[siteData.ID] = game.BaseConstructionSite{
+			SiteID:      siteData.ID,
+			Target:      utils.MapSlice(siteData.Target, decodeFactoryEquipment),
+			Contributed: decodeContributionJSON(siteData.Contribution),
+		}
+	}
+
+	base := game.Base{
+		ID:        game.BaseID(row.ID),
+		Created:   row.EstablishedAt.Time,
+		Operator:  game.CompanyID(row.CompanyID.String()),
+		WorldID:   game.CelestialID(row.WorldID),
+		TileID:    game.TileID(row.TileID),
+		CityID:    game.CityID(row.CityID),
+		Sites:     sites,
+		Inventory: game.MakeInventoryFrom(baseData.Inventory),
+	}
+
+	return base, nil
 }

@@ -1,6 +1,7 @@
 export * from './AutoScroller/AutoScroller';
 export * from './Badge/Badge';
 export * from './Banner/Banner';
+export * from './BlockIcon/BlockIcon';
 export * from './Button/Button';
 export * from './Container/Container';
 export * from './ContentList';
@@ -14,6 +15,7 @@ export * from './InlineLoader/InlineLoader';
 export * from './InputIcon/InputIcon';
 export * from './Island/Island';
 export * from './Link/Link';
+export * from './List';
 export * from './NumberInput/NumberInput';
 export * from './PageHeader';
 export * from './ProgressBar/ProgressBar';

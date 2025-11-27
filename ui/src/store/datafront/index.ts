@@ -1,14 +1,3 @@
 import './_global';
 
-export * from './actions';
-export * from './bases';
-export * from './cities';
-export * from './companies';
-export * from './galaxy';
-export * from './me';
-export * from './online';
-export * from './sys_overviews';
-export * from './systems';
-export * from './users';
-export * from './world_overviews';
-export * from './worlds';
+export * from './all';

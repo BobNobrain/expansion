@@ -1,5 +1,5 @@
 import { createMemo, For, Show, type Component } from 'solid-js';
-import { Group } from '@/atoms';
+import { List, ListItem } from '@/atoms';
 import { type Building, type Equipment } from '@/domain/Base';
 import { buildingsAsset } from '@/lib/assetmanager';
 import { mapValues } from '@/lib/misc';
@@ -9,7 +9,6 @@ import {
     type EquipmentRequirement,
     type EquipmentRequirementStatus,
 } from '../EquipmentOverview/EquipmentOverview';
-import styles from './EquipmentSelectionList.module.css';
 
 export type EquipmentSelectionListProps = {
     availableArea?: number;
@@ -39,13 +38,6 @@ const EquipmentListItem: Component<
         };
     });
 
-    const buildingMats = createMemo(() => {
-        const mats = props.buildingData?.matsPerArea ?? {};
-        return mapValues(
-            mats,
-            (n): EquipmentRequirement => ({ value: (n * props.equipmentData.area).toFixed(0), status: 'ok' }),
-        );
-    });
     const workforce = createMemo(() => {
         return mapValues(
             props.equipmentData.workforce,
@@ -80,19 +72,27 @@ const EquipmentListItem: Component<
         };
     });
 
+    const disabled = createMemo(() => {
+        const reqs = requirements();
+        const hasInsufficientResources =
+            reqs.soil?.status === 'none' ||
+            reqs.minerals?.status === 'none' ||
+            reqs.liquids?.status === 'none' ||
+            reqs.gases?.status === 'none';
+        return hasInsufficientResources && (props.selectedCounts?.[props.equipmentData.id] ?? 0) === 0;
+    });
+
     return (
-        <Group style="bleak">
-            <EquipmentOverview
-                name={props.equipmentData.id}
-                area={area()}
-                building={props.equipmentData.building}
-                buildingMats={buildingMats()}
-                workforce={workforce()}
-                {...requirements()}
-                count={props.selectedCounts ? props.selectedCounts[props.equipmentData.id] ?? 0 : undefined}
-                onCountChange={props.onCountChange ? (c) => props.onCountChange!(props.equipmentData.id, c) : undefined}
-            />
-        </Group>
+        <EquipmentOverview
+            name={props.equipmentData.id}
+            area={area()}
+            building={props.equipmentData.building}
+            workforce={workforce()}
+            {...requirements()}
+            disabled={disabled()}
+            count={props.selectedCounts ? props.selectedCounts[props.equipmentData.id] ?? 0 : undefined}
+            onCountChange={props.onCountChange ? (c) => props.onCountChange!(props.equipmentData.id, c) : undefined}
+        />
     );
 };
 
@@ -111,16 +111,16 @@ export const EquipmentSelectionList: Component<EquipmentSelectionListProps> = (p
     });
 
     return (
-        <ul class={styles.list}>
+        <List striped>
             <For each={allEquipment()} fallback={<Show when={!buildings()}>Loading...</Show>}>
                 {({ buildingData, equipmentData }) => {
                     return (
-                        <li class={styles.item}>
+                        <ListItem selected={(props.selectedCounts?.[equipmentData.id] ?? 0) > 0}>
                             <EquipmentListItem equipmentData={equipmentData} buildingData={buildingData} {...props} />
-                        </li>
+                        </ListItem>
                     );
                 }}
             </For>
-        </ul>
+        </List>
     );
 };

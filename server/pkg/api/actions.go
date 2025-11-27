@@ -9,6 +9,10 @@ const (
 	ActionCreateBase = "createBase"
 	ActionRemoveBase = "removeBase"
 
+	// base construction sites
+	ActionCreateBaseSite   = "createSite"
+	ActionContributeToSite = "contributeToSite"
+
 	// base factories
 	ActionCreateFactory       = "createFactory"
 	ActionUpdateFactoryConfig = "updateFactoryConfig"
@@ -20,6 +24,9 @@ const (
 
 	// cities
 	ActionFoundCity = "foundCity"
+
+	// misc
+	ActionRunCheat = "runCheat"
 )
 
 type ExploreSystemPayload struct {
@@ -45,6 +52,17 @@ type RemoveBasePayload struct {
 	BaseID int `json:"baseId"`
 }
 
+type CreateSitePayload struct {
+	BaseID    int                          `json:"baseId"`
+	Equipment []FactoriesTableRowEquipment `json:"equipment"`
+}
+type ContributeToSitePayload struct {
+	BaseID int `json:"baseId"`
+	SiteID int `json:"siteId"`
+
+	Amounts map[string]float64 `json:"amounts"`
+}
+
 type CreateFactoryPayload struct {
 	BaseID    int                          `json:"baseId"`
 	Equipment []FactoriesTableRowEquipment `json:"equipment"`
@@ -59,4 +77,8 @@ type UpdateFactoryStatusPayload struct {
 }
 type RemoveFactoryPayload struct {
 	FactoryID int `json:"factoryId"`
+}
+
+type RunCheatPayload struct {
+	Cmd string `json:"cmd"`
 }

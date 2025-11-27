@@ -65,13 +65,12 @@ export namespace WorkforceData {
         return Object.fromEntries(WORKFORCE_TYPES.map((type) => [type, fill]));
     }
 
-    export function mix<T>(target: WorkforceData<T>, mixin: WorkforceData<T>, mixer: (current: T, incoming: T) => T) {
-        for (const [type, data] of Object.entries(mixin) as [WorkforceType, T][]) {
-            if (!target[type]) {
-                target[type] = data;
-                continue;
-            }
-
+    export function mix<T, U>(
+        target: WorkforceData<T>,
+        mixin: WorkforceData<U>,
+        mixer: (current: T | undefined, incoming: U) => T,
+    ) {
+        for (const [type, data] of Object.entries(mixin) as [WorkforceType, U][]) {
             target[type] = mixer(target[type], data);
         }
     }

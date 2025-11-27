@@ -2,6 +2,7 @@ package monolith
 
 import (
 	"fmt"
+	"srv/internal/cheats"
 	"srv/internal/components"
 	"srv/internal/components/auth"
 	"srv/internal/datafront"
@@ -57,7 +58,15 @@ func (m *Monolith) Start() error {
 		usecases.NewExploreWorldUsecase(worldGen, store),
 	)
 	gdf.InitCityActions(usecases.NewFoundCityUsecase(store))
-	gdf.InitBaseActions(usecases.NewCreateBaseUsecase(store))
+	gdf.InitBaseActions(
+		usecases.NewCreateBaseUsecase(store),
+		usecases.NewCreateFactorySiteUsecase(store),
+		usecases.NewMakeFactorySiteContributionUsecase(store),
+	)
+
+	if config.World().AllowCheats {
+		gdf.InitCheatAction(usecases.NewCheatUsecase(store, cheats.NewCheatEngine()))
+	}
 
 	srv, herr := http.NewHTTPServer(auth, comms)
 	if herr != nil {

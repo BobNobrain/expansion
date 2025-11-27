@@ -5,9 +5,16 @@
     height: 24px;
 }
 
+.hbar-row.full-height {
+    height: 100%;
+}
+
 .hbar {
     flex: 0 0 auto;
     height: 8px;
+}
+.full-height .hbar {
+    height: 100%;
 }
 
 .full {
@@ -15,6 +22,10 @@
 }
 .hollow {
     border: 1px solid var(--hbar-color);
+}
+.transparent {
+    background-color: var(--hbar-color);
+    opacity: 0.4;
 }
 .loading {
     /* TODO */
@@ -87,6 +98,12 @@
     border-left-width: 0;
 }
 
+.full-height .slider,
+.full-height .slider-bar-left,
+.full-height .slider-bar-right {
+    height: 100%;
+}
+
 .slider-handle {
     position: absolute;
     top: 0;
@@ -97,4 +114,9 @@
     background-color: var(--p-main-700-50);
     border-radius: 8px;
     box-shadow: inset 0 0 4px var(--p-main-700);
+}
+
+.full-height .slider-handle {
+    height: 100%;
+    border-radius: 0;
 }

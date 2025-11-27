@@ -65,3 +65,10 @@ export namespace World {
         return grid.coords.slice(tileIndex * 3, tileIndex * 3 + 3) as [number, number, number];
     }
 }
+
+export type WorldTileConditions = {
+    soilFertility: number;
+    resources: ResourceDeposit[];
+    oceanResources: ResourceDeposit[];
+    atmosphericResources: ResourceDeposit[];
+};

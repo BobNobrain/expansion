@@ -1,19 +1,16 @@
-import { createMemo, createSignal, For, Show, type Component } from 'solid-js';
-import { Dynamic } from 'solid-js/web';
+import { createMemo, For, Show, type Component } from 'solid-js';
 import { Badge, Button, NumberInput, Text } from '@/atoms';
 import { type WorkforceType } from '@/domain/City';
 import {
     type Icon,
     IconArea,
-    IconBarrel,
-    IconCity,
     IconCloud,
-    IconFactory,
     IconFlask,
     IconFlaskChevron,
     IconGraduate,
-    IconHammer,
+    IconHandbook,
     IconLeaf,
+    IconPlus,
     IconRocks,
     IconTie,
     IconTieChevron,
@@ -26,8 +23,8 @@ import {
 } from '@/icons';
 import { type SemanticColor } from '@/lib/appearance';
 import { stopPropagation } from '@/lib/misc';
-import { CommodityIconWithLabel } from '../CommodityIcon';
 import styles from './EquipmentOverview.module.css';
+import { EquipmentIcon } from '../EquipmentIcon/EquipmentIcon';
 
 export type EquipmentRequirementStatus = 'none' | 'bad' | 'ok' | 'good';
 
@@ -41,12 +38,12 @@ export type EquipmentOverviewProps = {
     workforce: Partial<Record<WorkforceType, EquipmentRequirement>>;
     area: EquipmentRequirement;
     building: string;
-    buildingMats: Record<string, EquipmentRequirement>;
 
     soil?: EquipmentRequirement;
     minerals?: EquipmentRequirement;
     liquids?: EquipmentRequirement;
     gases?: EquipmentRequirement;
+    disabled?: boolean;
 
     count?: number;
     onCountChange?: (newValue: number) => void;
@@ -64,18 +61,7 @@ const wfIcons: Record<WorkforceType, Icon> = {
     scientist: IconFlaskChevron,
 };
 
-const buildingIcons: Record<string, Icon> = {
-    facility: IconFactory,
-    mine: IconRocks,
-    farmland: IconLeaf,
-    office: IconCity,
-    rig: IconBarrel,
-};
-
 export const EquipmentOverview: Component<EquipmentOverviewProps> = (props) => {
-    const [isExpanded, setExpanded] = createSignal(false);
-    const toggleExpanded = () => setExpanded((x) => !x);
-
     const badges = createMemo(() => {
         const result: (EquipmentRequirement & { icon: Icon })[] = [{ ...props.area, icon: IconArea }];
 
@@ -100,80 +86,62 @@ export const EquipmentOverview: Component<EquipmentOverviewProps> = (props) => {
     });
 
     return (
-        <div class={styles.wrapper} classList={{ [styles.expanded]: isExpanded() }} onClick={toggleExpanded}>
-            <div class={styles.main}>
-                <div class={styles.icon}>
-                    <Dynamic component={buildingIcons[props.building] ?? IconUnknown} size={48} />
-                </div>
-                <div class={styles.info}>
-                    <div class={styles.topLine}>
-                        <Text tag="div" size="h3" color="bright" class={styles.name}>
-                            {props.name}
-                        </Text>
-                        <div class={styles.build} onClick={stopPropagation}>
-                            <Show
-                                when={props.count}
-                                fallback={
-                                    <Button
-                                        square
-                                        style="light"
-                                        size="s"
-                                        disabled={!props.onCountChange}
-                                        onClick={() => props.onCountChange!(1)}
-                                        stopPropagation
-                                    >
-                                        <IconHammer size={20} />
-                                    </Button>
-                                }
-                            >
-                                <NumberInput value={props.count} onUpdate={props.onCountChange} noIcon noErrorMessage />
-                            </Show>
-                        </div>
-                    </div>
-                    <div class={styles.badges}>
-                        <For each={badges()}>
-                            {({ icon, value, status }) => {
-                                return (
-                                    <Badge style="transparent" iconLeft={icon} color={getStatusColor<never>(status)}>
-                                        {value}
-                                    </Badge>
-                                );
-                            }}
-                        </For>
-
-                        <div class={styles.help}>
+        <div class={styles.main}>
+            <div class={styles.topLine}>
+                <EquipmentIcon equipmentId={props.name} size="sm" />
+                <Text tag="div" size="h3" color="bright" class={styles.name}>
+                    {props.name}
+                </Text>
+                <div class={styles.build} onClick={stopPropagation}>
+                    <Show
+                        when={props.count}
+                        fallback={
                             <Button
                                 square
                                 style="light"
                                 size="s"
-                                onClick={(ev) => {
-                                    (ev as { handled?: boolean }).handled = true;
-                                }}
+                                disabled={!props.onCountChange || props.disabled}
+                                onClick={() => props.onCountChange!(1)}
+                                stopPropagation
                             >
-                                <IconUnknown size={16} />
+                                <IconPlus size={20} />
                             </Button>
-                        </div>
-                    </div>
+                        }
+                    >
+                        <NumberInput
+                            value={props.count}
+                            onUpdate={props.onCountChange}
+                            noIcon
+                            noErrorMessage
+                            disabled={props.disabled}
+                        />
+                    </Show>
                 </div>
             </div>
-            <ul class={styles.cost}>
-                <For each={Object.entries(props.buildingMats)}>
-                    {([commodity, { value, status }]) => {
+            <div class={styles.badges}>
+                <For each={badges()}>
+                    {({ icon, value, status }) => {
                         return (
-                            <li class={styles.material}>
-                                <CommodityIconWithLabel
-                                    commodity={commodity}
-                                    badge={
-                                        <Text color={getStatusColor(status, 'bright')} size="small">
-                                            {value}
-                                        </Text>
-                                    }
-                                />
-                            </li>
+                            <Badge style="transparent" iconLeft={icon} color={getStatusColor<never>(status)}>
+                                {value}
+                            </Badge>
                         );
                     }}
                 </For>
-            </ul>
+
+                <div class={styles.help}>
+                    <Button
+                        square
+                        style="light"
+                        size="s"
+                        onClick={(ev) => {
+                            (ev as { handled?: boolean }).handled = true;
+                        }}
+                    >
+                        <IconHandbook size={16} />
+                    </Button>
+                </div>
+            </div>
         </div>
     );
 };

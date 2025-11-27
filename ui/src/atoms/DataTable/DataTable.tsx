@@ -9,6 +9,8 @@ export type DataTableColumn<Row> = {
     content: keyof Row | ((row: Row) => JSX.Element);
     align?: 'left' | 'right' | 'center';
     noPadding?: boolean;
+
+    onCellClick?: (row: Row, ev: MouseEvent) => void;
 };
 
 export type DataTableProps<Row> = {
@@ -123,6 +125,11 @@ export function DataTable<Row>(props: ParentProps<DataTableProps<Row>>): JSX.Ele
                                                         [align]: true,
                                                         [styles.noPadding]: column.noPadding,
                                                     }}
+                                                    onClick={
+                                                        column.onCellClick
+                                                            ? (ev) => column.onCellClick!(row, ev)
+                                                            : undefined
+                                                    }
                                                 >
                                                     {cellContent}
                                                 </td>

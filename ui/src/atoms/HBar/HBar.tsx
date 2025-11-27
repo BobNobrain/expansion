@@ -8,7 +8,11 @@ import {
 } from './common';
 import styles from './HBar.module.css';
 
-export const HBarRow: ParentComponent = (props) => {
+export type HBarRowProps = {
+    height?: 'sm' | 'full';
+};
+
+export const HBarRow: ParentComponent<HBarRowProps> = (props) => {
     const [getPixelsClaimed, setPixelsClaimed] = createSignal(0);
     const context: HBarRowContext = {
         getPixelsClaimed,
@@ -16,7 +20,12 @@ export const HBarRow: ParentComponent = (props) => {
     };
 
     return (
-        <div class={styles.hbarRow}>
+        <div
+            class={styles.hbarRow}
+            classList={{
+                [styles.fullHeight]: props.height === 'full',
+            }}
+        >
             <HBarRowContextProvider value={context}>{props.children}</HBarRowContextProvider>
         </div>
     );

@@ -28,4 +28,16 @@ type BasesTableRow struct {
 	CityID    int    `json:"cityId"`
 
 	CreatedAt time.Time `json:"established"`
+
+	ConstructionSites []BasesTableRowSite  `json:"constructionSites"`
+	Storage           BasesTableRowStorage `json:"storage"`
+}
+
+type BasesTableRowSite struct {
+	Target       []FactoriesTableRowEquipment `json:"target"`
+	Contribution Contribution                 `json:"contribution"`
+}
+
+type BasesTableRowStorage struct {
+	Inventory map[string]float64 `json:"inventory"`
 }

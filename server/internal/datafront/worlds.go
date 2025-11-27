@@ -30,6 +30,7 @@ func (gdf *GameDataFront) InitWorlds(repo components.WorldsRepoReadonly) {
 	worlds.table = dfcore.NewQueryableTable(worlds.queryByIDs)
 
 	events.SubscribeTyped(worlds.sub, events.WorldUpdated, worlds.onWorldUpdated)
+	events.SubscribeTyped(worlds.sub, events.BaseCreated, worlds.onBaseCreated)
 
 	gdf.worlds = worlds
 	gdf.df.AttachTable(dfcore.DFPath("worlds"), worlds.table)
@@ -66,16 +67,29 @@ func (w *worldsTable) queryByIDs(
 }
 
 func (t *worldsTable) onWorldUpdated(payload events.WorldUpdatedPayload) {
-	update := make(map[dfcore.EntityID]common.Encodable)
-
 	worldData, err := t.repo.GetData(payload.WorldID)
 	if err != nil {
-		logger.Error(logger.FromError("DF/world_overviews", err).WithDetail("payload", payload))
+		logger.Error(logger.FromError("DF/worlds.onWorldUpdated", err).WithDetail("payload", payload))
 		return
 	}
 
-	update[dfcore.EntityID(payload.WorldID)] = encodeWorld(worldData)
-	t.table.PublishEntities(update)
+	t.table.PublishEntities(dfcore.NewTableResponseFromSingle(
+		dfcore.EntityID(payload.WorldID),
+		encodeWorld(worldData),
+	))
+}
+
+func (t *worldsTable) onBaseCreated(payload events.BaseCreatedPayload) {
+	worldData, err := t.repo.GetData(payload.WorldID)
+	if err != nil {
+		logger.Error(logger.FromError("DF/worlds.onBaseCreated", err).WithDetail("payload", payload))
+		return
+	}
+
+	t.table.PublishEntities(dfcore.NewTableResponseFromSingle(
+		dfcore.EntityID(payload.WorldID),
+		encodeWorld(worldData),
+	))
 }
 
 func encodeWorld(w game.WorldData) common.Encodable {
@@ -95,7 +109,7 @@ func encodeWorld(w game.WorldData) common.Encodable {
 	var tileSoilFertilities []float64
 	var tileMoistureLevels []float64
 
-	for i := 0; i < size; i++ {
+	for i := range size {
 		coords := w.Grid.GetCoords(i)
 		color := w.Tiles[i].Color
 		gridCoords = append(gridCoords, coords.X, coords.Y, coords.Z)

@@ -73,3 +73,11 @@ func MapKeys[K1 comparable, K2 comparable, V any](src map[K1]V, f func(K1) K2) m
 	}
 	return dest
 }
+
+func MapValues[K comparable, V1 any, V2 any](src map[K]V1, f func(V1) V2) map[K]V2 {
+	dest := make(map[K]V2)
+	for k, v := range src {
+		dest[k] = f(v)
+	}
+	return dest
+}

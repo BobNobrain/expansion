@@ -1,6 +1,7 @@
 import type { BuildingsAsset } from '../lib/assetmanager';
-import type { WorkforceData, WorkforceType } from './City';
+import { WorkforceData, type WorkforceType } from './City';
 import { ConstructionCost } from './Commodity';
+import { Inventory } from './Inventory';
 import type { Recipe } from './Recipe';
 
 export type BaseOverview = {
@@ -34,7 +35,7 @@ export type BaseContent = {
 };
 
 export type Factory = {
-    id: string;
+    id: number;
     equipment: FactoryEquipment[];
 };
 
@@ -46,29 +47,53 @@ export type FactoryEquipment = {
 };
 
 export type FactoryProduction = {
-    recipeId: string;
-    efficiency: number;
+    recipeId: number;
+    manualEfficiency: number;
+    dynamicOutputs: Record<string, number>;
 };
 
 export namespace Factory {
-    export function getTotalInOuts(
-        recipes: Record<string, Recipe>,
-        factory: Pick<Factory, 'equipment'>,
-    ): Record<string, number> {
+    export function getEffectiveScales(equipment: FactoryEquipment): Record<string, number> {
+        let totalWeights = 0;
+        for (const productionItem of Object.values(equipment.production)) {
+            totalWeights += productionItem.manualEfficiency;
+        }
+
+        if (totalWeights === 0) {
+            totalWeights = 1;
+        }
+
+        const factor = equipment.count / totalWeights;
+
         const result: Record<string, number> = {};
+        for (const [key, productionItem] of Object.entries(equipment.production)) {
+            result[key] = productionItem.manualEfficiency * factor;
+        }
+        return result;
+    }
+
+    export function getTotalInOuts(recipes: Record<string, Recipe>, factory: Pick<Factory, 'equipment'>): Inventory {
+        const result = Inventory.empty();
 
         for (const equipment of factory.equipment) {
+            const scales = getEffectiveScales(equipment);
+
             for (const production of Object.values(equipment.production)) {
                 const recipe = recipes[production.recipeId];
-
-                for (const [cid, delta] of Object.entries(recipe.inputs)) {
-                    result[cid] ??= 0;
-                    result[cid] -= delta * equipment.count * production.efficiency;
+                if (!recipe) {
+                    continue;
                 }
 
+                const effectiveScale = scales[production.recipeId];
+
                 for (const [cid, delta] of Object.entries(recipe.inputs)) {
                     result[cid] ??= 0;
-                    result[cid] += delta * equipment.count * production.efficiency;
+                    result[cid] -= delta * effectiveScale;
+                }
+
+                for (const [cid, delta] of Object.entries(recipe.outputs)) {
+                    result[cid] ??= 0;
+                    result[cid] += delta * effectiveScale;
                 }
             }
         }
@@ -99,6 +124,21 @@ export namespace Factory {
 
         return totalCost;
     }
+
+    export function getTotalJobs(data: BuildingsAsset, factory: Pick<Factory, 'equipment'>): WorkforceData<number> {
+        const result = WorkforceData.empty<number>();
+
+        for (const eq of factory.equipment) {
+            const eqData = data.equipment[eq.equipmentId];
+            if (!eqData) {
+                continue;
+            }
+
+            WorkforceData.mix(result, eqData.workforce, (acc, current) => (acc ?? 0) + current.count * eq.count);
+        }
+
+        return result;
+    }
 }
 
 export type Building = {
@@ -111,6 +151,7 @@ export type Equipment = {
     building: string;
     area: number;
     workforce: Partial<Record<WorkforceType, { count: number; contribution: number }>>;
+    constructedFrom: Record<string, number>;
 
     requiresSoil?: boolean;
     requiresMinerals?: boolean;
@@ -141,6 +182,10 @@ export namespace Equipment {
         const result: ConstructionCost = {};
         for (const [mat, amount] of Object.entries(buildingData.matsPerArea)) {
             result[mat] = amount * eqData.area * count;
+        }
+
+        for (const [mat, amount] of Object.entries(eqData.constructedFrom)) {
+            result[mat] = amount * count;
         }
 
         // TODO: calculate in additional materials for environmental hazards

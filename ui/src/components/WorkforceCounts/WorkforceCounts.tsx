@@ -18,7 +18,7 @@ export type WorkforceCountsProps = {
     counts: WorkforceData<number>;
 };
 
-const wfIcons: Record<WorkforceType, Icon> = {
+export const wfIcons: Record<WorkforceType, Icon> = {
     intern: IconGraduate,
     worker: IconWorker,
     foreman: IconWorkerChevron,

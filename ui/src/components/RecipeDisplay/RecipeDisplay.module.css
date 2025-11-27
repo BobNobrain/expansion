@@ -41,19 +41,10 @@
     justify-content: center;
 }
 
-.ingridient {
-    display: flex;
-    align-items: center;
-}
 .ingridient + .ingridient {
     margin-top: 2px;
 }
 
-.ingridient-speed {
-    flex: 0 0 auto;
-    text-align: right;
-    margin-left: auto;
-}
 .ingridient.red .ingridient-speed {
     color: var(--p-red-500);
 }

@@ -2,7 +2,6 @@ package game
 
 import (
 	"srv/internal/domain"
-	"srv/internal/utils/phys"
 	"time"
 )
 
@@ -15,8 +14,7 @@ func (c CommodityID) IsNil() bool {
 // Represents a game commodity (item type that can be produced/bought/stored)
 type Commodity struct {
 	CommodityID CommodityID
-	Mass        phys.Mass
-	Volume      phys.Volume
+	Size        StorageSize
 	IsQuantized bool
 }
 
@@ -26,44 +24,52 @@ func (c Commodity) IsNil() bool {
 
 // Represents a singular act of contributing towards some kind of construction project
 type ContrubutionHistoryItem struct {
-	AmountsProvided map[CommodityID]float64
+	AmountsProvided InventoryDelta
 	Contributor     domain.UserID
 	Date            time.Time
 }
 
 // Represents a state of gathering resources for some kind of construction project
-type Contrubution struct {
-	AmountsRequired map[CommodityID]float64
-	AmountsProvided map[CommodityID]float64
+type Contribution struct {
+	AmountsRequired Inventory
 	History         []ContrubutionHistoryItem
 }
 
-func (c Contrubution) IsFulfilled() bool {
-	for cid, required := range c.AmountsRequired {
-		provided := c.AmountsProvided[cid]
-		if provided < required {
-			return false
-		}
+func NewContribution() *Contribution {
+	return &Contribution{
+		AmountsRequired: MakeEmptyInventory(),
+		History:         nil,
 	}
-
-	return true
 }
 
-func (c *Contrubution) Contribute(contribution ContrubutionHistoryItem) bool {
-	for cid, amount := range contribution.AmountsProvided {
-		required := c.AmountsRequired[cid]
-		provided := c.AmountsProvided[cid]
+func (c *Contribution) GetAmountsProvided() Inventory {
+	result := MakeEmptyInventory()
+	for _, next := range c.History {
+		result.Add(next.AmountsProvided)
+	}
+	return result
+}
 
-		if provided+amount > required {
-			return false
-		}
+func (c *Contribution) IsFulfilled() bool {
+	return c.GetAmountsProvided().GetDeltaTo(c.AmountsRequired).IsEmpty()
+}
+
+func (c *Contribution) Contribute(author domain.UserID, date time.Time, materials InventoryDelta) bool {
+	amountsProvided := c.GetAmountsProvided()
+
+	if !amountsProvided.Add(materials) {
+		return false
 	}
 
-	c.History = append(c.History, contribution)
-
-	for cid, amount := range contribution.AmountsProvided {
-		c.AmountsProvided[cid] += amount
+	if !amountsProvided.IsSubsetOf(c.AmountsRequired) {
+		return false
 	}
+
+	c.History = append(c.History, ContrubutionHistoryItem{
+		Contributor:     author,
+		Date:            date,
+		AmountsProvided: materials,
+	})
 
 	return true
 }
@@ -76,6 +82,10 @@ type BaseBuildingData struct {
 }
 
 type EquipmentID string
+
+func (id EquipmentID) IsEmpty() bool {
+	return len(id) == 0
+}
 
 type EquipmentData struct {
 	EquipmentID EquipmentID

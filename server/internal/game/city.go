@@ -35,7 +35,7 @@ type CityBuildingID string
 
 type CityContructionSite struct {
 	Building    CityBuildingID
-	Contributed *Contrubution
+	Contributed *Contribution
 }
 
 type CityPopulationData struct {

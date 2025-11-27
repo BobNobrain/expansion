@@ -42,6 +42,48 @@
                 "steel": 1
             },
             "baseTime": "1h"
+        },
+        {
+            "equipment": "smithingStation",
+            "inputs": {
+                "steel": 1
+            },
+            "outputs": {
+                "steelBeams": 7
+            },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "constructionMixer",
+            "inputs": {
+                "limestone": 3
+            },
+            "outputs": {
+                "concrete": 2
+            },
+            "baseTime": "2h"
+        },
+        {
+            "equipment": "constructionPress",
+            "inputs": {
+                "concrete": 1,
+                "steelBeams": 1
+            },
+            "outputs": {
+                "constructionPanel": 5
+            },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "constructionPress",
+            "inputs": {
+                "concrete": 1,
+                "limestone": 0.1
+            },
+            "outputs": {
+                "constructionBlocks": 3
+            },
+            "baseTime": "2h"
         }
     ]
 }

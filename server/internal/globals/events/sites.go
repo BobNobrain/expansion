@@ -8,6 +8,10 @@ type BaseCreatedPayload struct {
 	Operator game.CompanyID
 }
 
+type BaseUpdatedPayload struct {
+	BaseID game.BaseID
+	Base   *game.Base
+}
 type BaseRemovedPayload struct {
 	BaseID game.BaseID
 }
@@ -24,6 +28,7 @@ type FactoryRemovedPayload struct {
 
 var (
 	BaseCreated    = newEventBus[BaseCreatedPayload]()
+	BaseUpdated    = newEventBus[BaseUpdatedPayload]()
 	BaseRemoved    = newEventBus[BaseRemovedPayload]()
 	FactoryCreated = newEventBus[FactoryCreatedPayload]()
 	FactoryUpdated = newEventBus[FactoryUpdatedPayload]()
@@ -32,6 +37,7 @@ var (
 
 func initSites() {
 	BaseCreated.start()
+	BaseUpdated.start()
 	BaseRemoved.start()
 	FactoryCreated.start()
 	FactoryUpdated.start()

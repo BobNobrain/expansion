@@ -78,21 +78,27 @@ func (t *worldOverviewsTable) onSystemUpdated(payload events.SystemUpdatedPayloa
 }
 
 func (t *worldOverviewsTable) onWorldUpdated(payload events.WorldUpdatedPayload) {
-	worldData, err := t.repo.GetData(payload.WorldID)
+	overviews, err := t.repo.ResolveOverviews([]game.CelestialID{payload.WorldID})
 	if err != nil {
-		logger.Error(logger.FromError("DF/world_overviews", err).WithDetail("payload", payload))
+		logger.Error(logger.FromError("DF/world_overviews.onWorldUpdated", err).WithDetail("payload", payload))
 		return
 	}
 
-	update := make(map[dfcore.EntityID]common.Encodable)
-	update[dfcore.EntityID(payload.WorldID)] = encodeWorldOverview(game.WorldOverview{
-		ID:         worldData.ID,
-		IsExplored: worldData.Explored != nil,
-		Size:       worldData.Grid.Size(),
-		Conditions: worldData.Conditions,
-		Params:     worldData.Params,
-	})
-	t.table.PublishEntities(update)
+	t.table.PublishEntities(dfcore.NewTableResponseFromList(overviews, identifyWorldOverview, encodeWorldOverview))
+}
+
+func (t *worldOverviewsTable) onBaseCreated(payload events.BaseCreatedPayload) {
+	overviews, err := t.repo.ResolveOverviews([]game.CelestialID{payload.WorldID})
+	if err != nil {
+		logger.Error(logger.FromError("DF/world_overviews.onBaseCreated", err).WithDetail("payload", payload))
+		return
+	}
+
+	t.table.PublishEntities(dfcore.NewTableResponseFromList(overviews, identifyWorldOverview, encodeWorldOverview))
+}
+
+func identifyWorldOverview(overview game.WorldOverview) dfcore.EntityID {
+	return dfcore.EntityID(overview.ID)
 }
 
 func encodeWorldOverview(overview game.WorldOverview) common.Encodable {

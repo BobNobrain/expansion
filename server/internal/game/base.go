@@ -29,8 +29,24 @@ type Base struct {
 	TileID   TileID
 	CityID   CityID
 
-	// Factories []BaseFactory
-	Sites []BaseConstructionSite
+	Sites     map[int]BaseConstructionSite
+	Inventory Inventory
+}
+
+func (b *Base) AddConstructionSite(target []FactoryEquipment, contribution *Contribution) int {
+	var maxExistingId int
+	for id := range b.Sites {
+		maxExistingId = max(maxExistingId, id)
+	}
+
+	id := maxExistingId + 1
+	b.Sites[id] = BaseConstructionSite{
+		SiteID:      id,
+		Target:      target,
+		Contributed: contribution,
+	}
+
+	return id
 }
 
 type FactoryID int
@@ -105,6 +121,7 @@ type FactoryProductionItem struct {
 }
 
 type BaseConstructionSite struct {
+	SiteID      int
 	Target      []FactoryEquipment
-	Contributed *Contrubution
+	Contributed *Contribution
 }

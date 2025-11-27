@@ -1,0 +1,41 @@
+.list {
+    list-style: none;
+    padding: 8px 0;
+    margin: 0;
+}
+
+.item {
+    border: solid transparent;
+    border-width: 0 2px;
+}
+
+.striped > .item:nth-child(2n) {
+    background-color: var(--p-main-900-10);
+}
+
+.selected {
+    border-color: var(--p-primary-500);
+    background-color: var(--p-main-900-25);
+}
+
+.striped > .item:nth-child(2n).selected {
+    background-color: var(--p-main-900-35);
+}
+
+.clickable {
+    cursor: pointer;
+}
+
+.paddingH {
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+.paddingV {
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+.paddingBoth {
+    composes: paddingV paddingH;
+}

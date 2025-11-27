@@ -68,6 +68,90 @@
             "mass": 1,
             "volume": 0.2,
             "quantized": true
+        },
+        "powerDrill": {
+            "category": "machinery",
+            "mass": 10,
+            "volume": 5,
+            "quantized": true
+        },
+        "powerPump": {
+            "category": "machinery",
+            "mass": 5,
+            "volume": 5,
+            "quantized": true
+        },
+        "airFilteringKit": {
+            "category": "machinery",
+            "mass": 3,
+            "volume": 20,
+            "quantized": true
+        },
+        "foodCooker": {
+            "category": "machinery",
+            "mass": 4,
+            "volume": 4,
+            "quantized": true
+        },
+        "powerMixer": {
+            "category": "machinery",
+            "mass": 4,
+            "volume": 4,
+            "quantized": true
+        },
+        "powerPress": {
+            "category": "machinery",
+            "mass": 5,
+            "volume": 7,
+            "quantized": true
+        },
+        "powerHammer": {
+            "category": "machinery",
+            "mass": 4,
+            "volume": 2,
+            "quantized": true
+        },
+        "metalRollingMachine": {
+            "category": "machinery",
+            "mass": 4,
+            "volume": 3,
+            "quantized": true
+        },
+        "machineAssembler": {
+            "category": "machinery",
+            "mass": 3,
+            "volume": 5,
+            "quantized": true
+        },
+        "plasticPrinter": {
+            "category": "machinery",
+            "mass": 2,
+            "volume": 4,
+            "quantized": true
+        },
+        "cleanroomKit": {
+            "category": "machinery",
+            "mass": 2,
+            "volume": 2,
+            "quantized": true
+        },
+        "electronicsAssembler": {
+            "category": "machinery",
+            "mass": 1,
+            "volume": 1,
+            "quantized": true
+        },
+        "laboratoryEquipment": {
+            "category": "machinery",
+            "mass": 1,
+            "volume": 2,
+            "quantized": true
+        },
+        "officeFurniture": {
+            "category": "machinery",
+            "mass": 2,
+            "volume": 2,
+            "quantized": true
         }
     },
     "resources": {

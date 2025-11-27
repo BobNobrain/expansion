@@ -14,6 +14,8 @@ export type ContainerProps = {
     primaryAlignment?: 'start' | 'end' | 'center';
     secondaryAlignment?: 'start' | 'end' | 'center';
     background?: 'none' | 'light';
+
+    onClick?: (ev: MouseEvent) => void;
 };
 
 const SIZE_CLS: Record<NonNullable<ContainerProps['size']>, string> = {
@@ -53,6 +55,7 @@ export const Container: ParentComponent<ContainerProps> = (props) => {
                 ),
                 [BG_CLS[props.background ?? 'none']]: true,
             }}
+            onClick={props.onClick}
         >
             {props.children}
         </div>

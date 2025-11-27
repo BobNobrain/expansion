@@ -54,13 +54,13 @@ func (u *sysOverviewsTable) onSystemUpdated(payload events.SystemUpdatedPayload)
 		return
 	}
 
-	update := make(map[dfcore.EntityID]common.Encodable)
-	update[dfcore.EntityID(payload.SystemID)] = encodeSystemOverview(game.StarSystemOverview{
+	update := dfcore.NewTableResponse()
+	update.Add(dfcore.EntityID(payload.SystemID), encodeSystemOverview(game.StarSystemOverview{
 		ID:         system.ID,
 		IsExplored: !system.Explored.By.IsEmpty(),
 		Stars:      system.Stars,
 		// TODO: properly retrieve and calculate values like NPlanets
-	})
+	}))
 	u.table.PublishEntities(update)
 }
 

@@ -1,5 +1,13 @@
+import type { Inventory } from './Inventory';
+
 export type Recipe = {
-    id: string;
-    inputs: Record<string, number>;
-    outputs: Record<string, number>;
+    id: number;
+    inputs: Inventory;
+    outputs: Inventory;
+    equipment: string;
+
+    affectedByFertility?: boolean;
+    affectedByResource?: boolean;
+    affectedByOcean?: boolean;
+    affectedByAtmosphere?: boolean;
 };

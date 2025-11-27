@@ -14,6 +14,7 @@ export type TextProps = {
     italic?: boolean;
     underline?: boolean;
     size?: TextSize;
+    ellipsis?: boolean;
 
     onClick?: (ev: MouseEvent) => void;
     class?: string;
@@ -30,6 +31,7 @@ export const Text: ParentComponent<TextProps> = (props) => {
                 [styles.bold]: props.bold,
                 [styles.italic]: props.italic,
                 [styles.underline]: props.underline,
+                [styles.ellipsis]: props.ellipsis,
                 [colors[props.color ?? 'default']]: Boolean(props.color),
                 [colors.inverted]: props.inverted,
                 [sizes[props.size ?? 'normal']]: Boolean(props.size),

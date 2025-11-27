@@ -29,13 +29,7 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
-                "materialsPerArea": {
-                    "type": "object",
-                    "patternProperties": {
-                        "^[a-z][A-Za-z0-9]*$": { "type": "number", "min": 0 }
-                    },
-                    "additionalProperties": false
-                }
+                "materialsPerArea": { "$ref": "#/$defs/Inventory" }
             },
             "required": [ "materialsPerArea" ]
         },
@@ -45,6 +39,7 @@
             "properties": {
                 "building": { "type": "string" },
                 "area": { "type": "integer", "min": 1 },
+                "constructedFrom": { "$ref": "#/$defs/Inventory" },
                 "operators": {
                     "type": "object",
                     "properties": {
@@ -66,7 +61,14 @@
                 "requiresLiquids": { "type": "boolean" },
                 "requiresGases": { "type": "boolean" }
             },
-            "required": [ "area", "operators", "building" ]
+            "required": [ "area", "operators", "building", "constructedFrom" ]
+        },
+        "Inventory": {
+            "type": "object",
+            "patternProperties": {
+                "^[a-z][A-Za-z0-9]*$": { "type": "number", "min": 0 }
+            },
+            "additionalProperties": false
         },
         "OperatorsCount": {
             "type": "object",

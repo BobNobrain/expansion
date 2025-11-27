@@ -2,10 +2,12 @@ import type { Predictable } from '@/lib/predictables';
 
 export type InventoryEntry = {
     commodity: string;
-    amount: Predictable;
+    amount?: Predictable;
+    speed?: number;
 };
 
 export type InventoryEntryWithData = InventoryEntry & {
-    density: number;
+    mass: number;
+    volume: number;
     quantized: boolean;
 };

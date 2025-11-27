@@ -60,6 +60,42 @@ func (uc *createBaseUsecase) Run(
 		)
 	}
 
+	base, err := tx.Bases().GetBaseAt(input.WorldID, input.TileID)
+	if err != nil {
+		return err
+	}
+
+	if base != nil {
+		return common.NewValidationError(
+			"CreateBaseUsecaseInput.TileID",
+			"This plot is already occupied by another base",
+			common.WithDetail("baseId", base.ID),
+			common.WithDetail("operator", base.Operator),
+		)
+	}
+
+	companies, err := tx.Companies().GetOwnedCompanies(uctx.Author)
+	if err != nil {
+		return err
+	}
+
+	isOperatorValid := false
+	for _, c := range companies {
+		if c.ID == input.Operator {
+			isOperatorValid = true
+			break
+		}
+	}
+
+	if !isOperatorValid {
+		return common.NewValidationError(
+			"CreateBaseUsecaseInput.Operator",
+			"Specified company is not owned by you",
+			common.WithDetail("nCompaniesChecked", len(companies)),
+			common.WithDetail("operator", input.Operator),
+		)
+	}
+
 	tx.Bases().CreateBase(components.CreateBasePayload{
 		WorldID:  input.WorldID,
 		TileID:   input.TileID,

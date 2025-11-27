@@ -25,5 +25,6 @@ type BasesRepo interface {
 	BasesRepoReadonly
 
 	CreateBase(CreateBasePayload) common.Error
+	UpdateBaseContent(game.Base) common.Error
 	DeleteBase(game.BaseID) common.Error
 }

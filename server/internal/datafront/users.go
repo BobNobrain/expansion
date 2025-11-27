@@ -44,33 +44,37 @@ func (u *usersTable) dispose() {
 }
 
 func (u *usersTable) onUserCreated(payload events.UserUpdatedPayload) {
-	update := make(map[dfcore.EntityID]common.Encodable)
-	update[dfcore.EntityID(payload.User.ID)] = encodeUser(payload.User, nil)
-	u.table.PublishEntities(update)
+	u.table.PublishEntities(dfcore.NewTableResponseFromSingle(
+		dfcore.EntityID(payload.User.ID),
+		encodeUser(payload.User, nil),
+	))
 }
 
 func (u *usersTable) onUserUpdated(payload events.UserUpdatedPayload) {
-	update := make(map[dfcore.EntityID]common.Encodable)
-	update[dfcore.EntityID(payload.User.ID)] = encodeUser(payload.User, nil)
-	u.table.PublishEntities(update)
+	u.table.PublishEntities(dfcore.NewTableResponseFromSingle(
+		dfcore.EntityID(payload.User.ID),
+		encodeUser(payload.User, nil),
+	))
 }
 
 func (u *usersTable) onUserOnline(payload events.ClientConnected) {
-	update := make(map[dfcore.EntityID]common.Encodable)
 	isOnline := true
-	update[dfcore.EntityID(payload.User.ID)] = common.AsEncodable(api.UsersTableRow{
-		IsOnline: &isOnline,
-	})
-	u.table.PublishEntities(update)
+	u.table.PublishEntities(dfcore.NewTableResponseFromSingle(
+		dfcore.EntityID(payload.User.ID),
+		common.AsEncodable(api.UsersTableRow{
+			IsOnline: &isOnline,
+		}),
+	))
 }
 
 func (u *usersTable) onUserOffline(payload events.ClientConnected) {
-	update := make(map[dfcore.EntityID]common.Encodable)
 	isOnline := false
-	update[dfcore.EntityID(payload.User.ID)] = common.AsEncodable(api.UsersTableRow{
-		IsOnline: &isOnline,
-	})
-	u.table.PublishEntities(update)
+	u.table.PublishEntities(dfcore.NewTableResponseFromSingle(
+		dfcore.EntityID(payload.User.ID),
+		common.AsEncodable(api.UsersTableRow{
+			IsOnline: &isOnline,
+		}),
+	))
 }
 
 func (u *usersTable) queryByIds(
@@ -99,38 +103,6 @@ func (u *usersTable) queryByIds(
 
 	return result, nil
 }
-
-// func (u *usersTable) queryByUsernames(
-// 	payload api.UsersQueryByUsernamePayload,
-// 	_ dfapi.DFTableRequest,
-// 	_ dfcore.DFRequestContext,
-// ) (*dfcore.TableResponse, common.Error) {
-// 	if len(payload.Usernames) == 0 {
-// 		return nil, common.NewValidationError("UsersQueryByUsernamePayload::Usernames", "no usernames specified")
-// 	}
-
-// 	unames := make([]domain.Username, 0, len(payload.Usernames))
-// 	for _, uname := range payload.Usernames {
-// 		unames = append(unames, domain.Username(uname))
-// 	}
-
-// 	fetchedUsersByUsername, err := u.repo.GetManyByUsernames(unames)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	result := dfcore.EmptyTableResponse()
-// 	for _, user := range fetchedUsersByUsername {
-// 		isOnline, err := u.tracker.IsOnline(user.ID)
-// 		var isOnlineNullable *bool
-// 		if err != nil {
-// 			isOnlineNullable = &isOnline
-// 		}
-// 		result.Add(dfcore.EntityID(user.ID), encodeUser(user, isOnlineNullable))
-// 	}
-
-// 	return result, nil
-// }
 
 func encodeUser(user domain.User, isOnline *bool) common.Encodable {
 	return common.AsEncodable(api.UsersTableRow{

@@ -45,6 +45,7 @@
         "drill": {
             "building": "mine",
             "area": 80,
+            "constructedFrom": { "powerDrill": 1 },
             "operators": {
                 "intern": { "count": 3, "contribution": 0.1 },
                 "worker": { "count": 1, "contribution": 0.5 }
@@ -54,6 +55,7 @@
         "pump": {
             "building": "rig",
             "area": 20,
+            "constructedFrom": { "powerPump": 1 },
             "operators": {
                 "intern": { "count": 3, "contribution": 0.1 },
                 "worker": { "count": 1, "contribution": 0.5 }
@@ -63,6 +65,7 @@
         "airFilter": {
             "building": "rig",
             "area": 40,
+            "constructedFrom": { "airFilteringKit": 1 },
             "operators": {
                 "intern": { "count": 2, "contribution": 0.1 },
                 "worker": { "count": 2, "contribution": 0.5 }
@@ -72,6 +75,7 @@
         "field": {
             "building": "farmland",
             "area": 50,
+            "constructedFrom": { },
             "operators": {
                 "intern": { "count": 5, "contribution": 0.1 },
                 "worker": { "count": 3, "contribution": 0.5 }
@@ -81,6 +85,7 @@
         "foodProcessor": {
             "building": "facility",
             "area": 10,
+            "constructedFrom": { "foodCooker": 1 },
             "operators": {
                 "intern": { "count": 1, "contribution": 0.1 },
                 "worker": { "count": 2, "contribution": 0.5 }
@@ -89,6 +94,7 @@
         "smelter": {
             "building": "facility",
             "area": 20,
+            "constructedFrom": { "constructionBlocks": 10 },
             "operators": {
                 "intern": { "count": 3, "contribution": 0.1 },
                 "worker": { "count": 1, "contribution": 0.5 },
@@ -98,6 +104,7 @@
         "constructionMixer": {
             "building": "facility",
             "area": 10,
+            "constructedFrom": { "powerMixer": 1 },
             "operators": {
                 "intern": { "count": 3, "contribution": 0.1 }
             }
@@ -105,14 +112,25 @@
         "constructionPress": {
             "building": "facility",
             "area": 10,
+            "constructedFrom": { "powerPress": 1 },
             "operators": {
                 "intern": { "count": 3, "contribution": 0.1 },
                 "worker": { "count": 1, "contribution": 0.5 }
             }
         },
+        "smithingStation": {
+            "building": "facility",
+            "area": 10,
+            "constructedFrom": { "powerHammer": 1, "metalRollingMachine": 1 },
+            "operators": {
+                "intern": { "count": 2, "contribution": 0.2 },
+                "worker": { "count": 1, "contribution": 0.6 }
+            }
+        },
         "machineAssembler": {
             "building": "facility",
             "area": 20,
+            "constructedFrom": { "machineAssembler": 1 },
             "operators": {
                 "intern": { "count": 5, "contribution": 0.1 },
                 "engineer": { "count": 1, "contribution": 1.0 }
@@ -121,23 +139,16 @@
         "plasticPrinter": {
             "building": "facility",
             "area": 30,
+            "constructedFrom": { "plasticPrinter": 1 },
             "operators": {
                 "intern": { "count": 2, "contribution": 0.1 },
                 "engineer": { "count": 3, "contribution": 0.3 }
             }
         },
-        "metalsmithing": {
-            "building": "facility",
-            "area": 30,
-            "operators": {
-                "intern": { "count": 5, "contribution": 0.2 },
-                "worker": { "count": 3, "contribution": 0.5 },
-                "engineer": { "count": 2, "contribution": 0.5 }
-            }
-        },
         "electronicsAssembler": {
             "building": "facility",
             "area": 40,
+            "constructedFrom": { "cleanroomKit": 1, "electronicsAssembler": 1 },
             "operators": {
                 "intern": { "count": 5, "contribution": 0.1 },
                 "worker": { "count": 1, "contribution": 0.3 },
@@ -147,6 +158,7 @@
         "chemicalMixer": {
             "building": "facility",
             "area": 20,
+            "constructedFrom": { "powerMixer": 1 },
             "operators": {
                 "intern": { "count": 3, "contribution": 0.1 },
                 "worker": { "count": 1, "contribution": 0.3 },
@@ -156,6 +168,7 @@
         "chemicalLab": {
             "building": "facility",
             "area": 30,
+            "constructedFrom": { "laboratoryEquipment": 1 },
             "operators": {
                 "worker": { "count": 1, "contribution": 0.3 },
                 "engineer": { "count": 3, "contribution": 0.3 },
@@ -166,6 +179,7 @@
         "openSpace": {
             "building": "office",
             "area": 20,
+            "constructedFrom": { "officeFurniture": 10 },
             "operators": {
                 "intern": { "count": 3, "contribution": 0.1 },
                 "manager": { "count": 2, "contribution": 0.2 }
@@ -174,6 +188,7 @@
         "managementCabinets": {
             "building": "office",
             "area": 10,
+            "constructedFrom": { "officeFurniture": 15 },
             "operators": {
                 "intern": { "count": 1, "contribution": 0.1 },
                 "manager": { "count": 5, "contribution": 0.3 },

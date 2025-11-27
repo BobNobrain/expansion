@@ -1,0 +1,15 @@
+.production-item {
+    position: relative;
+}
+
+.production-item-slider {
+    position: absolute;
+    inset: -2px;
+
+    display: flex;
+    align-items: center;
+}
+
+.production-item-slider > * {
+    flex: 1 1 auto;
+}

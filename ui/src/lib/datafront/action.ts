@@ -46,6 +46,8 @@ function createRunningAction<P, R>(impl: (payload: P) => Promise<R>): RunningAct
                     if (dfErr.retry) {
                         canRun = true;
                     }
+
+                    callbacks?.onError?.();
                 });
         },
         result,

@@ -20,6 +20,7 @@ type ExploreWorldPayload struct {
 
 type WorldsRepoReadonly interface {
 	GetOverviews(game.StarSystemID) ([]game.WorldOverview, common.Error)
+	ResolveOverviews([]game.CelestialID) ([]game.WorldOverview, common.Error)
 	GetData(game.CelestialID) (game.WorldData, common.Error)
 	GetDataMany([]game.CelestialID) ([]game.WorldData, common.Error)
 }

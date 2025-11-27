@@ -79,6 +79,9 @@ func (s1 ScaledScalar[T]) Diff(s2 ScaledScalar[T], scale *Scale) ScaledScalar[T]
 func (s ScaledScalar[T]) Multiply(factor float64) ScaledScalar[T] {
 	return ScaledScalar[T]{scaleValue: s.scaleValue, value: s.value * factor}
 }
+func (s ScaledScalar[T]) IsZero() bool {
+	return s.value == 0.0
+}
 func (s1 ScaledScalar[T]) Max(s2 ScaledScalar[T], scale *Scale) ScaledScalar[T] {
 	maxScale := s1.scaleValue
 	if s2.scaleValue > s1.scaleValue {

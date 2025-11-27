@@ -59,6 +59,12 @@ func (m Mass) SolarMasses() float64 {
 func (m Mass) Multiply(factor float64) Mass {
 	return Mass{value: m.value.Multiply(factor)}
 }
+func (m1 Mass) Add(m2 Mass) Mass {
+	return Mass{value: m1.value.Add(m2.value, massScaleData)}
+}
+func (m Mass) IsZero() bool {
+	return m.value.IsZero()
+}
 
 func FromVolumeAndDensity(v Volume, d Density) Mass {
 	return Tons(v.CubicKilometers() * d.TonsPerCubicKilometer())
@@ -90,11 +96,17 @@ func SphereVolume(side Distance) Volume {
 	km := side.Kilometers()
 	return Volume(geom.SphereVolume(km))
 }
+func (v Volume) CubicMeters() float64 {
+	return float64(v) * 1e9
+}
 func (v Volume) CubicKilometers() float64 {
 	return float64(v)
 }
 func (v1 Volume) Diff(v2 Volume) Volume {
 	return Volume(float64(v1) - float64(v2))
+}
+func (v Volume) IsZero() bool {
+	return v == 0.0
 }
 
 type Density float64

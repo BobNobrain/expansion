@@ -194,9 +194,8 @@ func (w *worldsRepoImpl) GetOverviews(systemID game.StarSystemID) ([]game.WorldO
 		return nil, makeDBError(dberr, "WorldsRepo::GetOverviews")
 	}
 
-	result := make([]game.WorldOverview, 0, len(rows))
-	for _, row := range rows {
-		result = append(result, game.WorldOverview{
+	return utils.MapSlice(rows, func(row dbq.GetWorldsInSystemRow) game.WorldOverview {
+		return game.WorldOverview{
 			ID:         game.CelestialID(row.BodyID),
 			IsExplored: row.ExploredAt.Valid && row.ExploredBy.Valid,
 			Size:       int(row.GridSize),
@@ -216,10 +215,39 @@ func (w *worldsRepoImpl) GetOverviews(systemID game.StarSystemID) ([]game.WorldO
 				NCities: int(row.NCities),
 				NBases:  int(row.NBases),
 			},
-		})
+		}
+	}), nil
+}
+
+func (w *worldsRepoImpl) ResolveOverviews(wids []game.CelestialID) ([]game.WorldOverview, common.Error) {
+	rows, dberr := w.q.ResolveWorldOverviews(w.ctx, utils.ConvertStrings[game.CelestialID, string](wids))
+	if dberr != nil {
+		return nil, makeDBError(dberr, "WorldsRepo::ResolveOverviews")
 	}
 
-	return result, nil
+	return utils.MapSlice(rows, func(row dbq.ResolveWorldOverviewsRow) game.WorldOverview {
+		return game.WorldOverview{
+			ID:         game.CelestialID(row.BodyID),
+			IsExplored: row.ExploredAt.Valid && row.ExploredBy.Valid,
+			Size:       int(row.GridSize),
+			Conditions: game.WorldConditions{
+				Pressure: phys.Bar(row.SurfacePressureBar),
+				AvgTemp:  phys.Kelvins(row.SurfaceAvgTempK),
+				Gravity:  phys.EarthGs(row.SurfaceGravityG),
+			},
+			Params: game.WorldParams{
+				Radius: phys.Kilometers(row.RadiusKm),
+				Mass:   phys.EarthMasses(row.MassEarths),
+				Age:    phys.BillionYears(row.AgeByrs),
+				Class:  decodeWorldClass(row.Class),
+			},
+			Population: game.WorldPopulationOverview{
+				NPops:   int(row.Population),
+				NCities: int(row.NCities),
+				NBases:  int(row.NBases),
+			},
+		}
+	}), nil
 }
 
 func encodeWorldClass(class game.CelestialBodyClass) string {

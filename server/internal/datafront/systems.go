@@ -68,13 +68,11 @@ func (t *systemsTable) queryByIDs(
 func (t *systemsTable) onSystemUpdated(payload events.SystemUpdatedPayload) {
 	system, err := t.repo.GetContent(payload.SystemID)
 	if err != nil {
-		logger.Error(logger.FromError("DF/systems", err).WithDetail("event", "galaxy:systemUpdate"))
+		logger.Error(logger.FromError("DF/systems.onSystemUpdated", err).WithDetail("event", "galaxy:systemUpdate"))
 		return
 	}
 
-	update := make(map[dfcore.EntityID]common.Encodable)
-	update[dfcore.EntityID(payload.SystemID)] = encodeSystem(system)
-	t.table.PublishEntities(update)
+	t.table.PublishEntities(dfcore.NewTableResponseFromSingle(dfcore.EntityID(system.ID), encodeSystem(system)))
 }
 
 func encodeSystem(system game.StarSystemContent) common.Encodable {

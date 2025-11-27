@@ -2,7 +2,7 @@ import { createContext, createMemo, onCleanup, onMount, useContext, type JSX } f
 import { type SemanticColor } from '@/lib/appearance';
 import styles from './HBar.module.css';
 
-export type HBarStyle = 'full' | 'hollow' | 'loading';
+export type HBarStyle = 'full' | 'hollow' | 'transparent' | 'loading';
 
 export type HBarStyleProps = {
     color?: SemanticColor;

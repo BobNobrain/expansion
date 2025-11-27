@@ -1,10 +1,11 @@
 import { type Component, createMemo, type JSX, Show } from 'solid-js';
-import { Dynamic } from 'solid-js/web';
+import { BlockIcon, type BlockIconSize } from '@/atoms';
 import {
     type Icon,
     IconBarrel,
     IconCloud,
     IconConstruction,
+    IconEquipment,
     IconIngot,
     IconLeaf,
     IconRocks,
@@ -18,6 +19,7 @@ export type CommodityIconProps = {
     commodity?: string;
     category?: string;
     badge?: JSX.Element;
+    size?: BlockIconSize;
 };
 
 const iconsByCategory: Record<string, Icon> = {
@@ -27,6 +29,7 @@ const iconsByCategory: Record<string, Icon> = {
     construction: IconConstruction,
     crops: IconLeaf,
     metals: IconIngot,
+    machinery: IconEquipment,
 };
 
 const classesByCategory: Record<string, string | undefined> = {
@@ -37,6 +40,7 @@ const classesByCategory: Record<string, string | undefined> = {
     construction: styles.catConstruction,
     crops: styles.catCrops,
     metals: styles.catMetals,
+    machinery: styles.catMachinery,
 };
 
 export const CommodityIcon: Component<CommodityIconProps> = (props) => {
@@ -48,46 +52,55 @@ export const CommodityIcon: Component<CommodityIconProps> = (props) => {
         }
 
         if (!props.commodity) {
-            return undefined;
+            return 'unknown';
         }
 
         const all = commodities();
         if (!all) {
-            return undefined;
+            return 'unknown';
         }
 
-        return all[props.commodity]?.category;
+        return all[props.commodity]?.category ?? 'unknown';
     });
 
     const icon = createMemo(() => {
         const cat = category();
-        if (!cat) {
-            return IconUnknown;
-        }
-
         return iconsByCategory[cat] ?? IconUnknown;
     });
 
     return (
-        <div
-            class={styles.icon}
-            classList={{
-                [classesByCategory[category() ?? 'unknown'] ?? styles.catUnknown]: true,
-            }}
-        >
-            <Dynamic component={icon()} size={24} block />
-            <Show when={props.badge}>
-                <div class={styles.badge}>{props.badge}</div>
-            </Show>
-        </div>
+        <BlockIcon
+            icon={icon()}
+            badge={props.badge}
+            size={props.size}
+            class={classesByCategory[category()] ?? styles.catUnknown}
+        />
     );
 };
 
-export const CommodityIconWithLabel: Component<CommodityIconProps> = (props) => {
+export type CommodityIconHeight = 'one-line' | 'two-line';
+export type CommodityIconWithLabelProps = CommodityIconProps & {
+    secondLine?: JSX.Element;
+    secondLineAlignment?: 'left' | 'right';
+};
+
+export const CommodityIconWithLabel: Component<CommodityIconWithLabelProps> = (props) => {
     return (
-        <div class={styles.labeled}>
+        <div class={styles.labeled} classList={{ [styles.twoLines]: Boolean(props.secondLine) }}>
             <CommodityIcon {...props} />
-            <div class={styles.label}>{props.commodity}</div>
+            <Show when={props.secondLine} fallback={<div class={styles.label}>{props.commodity}</div>}>
+                <div class={styles.labels}>
+                    <div class={styles.label}>{props.commodity}</div>
+                    <div
+                        class={styles.secondLine}
+                        classList={{
+                            [styles.alignRight]: props.secondLineAlignment === 'right',
+                        }}
+                    >
+                        {props.secondLine}
+                    </div>
+                </div>
+            </Show>
         </div>
     );
 };

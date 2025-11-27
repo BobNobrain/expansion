@@ -1,34 +1,17 @@
-.icon {
-    width: 32px;
-    height: 32px;
-    overflow: hidden;
-
-    background-color: var(--commodity-icon-bg);
-    border-radius: 2px;
-    color: var(--commodity-icon-color);
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    flex: 0 0 32px;
-
-    position: relative;
-}
-
-.badge {
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    padding: 0 4px;
-    background-color: var(--p-main-100-75);
-    border-top-left-radius: 2px;
-}
-
 .labeled {
     display: flex;
     align-items: center;
     gap: 8px;
+    overflow: hidden;
+}
+
+.labels {
+    flex: 1 1 auto;
+    overflow: hidden;
+
+    display: flex;
+    flex-flow: column;
+    align-items: stretch;
 }
 
 .label {
@@ -39,31 +22,39 @@
     white-space: nowrap;
 }
 
+.secondLine.alignRight {
+    text-align: right;
+}
+
 .cat-unknown {
-    --commodity-icon-bg: var(--p-secondary-500-25);
-    --commodity-icon-color: var(--p-secondary-900);
+    --block-icon-bg: var(--p-secondary-500-25);
+    --block-icon-color: var(--p-secondary-900);
 }
 .cat-construction {
-    --commodity-icon-bg: #adc2d260;
-    --commodity-icon-color: #adc2d2;
+    --block-icon-bg: #adc2d260;
+    --block-icon-color: #adc2d2;
 }
 .cat-crops {
-    --commodity-icon-bg: #8bd36a60;
-    --commodity-icon-color: #8bd36a;
+    --block-icon-bg: #8bd36a60;
+    --block-icon-color: #8bd36a;
 }
 .cat-gases {
-    --commodity-icon-bg: #73dab960;
-    --commodity-icon-color: #73dab9;
+    --block-icon-bg: #73dab960;
+    --block-icon-color: #73dab9;
 }
 .cat-liquids {
-    --commodity-icon-bg: #8391d160;
-    --commodity-icon-color: #8391d1;
+    --block-icon-bg: #8391d160;
+    --block-icon-color: #8391d1;
 }
 .cat-metals {
-    --commodity-icon-bg: #d5d4ce60;
-    --commodity-icon-color: #d5d4ce;
+    --block-icon-bg: #d5d4ce60;
+    --block-icon-color: #d5d4ce;
 }
 .cat-minerals {
-    --commodity-icon-bg: #da977360;
-    --commodity-icon-color: #da9773;
+    --block-icon-bg: #da977360;
+    --block-icon-color: #da9773;
+}
+.cat-machinery {
+    --block-icon-bg: #405c7260;
+    --block-icon-color: #6ba6d2;
 }

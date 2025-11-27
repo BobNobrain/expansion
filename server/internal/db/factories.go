@@ -107,23 +107,7 @@ func decodeFactory(row dbq.Factory) (game.Factory, common.Error) {
 		Status:    game.FactoryStatus(rowData.Status),
 		Inventory: game.MakeInventoryFrom(rowData.Inventory),
 		Employees: make(map[game.WorkforceType]int),
-		Equipment: utils.MapSlice(rowData.Equipment, func(eqData factoryDataEquipmentJSON) game.FactoryEquipment {
-			eq := game.FactoryEquipment{
-				EquipmentID: game.EquipmentID(eqData.EquipmentID),
-				Count:       eqData.Count,
-				Production:  make(map[game.RecipeID]game.FactoryProductionItem),
-			}
-
-			for _, prodData := range eqData.Production {
-				eq.Production[game.RecipeID(prodData.RecipeID)] = game.FactoryProductionItem{
-					Template:         game.RecipeID(prodData.RecipeID),
-					DynamicOutputs:   game.MakeInventoryFrom(prodData.DynamicOutputs),
-					ManualEfficiency: prodData.ManualEfficiency,
-				}
-			}
-
-			return eq
-		}),
+		Equipment: utils.MapSlice(rowData.Equipment, decodeFactoryEquipment),
 	}
 
 	for wf, count := range rowData.Employees {
@@ -137,28 +121,47 @@ func decodeFactory(row dbq.Factory) (game.Factory, common.Error) {
 
 	return factory, nil
 }
+func decodeFactoryEquipment(eqData factoryDataEquipmentJSON) game.FactoryEquipment {
+	eq := game.FactoryEquipment{
+		EquipmentID: game.EquipmentID(eqData.EquipmentID),
+		Count:       eqData.Count,
+		Production:  make(map[game.RecipeID]game.FactoryProductionItem),
+	}
+
+	for _, prodData := range eqData.Production {
+		eq.Production[game.RecipeID(prodData.RecipeID)] = game.FactoryProductionItem{
+			Template:         game.RecipeID(prodData.RecipeID),
+			DynamicOutputs:   game.MakeInventoryFrom(prodData.DynamicOutputs),
+			ManualEfficiency: prodData.ManualEfficiency,
+		}
+	}
+
+	return eq
+}
+
 func encodeFactoryData(factory game.Factory) factoryDataJSON {
 	data := factoryDataJSON{
 		Status:    byte(factory.Status),
 		Employees: utils.MapKeys(factory.Employees, func(wf game.WorkforceType) string { return wf.String() }),
 		Inventory: factory.Inventory.ToMap(),
-		Equipment: utils.MapSlice(factory.Equipment, func(eq game.FactoryEquipment) factoryDataEquipmentJSON {
-			data := factoryDataEquipmentJSON{
-				EquipmentID: string(eq.EquipmentID),
-				Count:       eq.Count,
-				Production:  make(map[int]factoryDataProductionItemJSON),
-			}
-
-			for _, production := range eq.Production {
-				data.Production[int(production.Template)] = factoryDataProductionItemJSON{
-					RecipeID:         int(production.Template),
-					ManualEfficiency: production.ManualEfficiency,
-					DynamicOutputs:   production.DynamicOutputs.ToMap(),
-				}
-			}
-
-			return data
-		}),
+		Equipment: utils.MapSlice(factory.Equipment, encodeFactoryEquipment),
 	}
+	return data
+}
+func encodeFactoryEquipment(eq game.FactoryEquipment) factoryDataEquipmentJSON {
+	data := factoryDataEquipmentJSON{
+		EquipmentID: string(eq.EquipmentID),
+		Count:       eq.Count,
+		Production:  make(map[int]factoryDataProductionItemJSON),
+	}
+
+	for _, production := range eq.Production {
+		data.Production[int(production.Template)] = factoryDataProductionItemJSON{
+			RecipeID:         int(production.Template),
+			ManualEfficiency: production.ManualEfficiency,
+			DynamicOutputs:   production.DynamicOutputs.ToMap(),
+		}
+	}
+
 	return data
 }

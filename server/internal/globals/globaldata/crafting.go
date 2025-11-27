@@ -6,7 +6,6 @@ import (
 	"srv/internal/globals/assets"
 	"srv/internal/globals/logger"
 	"srv/internal/utils"
-	"srv/internal/utils/phys"
 	"srv/internal/utils/phys/material"
 )
 
@@ -75,8 +74,7 @@ func (r *CraftingRegistry) FillCommodities(commoditiesData *assets.CommoditiesAs
 	for id, data := range commoditiesData.Commodities {
 		r.commodities[game.CommodityID(id)] = game.Commodity{
 			CommodityID: game.CommodityID(id),
-			Mass:        phys.Kilograms(data.Mass),
-			Volume:      phys.CubicMeters(data.Volume),
+			Size:        game.MakeStorageSize(data.Mass, data.Volume),
 			IsQuantized: data.IsQuantized,
 		}
 	}
