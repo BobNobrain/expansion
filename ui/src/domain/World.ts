@@ -64,6 +64,11 @@ export namespace World {
     export function getTileCoords(grid: WorldGrid, tileIndex: number): [number, number, number] {
         return grid.coords.slice(tileIndex * 3, tileIndex * 3 + 3) as [number, number, number];
     }
+
+    export function formatGalacticTileId(worldId: string, tileIdOrIndex: string | number): string {
+        const tileId = typeof tileIdOrIndex === 'number' ? makeTileId(tileIdOrIndex) : tileIdOrIndex;
+        return `${worldId}#${tileId}`;
+    }
 }
 
 export type WorldTileConditions = {

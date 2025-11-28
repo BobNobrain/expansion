@@ -1,15 +1,16 @@
-import { createSignal, Show, type ParentComponent } from 'solid-js';
+import { createMemo, createSignal, Show, type ParentComponent } from 'solid-js';
+import { Dynamic } from 'solid-js/web';
 import { IconBack, IconContext, IconFlag, IconGalaxy, IconShip, IconUser } from '@/icons';
 import { UserFeed } from '@/views/UserFeed/UserFeed';
 import { TouchHeader, TouchHeaderButton, TouchHeaderTitle } from '../TouchHeader/TouchHeader';
 import { TouchLoginModal } from '../TouchLoginModal/TouchLoginModal';
-import { type TouchNavBarItem } from '../TouchNavBar/TouchNavBar';
+import { TouchNavBar, type TouchNavBarItem } from '../TouchNavBar/TouchNavBar';
 import { TouchOfflineIndicator } from '../TouchOfflineIndicator/TouchOfflineIndicator';
 import { TouchSidePanel } from '../TouchSidePanel/TouchSidePanel';
 import { createPageContext, PageContext } from './context';
 import { TouchPage } from './TouchPage';
 
-const navItems: TouchNavBarItem[] = [
+const defaultNavItems: TouchNavBarItem[] = [
     {
         icon: IconFlag,
         title: 'Bases',
@@ -38,6 +39,8 @@ export const TouchPageWrapper: ParentComponent = (props) => {
     const closeUserPanel = () => setUserPanelVisible(false);
     const openUserPanel = () => setUserPanelVisible(true);
 
+    const customFooter = createMemo(() => ctx.get().customFooter);
+
     return (
         <TouchPage
             header={
@@ -58,7 +61,11 @@ export const TouchPageWrapper: ParentComponent = (props) => {
                     </TouchHeaderButton>
                 </TouchHeader>
             }
-            footerItems={navItems}
+            footer={
+                <Show when={customFooter()} fallback={<TouchNavBar items={defaultNavItems} />}>
+                    <Dynamic component={customFooter()} />
+                </Show>
+            }
         >
             <PageContext.Provider value={ctx}>{props.children}</PageContext.Provider>
             <TouchSidePanel side="right" active={isUserPanelVisible()} onClose={closeUserPanel}>

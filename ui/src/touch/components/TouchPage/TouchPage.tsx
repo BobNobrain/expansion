@@ -1,10 +1,9 @@
 import { type JSX, type ParentComponent } from 'solid-js';
-import { TouchNavBar, type TouchNavBarItem } from '../TouchNavBar/TouchNavBar';
 import styles from './TouchPage.module.css';
 
 export type TouchPageProps = {
     header?: JSX.Element;
-    footerItems: TouchNavBarItem[];
+    footer: JSX.Element;
 };
 
 export const TouchPage: ParentComponent<TouchPageProps> = (props) => {
@@ -12,9 +11,7 @@ export const TouchPage: ParentComponent<TouchPageProps> = (props) => {
         <div class={styles.wrapper}>
             <header class={styles.header}>{props.header}</header>
             <div class={styles.page}>{props.children}</div>
-            <footer class={styles.footer}>
-                <TouchNavBar items={props.footerItems} />
-            </footer>
+            <footer class={styles.footer}>{props.footer}</footer>
         </div>
     );
 };

@@ -1,7 +1,5 @@
-import { createMemo, type Component } from 'solid-js';
+import { createMemo, Show, type Component } from 'solid-js';
 import { TabContent, TabsList, type TabHeader } from '@/atoms';
-import { TouchContentSingle } from '@/touch/components/TouchContentSingle/TouchContentSingle';
-import { CreateFactoryTab, getCreateFactoryRoute, useCreateFactoryRouteInfo } from '@/routes/factories';
 import { IconConstruction, IconFactory, IconPeople, IconStorage } from '@/icons';
 import {
     FactoryDisplay,
@@ -10,9 +8,50 @@ import {
     FactoryDisplayProduction,
     FactoryDisplayWorkforce,
 } from '@/components/FactoryDisplay';
+import { World } from '@/domain/World';
+import { CreateFactoryTab, getCreateFactoryRoute, useCreateFactoryRouteInfo } from '@/routes/factories';
+import { dfBases } from '@/store/datafront';
+import { TouchContentSingle } from '@/touch/components/TouchContentSingle/TouchContentSingle';
+import {
+    TouchFooterActionButton,
+    TouchFooterActionLink,
+    TouchFooterActions,
+} from '@/touch/components/TouchFooterActions/TouchFooterActions';
+import { usePageContextBinding } from '@/touch/components/TouchPage';
 
 export const CreateFactoryPage: Component = () => {
     const routeInfo = useCreateFactoryRouteInfo();
+    const base = dfBases.useSingle(() => routeInfo().baseId);
+
+    usePageContextBinding(() => {
+        const baseContent = base.result();
+        const route = routeInfo();
+
+        return {
+            title: 'Create Factory',
+            subtitle: baseContent ? World.formatGalacticTileId(baseContent.worldId, baseContent.tileId) : undefined,
+
+            customFooter: () => {
+                return (
+                    <TouchFooterActions>
+                        <TouchFooterActionButton text="Save" />
+                        <Show
+                            when={route.tab === CreateFactoryTab.Construction}
+                            fallback={
+                                <TouchFooterActionLink
+                                    href={getCreateFactoryRoute({ ...route, tab: CreateFactoryTab.Construction })}
+                                    text="Continue"
+                                    color="semiprimary"
+                                />
+                            }
+                        >
+                            <TouchFooterActionButton text="Construct" color="primary" />
+                        </Show>
+                    </TouchFooterActions>
+                );
+            },
+        };
+    });
 
     const tabs = createMemo<TabHeader[]>(() => {
         const route = routeInfo();

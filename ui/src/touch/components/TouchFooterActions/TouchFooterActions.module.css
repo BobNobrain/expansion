@@ -1,0 +1,98 @@
+.actions {
+    display: grid;
+    grid-template-rows: 1fr;
+    grid-auto-columns: 1fr;
+    grid-auto-flow: column;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: linear-gradient(to top, var(--p-main-100) 0%, var(--p-main-100) 40%, var(--p-main-100-75) 100%);
+}
+
+.action-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border-top: 4px solid var(--tfa-top-color, var(--tfa-color));
+    border-bottom: 4px solid transparent;
+    background-color: var(--tfa-background);
+}
+.action-item:active {
+    border-bottom-width: 0;
+}
+
+.label {
+    font-size: 18px;
+    line-height: 18px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 500;
+    font-variation-settings: "wght" 500;
+
+    color: var(--tfa-color);
+}
+
+.link {
+    composes: action-item;
+    text-decoration: none;
+}
+
+.button {
+    composes: action-item;
+    border-left: 0px none;
+    border-right: 0px none;
+}
+
+.color-primary {
+    --tfa-color: var(--p-main-100);
+    --tfa-background: var(--p-primary-500);
+    --tfa-background-loading: var(--p-primary-500-25);
+    --tfa-top-color: var(--p-primary-700);
+}
+.color-primary.loading {
+    --tfa-color: var(--p-primary-300);
+}
+
+.color-semiprimary {
+    --tfa-color: var(--p-primary-500);
+    --tfa-background: var(--p-primary-500-25);
+    --tfa-background-loading: var(--p-primary-500-25);
+}
+
+.color-secondary {
+    --tfa-color: var(--p-main-800);
+    --tfa-background: transparent;
+    --tfa-background-loading: var(--p-main-500);
+}
+
+.action-item.disabled {
+    pointer-events: none;
+    --tfa-color: var(--p-neutral-700);
+    --tfa-background: var(--p-neutral-500-25);
+    --tfa-top-color: var(--p-neutral-500);
+}
+
+.action-item.loading {
+    pointer-events: none;
+
+    background: repeating-linear-gradient(
+        135deg,
+        var(--tfa-background-loading) 0,
+        var(--tfa-background-loading) 8px,
+        transparent 8px,
+        transparent 16px
+    );
+    background-size: calc(100% + 46px) calc(100% + 46px);
+    background-attachment: fixed;
+    animation: moving-stripes 1s linear infinite;
+}
+
+@keyframes moving-stripes {
+    0% {
+        background-position-x: -45.254833995939045px;
+    }
+    100% {
+        background-position-x: 0;
+    }
+}

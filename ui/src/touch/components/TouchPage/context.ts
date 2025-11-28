@@ -1,5 +1,6 @@
-import { createContext, createEffect, createSignal, onCleanup, untrack, useContext } from 'solid-js';
+import { createContext, createEffect, createSignal, onCleanup, untrack, useContext, type Component } from 'solid-js';
 import type { Icon } from '@/icons';
+import { outOfContext } from '@/lib/solid/context';
 
 export type PageContextRelatedItem = {
     title: string;
@@ -7,11 +8,19 @@ export type PageContextRelatedItem = {
     icon: Icon;
 };
 
+export type PageContextButton = {
+    text: string;
+    action: string | (() => void);
+    icon?: Icon;
+    color?: 'primary' | 'semiprimary' | 'secondary';
+};
+
 export type PageContextData = {
     title: string;
     subtitle?: string;
     goBack?: () => void;
     related: PageContextRelatedItem[];
+    customFooter?: Component;
 };
 
 export type PageContext = {
@@ -21,15 +30,9 @@ export type PageContext = {
 };
 
 export const PageContext = createContext<PageContext>({
-    get: () => {
-        throw new Error('out of context');
-    },
-    set: () => {
-        throw new Error('out of context');
-    },
-    update: () => {
-        throw new Error('out of context');
-    },
+    get: outOfContext,
+    set: outOfContext,
+    update: outOfContext,
 });
 
 export const usePageContext = () => useContext(PageContext);

@@ -86,6 +86,7 @@ class WSClient {
         });
 
         this.sock.addEventListener('open', () => {
+            console.log('[ws] open');
             this.setIsOnline(true);
             this.setIsConnecting(false);
             this.flushOutbox();
