@@ -71,29 +71,20 @@ export const buildingsAsset = createJSONAsset({
 
 export type RecipesAsset = { recipes: Recipe[] };
 
-export const recipesAsset = createJSONAsset({
+export const staticRecipesAsset = createJSONAsset({
     url: '/assets/recipes.generated.json',
     map: (raw: typeof recipesRawAsset): RecipesAsset => {
-        const lengths: Record<string, number | undefined> = { s: 1, m: 60, h: 60 * 60, d: 60 * 60 * 24 };
         const gameTimeDaySeconds = GAME_TIME_DAY_MS / 1000;
 
         return {
             recipes: raw.recipes.map((data, index) => {
-                const baseTimeSeconds = Array.from(data.baseTime.matchAll(/(\d+)(\w)/g) ?? [])
-                    .map(([_, n, s]) => (lengths[s] ?? 0) * Number.parseInt(n))
-                    .reduce((acc, next) => acc + next, 0);
-
-                const scaleFactor = gameTimeDaySeconds / baseTimeSeconds;
+                const scaleFactor = gameTimeDaySeconds / 3600;
 
                 return {
                     id: index,
-                    inputs: Inventory.multiply(data.inputs as Record<string, number>, scaleFactor),
-                    outputs: Inventory.multiply(data.outputs as Record<string, number>, scaleFactor),
+                    inputs: Inventory.multiply(data.inputs as unknown as Record<string, number>, scaleFactor),
+                    outputs: Inventory.multiply(data.outputs as unknown as Record<string, number>, scaleFactor),
                     equipment: data.equipment,
-                    affectedByAtmosphere: data.affectedByAtmosphere,
-                    affectedByFertility: data.affectedByFertility,
-                    affectedByOcean: data.affectedByOcean,
-                    affectedByResource: data.affectedByResource,
                 };
             }),
         };

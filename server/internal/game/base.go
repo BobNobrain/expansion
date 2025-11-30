@@ -29,24 +29,7 @@ type Base struct {
 	TileID   TileID
 	CityID   CityID
 
-	Sites     map[int]BaseConstructionSite
 	Inventory Inventory
-}
-
-func (b *Base) AddConstructionSite(target []FactoryEquipment, contribution *Contribution) int {
-	var maxExistingId int
-	for id := range b.Sites {
-		maxExistingId = max(maxExistingId, id)
-	}
-
-	id := maxExistingId + 1
-	b.Sites[id] = BaseConstructionSite{
-		SiteID:      id,
-		Target:      target,
-		Contributed: contribution,
-	}
-
-	return id
 }
 
 type FactoryID int
@@ -55,73 +38,121 @@ func (f FactoryID) String() string {
 	return strconv.Itoa(int(f))
 }
 
-type FactoryStatus byte
+type FactoryProductionStatus byte
 
 const (
 	// The factory has been manually disabled and should not be automatically turned back on
-	FactoryStatusDisabled FactoryStatus = iota
+	FactoryProductionStatusDisabled FactoryProductionStatus = iota
 	// The factory is running, producing outputs and consuming inputs
-	FactoryStatusActive
+	FactoryProductionStatusActive
 	// The factory is being prevented from functioning properly (due to lack of inputs, storage, etc). Should the issues
 	// be resolved, it will become active again.
-	FactoryStatusHalted
+	FactoryProductionStatusHalted
 )
 
 // Returns true for any factory status that permits factory operation (i.e. its production running)
-func (s FactoryStatus) IsActive() bool {
-	return s == FactoryStatusActive
+func (s FactoryProductionStatus) IsActive() bool {
+	return s == FactoryProductionStatusActive
 }
 
-func (s FactoryStatus) String() string {
+func (s FactoryProductionStatus) String() string {
 	switch s {
-	case FactoryStatusDisabled:
+	case FactoryProductionStatusDisabled:
 		return "disabled"
-	case FactoryStatusActive:
+	case FactoryProductionStatusActive:
 		return "active"
-	case FactoryStatusHalted:
+	case FactoryProductionStatusHalted:
 		return "halted"
 	default:
 		return ""
 	}
 }
-func ParseFactoryStatus(s string) FactoryStatus {
+func ParseFactoryStatus(s string) FactoryProductionStatus {
 	switch s {
 	case "disabled":
-		return FactoryStatusDisabled
+		return FactoryProductionStatusDisabled
 	case "active":
-		return FactoryStatusActive
+		return FactoryProductionStatusActive
 	case "halted":
-		return FactoryStatusHalted
+		return FactoryProductionStatusHalted
 	default:
-		return FactoryStatusDisabled
+		return FactoryProductionStatusDisabled
 	}
 }
 
 type Factory struct {
 	FactoryID FactoryID
 	BaseID    BaseID
-	Status    FactoryStatus
+	Status    FactoryProductionStatus
 	Equipment []FactoryEquipment
 	Inventory Inventory
 	Employees map[WorkforceType]int
 	Updated   time.Time
 	BuiltAt   time.Time
+
+	Upgrade FactoryUpgradeProject
+}
+
+func MakeEmptyFactory() Factory {
+	now := time.Now()
+
+	return Factory{
+		Status:    FactoryProductionStatusActive,
+		Equipment: nil,
+		Inventory: MakeEmptyInventory(),
+		Employees: make(map[WorkforceType]int),
+		Updated:   now,
+		BuiltAt:   now,
+		Upgrade: FactoryUpgradeProject{
+			Equipment:   nil,
+			Progress:    nil,
+			LastUpdated: now,
+		},
+	}
 }
 
 type FactoryEquipment struct {
 	EquipmentID EquipmentID
 	Count       int
-	Production  map[RecipeID]FactoryProductionItem
+	Production  []FactoryProductionItem
 }
 
 type FactoryProductionItem struct {
-	Template         RecipeID
-	DynamicOutputs   Inventory
+	Recipe           Recipe
 	ManualEfficiency float64
 }
 
-type BaseConstructionSite struct {
-	SiteID      int
-	Target      []FactoryEquipment
-	Contributed *Contribution
+type FactoryUpgradeProject struct {
+	Equipment   []FactoryUpgradeProjectEqipment
+	Progress    []ContributionHistoryItem
+	LastUpdated time.Time
+}
+
+type FactoryUpgradeProjectEqipment struct {
+	EquipmentID EquipmentID
+	Count       int
+	Production  []FactoryProductionPlan
+}
+
+func (fup FactoryUpgradeProject) IsEmpty() bool {
+	return len(fup.Equipment) == 0
+}
+func (fup FactoryUpgradeProject) IsPlanned() bool {
+	return !fup.IsEmpty() && !fup.IsInProgress()
+}
+func (fup FactoryUpgradeProject) IsInProgress() bool {
+	return len(fup.Progress) > 0
+}
+
+type FactoryRebalancePlan struct {
+	EquipmentRebalances []FactoryEquipmentRebalancePlan
+}
+
+type FactoryEquipmentRebalancePlan struct {
+	Production []FactoryProductionPlan
+}
+
+type FactoryProductionPlan struct {
+	RecipeID         RecipeID
+	ManualEfficiency float64
 }

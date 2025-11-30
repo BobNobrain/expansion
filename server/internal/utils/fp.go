@@ -14,6 +14,10 @@ func ConvertStrings[T ~string, U ~string](ids []T) []U {
 }
 
 func ConvertStringKeys[K1 ~string, K2 ~string, V any](m map[K1]V) map[K2]V {
+	if m == nil {
+		return nil
+	}
+
 	dest := make(map[K2]V)
 	for k, v := range m {
 		dest[K2(k)] = v
@@ -46,6 +50,10 @@ func ParseInts[T Integer](ids []string) []T {
 }
 
 func MapSlice[T any, U any](ts []T, f func(T) U) []U {
+	if ts == nil {
+		return nil
+	}
+
 	us := make([]U, 0, len(ts))
 	for _, t := range ts {
 		us = append(us, f(t))
@@ -54,6 +62,10 @@ func MapSlice[T any, U any](ts []T, f func(T) U) []U {
 }
 
 func MapSliceFailable[T any, U any](ts []T, f func(T) (U, common.Error)) ([]U, common.Error) {
+	if ts == nil {
+		return nil, nil
+	}
+
 	us := make([]U, 0, len(ts))
 	for _, t := range ts {
 		u, err := f(t)
@@ -67,6 +79,10 @@ func MapSliceFailable[T any, U any](ts []T, f func(T) (U, common.Error)) ([]U, c
 }
 
 func MapKeys[K1 comparable, K2 comparable, V any](src map[K1]V, f func(K1) K2) map[K2]V {
+	if src == nil {
+		return nil
+	}
+
 	dest := make(map[K2]V)
 	for k, v := range src {
 		dest[f(k)] = v
@@ -75,9 +91,25 @@ func MapKeys[K1 comparable, K2 comparable, V any](src map[K1]V, f func(K1) K2) m
 }
 
 func MapValues[K comparable, V1 any, V2 any](src map[K]V1, f func(V1) V2) map[K]V2 {
+	if src == nil {
+		return nil
+	}
+
 	dest := make(map[K]V2)
 	for k, v := range src {
 		dest[k] = f(v)
 	}
 	return dest
+}
+
+func GetMapKeys[K comparable, V any](m map[K]V) []K {
+	if m == nil {
+		return nil
+	}
+
+	keys := make([]K, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	return keys
 }

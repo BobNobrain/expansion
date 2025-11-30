@@ -31,13 +31,23 @@ type BasesTableRow struct {
 
 	ConstructionSites []BasesTableRowSite  `json:"constructionSites"`
 	Storage           BasesTableRowStorage `json:"storage"`
+
+	DynamicRecipes []BasesTableRowRecipe `json:"dynamicRecipes,omitempty"`
 }
 
 type BasesTableRowSite struct {
+	ID           int                          `json:"id"`
 	Target       []FactoriesTableRowEquipment `json:"target"`
 	Contribution Contribution                 `json:"contribution"`
 }
 
 type BasesTableRowStorage struct {
 	Inventory map[string]float64 `json:"inventory"`
+}
+
+type BasesTableRowRecipe struct {
+	RecipeID    string             `json:"id"`
+	Inputs      map[string]float64 `json:"inputs"`
+	Outputs     map[string]float64 `json:"outputs"`
+	EquipmentID string             `json:"equipment"`
 }

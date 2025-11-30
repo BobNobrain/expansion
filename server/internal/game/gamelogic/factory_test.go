@@ -12,20 +12,18 @@ import (
 
 func TestFactoryLogicUpdateBasic(t *testing.T) {
 	logger.Init()
-	factory, l, t0 := setup2()
+	factory, l, t0, mockReg := setup2()
 
 	factory.Equipment = append(factory.Equipment, game.FactoryEquipment{
 		EquipmentID: game.EquipmentID("E1"),
 		Count:       1,
-		Production: map[game.RecipeID]game.FactoryProductionItem{
-			game.RecipeID(0): {
-				Template:         game.RecipeID(0),
-				DynamicOutputs:   make(map[game.CommodityID]float64),
+		Production: []game.FactoryProductionItem{
+			{
+				Recipe:           mockReg.GetRecipe(game.RecipeTemplateID(0)).Instantiate(),
 				ManualEfficiency: 1.0,
 			},
-			game.RecipeID(1): {
-				Template:         game.RecipeID(1),
-				DynamicOutputs:   make(map[game.CommodityID]float64),
+			{
+				Recipe:           mockReg.GetRecipe(game.RecipeTemplateID(1)).Instantiate(),
 				ManualEfficiency: 1.0,
 			},
 		},
@@ -45,17 +43,17 @@ func TestFactoryLogicUpdateBasic(t *testing.T) {
 	assertInventoryAmount(t, factory.Inventory, "c", 0.0)
 	assertInventoryAmount(t, factory.Inventory, "d", 1.0)
 
-	assert(t, factory.Status == game.FactoryStatusHalted, "the factory should be halted")
+	assert(t, factory.Status == game.FactoryProductionStatusHalted, "the factory should be halted")
 
 	updatedMinutes := factory.Updated.Sub(t0).Minutes()
 	assertFloatEquals(t, updatedMinutes, 1.0, "updated time (m)")
 }
 
-func setup2() (*game.Factory, *gamelogic.FactoryUpdatesLogic, time.Time) {
+func setup2() (*game.Factory, *gamelogic.FactoryUpdatesLogic, time.Time, *globaldata.CraftingRegistry) {
 	t0 := time.Date(2025, time.January, 1, 12, 0, 0, 0, time.UTC)
 
 	factory := &game.Factory{
-		Status:    game.FactoryStatusActive,
+		Status:    game.FactoryProductionStatusActive,
 		Equipment: []game.FactoryEquipment{},
 		Inventory: make(map[game.CommodityID]float64),
 		Employees: make(map[game.WorkforceType]int),
@@ -63,9 +61,10 @@ func setup2() (*game.Factory, *gamelogic.FactoryUpdatesLogic, time.Time) {
 	}
 
 	l := gamelogic.NewFactoryUpdatesLogic(factory)
-	l.MockRegistry(setUpMockRegistry2())
+	mockReg := setUpMockRegistry2()
+	l.MockRegistry(mockReg)
 
-	return factory, l, t0
+	return factory, l, t0, mockReg
 }
 
 func setUpMockRegistry2() *globaldata.CraftingRegistry {

@@ -47,8 +47,6 @@ func (gdf *GameDataFront) InitCityActions(foundCity components.Usecase[usecases.
 
 func (gdf *GameDataFront) InitBaseActions(
 	createBase components.Usecase[usecases.CreateBaseUsecaseInput],
-	createBaseSite components.Usecase[usecases.CreateFactorySiteUsecaseInput],
-	contributeToSite components.Usecase[usecases.MakeFactorySiteContributionUsecaseInput],
 ) {
 	gdf.df.AttachAction(api.ActionCreateBase, newActionFromUsecase(
 		createBase,
@@ -60,40 +58,85 @@ func (gdf *GameDataFront) InitBaseActions(
 			}
 		},
 	))
+}
 
-	gdf.df.AttachAction(api.ActionCreateBaseSite, newActionFromUsecase(
-		createBaseSite,
-		func(payload api.CreateSitePayload) usecases.CreateFactorySiteUsecaseInput {
-			return usecases.CreateFactorySiteUsecaseInput{
+func (gdf *GameDataFront) InitFactoryActions(
+	createFactory components.Usecase[usecases.CreateFactoryUsecaseInput],
+	upgradeFactory components.Usecase[usecases.UpgradeFactoryUsecaseInput],
+	rebalanceFactory components.Usecase[usecases.RebalanceFactoryUsecaseInput],
+	contributeToFactory components.Usecase[usecases.ContributeToFactoryUsecaseInput],
+) {
+	gdf.df.AttachAction(api.ActionCreateFactory, newActionFromUsecase(
+		createFactory,
+		func(payload api.CreateFactoryPayload) usecases.CreateFactoryUsecaseInput {
+			return usecases.CreateFactoryUsecaseInput{
 				BaseID: game.BaseID(payload.BaseID),
-				Equipment: utils.MapSlice(payload.Equipment, func(equipment api.FactoriesTableRowEquipment) game.FactoryEquipment {
-					production := make(map[game.RecipeID]game.FactoryProductionItem)
-					for _, p := range equipment.Production {
-						rid := game.RecipeID(p.RecipeID)
-						production[rid] = game.FactoryProductionItem{
-							Template:         rid,
-							ManualEfficiency: p.ManualEfficiency,
-							DynamicOutputs:   game.MakeInventoryFrom(p.DynamicOutputs),
-						}
-					}
-
-					return game.FactoryEquipment{
-						EquipmentID: game.EquipmentID(equipment.EquipmentID),
-						Count:       equipment.Count,
-						Production:  production,
-					}
-				}),
 			}
 		},
 	))
 
-	gdf.df.AttachAction(api.ActionContributeToSite, newActionFromUsecase(
-		contributeToSite,
-		func(payload api.ContributeToSitePayload) usecases.MakeFactorySiteContributionUsecaseInput {
-			return usecases.MakeFactorySiteContributionUsecaseInput{
-				BaseID:  game.BaseID(payload.BaseID),
-				SiteID:  payload.SiteID,
-				Amounts: game.MakeInventoryDeltaFrom(payload.Amounts),
+	gdf.df.AttachAction(api.ActionChangeUpgradeProject, newActionFromUsecase(
+		upgradeFactory,
+		func(payload api.UpgradeFactoryPayload) usecases.UpgradeFactoryUsecaseInput {
+			return usecases.UpgradeFactoryUsecaseInput{
+				FactoryID: game.FactoryID(payload.FactoryID),
+				Project: game.FactoryUpgradeProject{
+					Equipment: utils.MapSlice(
+						payload.Equipment,
+						func(data api.UpgradeFactoryPayloadEquipment) game.FactoryUpgradeProjectEqipment {
+							return game.FactoryUpgradeProjectEqipment{
+								EquipmentID: game.EquipmentID(data.EquipmentID),
+								Count:       data.Count,
+								Production: utils.MapSlice(
+									data.Production,
+									func(data api.UpgradeFactoryPayloadProduction) game.FactoryProductionPlan {
+										return game.FactoryProductionPlan{
+											RecipeID:         game.RecipeID(data.RecipeID),
+											ManualEfficiency: data.ManualEfficiency,
+										}
+									},
+								),
+							}
+						},
+					),
+				},
+			}
+		},
+	))
+
+	gdf.df.AttachAction(api.ActionRebalanceFactory, newActionFromUsecase(
+		rebalanceFactory,
+		func(payload api.RebalanceFactoryPayload) usecases.RebalanceFactoryUsecaseInput {
+			return usecases.RebalanceFactoryUsecaseInput{
+				FactoryID: game.FactoryID(payload.FactoryID),
+				Plan: game.FactoryRebalancePlan{
+					EquipmentRebalances: utils.MapSlice(
+						payload.Plan,
+						func(data []api.UpgradeFactoryPayloadProduction) game.FactoryEquipmentRebalancePlan {
+							return game.FactoryEquipmentRebalancePlan{
+								Production: utils.MapSlice(
+									data,
+									func(data api.UpgradeFactoryPayloadProduction) game.FactoryProductionPlan {
+										return game.FactoryProductionPlan{
+											RecipeID:         game.RecipeID(data.RecipeID),
+											ManualEfficiency: data.ManualEfficiency,
+										}
+									},
+								),
+							}
+						},
+					),
+				},
+			}
+		},
+	))
+
+	gdf.df.AttachAction(api.ActionContributeToUpgrade, newActionFromUsecase(
+		contributeToFactory,
+		func(payload api.ContributeToFactoryPayload) usecases.ContributeToFactoryUsecaseInput {
+			return usecases.ContributeToFactoryUsecaseInput{
+				FactoryID: game.FactoryID(payload.FactoryID),
+				Amounts:   game.MakeInventoryDeltaFrom(payload.Amounts),
 			}
 		},
 	))

@@ -4,6 +4,7 @@ import (
 	"srv/internal/components"
 	"srv/internal/datafront/dfcore"
 	"srv/internal/game"
+	"srv/internal/game/gamelogic"
 	"srv/internal/globals/events"
 	"srv/internal/globals/logger"
 	"srv/internal/utils"
@@ -13,8 +14,9 @@ import (
 )
 
 type basesTable struct {
-	repo components.BasesRepoReadonly
-	sub  *events.Subscription
+	basesRepo  components.BasesRepoReadonly
+	worldsRepo components.WorldsRepoReadonly
+	sub        *events.Subscription
 
 	table       *dfcore.QueryableTable
 	qByCompany  *dfcore.TrackableTableQuery[api.BasesQueryByCompanyID]
@@ -22,14 +24,15 @@ type basesTable struct {
 	qByLocation *dfcore.TrackableTableQuery[api.BasesQueryByLocation]
 }
 
-func (gdf *GameDataFront) InitBases(repo components.BasesRepoReadonly) {
+func (gdf *GameDataFront) InitBases(repo components.BasesRepoReadonly, worlds components.WorldsRepoReadonly) {
 	if gdf.bases != nil {
 		panic("GameDataFront.InitBases() has already been called!")
 	}
 
 	bases := &basesTable{
-		repo: repo,
-		sub:  events.NewSubscription(),
+		basesRepo:  repo,
+		worldsRepo: worlds,
+		sub:        events.NewSubscription(),
 	}
 	bases.table = dfcore.NewQueryableTable(bases.queryByIDs)
 	bases.qByCompany = dfcore.NewTrackableTableQuery(bases.queryByCompanyID, bases.table)
@@ -54,12 +57,31 @@ func (t *basesTable) queryByIDs(
 	req dfapi.DFTableRequest,
 	ctx dfcore.DFRequestContext,
 ) (*dfcore.TableResponse, common.Error) {
-	bases, err := t.repo.ResolveBases(utils.ParseInts[game.BaseID](req.IDs))
+	bases, err := t.basesRepo.ResolveBases(utils.ParseInts[game.BaseID](req.IDs))
 	if err != nil {
 		return nil, err
 	}
 
-	return dfcore.NewTableResponseFromList(bases, identifyBase, encodeBase), nil
+	worldIdsToQuery := make(map[game.CelestialID]bool)
+	for _, base := range bases {
+		worldIdsToQuery[base.WorldID] = true
+	}
+
+	worlds, err := t.worldsRepo.GetDataMany(utils.GetMapKeys(worldIdsToQuery))
+	if err != nil {
+		return nil, err
+	}
+
+	worldsById := make(map[game.CelestialID]game.WorldData)
+	for _, w := range worlds {
+		worldsById[w.ID] = w
+	}
+
+	return dfcore.NewTableResponseFromList(bases, identifyBase, func(b game.Base) common.Encodable {
+		dr := gamelogic.CraftingLogic().GetRecipesAt(worldsById[b.WorldID], b.TileID).CreateAllDynamicRecipes()
+
+		return encodeBaseWithRecipes(b, dr)
+	}), nil
 }
 
 func (t *basesTable) queryByCompanyID(
@@ -67,7 +89,7 @@ func (t *basesTable) queryByCompanyID(
 	req dfapi.DFTableQueryRequest,
 	ctx dfcore.DFRequestContext,
 ) (*dfcore.TableResponse, common.Error) {
-	bases, err := t.repo.GetCompanyBases(game.CompanyID(payload.CompanyID))
+	bases, err := t.basesRepo.GetCompanyBases(game.CompanyID(payload.CompanyID))
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +102,7 @@ func (t *basesTable) queryByBranch(
 	req dfapi.DFTableQueryRequest,
 	ctx dfcore.DFRequestContext,
 ) (*dfcore.TableResponse, common.Error) {
-	bases, err := t.repo.GetCompanyBasesOnPlanet(game.CompanyID(payload.CompanyID), game.CelestialID(payload.WorldID))
+	bases, err := t.basesRepo.GetCompanyBasesOnPlanet(game.CompanyID(payload.CompanyID), game.CelestialID(payload.WorldID))
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +115,7 @@ func (t *basesTable) queryByLocation(
 	req dfapi.DFTableQueryRequest,
 	ctx dfcore.DFRequestContext,
 ) (*dfcore.TableResponse, common.Error) {
-	base, err := t.repo.GetBaseAt(game.CelestialID(payload.WorldID), game.TileID(payload.TileID))
+	base, err := t.basesRepo.GetBaseAt(game.CelestialID(payload.WorldID), game.TileID(payload.TileID))
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +137,7 @@ func (t *basesTable) onBaseUpdated(ev events.BaseUpdatedPayload) {
 	if ev.Base != nil {
 		base = *ev.Base
 	} else {
-		basePtr, err := t.repo.GetBase(ev.BaseID)
+		basePtr, err := t.basesRepo.GetBase(ev.BaseID)
 
 		if err != nil {
 			logger.Error(logger.FromError("DF/bases.onBaseUpdated", err))
@@ -140,13 +162,35 @@ func identifyBase(b game.Base) dfcore.EntityID {
 	return dfcore.EntityID(b.ID.String())
 }
 
-func encodeBase(b game.Base) common.Encodable {
-	return common.AsEncodable(api.BasesTableRow{
+func baseToApi(b game.Base) api.BasesTableRow {
+	return api.BasesTableRow{
 		BaseID:    int(b.ID),
 		WorldID:   string(b.WorldID),
 		TileID:    int(b.TileID),
 		CompanyID: string(b.Operator),
 		CityID:    int(b.CityID),
 		CreatedAt: b.Created,
-	})
+		Storage: api.BasesTableRowStorage{
+			Inventory: b.Inventory.ToMap(),
+		},
+	}
+}
+
+func encodeBase(b game.Base) common.Encodable {
+	return common.AsEncodable(baseToApi(b))
+}
+
+func encodeBaseWithRecipes(b game.Base, drs map[game.RecipeID]game.Recipe) common.Encodable {
+	data := baseToApi(b)
+
+	for _, r := range drs {
+		data.DynamicRecipes = append(data.DynamicRecipes, api.BasesTableRowRecipe{
+			RecipeID:    string(r.RecipeID),
+			Inputs:      utils.ConvertStringKeys[game.CommodityID, string](r.Inputs),
+			Outputs:     utils.ConvertStringKeys[game.CommodityID, string](r.Outputs),
+			EquipmentID: string(r.EquipmentID),
+		})
+	}
+
+	return common.AsEncodable(data)
 }

@@ -18,7 +18,7 @@ const BUILDINGS_SRC = path.join(ASSETS_DIR, 'crafting', 'buildings.json');
 const BUILDINGS_DST = path.join(CLIENT_ASSETS_DIR, 'buildings.generated.json');
 copyAsset(BUILDINGS_SRC, BUILDINGS_DST);
 
-const RECIPES_SRC = path.join(ASSETS_DIR, 'crafting', 'recipes.json');
+const RECIPES_SRC = path.join(ASSETS_DIR, 'generated', 'static_recipes.json');
 const RECIPES_DST = path.join(CLIENT_ASSETS_DIR, 'recipes.generated.json');
 copyAsset(RECIPES_SRC, RECIPES_DST);
 

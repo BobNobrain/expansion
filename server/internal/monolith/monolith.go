@@ -45,7 +45,7 @@ func (m *Monolith) Start() error {
 	gdf.InitWorldOverviews(store.Worlds())
 	gdf.InitWorlds(store.Worlds())
 	gdf.InitCities(store.Cities())
-	gdf.InitBases(store.Bases())
+	gdf.InitBases(store.Bases(), store.Worlds())
 	gdf.InitFactories(store.Factories())
 
 	gdf.InitUsers(store.Users(), comms)
@@ -60,8 +60,12 @@ func (m *Monolith) Start() error {
 	gdf.InitCityActions(usecases.NewFoundCityUsecase(store))
 	gdf.InitBaseActions(
 		usecases.NewCreateBaseUsecase(store),
-		usecases.NewCreateFactorySiteUsecase(store),
-		usecases.NewMakeFactorySiteContributionUsecase(store),
+	)
+	gdf.InitFactoryActions(
+		usecases.NewCreateFactoryUsecase(store),
+		usecases.NewUpgradeFactoryUsecase(store),
+		usecases.NewRebalanceFactoryUsecase(store),
+		usecases.NewContributeToFactoryUsecase(store),
 	)
 
 	if config.World().AllowCheats {

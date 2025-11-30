@@ -10,6 +10,7 @@ type RecipesAssetRecipe struct {
 	Outputs              map[string]float64 `json:"outputs"`
 	BaseTime             string             `json:"baseTime"`
 	AffectedByResource   bool               `json:"affectedByResource"`
+	AffectedBySnow       bool               `json:"affectedBySnow"`
 	AffectedByOcean      bool               `json:"affectedByOcean"`
 	AffectedByAtmosphere bool               `json:"affectedByAtmosphere"`
 	AffectedByFertility  bool               `json:"affectedByFertility"`

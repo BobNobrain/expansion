@@ -60,3 +60,39 @@ func ParseDurationString(input string) (time.Duration, error) {
 
 	return result, nil
 }
+
+// Stringifies duration into a clientside-supported string like 10h, 2h30m, etc.
+// Currently does not support negative durations (they will be outputted like positive).
+func StringifyDuration(d time.Duration) string {
+	seconds := int(d.Abs().Seconds())
+
+	if seconds == 0 {
+		return "0s"
+	}
+
+	minutes := seconds / 60
+	seconds -= minutes * 60
+
+	hours := minutes / 60
+	minutes -= hours * 60
+
+	days := hours / 24
+	hours -= days * 24
+
+	var result string
+
+	if days > 0 {
+		result += fmt.Sprintf("%dd", days)
+	}
+	if hours > 0 {
+		result += fmt.Sprintf("%dh", hours)
+	}
+	if minutes > 0 {
+		result += fmt.Sprintf("%dm", minutes)
+	}
+	if seconds > 0 {
+		result += fmt.Sprintf("%ds", seconds)
+	}
+
+	return result
+}

@@ -5,7 +5,7 @@ import { Factory, type FactoryEquipment } from '@/domain/Base';
 import { Inventory } from '@/domain/Inventory';
 import type { Recipe } from '@/domain/Recipe';
 import type { SemanticColor } from '@/lib/appearance';
-import { recipesAsset } from '@/lib/assetmanager';
+import { staticRecipesAsset } from '@/lib/assetmanager';
 import { useAsset } from '@/lib/solid/asset';
 import { formatPercentage } from '@/lib/strings';
 import styles from './styles.module.css';
@@ -16,7 +16,7 @@ export const FactoryDisplayProductionItem: Component<{
     efficiencyEditable: boolean;
     onShareUpdate: (value: number) => void;
 }> = (props) => {
-    const recipes = useAsset(recipesAsset);
+    const recipes = useAsset(staticRecipesAsset);
 
     const effectiveScale = createMemo((): number => Factory.getEffectiveScales(props.equipment)[props.recipeId] ?? 0);
 

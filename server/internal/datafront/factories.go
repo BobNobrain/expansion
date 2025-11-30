@@ -79,21 +79,24 @@ func encodeFactory(f game.Factory) common.Encodable {
 		UpdatedTo: f.Updated,
 		Inventory: f.Inventory.ToMap(),
 		Employees: utils.MapKeys(f.Employees, func(wf game.WorkforceType) string { return wf.String() }),
-		Equipment: utils.MapSlice(f.Equipment, func(eq game.FactoryEquipment) api.FactoriesTableRowEquipment {
-			production := make([]api.FactoriesTableRowProductionItem, 0, len(eq.Production))
-			for _, p := range eq.Production {
-				production = append(production, api.FactoriesTableRowProductionItem{
-					RecipeID:         int(p.Template),
-					DynamicOutputs:   p.DynamicOutputs.ToMap(),
-					ManualEfficiency: p.ManualEfficiency,
-				})
-			}
-
-			return api.FactoriesTableRowEquipment{
-				EquipmentID: string(eq.EquipmentID),
-				Count:       eq.Count,
-				Production:  production,
-			}
-		}),
+		Equipment: utils.MapSlice(f.Equipment, encodeFactoryEquipment),
 	})
+}
+
+func encodeFactoryEquipment(eq game.FactoryEquipment) api.FactoriesTableRowEquipment {
+	production := make([]api.FactoriesTableRowProductionItem, 0, len(eq.Production))
+	for _, p := range eq.Production {
+		production = append(production, api.FactoriesTableRowProductionItem{
+			RecipeID:         string(p.Recipe.RecipeID),
+			Inputs:           utils.ConvertStringKeys[game.CommodityID, string](p.Recipe.Inputs),
+			Outputs:          utils.ConvertStringKeys[game.CommodityID, string](p.Recipe.Outputs),
+			ManualEfficiency: p.ManualEfficiency,
+		})
+	}
+
+	return api.FactoriesTableRowEquipment{
+		EquipmentID: string(eq.EquipmentID),
+		Count:       eq.Count,
+		Production:  production,
+	}
 }

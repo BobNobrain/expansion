@@ -1,7 +1,6 @@
 package game
 
 import (
-	"srv/internal/utils/color"
 	"srv/internal/utils/phys"
 )
 
@@ -35,20 +34,16 @@ func (t TileOccupation) IsOccupied() bool {
 	return t != TileOccupationFree
 }
 
-type TileOverview struct {
-	Occupation TileOccupation
-	Resource   ResourceDeposit
-	Surface    BiomeSurface
-}
-
 type TileData struct {
 	ID        TileID
-	Color     color.RichColorRGB
 	Elevation phys.Distance
 	AvgTemp   phys.Temperature
 	Pressure  phys.Pressure
 	Surface   BiomeSurface
-	Resource  ResourceDeposit
+
+	Resources     []ResourceDeposit
+	Composition   WorldComposition
+	SoilFertility float64
 
 	TransportLevel byte
 	EnergyLevel    byte

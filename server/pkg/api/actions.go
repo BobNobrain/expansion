@@ -2,31 +2,27 @@ package api
 
 const (
 	// exploration
-	ActionExploreSystem = "exploreSystem"
-	ActionExploreWorld  = "exploreWorld"
+	ActionExploreSystem = "explore.system"
+	ActionExploreWorld  = "explore.world"
 
 	// base management
-	ActionCreateBase = "createBase"
-	ActionRemoveBase = "removeBase"
-
-	// base construction sites
-	ActionCreateBaseSite   = "createSite"
-	ActionContributeToSite = "contributeToSite"
+	ActionCreateBase = "base.create"
+	ActionRemoveBase = "base.remove"
 
 	// base factories
-	ActionCreateFactory       = "createFactory"
-	ActionUpdateFactoryConfig = "updateFactoryConfig"
-	ActionUpdateFactoryStatus = "updateFactoryStatus"
-	ActionRemoveFactory       = "removeFactory"
+	ActionCreateFactory        = "factory.create"
+	ActionRebalanceFactory     = "factory.rebalance"
+	ActionChangeUpgradeProject = "factory.upgrade"
+	ActionContributeToUpgrade  = "factory.contribute"
 
 	// inventory management
 	ActionTransferItems = "transferItems"
 
 	// cities
-	ActionFoundCity = "foundCity"
+	ActionFoundCity = "city.found"
 
 	// misc
-	ActionRunCheat = "runCheat"
+	ActionRunCheat = "cheat"
 )
 
 type ExploreSystemPayload struct {
@@ -52,29 +48,36 @@ type RemoveBasePayload struct {
 	BaseID int `json:"baseId"`
 }
 
-type CreateSitePayload struct {
-	BaseID    int                          `json:"baseId"`
-	Equipment []FactoriesTableRowEquipment `json:"equipment"`
-}
-type ContributeToSitePayload struct {
-	BaseID int `json:"baseId"`
-	SiteID int `json:"siteId"`
-
-	Amounts map[string]float64 `json:"amounts"`
-}
-
 type CreateFactoryPayload struct {
-	BaseID    int                          `json:"baseId"`
-	Equipment []FactoriesTableRowEquipment `json:"equipment"`
+	BaseID int `json:"baseId"`
 }
-type UpdateFactoryConfigPayload struct {
-	FactoryID int                          `json:"factoryId"`
-	Equipment []FactoriesTableRowEquipment `json:"equipment"`
+
+type UpgradeFactoryPayload struct {
+	FactoryID int                              `json:"factoryId"`
+	Equipment []UpgradeFactoryPayloadEquipment `json:"equipment"`
 }
-type UpdateFactoryStatusPayload struct {
-	FactoryID int    `json:"factoryId"`
-	Status    string `json:"status"`
+type UpgradeFactoryPayloadEquipment struct {
+	EquipmentID string `json:"equipment"`
+	Count       int    `json:"count"`
+
+	Production []UpgradeFactoryPayloadProduction `json:"production"`
 }
+type UpgradeFactoryPayloadProduction struct {
+	RecipeID         string  `json:"recipeId"`
+	ManualEfficiency float64 `json:"manualEfficiency"`
+}
+
+type RebalanceFactoryPayload struct {
+	FactoryID int `json:"factoryId"`
+
+	Plan [][]UpgradeFactoryPayloadProduction `json:"plan"`
+}
+
+type ContributeToFactoryPayload struct {
+	FactoryID int                `json:"baseId"`
+	Amounts   map[string]float64 `json:"amounts"`
+}
+
 type RemoveFactoryPayload struct {
 	FactoryID int `json:"factoryId"`
 }

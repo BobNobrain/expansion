@@ -20,9 +20,9 @@ type galacticGridAssetSector struct {
 
 func LoadGalacticGrid() (game.GalacticGrid, common.Error) {
 	var data galacticGridAsset
-	err := globalLoader.loadJSONAsset("galactic_grid.json", &data)
+	err := globalLoader.loadJSONAsset("generated/galactic_grid.json", &data)
 	if err != nil {
-		return nil, newAssetParseError("galactic_grid.json", err)
+		return nil, newAssetParseError("generated/galactic_grid.json", err)
 	}
 
 	sectors := make(map[game.GalacticSectorID]*game.GalacticSector)
@@ -54,11 +54,11 @@ func SaveGalacticGrid(grid game.GalacticGrid) common.Error {
 		})
 	}
 
-	err := globalLoader.saveJSONAsset("galactic_grid.json", galacticGridAsset{
+	err := globalLoader.saveJSONAsset("generated/galactic_grid.json", galacticGridAsset{
 		Sectors: jsonSectors,
 	})
 	if err != nil {
-		return newAssetSaveError("galactic_grid.json", err)
+		return newAssetSaveError("generated/galactic_grid.json", err)
 	}
 	return nil
 }

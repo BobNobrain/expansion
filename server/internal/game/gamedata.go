@@ -2,7 +2,7 @@ package game
 
 type GameCraftingData interface {
 	GetCommodity(CommodityID) Commodity
-	GetRecipe(RecipeID) RecipeTemplate
+	GetRecipe(RecipeTemplateID) RecipeTemplate
 	GetEquipment(EquipmentID) EquipmentData
 	GetBaseBuilding(BaseBuildingID) BaseBuildingData
 }

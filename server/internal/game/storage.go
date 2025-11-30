@@ -2,6 +2,7 @@ package game
 
 import (
 	"srv/internal/utils/phys"
+	"strconv"
 )
 
 type StorageAlterResult byte
@@ -78,4 +79,22 @@ func (s StorageSize) FitsInto(limit StorageSize) bool {
 	massFits := !limit.IsFiniteMass() || limit.mass >= s.mass
 	volumeFits := !limit.IsFiniteVolume() || limit.volume >= s.volume
 	return massFits && volumeFits
+}
+
+type StorageID string
+
+func (sid StorageID) IsBase() bool {
+	return sid[0] == 'b'
+}
+func (sid StorageID) IsFactory() bool {
+	return sid[0] == 'f'
+}
+
+func (sid StorageID) GetBaseID() BaseID {
+	bid, _ := strconv.Atoi(string(sid[1:]))
+	return BaseID(bid)
+}
+func (sid StorageID) GetFactoryID() FactoryID {
+	fid, _ := strconv.Atoi(string(sid[1:]))
+	return FactoryID(fid)
 }

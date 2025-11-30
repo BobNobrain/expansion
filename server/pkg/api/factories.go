@@ -22,6 +22,10 @@ type FactoriesTableRow struct {
 
 	Inventory map[string]float64 `json:"inventory"`
 	Employees map[string]int     `json:"employees"`
+
+	UpgradeTarget       []FactoriesTableRowEquipment `json:"upgradeTarget,omitempty"`
+	UpgradeContribution Contribution                 `json:"upgradeContribution,omitempty"`
+	UpgradeLastUpdated  time.Time                    `json:"upgradeLastUpdated"`
 }
 
 type FactoriesTableRowEquipment struct {
@@ -32,7 +36,8 @@ type FactoriesTableRowEquipment struct {
 }
 
 type FactoriesTableRowProductionItem struct {
-	RecipeID         int                `json:"recipeId"`
-	DynamicOutputs   map[string]float64 `json:"dynamicOutputs"`
+	RecipeID         string             `json:"recipeId"`
+	Inputs           map[string]float64 `json:"inputs"`
+	Outputs          map[string]float64 `json:"outputs"`
 	ManualEfficiency float64            `json:"manualEfficiency"`
 }

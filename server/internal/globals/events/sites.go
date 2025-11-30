@@ -1,6 +1,9 @@
 package events
 
-import "srv/internal/game"
+import (
+	"srv/internal/domain"
+	"srv/internal/game"
+)
 
 type BaseCreatedPayload struct {
 	WorldID  game.CelestialID
@@ -18,6 +21,7 @@ type BaseRemovedPayload struct {
 
 type FactoryCreatedPayload struct {
 	BaseID game.BaseID
+	Owner  domain.UserID
 }
 type FactoryUpdatedPayload struct {
 	FactoryID game.FactoryID

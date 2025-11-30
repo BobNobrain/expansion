@@ -7,6 +7,9 @@ import (
 	"srv/internal/game"
 	"srv/internal/utils"
 	"srv/internal/utils/common"
+	"time"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type factoriesRepoImpl struct {
@@ -19,16 +22,22 @@ type factoryDataJSON struct {
 	Employees map[string]int             `json:"wf"`
 	Inventory map[string]float64         `json:"inv"`
 	Equipment []factoryDataEquipmentJSON `json:"equipment"`
+
+	UpgradeTarget        []factoryDataEquipmentJSON    `json:"upgradeTarget,omitempty"`
+	UpgradeContributions []contributionJSONHistoryItem `json:"upgradeContributions,omitempty"`
+	UpgradeLastChanged   time.Time                     `json:"upgradeLastChanged"`
 }
 type factoryDataEquipmentJSON struct {
-	EquipmentID string                                `json:"eqId"`
-	Count       int                                   `json:"n"`
-	Production  map[int]factoryDataProductionItemJSON `json:"production"`
+	EquipmentID string                          `json:"eqId"`
+	Count       int                             `json:"n"`
+	Production  []factoryDataProductionItemJSON `json:"production"`
 }
 type factoryDataProductionItemJSON struct {
-	RecipeID         int                `json:"recipe"`
+	RecipeID         string             `json:"recipe"`
+	TemplateID       string             `json:"template,omitempty"`
 	ManualEfficiency float64            `json:"manualEff"`
-	DynamicOutputs   map[string]float64 `json:"dynOutputs"`
+	Inputs           map[string]float64 `json:"inputs,omitempty"`
+	Outputs          map[string]float64 `json:"outputs,omitempty"`
 }
 
 func (b *factoriesRepoImpl) GetBaseFactories(bid game.BaseID) ([]game.Factory, common.Error) {
@@ -82,9 +91,10 @@ func (b *factoriesRepoImpl) UpdateBaseFactory(factory game.Factory) common.Error
 		return makeDBError(jerr, "FactoriesRepo::UpdateBaseFactory")
 	}
 
-	dberr := b.q.UpdateBase(b.ctx, dbq.UpdateBaseParams{
-		ID:   int32(factory.FactoryID),
-		Data: factoryData,
+	dberr := b.q.UpdateFactory(b.ctx, dbq.UpdateFactoryParams{
+		ID:        int32(factory.FactoryID),
+		Data:      factoryData,
+		UpdatedTo: pgtype.Timestamptz{Time: factory.Updated, Valid: true},
 	})
 	if dberr != nil {
 		return makeDBError(dberr, "FactoriesRepo::UpdateBaseFactory")
@@ -104,10 +114,27 @@ func decodeFactory(row dbq.Factory) (game.Factory, common.Error) {
 		BuiltAt:   row.CreatedAt.Time,
 		Updated:   row.UpdatedTo.Time,
 
-		Status:    game.FactoryStatus(rowData.Status),
+		Status:    game.FactoryProductionStatus(rowData.Status),
 		Inventory: game.MakeInventoryFrom(rowData.Inventory),
 		Employees: make(map[game.WorkforceType]int),
 		Equipment: utils.MapSlice(rowData.Equipment, decodeFactoryEquipment),
+
+		Upgrade: game.FactoryUpgradeProject{
+			Equipment: utils.MapSlice(rowData.UpgradeTarget, func(data factoryDataEquipmentJSON) game.FactoryUpgradeProjectEqipment {
+				return game.FactoryUpgradeProjectEqipment{
+					EquipmentID: game.EquipmentID(data.EquipmentID),
+					Count:       data.Count,
+					Production: utils.MapSlice(data.Production, func(data factoryDataProductionItemJSON) game.FactoryProductionPlan {
+						return game.FactoryProductionPlan{
+							RecipeID:         game.RecipeID(data.RecipeID),
+							ManualEfficiency: data.ManualEfficiency,
+						}
+					}),
+				}
+			}),
+			Progress:    utils.MapSlice(rowData.UpgradeContributions, decodeContributionJSONHistoryItem),
+			LastUpdated: rowData.UpgradeLastChanged,
+		},
 	}
 
 	for wf, count := range rowData.Employees {
@@ -125,15 +152,20 @@ func decodeFactoryEquipment(eqData factoryDataEquipmentJSON) game.FactoryEquipme
 	eq := game.FactoryEquipment{
 		EquipmentID: game.EquipmentID(eqData.EquipmentID),
 		Count:       eqData.Count,
-		Production:  make(map[game.RecipeID]game.FactoryProductionItem),
+		Production:  nil,
 	}
 
 	for _, prodData := range eqData.Production {
-		eq.Production[game.RecipeID(prodData.RecipeID)] = game.FactoryProductionItem{
-			Template:         game.RecipeID(prodData.RecipeID),
-			DynamicOutputs:   game.MakeInventoryFrom(prodData.DynamicOutputs),
+		eq.Production = append(eq.Production, game.FactoryProductionItem{
+			Recipe: game.Recipe{
+				RecipeID:    game.RecipeID(prodData.RecipeID),
+				TemplateID:  game.RecipeTemplateID(prodData.TemplateID),
+				Inputs:      utils.ConvertStringKeys[string, game.CommodityID](prodData.Inputs),
+				Outputs:     utils.ConvertStringKeys[string, game.CommodityID](prodData.Outputs),
+				EquipmentID: eq.EquipmentID,
+			},
 			ManualEfficiency: prodData.ManualEfficiency,
-		}
+		})
 	}
 
 	return eq
@@ -145,6 +177,21 @@ func encodeFactoryData(factory game.Factory) factoryDataJSON {
 		Employees: utils.MapKeys(factory.Employees, func(wf game.WorkforceType) string { return wf.String() }),
 		Inventory: factory.Inventory.ToMap(),
 		Equipment: utils.MapSlice(factory.Equipment, encodeFactoryEquipment),
+
+		UpgradeTarget: utils.MapSlice(factory.Upgrade.Equipment, func(eq game.FactoryUpgradeProjectEqipment) factoryDataEquipmentJSON {
+			return factoryDataEquipmentJSON{
+				EquipmentID: string(eq.EquipmentID),
+				Count:       eq.Count,
+				Production: utils.MapSlice(eq.Production, func(prod game.FactoryProductionPlan) factoryDataProductionItemJSON {
+					return factoryDataProductionItemJSON{
+						RecipeID:         string(prod.RecipeID),
+						ManualEfficiency: prod.ManualEfficiency,
+					}
+				}),
+			}
+		}),
+		UpgradeContributions: utils.MapSlice(factory.Upgrade.Progress, encodeContributionJSONHistoryItem),
+		UpgradeLastChanged:   factory.Upgrade.LastUpdated,
 	}
 	return data
 }
@@ -152,15 +199,17 @@ func encodeFactoryEquipment(eq game.FactoryEquipment) factoryDataEquipmentJSON {
 	data := factoryDataEquipmentJSON{
 		EquipmentID: string(eq.EquipmentID),
 		Count:       eq.Count,
-		Production:  make(map[int]factoryDataProductionItemJSON),
+		Production:  nil,
 	}
 
 	for _, production := range eq.Production {
-		data.Production[int(production.Template)] = factoryDataProductionItemJSON{
-			RecipeID:         int(production.Template),
+		data.Production = append(data.Production, factoryDataProductionItemJSON{
+			RecipeID:         string(production.Recipe.RecipeID),
+			TemplateID:       string(production.Recipe.TemplateID),
+			Inputs:           utils.ConvertStringKeys[game.CommodityID, string](production.Recipe.Inputs),
+			Outputs:          utils.ConvertStringKeys[game.CommodityID, string](production.Recipe.Outputs),
 			ManualEfficiency: production.ManualEfficiency,
-			DynamicOutputs:   production.DynamicOutputs.ToMap(),
-		}
+		})
 	}
 
 	return data

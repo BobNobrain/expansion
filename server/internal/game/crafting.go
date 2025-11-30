@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	"srv/internal/domain"
 	"time"
 )
@@ -23,7 +24,7 @@ func (c Commodity) IsNil() bool {
 }
 
 // Represents a singular act of contributing towards some kind of construction project
-type ContrubutionHistoryItem struct {
+type ContributionHistoryItem struct {
 	AmountsProvided InventoryDelta
 	Contributor     domain.UserID
 	Date            time.Time
@@ -32,7 +33,7 @@ type ContrubutionHistoryItem struct {
 // Represents a state of gathering resources for some kind of construction project
 type Contribution struct {
 	AmountsRequired Inventory
-	History         []ContrubutionHistoryItem
+	History         []ContributionHistoryItem
 }
 
 func NewContribution() *Contribution {
@@ -65,7 +66,7 @@ func (c *Contribution) Contribute(author domain.UserID, date time.Time, material
 		return false
 	}
 
-	c.History = append(c.History, ContrubutionHistoryItem{
+	c.History = append(c.History, ContributionHistoryItem{
 		Contributor:     author,
 		Date:            date,
 		AmountsProvided: materials,
@@ -88,10 +89,11 @@ func (id EquipmentID) IsEmpty() bool {
 }
 
 type EquipmentData struct {
-	EquipmentID EquipmentID
-	Area        float64
-	Jobs        map[WorkforceType]EquipmentDataJob
-	Building    BaseBuildingID
+	EquipmentID       EquipmentID
+	Area              float64
+	Jobs              map[WorkforceType]EquipmentDataJob
+	Building          BaseBuildingID
+	ConstructionParts InventoryDelta
 }
 
 type EquipmentDataJob struct {
@@ -99,10 +101,10 @@ type EquipmentDataJob struct {
 	Contribution float64
 }
 
-type RecipeID int
+type RecipeTemplateID string
 
 type RecipeTemplate struct {
-	RecipeID      RecipeID
+	TemplateID    RecipeTemplateID
 	StaticInputs  map[CommodityID]float64
 	StaticOutputs map[CommodityID]float64
 	Equipment     EquipmentID
@@ -115,13 +117,59 @@ type RecipeTemplate struct {
 	AffectedByAtmosphere bool
 }
 
-func (r RecipeTemplate) HasDynamicOutputs() bool {
-	return r.AffectedByFertility || r.AffectedByResources || r.AffectedByOcean || r.AffectedByAtmosphere
+func (t RecipeTemplate) IsValid() bool {
+	return !t.Equipment.IsEmpty()
+}
+func (t RecipeTemplate) HasDynamicOutputs() bool {
+	return t.AffectedByFertility || t.AffectedByResources || t.AffectedByOcean || t.AffectedByAtmosphere
 }
 
-func (r RecipeTemplate) GetProductionItemBase() FactoryProductionItem {
-	item := FactoryProductionItem{
-		Template: r.RecipeID,
+func (t RecipeTemplate) Instantiate() Recipe {
+	result := Recipe{
+		RecipeID:    RecipeID(t.TemplateID),
+		TemplateID:  t.TemplateID,
+		EquipmentID: t.Equipment,
+		Inputs:      make(map[CommodityID]float64),
+		Outputs:     make(map[CommodityID]float64),
 	}
-	return item
+
+	timeScale := t.GetDurationScale()
+
+	for cid, amt := range t.StaticInputs {
+		result.Inputs[cid] += amt * timeScale
+	}
+	for cid, amt := range t.StaticOutputs {
+		result.Outputs[cid] += amt * timeScale
+	}
+
+	return result
+}
+func (t RecipeTemplate) GetDurationScale() float64 {
+	return 1 / t.BaseDuration.Hours()
+}
+
+func (t RecipeTemplate) InstantiateWithScaledOutputs(scale float64) Recipe {
+	r := t.Instantiate()
+	r.RecipeID += RecipeID(fmt.Sprintf("*%.3f", scale))
+	for cid := range r.Outputs {
+		r.Outputs[cid] *= scale
+	}
+	return r
+}
+
+func (t RecipeTemplate) InstantiateWithDynamicOutput(cid CommodityID, amt float64) Recipe {
+	r := t.Instantiate()
+	r.RecipeID += RecipeID(fmt.Sprintf("+%s", cid))
+	r.Outputs[cid] += amt * t.GetDurationScale()
+	return r
+}
+
+type RecipeID string
+
+type Recipe struct {
+	RecipeID    RecipeID
+	TemplateID  RecipeTemplateID
+	Inputs      map[CommodityID]float64
+	Outputs     map[CommodityID]float64
+	EquipmentID EquipmentID
 }

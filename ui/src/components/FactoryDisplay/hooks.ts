@@ -1,6 +1,6 @@
 import { createMemo } from 'solid-js';
 import type { Recipe } from '@/domain/Recipe';
-import { recipesAsset } from '@/lib/assetmanager';
+import { staticRecipesAsset } from '@/lib/assetmanager';
 import { useAsset } from '@/lib/solid/asset';
 import { useFactoryDisplayContext } from './state';
 import type { FactoryEquipment } from '@/domain/Base';
@@ -20,7 +20,7 @@ export function useSelectedEquipment(): () => FactoryEquipment | null {
 }
 
 export function useRecipesList(filterByEquipment?: () => FactoryEquipment | null): () => Recipe[] {
-    const recipesData = useAsset(recipesAsset);
+    const recipesData = useAsset(staticRecipesAsset);
     const { dynamicRecipes } = useFactoryDisplayContext();
 
     const isFittingEquipment = (r: Recipe): boolean => {

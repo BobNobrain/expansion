@@ -19,14 +19,8 @@ type basesRepoImpl struct {
 }
 
 type baseDataJSON struct {
-	Sites     []baseDataJSONSite `json:"sites"`
 	Inventory map[string]float64 `json:"inventory"`
 	// TBD: storage capacity
-}
-type baseDataJSONSite struct {
-	ID           int                        `json:"id"`
-	Target       []factoryDataEquipmentJSON `json:"target"`
-	Contribution contributionJSON           `json:"contrib"`
 }
 
 func (b *basesRepoImpl) GetBase(id game.BaseID) (*game.Base, common.Error) {
@@ -108,7 +102,6 @@ func (b *basesRepoImpl) CreateBase(payload components.CreateBasePayload) common.
 	}
 
 	baseData, jerr := json.Marshal(baseDataJSON{
-		Sites:     nil,
 		Inventory: make(map[string]float64),
 	})
 	if jerr != nil {
@@ -158,16 +151,7 @@ func (b *basesRepoImpl) DeleteBase(bid game.BaseID) common.Error {
 
 func encodeBaseData(base game.Base) baseDataJSON {
 	data := baseDataJSON{
-		Sites:     make([]baseDataJSONSite, len(base.Sites)),
 		Inventory: base.Inventory.ToMap(),
-	}
-
-	for _, site := range base.Sites {
-		data.Sites = append(data.Sites, baseDataJSONSite{
-			ID:           site.SiteID,
-			Target:       utils.MapSlice(site.Target, encodeFactoryEquipment),
-			Contribution: encodeContributionJSON(site.Contributed),
-		})
 	}
 
 	return data
@@ -179,15 +163,6 @@ func decodeBase(row dbq.Base) (game.Base, common.Error) {
 		return game.Base{}, err
 	}
 
-	sites := make(map[int]game.BaseConstructionSite)
-	for _, siteData := range baseData.Sites {
-		sites[siteData.ID] = game.BaseConstructionSite{
-			SiteID:      siteData.ID,
-			Target:      utils.MapSlice(siteData.Target, decodeFactoryEquipment),
-			Contributed: decodeContributionJSON(siteData.Contribution),
-		}
-	}
-
 	base := game.Base{
 		ID:        game.BaseID(row.ID),
 		Created:   row.EstablishedAt.Time,
@@ -195,7 +170,6 @@ func decodeBase(row dbq.Base) (game.Base, common.Error) {
 		WorldID:   game.CelestialID(row.WorldID),
 		TileID:    game.TileID(row.TileID),
 		CityID:    game.CityID(row.CityID),
-		Sites:     sites,
 		Inventory: game.MakeInventoryFrom(baseData.Inventory),
 	}
 

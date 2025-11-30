@@ -126,3 +126,27 @@ type WorldPopulationOverview struct {
 	NCities int
 	NBases  int
 }
+
+func (w WorldData) GetTileData(tid TileID) TileData {
+	tile := w.Tiles[tid]
+	fertility := -1.0
+
+	if len(w.FertileTiles) > 0 {
+		fertility = w.FertileTiles[tid].SoilFertility
+	}
+
+	return TileData{
+		ID:        tid,
+		Elevation: w.TileElevationsScale.Mul(tile.Elevation),
+		AvgTemp:   tile.AvgTemp,
+		Pressure:  tile.Pressure,
+		Surface:   tile.Surface,
+
+		Resources:     w.TileResources[tid],
+		Composition:   w.Composition,
+		SoilFertility: fertility,
+
+		TransportLevel: 0,
+		EnergyLevel:    0,
+	}
+}

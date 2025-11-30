@@ -1,12 +1,14 @@
 package globaldata
 
 import (
+	"fmt"
 	"slices"
 	"srv/internal/game"
 	"srv/internal/globals/assets"
 	"srv/internal/globals/logger"
 	"srv/internal/utils"
 	"srv/internal/utils/phys/material"
+	"strings"
 )
 
 type CraftingRegistry struct {
@@ -15,9 +17,10 @@ type CraftingRegistry struct {
 	resourceIDs        []game.ResourceID // this one is needed for consistent iteration order when generating worlds
 	materialToResource map[material.MaterialID]game.ResourceID
 
-	recipes       map[game.RecipeID]game.RecipeTemplate
-	equipment     map[game.EquipmentID]game.EquipmentData
-	baseBuildings map[game.BaseBuildingID]game.BaseBuildingData
+	allRecipes     map[game.RecipeTemplateID]game.RecipeTemplate
+	dynamicRecipes []game.RecipeTemplate
+	equipment      map[game.EquipmentID]game.EquipmentData
+	baseBuildings  map[game.BaseBuildingID]game.BaseBuildingData
 }
 
 func newCraftingRegistry() *CraftingRegistry {
@@ -25,7 +28,7 @@ func newCraftingRegistry() *CraftingRegistry {
 		commodities:        make(map[game.CommodityID]game.Commodity),
 		resources:          make(map[game.ResourceID]game.ResourceData),
 		materialToResource: make(map[material.MaterialID]game.ResourceID),
-		recipes:            make(map[game.RecipeID]game.RecipeTemplate),
+		allRecipes:         make(map[game.RecipeTemplateID]game.RecipeTemplate),
 		equipment:          make(map[game.EquipmentID]game.EquipmentData),
 		baseBuildings:      make(map[game.BaseBuildingID]game.BaseBuildingData),
 	}
@@ -53,18 +56,34 @@ func (r *CraftingRegistry) GetBaseBuilding(id game.BaseBuildingID) game.BaseBuil
 	return r.baseBuildings[id]
 }
 
-func (r *CraftingRegistry) GetRecipe(id game.RecipeID) game.RecipeTemplate {
-	return r.recipes[id]
+func (r *CraftingRegistry) GetRecipe(id game.RecipeTemplateID) game.RecipeTemplate {
+	return r.allRecipes[id]
+}
+func (r *CraftingRegistry) GetDynamicRecipes() []game.RecipeTemplate {
+	return r.dynamicRecipes
 }
 func (r *CraftingRegistry) GetRecipesForEquipment(eid game.EquipmentID) []game.RecipeTemplate {
 	result := make([]game.RecipeTemplate, 0)
 
-	for _, recipe := range r.recipes {
+	for _, recipe := range r.allRecipes {
 		if recipe.Equipment != eid {
 			continue
 		}
 
 		result = append(result, recipe)
+	}
+
+	return result
+}
+func (r *CraftingRegistry) CreateAllStaticRecipes() []game.Recipe {
+	var result []game.Recipe
+
+	for _, rt := range r.allRecipes {
+		if rt.HasDynamicOutputs() {
+			continue
+		}
+
+		result = append(result, rt.Instantiate())
 	}
 
 	return result
@@ -112,8 +131,8 @@ func (r *CraftingRegistry) FillCommodities(commoditiesData *assets.CommoditiesAs
 }
 
 func (r *CraftingRegistry) FillRecipes(recipesData *assets.RecipesAsset) {
-	for i, recipeData := range recipesData.Recipes {
-		rid := game.RecipeID(i)
+	for _, recipeData := range recipesData.Recipes {
+		rtid := makeRecipeTemplateId(recipeData)
 
 		inputs := make(map[game.CommodityID]float64)
 		outputs := make(map[game.CommodityID]float64)
@@ -130,12 +149,24 @@ func (r *CraftingRegistry) FillRecipes(recipesData *assets.RecipesAsset) {
 			outputs[game.CommodityID(cid)] = amt
 		}
 
-		r.recipes[rid] = game.RecipeTemplate{
-			RecipeID:      rid,
+		rt := game.RecipeTemplate{
+			TemplateID:    rtid,
 			StaticInputs:  inputs,
 			StaticOutputs: outputs,
 			Equipment:     game.EquipmentID(recipeData.Equipment),
 			BaseDuration:  baseDuration,
+
+			AffectedByFertility:  recipeData.AffectedByFertility,
+			AffectedByResources:  recipeData.AffectedByResource,
+			AffectedBySnow:       recipeData.AffectedBySnow,
+			AffectedByOcean:      recipeData.AffectedByOcean,
+			AffectedByAtmosphere: recipeData.AffectedByAtmosphere,
+		}
+
+		r.allRecipes[rtid] = rt
+
+		if rt.HasDynamicOutputs() {
+			r.dynamicRecipes = append(r.dynamicRecipes, rt)
 		}
 	}
 }
@@ -191,4 +222,26 @@ func NewMockCraftingRegistry(
 	mock.FillEquipment(equipmentData)
 	mock.FillRecipes(recipesData)
 	return mock
+}
+
+func makeRecipeTemplateId(rtdata assets.RecipesAssetRecipe) game.RecipeTemplateID {
+	sortedInCids := utils.GetMapKeys(rtdata.Inputs)
+	slices.Sort(sortedInCids)
+
+	sortedOutCids := utils.GetMapKeys(rtdata.Outputs)
+	slices.Sort(sortedOutCids)
+
+	var builder strings.Builder
+
+	for _, cid := range sortedInCids {
+		builder.WriteString(fmt.Sprintf("%.2f%s", rtdata.Inputs[cid], cid[:3]))
+	}
+
+	builder.WriteString("=")
+
+	for _, cid := range sortedOutCids {
+		builder.WriteString(fmt.Sprintf("%.2f%s", rtdata.Outputs[cid], cid[:3]))
+	}
+
+	return game.RecipeTemplateID(builder.String())
 }

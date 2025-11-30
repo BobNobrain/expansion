@@ -5,6 +5,7 @@ import (
 	"srv/internal/globals"
 	"srv/internal/globals/assets"
 	"srv/internal/globals/config"
+	"srv/internal/globals/globaldata"
 	"srv/internal/utils/cmdutils"
 )
 
@@ -20,4 +21,7 @@ func main() {
 	})
 
 	cmdutils.Ensure(assets.SaveGalacticGrid(grid))
+
+	staticRecipes := globaldata.Crafting().CreateAllStaticRecipes()
+	cmdutils.Ensure(assets.SaveStaticRecipes(staticRecipes))
 }

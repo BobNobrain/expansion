@@ -3,104 +3,127 @@ package gamelogic
 import (
 	"srv/internal/game"
 	"srv/internal/globals/globaldata"
-	"srv/internal/utils/common"
 	"srv/internal/utils/phys/material"
 )
 
 type CraftingRecipeLogic struct {
 	reg *globaldata.CraftingRegistry
-
-	hasLocation   bool
-	soilFertility float64
-	resources     []game.ResourceDeposit
-	atmosphere    *material.MaterialCompound
-	oceans        *material.MaterialCompound
-	snow          *material.MaterialCompound
 }
 
-func NewCraftingRecipeLogic() *CraftingRecipeLogic {
-	return &CraftingRecipeLogic{
-		reg: globaldata.Crafting(),
+var globalCraftingLogic *CraftingRecipeLogic
+
+func CraftingLogic() *CraftingRecipeLogic {
+	if globalCraftingLogic == nil {
+		globalCraftingLogic = &CraftingRecipeLogic{
+			reg: globaldata.Crafting(),
+		}
+	}
+
+	return globalCraftingLogic
+}
+
+func (l *CraftingRecipeLogic) GetRecipesAt(worldData game.WorldData, tileID game.TileID) *RecipeLibrary {
+	return &RecipeLibrary{
+		reg:          l.reg,
+		locationInfo: worldData.GetTileData(tileID),
 	}
 }
 
-func (l *CraftingRecipeLogic) WithLocation(worldData game.WorldData, tileID game.TileID) *CraftingRecipeLogic {
-	l.hasLocation = true
-
-	l.resources = worldData.TileResources[tileID]
-	l.atmosphere = worldData.Composition.Atmosphere
-	l.oceans = worldData.Composition.Oceans
-	l.snow = worldData.Composition.Snow
-
-	l.soilFertility = -1
-	if len(worldData.FertileTiles) != 0 {
-		l.soilFertility = worldData.FertileTiles[tileID].SoilFertility
-	}
-
-	return l
+type RecipeLibrary struct {
+	reg          *globaldata.CraftingRegistry
+	locationInfo game.TileData
 }
 
-func (l *CraftingRecipeLogic) GetPossibleProductionItems(eid game.EquipmentID) []game.FactoryProductionItem {
-	recipes := l.reg.GetRecipesForEquipment(eid)
-	result := make([]game.FactoryProductionItem, 0)
+func (l *RecipeLibrary) CreateAllRecipesForEquipment(
+	equipment game.EquipmentID,
+) map[game.RecipeID]game.Recipe {
+	result := make(map[game.RecipeID]game.Recipe)
 
-	for _, recipe := range recipes {
-		if !recipe.HasDynamicOutputs() || !l.hasLocation {
-			result = append(result, recipe.GetProductionItemBase())
-			continue
-		}
-
-		if recipe.AffectedByResources {
-			for _, deposit := range l.resources {
-				cid := l.reg.GetResourceData(deposit.ResourceID).CommodityID
-				item := recipe.GetProductionItemBase()
-				item.DynamicOutputs = map[game.CommodityID]float64{cid: deposit.Abundance}
-				result = append(result, item)
-			}
-		}
-
-		compounds := make([]*material.MaterialCompound, 0, 3)
-		if recipe.AffectedByAtmosphere {
-			compounds = append(compounds, l.atmosphere)
-		}
-		if recipe.AffectedByOcean {
-			compounds = append(compounds, l.oceans)
-		}
-		if recipe.AffectedBySnow {
-			compounds = append(compounds, l.snow)
-		}
-
-		for _, compound := range compounds {
-			for _, mat := range compound.ListMaterials() {
-				cid := l.reg.GetResourceForMaterial(mat.GetID()).CommodityID
-
-				item := recipe.GetProductionItemBase()
-				item.DynamicOutputs = map[game.CommodityID]float64{cid: compound.GetPercentage(mat.GetID())}
-				result = append(result, item)
-			}
-		}
-
-		if recipe.AffectedByFertility && l.soilFertility > 0 {
-			item := recipe.GetProductionItemBase()
-			item.DynamicOutputs = make(map[game.CommodityID]float64)
-
-			for cid, amt := range recipe.StaticOutputs {
-				item.DynamicOutputs[cid] = amt * l.soilFertility
-			}
-
-			result = append(result, item)
+	for _, rt := range l.reg.GetRecipesForEquipment(equipment) {
+		if rt.HasDynamicOutputs() {
+			l.instantiateDynamicRecipeTemplate(rt, result)
+		} else {
+			recipe := rt.Instantiate()
+			result[recipe.RecipeID] = recipe
 		}
 	}
 
 	return result
 }
 
-func (l *CraftingRecipeLogic) GetProductionItem(rid game.RecipeID, cid game.CommodityID) (game.FactoryProductionItem, common.Error) {
-	recipe := l.reg.GetRecipe(rid)
+func (l *RecipeLibrary) CreateAllDynamicRecipes() map[game.RecipeID]game.Recipe {
+	result := make(map[game.RecipeID]game.Recipe)
 
-	if recipe.HasDynamicOutputs() && !l.hasLocation {
-		panic("need to provide location to get actual recipe outputs")
+	for _, rt := range l.reg.GetDynamicRecipes() {
+		l.instantiateDynamicRecipeTemplate(rt, result)
 	}
 
-	panic("not implemented")
+	return result
+}
+
+func (l *RecipeLibrary) instantiateDynamicRecipeTemplate(
+	template game.RecipeTemplate,
+	into map[game.RecipeID]game.Recipe,
+) {
+	// TODO: put these numbers into config
+	const ATMOSPHERE_RESOURCE_SCALE = 5.0
+	const OCEAN_RESOURCE_SCALE = 15.0
+	const SNOW_RESOURCE_SCALE = 10.0
+	const DEPOSIT_RESOURCE_SCALE = 10.0
+
+	if template.AffectedByAtmosphere && !l.locationInfo.Composition.Atmosphere.IsEmpty() {
+		const MAX_RESOURCE_PRESSURE_BAR = 3.0
+		atmResourceScale := ATMOSPHERE_RESOURCE_SCALE
+		if l.locationInfo.Pressure.Bar() < MAX_RESOURCE_PRESSURE_BAR {
+			atmResourceScale = max(0.01, l.locationInfo.Pressure.Bar()/MAX_RESOURCE_PRESSURE_BAR)
+		}
+
+		l.addDynamicRecipes(template, l.locationInfo.Composition.Atmosphere, into, atmResourceScale)
+	}
+
+	if template.AffectedByOcean && !l.locationInfo.Composition.Oceans.IsEmpty() {
+		l.addDynamicRecipes(template, l.locationInfo.Composition.Oceans, into, OCEAN_RESOURCE_SCALE)
+	}
+
+	if template.AffectedBySnow && !l.locationInfo.Composition.Snow.IsEmpty() {
+		l.addDynamicRecipes(template, l.locationInfo.Composition.Snow, into, SNOW_RESOURCE_SCALE)
+	}
+
+	if template.AffectedByResources {
+		for _, deposit := range l.locationInfo.Resources {
+			cid := l.reg.GetResourceData(deposit.ResourceID).CommodityID
+			if cid.IsNil() {
+				continue
+			}
+
+			recipe := template.InstantiateWithDynamicOutput(cid, deposit.Abundance*DEPOSIT_RESOURCE_SCALE)
+			into[recipe.RecipeID] = recipe
+		}
+	}
+
+	if template.AffectedByFertility {
+		fertility := l.locationInfo.SoilFertility
+
+		if fertility > 0.001 {
+			recipe := template.InstantiateWithScaledOutputs(fertility)
+			into[recipe.RecipeID] = recipe
+		}
+	}
+}
+
+func (l *RecipeLibrary) addDynamicRecipes(
+	t game.RecipeTemplate,
+	mc *material.MaterialCompound,
+	into map[game.RecipeID]game.Recipe,
+	scale float64,
+) {
+	for _, mat := range mc.ListMaterials() {
+		resource := l.reg.GetResourceForMaterial(mat.GetID())
+		if resource.CommodityID.IsNil() {
+			continue
+		}
+
+		recipe := t.InstantiateWithDynamicOutput(resource.CommodityID, mc.GetPercentage(mat.GetID())*scale)
+		into[recipe.RecipeID] = recipe
+	}
 }

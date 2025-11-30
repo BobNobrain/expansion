@@ -62,18 +62,13 @@ func (l *FactoryUpdatesLogic) RunAutomaticUpdates(now time.Time) {
 		l.factory.Updated = l.factory.Updated.Add(time.Duration(float64(time.Hour) * nextUpdate.deltaHours))
 
 		if nextUpdate.reason.shouldHaltFactory() && l.factory.Status.IsActive() {
-			l.factory.Status = game.FactoryStatusHalted
+			l.factory.Status = game.FactoryProductionStatusHalted
 		}
 	}
 
 	if !success {
 		panic("too much updates have happened")
 	}
-
-	// TODO:
-	// 1. update inventory to nextUpdate.t
-	// 2. update factory status
-	// 3. repeat until nextUpdate.t > now (or nextUpdate.isNever())
 }
 
 // calculates inventory change speeds (per hour), regardless of whether the factory is actually running
@@ -81,21 +76,24 @@ func (l *FactoryUpdatesLogic) calculateSpeeds() {
 	l.speeds = make(map[game.CommodityID]float64)
 
 	for _, eq := range l.factory.Equipment {
-		wfEfficiency := 1.0 // TODO: calculate workforce efficiency
-		eqEff := float64(eq.Count) * wfEfficiency
+		totalManualEfficiencies := 0.0
+		for _, production := range eq.Production {
+			totalManualEfficiencies += production.ManualEfficiency
+		}
 
-		for rid, production := range eq.Production {
-			recipe := l.reg.GetRecipe(rid)
+		wfEfficiency := 1.0 // TODO: calculate workforce efficiency
+
+		eqEff := float64(eq.Count) * wfEfficiency / totalManualEfficiencies
+
+		for _, production := range eq.Production {
+			recipe := l.reg.GetRecipe(production.Recipe.TemplateID)
 			timeEff := float64(time.Hour.Milliseconds()) / float64(recipe.BaseDuration.Milliseconds())
 			eff := eqEff * production.ManualEfficiency * timeEff
 
-			for cid, delta := range recipe.StaticInputs {
+			for cid, delta := range production.Recipe.Inputs {
 				l.speeds[cid] -= delta * eff
 			}
-			for cid, delta := range recipe.StaticOutputs {
-				l.speeds[cid] += delta * eff
-			}
-			for cid, delta := range production.DynamicOutputs {
+			for cid, delta := range production.Recipe.Outputs {
 				l.speeds[cid] += delta * eff
 			}
 		}

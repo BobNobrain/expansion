@@ -3,7 +3,7 @@ CAESAR = node ./tools/caesar.js
 #
 # generated files
 #
-.PHONY: setup api-types sqlc client-assets
+.PHONY: setup api-types sqlc client-assets assets
 setup: dev-db
 	@echo "Setting up the project for local development"
 	cd server && make setup setup-dev-db
@@ -15,6 +15,10 @@ api-types:
 
 sqlc:
 	cd server && make sqlc
+
+assets:
+	cd server && make assetgen
+	node ./tools/client-assets/index.js
 
 client-assets:
 	node ./tools/client-assets/index.js
