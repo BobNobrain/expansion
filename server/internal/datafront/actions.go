@@ -83,13 +83,13 @@ func (gdf *GameDataFront) InitFactoryActions(
 				Project: game.FactoryUpgradeProject{
 					Equipment: utils.MapSlice(
 						payload.Equipment,
-						func(data api.UpgradeFactoryPayloadEquipment) game.FactoryUpgradeProjectEqipment {
+						func(data api.FactoriesTableRowEquipmentPlan) game.FactoryUpgradeProjectEqipment {
 							return game.FactoryUpgradeProjectEqipment{
 								EquipmentID: game.EquipmentID(data.EquipmentID),
 								Count:       data.Count,
 								Production: utils.MapSlice(
 									data.Production,
-									func(data api.UpgradeFactoryPayloadProduction) game.FactoryProductionPlan {
+									func(data api.FactoriesTableRowProductionPlan) game.FactoryProductionPlan {
 										return game.FactoryProductionPlan{
 											RecipeID:         game.RecipeID(data.RecipeID),
 											ManualEfficiency: data.ManualEfficiency,
@@ -112,11 +112,11 @@ func (gdf *GameDataFront) InitFactoryActions(
 				Plan: game.FactoryRebalancePlan{
 					EquipmentRebalances: utils.MapSlice(
 						payload.Plan,
-						func(data []api.UpgradeFactoryPayloadProduction) game.FactoryEquipmentRebalancePlan {
+						func(data []api.FactoriesTableRowProductionPlan) game.FactoryEquipmentRebalancePlan {
 							return game.FactoryEquipmentRebalancePlan{
 								Production: utils.MapSlice(
 									data,
-									func(data api.UpgradeFactoryPayloadProduction) game.FactoryProductionPlan {
+									func(data api.FactoriesTableRowProductionPlan) game.FactoryProductionPlan {
 										return game.FactoryProductionPlan{
 											RecipeID:         game.RecipeID(data.RecipeID),
 											ManualEfficiency: data.ManualEfficiency,

@@ -1,6 +1,7 @@
 import { createMemo, createSignal, Show, type ParentComponent } from 'solid-js';
 import { Dynamic } from 'solid-js/web';
 import { IconBack, IconContext, IconFlag, IconGalaxy, IconShip, IconUser } from '@/icons';
+import { useGoBack } from '@/lib/solid/useGoBack';
 import { UserFeed } from '@/views/UserFeed/UserFeed';
 import { TouchHeader, TouchHeaderButton, TouchHeaderTitle } from '../TouchHeader/TouchHeader';
 import { TouchLoginModal } from '../TouchLoginModal/TouchLoginModal';
@@ -41,11 +42,17 @@ export const TouchPageWrapper: ParentComponent = (props) => {
 
     const customFooter = createMemo(() => ctx.get().customFooter);
 
+    const { canGoBack, goBack } = useGoBack();
+
     return (
         <TouchPage
             header={
                 <TouchHeader>
-                    <TouchHeaderButton onClick={ctx.get().goBack}>
+                    <TouchHeaderButton
+                        onClick={() => {
+                            ctx.get().goBack?.(canGoBack() ? goBack : undefined);
+                        }}
+                    >
                         <Show when={ctx.get().goBack} fallback={<IconGalaxy size={32} />}>
                             <IconBack size={20} />
                         </Show>

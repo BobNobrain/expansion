@@ -1,8 +1,10 @@
 import type { BuildingsAsset } from '../lib/assetmanager';
 import { WorkforceData, type WorkforceType } from './City';
 import { ConstructionCost } from './Commodity';
+import type { Contribution } from './Contribution';
 import { Inventory } from './Inventory';
 import type { Recipe } from './Recipe';
+import type { WorldTileConditions } from './World';
 
 export type BaseOverview = {
     id: number;
@@ -30,32 +32,67 @@ export type BaseContent = {
     created: Date;
     operator: string;
 
-    factories: Factory[];
-    constructionSites: BaseConstructionSite[];
+    inventory: Inventory;
 };
+
+export enum FactoryStatus {
+    Active = 'active',
+    Halted = 'halted',
+    Disabled = 'disabled',
+}
 
 export type Factory = {
     id: number;
+    baseId: number;
+    status: FactoryStatus;
+    createdAt: Date;
+    updatedTo: Date;
+
     equipment: FactoryEquipment[];
+    inventory: Inventory;
+    employees: WorkforceData<number>;
+
+    upgradeProject: {
+        target: FactoryEquipmentPlan[];
+        contribution: Contribution;
+        lastUpdated: Date;
+    };
 };
 
 export type FactoryEquipment = {
     equipmentId: string;
     count: number;
-    production: Record<string, FactoryProduction>;
+    production: FactoryProduction[];
     employees: WorkforceData<number>;
 };
 
 export type FactoryProduction = {
-    recipeId: number;
+    recipe: Recipe;
     manualEfficiency: number;
-    dynamicOutputs: Record<string, number>;
+};
+
+export type FactoryEquipmentPlan = {
+    equipmentId: string;
+    count: number;
+    production: FactoryProductionPlan[];
+};
+
+export type FactoryProductionPlan = {
+    recipeId: string;
+    manualEfficiency: number;
+};
+
+export type FactoryConfiguration = {
+    equipment: Pick<FactoryEquipment, 'count' | 'equipmentId'>[];
+};
+export type FactoryConfigurationWithProduction = {
+    equipment: FactoryEquipmentPlan[];
 };
 
 export namespace Factory {
-    export function getEffectiveScales(equipment: FactoryEquipment): Record<string, number> {
+    export function getEffectiveScales(equipment: FactoryEquipmentPlan): number[] {
         let totalWeights = 0;
-        for (const productionItem of Object.values(equipment.production)) {
+        for (const productionItem of equipment.production) {
             totalWeights += productionItem.manualEfficiency;
         }
 
@@ -65,26 +102,30 @@ export namespace Factory {
 
         const factor = equipment.count / totalWeights;
 
-        const result: Record<string, number> = {};
-        for (const [key, productionItem] of Object.entries(equipment.production)) {
-            result[key] = productionItem.manualEfficiency * factor;
+        const result: number[] = [];
+        for (const productionItem of equipment.production) {
+            result.push(productionItem.manualEfficiency * factor);
         }
         return result;
     }
 
-    export function getTotalInOuts(recipes: Record<string, Recipe>, factory: Pick<Factory, 'equipment'>): Inventory {
+    export function getTotalInOuts(
+        recipes: Record<string, Recipe>,
+        factory: FactoryConfigurationWithProduction,
+    ): Inventory {
         const result = Inventory.empty();
 
         for (const equipment of factory.equipment) {
             const scales = getEffectiveScales(equipment);
 
-            for (const production of Object.values(equipment.production)) {
+            for (let i = 0; i < equipment.production.length; i++) {
+                const production = equipment.production[i];
                 const recipe = recipes[production.recipeId];
                 if (!recipe) {
                     continue;
                 }
 
-                const effectiveScale = scales[production.recipeId];
+                const effectiveScale = scales[i];
 
                 for (const [cid, delta] of Object.entries(recipe.inputs)) {
                     result[cid] ??= 0;
@@ -101,7 +142,7 @@ export namespace Factory {
         return result;
     }
 
-    export function getTotalArea(data: BuildingsAsset, factory: Pick<Factory, 'equipment'>): number {
+    export function getTotalArea(data: BuildingsAsset, factory: FactoryConfiguration): number {
         let total = 0;
 
         for (const equipment of factory.equipment) {
@@ -112,7 +153,17 @@ export namespace Factory {
         return total;
     }
 
-    export function getConstructionCost(data: BuildingsAsset, factory: Pick<Factory, 'equipment'>): ConstructionCost {
+    export function getTotalEquipmentCount(factory: FactoryConfiguration): number {
+        let total = 0;
+
+        for (const equipment of factory.equipment) {
+            total += equipment.count;
+        }
+
+        return total;
+    }
+
+    export function getConstructionCost(data: BuildingsAsset, factory: FactoryConfiguration): ConstructionCost {
         const totalCost = ConstructionCost.empty();
 
         for (const equipment of factory.equipment) {
@@ -125,7 +176,7 @@ export namespace Factory {
         return totalCost;
     }
 
-    export function getTotalJobs(data: BuildingsAsset, factory: Pick<Factory, 'equipment'>): WorkforceData<number> {
+    export function getTotalJobs(data: BuildingsAsset, factory: FactoryConfiguration): WorkforceData<number> {
         const result = WorkforceData.empty<number>();
 
         for (const eq of factory.equipment) {
@@ -138,6 +189,33 @@ export namespace Factory {
         }
 
         return result;
+    }
+
+    export function isUpgradeInProgress(f: Pick<Factory, 'upgradeProject'>): boolean {
+        return f.upgradeProject.contribution.contributions.length > 0;
+    }
+    export function hasUpgradePlanned(f: Pick<Factory, 'upgradeProject'>): boolean {
+        return f.upgradeProject.target.length > 0;
+    }
+
+    export function getCurrentConfiguration(f: Factory): FactoryConfigurationWithProduction {
+        return {
+            equipment: f.equipment.map(
+                (eq): FactoryEquipmentPlan => ({
+                    equipmentId: eq.equipmentId,
+                    count: eq.count,
+                    production: eq.production.map(
+                        (prod): FactoryProductionPlan => ({
+                            recipeId: prod.recipe.id,
+                            manualEfficiency: prod.manualEfficiency,
+                        }),
+                    ),
+                }),
+            ),
+        };
+    }
+    export function getUpgradeConfiguration(f: Factory): FactoryConfigurationWithProduction {
+        return { equipment: f.upgradeProject.target };
     }
 }
 
@@ -193,37 +271,7 @@ export namespace Equipment {
     }
 }
 
-export type BaseConstructionSite = {
-    id: number;
-    equipment: string;
-    area: number;
-    total: ConstructionCost;
-    provided: ConstructionCost;
-    autoBuild: boolean;
-};
-
-export type ProductionGraph = {
-    nodes: Record<number, ProductionGraphNode>;
-    edges: Record<number, ProductionGraphEdge>;
-};
-
-export type ProductionGraphNode = {
-    id: number;
-    position: ProductionGraphPosition;
-    equipmentId: string;
-    count: number;
-
-    inputs: number[];
-    outputs: number[];
-};
-
-export type ProductionGraphEdge = {
-    from: number;
-    to: number;
-    amount: number;
-};
-
-export type ProductionGraphPosition = {
-    column: number;
-    row: number;
+export type BaseEnvs = {
+    dynamicRecipes: Recipe[];
+    tileConditions: WorldTileConditions;
 };

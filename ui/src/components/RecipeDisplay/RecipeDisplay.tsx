@@ -1,10 +1,11 @@
-import { type Component, createMemo, For, type JSX } from 'solid-js';
+import { type Component, createMemo, For, type JSX, Show } from 'solid-js';
 import { Commodity } from '@/domain/Commodity';
 import { useAsset } from '@/lib/solid/asset';
 import { commoditiesAsset, type CommoditiesAsset } from '@/lib/assetmanager';
 import { CommodityIconWithLabel } from '../CommodityIcon';
 import { Arrow } from './Arrow';
 import styles from './RecipeDisplay.module.css';
+import { SkeletonText, Text } from '@/atoms';
 
 export type RecipeDisplayIngridient = {
     commodityId: string;
@@ -20,12 +21,27 @@ export type RecipeDisplayProps = {
     belowArrow?: JSX.Element;
 
     onClick?: (ev: MouseEvent) => void;
+    isLoading?: boolean;
 };
 
-const RecipeIngridients: Component<{ items: RecipeDisplayIngridient[] }> = (props) => {
+const RecipeIngridients: Component<{ items: RecipeDisplayIngridient[]; isLoading: boolean | undefined }> = (props) => {
     return (
         <ul class={styles.ingridientsList}>
-            <For each={props.items}>
+            <For
+                each={props.items}
+                fallback={
+                    <li
+                        class={styles.ingridient}
+                        classList={{
+                            [styles.emptyIngridient]: true,
+                        }}
+                    >
+                        <Text color="dim" size="large">
+                            (nothing)
+                        </Text>
+                    </li>
+                }
+            >
                 {(ingridient) => (
                     <li
                         class={styles.ingridient}
@@ -36,8 +52,15 @@ const RecipeIngridients: Component<{ items: RecipeDisplayIngridient[] }> = (prop
                         <CommodityIconWithLabel
                             size="md"
                             commodity={ingridient.commodityId}
-                            secondLine={<span class={styles.ingridientSpeed}>{ingridient.speed}</span>}
+                            secondLine={
+                                <span class={styles.ingridientSpeed}>
+                                    <Show when={props.isLoading} fallback={ingridient.speed}>
+                                        <SkeletonText length={4} />
+                                    </Show>
+                                </span>
+                            }
                             secondLineAlignment="right"
+                            isLoading={props.isLoading}
                         />
                     </li>
                 )}
@@ -50,6 +73,10 @@ export const RecipeDisplay: Component<RecipeDisplayProps> = (props) => {
     const commodities = useAsset(commoditiesAsset);
 
     const inputs = createMemo(() => {
+        if (props.isLoading) {
+            return [{ commodityId: '', speed: '' }];
+        }
+
         if (Array.isArray(props.inputs)) {
             return props.inputs;
         }
@@ -58,6 +85,10 @@ export const RecipeDisplay: Component<RecipeDisplayProps> = (props) => {
     });
 
     const outputs = createMemo(() => {
+        if (props.isLoading) {
+            return [{ commodityId: '', speed: '' }];
+        }
+
         if (Array.isArray(props.outputs)) {
             return props.outputs;
         }
@@ -67,13 +98,13 @@ export const RecipeDisplay: Component<RecipeDisplayProps> = (props) => {
 
     return (
         <div class={styles.recipe} onClick={props.onClick}>
-            <RecipeIngridients items={inputs()} />
+            <RecipeIngridients items={inputs()} isLoading={props.isLoading} />
             <div class={styles.arrowWrapper}>
                 <div class={styles.above}>{props.aboveArrow}</div>
                 <Arrow animated={props.animatedArrow} />
                 <div class={styles.below}>{props.belowArrow}</div>
             </div>
-            <RecipeIngridients items={outputs()} />
+            <RecipeIngridients items={outputs()} isLoading={props.isLoading} />
         </div>
     );
 };

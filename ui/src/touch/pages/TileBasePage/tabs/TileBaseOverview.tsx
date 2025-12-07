@@ -1,22 +1,32 @@
-import { type Component } from 'solid-js';
+import { createMemo, Show, type Component } from 'solid-js';
+import { useNavigate } from '@solidjs/router';
 import {
-    Badge,
     Button,
+    DataTable,
+    type DataTableColumn,
     DefinitionList,
     type DefinitionListItem,
+    InfoDisplay,
     Link,
     PageHeader,
     PageHeaderActions,
+    PageHeaderIcon,
     PageHeaderTitle,
+    SkeletonText,
 } from '@/atoms';
+import { FactoryStatusLabel } from '@/components/FactoryStatusLabel/FactoryStatusLabel';
 import { GameTimeLabel } from '@/components/GameTimeLabel/GameTimeLabel';
-import { type BaseContent } from '@/domain/Base';
-import { World } from '@/domain/World';
-import { IconContext, IconHammer, IconPeople } from '@/icons';
-import { useSingleEntity } from '@/lib/datafront/utils';
-import { useTileBaseRouteInfo } from '@/routes/bases';
-import { dfBasesByLocation } from '@/store/datafront';
+import { Factory, type BaseContent } from '@/domain/Base';
+import { IconArea, IconContext, IconEquipment, IconFactory, IconHammer, IconPlus } from '@/icons';
+import { buildingsAsset } from '@/lib/assetmanager';
+import { useAsset } from '@/lib/solid/asset';
+import { emulateLinkClick } from '@/lib/solid/emulateLinkClick';
+import { formatInteger } from '@/lib/strings';
 import { getExploreRoute } from '@/routes/explore';
+import { getViewFactoryRoute } from '@/routes/factories';
+import { dfCreateFactory, dfFactoriesByBaseId } from '@/store/datafront';
+import { useBase } from '../hooks';
+import { formatNumericId } from '@/lib/id';
 
 const DEFS: DefinitionListItem<BaseContent>[] = [
     {
@@ -34,47 +44,77 @@ const DEFS: DefinitionListItem<BaseContent>[] = [
         render: (value) => <GameTimeLabel value={value.created} />,
     },
     {
-        title: 'Production',
-        render: (value) => `${value.factories.length} factories`,
-    },
-    {
-        title: 'Construction sites',
-        render: (value) => `${value.constructionSites.length}`,
-    },
-    {
-        title: 'Total Workforce',
-        render: (value) => {
-            let totalWorkers = 0;
-
-            for (const f of Object.values(value.factories)) {
-                for (const e of Object.values(f.equipment)) {
-                    for (const n of Object.values(e.employees)) {
-                        totalWorkers += n;
-                    }
-                }
-            }
-
-            return (
-                <Badge iconLeft={IconPeople} style="transparent">
-                    {totalWorkers}
-                </Badge>
-            );
-        },
+        title: 'Registration',
+        render: (value) => formatNumericId(value.id, { prefix: 'B-', length: 6 }),
     },
 ];
 
 export const TileBaseOverview: Component = () => {
-    const routeInfo = useTileBaseRouteInfo();
+    const navigate = useNavigate();
+    const base = useBase();
 
-    const bases = dfBasesByLocation.use(() => {
-        const info = routeInfo();
-        return {
-            tileId: World.parseTileId(info.tileId)!,
-            worldId: info.worldId,
-        };
+    const factories = dfFactoriesByBaseId.use(() => {
+        const baseId = base()?.id;
+        return baseId ? { baseId } : null;
     });
 
-    const base = useSingleEntity(bases);
+    const createFactory = dfCreateFactory.use(() => Object.keys(factories).length.toString());
+    const onCreateFactoryClick = () => {
+        const baseId = base()?.id;
+        if (!baseId) {
+            return;
+        }
+
+        createFactory.run({ baseId });
+    };
+
+    const buildings = useAsset(buildingsAsset);
+
+    const COLUMNS: DataTableColumn<Factory>[] = [
+        {
+            header: { text: 'Status' },
+            width: 88,
+            content: (factory) => <FactoryStatusLabel factory={factory} />,
+        },
+        {
+            header: { icon: IconEquipment },
+            align: 'right',
+            width: 48,
+            content: (factory) => formatInteger(Factory.getTotalEquipmentCount(factory)),
+        },
+        {
+            header: { icon: IconArea },
+            align: 'right',
+            width: 48,
+            content: (factory) => {
+                return (
+                    <Show when={buildings()} fallback={<SkeletonText length={3} />}>
+                        {formatInteger(Factory.getTotalArea(buildings()!, factory))}
+                    </Show>
+                );
+            },
+        },
+        {
+            header: { text: 'Created' },
+            content: (factory) => <GameTimeLabel value={factory.createdAt} />,
+        },
+    ];
+
+    const totalAreaText = createMemo(() => {
+        const buildingsData = buildings();
+        if (!buildingsData) {
+            return '0';
+        }
+
+        const fs = Object.values(factories.result());
+        let total = 0;
+
+        for (const f of fs) {
+            total += Factory.getTotalArea(buildingsData, f);
+        }
+
+        return total.toString();
+    });
 
     return (
         <>
@@ -90,6 +130,56 @@ export const TileBaseOverview: Component = () => {
                 </PageHeaderActions>
             </PageHeader>
             <DefinitionList items={DEFS} value={base()} />
+
+            <PageHeader>
+                <PageHeaderTitle>Factories</PageHeaderTitle>
+                <PageHeaderIcon
+                    icon={IconFactory}
+                    text={Object.keys(factories.result()).length.toString()}
+                    isTextLoading={factories.isLoading()}
+                />
+                <PageHeaderIcon
+                    icon={IconArea}
+                    text={totalAreaText()}
+                    isTextLoading={factories.isLoading() || !buildings()}
+                />
+                <PageHeaderActions pushRight>
+                    <Button
+                        square
+                        style="light"
+                        loading={factories.isLoading() || createFactory.isLoading()}
+                        onClick={onCreateFactoryClick}
+                    >
+                        <IconPlus size={32} block />
+                    </Button>
+                </PageHeaderActions>
+            </PageHeader>
+            <DataTable
+                rows={Object.values(factories.result())}
+                columns={COLUMNS}
+                onRowClick={(row, ev) => {
+                    emulateLinkClick(
+                        {
+                            href: getViewFactoryRoute({ factoryId: row.id }),
+                            navigate,
+                        },
+                        ev,
+                    );
+                }}
+            >
+                <InfoDisplay
+                    title="No factories"
+                    actions={
+                        <Button
+                            color="primary"
+                            loading={factories.isLoading() || createFactory.isLoading()}
+                            onClick={onCreateFactoryClick}
+                        >
+                            Create
+                        </Button>
+                    }
+                ></InfoDisplay>
+            </DataTable>
         </>
     );
 };

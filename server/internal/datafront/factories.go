@@ -4,6 +4,7 @@ import (
 	"srv/internal/components"
 	"srv/internal/datafront/dfcore"
 	"srv/internal/game"
+	"srv/internal/game/gamelogic"
 	"srv/internal/globals/events"
 	"srv/internal/utils"
 	"srv/internal/utils/common"
@@ -34,8 +35,8 @@ func (gdf *GameDataFront) InitFactories(repo components.FactoriesRepoReadonly) {
 	// events.SubscribeTyped(bases.sub, events.CityCreated, cities.onNewCityFounded)
 
 	gdf.factories = factories
-	gdf.df.AttachTable("factories", factories.table)
-	gdf.df.AttachTableQuery("factories/"+api.FactoriesQueryTypeByBaseID, factories.qByBaseID)
+	gdf.df.AttachTable(api.FactoriesTableName, factories.table)
+	gdf.df.AttachTableQuery(api.FactoriesQueryTypeByBaseID, factories.qByBaseID)
 }
 
 func (t *factoriesTable) dispose() {
@@ -79,7 +80,22 @@ func encodeFactory(f game.Factory) common.Encodable {
 		UpdatedTo: f.Updated,
 		Inventory: f.Inventory.ToMap(),
 		Employees: utils.MapKeys(f.Employees, func(wf game.WorkforceType) string { return wf.String() }),
-		Equipment: utils.MapSlice(f.Equipment, encodeFactoryEquipment),
+		Equipment: utils.MapSlice(utils.UnNilSlice(f.Equipment), encodeFactoryEquipment),
+
+		UpgradeTarget: utils.MapSlice(utils.UnNilSlice(f.Upgrade.Equipment), func(eqPlan game.FactoryUpgradeProjectEqipment) api.FactoriesTableRowEquipmentPlan {
+			return api.FactoriesTableRowEquipmentPlan{
+				EquipmentID: string(eqPlan.EquipmentID),
+				Count:       eqPlan.Count,
+				Production: utils.MapSlice(utils.UnNilSlice(eqPlan.Production), func(prodPlan game.FactoryProductionPlan) api.FactoriesTableRowProductionPlan {
+					return api.FactoriesTableRowProductionPlan{
+						RecipeID:         string(prodPlan.RecipeID),
+						ManualEfficiency: prodPlan.ManualEfficiency,
+					}
+				}),
+			}
+		}),
+		UpgradeContribution: encodeContribution(gamelogic.FactoryUpgrade().GetConstructionCosts(f.Upgrade)),
+		UpgradeLastUpdated:  f.Upgrade.LastUpdated,
 	})
 }
 

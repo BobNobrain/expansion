@@ -113,3 +113,12 @@ func GetMapKeys[K comparable, V any](m map[K]V) []K {
 	}
 	return keys
 }
+
+// Returns s if it is not nil, otherwise creates an empty slice and returns it instead
+func UnNilSlice[T any](s []T) []T {
+	if s == nil {
+		return make([]T, 0)
+	}
+
+	return s
+}

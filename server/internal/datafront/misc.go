@@ -1,6 +1,8 @@
 package datafront
 
 import (
+	"srv/internal/game"
+	"srv/internal/utils"
 	"srv/internal/utils/predictable"
 	"srv/pkg/api"
 )
@@ -35,4 +37,17 @@ func serializePredictable(e predictable.EncodedPredictable) api.Predictable {
 	}
 
 	return api.Predictable{}
+}
+
+func encodeContribution(c *game.Contribution) api.Contribution {
+	return api.Contribution{
+		Required: c.AmountsRequired.ToMap(),
+		History: utils.MapSlice(utils.UnNilSlice(c.History), func(item game.ContributionHistoryItem) api.ContributionHistoryItem {
+			return api.ContributionHistoryItem{
+				Author: string(item.Contributor),
+				Date:   item.Date,
+				Delta:  item.AmountsProvided.ToMap(),
+			}
+		}),
+	}
 }

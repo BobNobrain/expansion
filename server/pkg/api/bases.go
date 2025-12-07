@@ -29,8 +29,7 @@ type BasesTableRow struct {
 
 	CreatedAt time.Time `json:"established"`
 
-	ConstructionSites []BasesTableRowSite  `json:"constructionSites"`
-	Storage           BasesTableRowStorage `json:"storage"`
+	Storage BasesTableRowStorage `json:"storage"`
 
 	DynamicRecipes []BasesTableRowRecipe `json:"dynamicRecipes,omitempty"`
 }

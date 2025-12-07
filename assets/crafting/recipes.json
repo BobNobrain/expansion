@@ -2,24 +2,24 @@
     "$schema": "../schemas/recipes.json",
     "recipes": [
         {
-            "equipment": "mine",
+            "equipment": "drill",
             "inputs": { },
             "outputs": { },
-            "baseTime": "24h",
+            "baseTime": "1h",
             "affectedByResource": true
         },
         {
             "equipment": "pump",
             "inputs": { },
             "outputs": { },
-            "baseTime": "24h",
+            "baseTime": "1h",
             "affectedByOcean": true
         },
         {
             "equipment": "airFilter",
             "inputs": { },
             "outputs": { },
-            "baseTime": "24h",
+            "baseTime": "1h",
             "affectedByAtmosphere": true
         },
         {
@@ -28,7 +28,7 @@
             "outputs": {
                 "grain": 10
             },
-            "baseTime": "24h",
+            "baseTime": "1h",
             "affectedByFertility": true
         },
         {

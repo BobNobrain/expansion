@@ -1,4 +1,5 @@
 import { type BaseContent } from '@/domain/Base';
+import { Inventory } from '@/domain/Inventory';
 import { World } from '@/domain/World';
 import { createDatafrontTable } from '@/lib/datafront/table';
 import {
@@ -27,8 +28,8 @@ export const dfBases = createDatafrontTable<BasesTableRow, BaseContent>({
 
             created: new Date(data.established),
             operator: data.companyId,
-            factories: [],
-            constructionSites: [],
+
+            inventory: Inventory.from(data.storage.inventory),
         };
 
         return result;

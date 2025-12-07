@@ -1,5 +1,5 @@
 import { type Component, createMemo, type JSX, Show } from 'solid-js';
-import { BlockIcon, type BlockIconSize } from '@/atoms';
+import { BlockIcon, SkeletonText, type BlockIconSize } from '@/atoms';
 import {
     type Icon,
     IconBarrel,
@@ -82,6 +82,7 @@ export type CommodityIconHeight = 'one-line' | 'two-line';
 export type CommodityIconWithLabelProps = CommodityIconProps & {
     secondLine?: JSX.Element;
     secondLineAlignment?: 'left' | 'right';
+    isLoading?: boolean;
 };
 
 export const CommodityIconWithLabel: Component<CommodityIconWithLabelProps> = (props) => {
@@ -90,7 +91,11 @@ export const CommodityIconWithLabel: Component<CommodityIconWithLabelProps> = (p
             <CommodityIcon {...props} />
             <Show when={props.secondLine} fallback={<div class={styles.label}>{props.commodity}</div>}>
                 <div class={styles.labels}>
-                    <div class={styles.label}>{props.commodity}</div>
+                    <div class={styles.label}>
+                        <Show when={props.isLoading} fallback={props.commodity}>
+                            <SkeletonText length={10} />
+                        </Show>
+                    </div>
                     <div
                         class={styles.secondLine}
                         classList={{

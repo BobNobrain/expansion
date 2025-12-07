@@ -52,6 +52,10 @@
     color: var(--p-green-500);
 }
 
+.empty-ingridient {
+    text-align: center;
+}
+
 .arrow {
     width: 32px;
     height: 32px;

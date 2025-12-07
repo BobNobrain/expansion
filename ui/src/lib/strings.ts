@@ -60,9 +60,11 @@ export function formatDegreesCelsius(temp: number, options: { unit?: 'K' | 'C' }
 export type FormatIntegerOptions = {
     /** How many digits after decimal separator when integer is shortened */
     digits?: number;
+    /** If positive numbers should be rendered with an explicit '+' sign in front */
+    explicitPlusSign?: boolean;
 };
 
-export function formatInteger(integer: number, { digits = 1 }: FormatIntegerOptions = {}): string {
+export function formatInteger(integer: number, { digits = 1, explicitPlusSign }: FormatIntegerOptions = {}): string {
     let suffix = '';
     const abs = Math.abs(integer);
     if (abs > 1e9) {
@@ -75,11 +77,17 @@ export function formatInteger(integer: number, { digits = 1 }: FormatIntegerOpti
         suffix = 'K';
         integer /= 1e3;
     }
-    if (!suffix) {
-        return integer.toFixed(0);
+
+    let prefix = '';
+    if (explicitPlusSign && integer > 0) {
+        prefix = '+';
     }
 
-    return integer.toFixed(digits) + suffix;
+    if (!suffix) {
+        return prefix + integer.toFixed(0);
+    }
+
+    return prefix + integer.toFixed(digits) + suffix;
 }
 
 type FormatPercentageOptions = {

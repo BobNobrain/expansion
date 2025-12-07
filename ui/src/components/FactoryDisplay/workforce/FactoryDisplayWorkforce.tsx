@@ -40,7 +40,6 @@ export const FactoryDisplayWorkforce: Component = () => {
             return WorkforceData.filled(0);
         }
 
-        console.log(Factory.getTotalJobs(buildingsData, { equipment: state.factoryEquipment }));
         return Factory.getTotalJobs(buildingsData, { equipment: state.factoryEquipment });
     });
 

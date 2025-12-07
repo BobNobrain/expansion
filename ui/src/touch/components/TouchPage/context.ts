@@ -18,7 +18,7 @@ export type PageContextButton = {
 export type PageContextData = {
     title: string;
     subtitle?: string;
-    goBack?: () => void;
+    goBack?: (historyBack: (() => void) | undefined) => void;
     related: PageContextRelatedItem[];
     customFooter?: Component;
 };

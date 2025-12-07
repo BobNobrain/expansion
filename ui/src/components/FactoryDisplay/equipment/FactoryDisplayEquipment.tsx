@@ -5,8 +5,6 @@ import {
     Group,
     GroupHeader,
     InfoDisplay,
-    List,
-    ListItem,
     PageHeader,
     PageHeaderActions,
     PageHeaderIcon,
@@ -17,12 +15,12 @@ import {
 import { EquipmentIcon } from '@/components/EquipmentIcon/EquipmentIcon';
 import { IconCog, IconEquipment, IconHammer, IconHandbook, IconProduction } from '@/icons';
 import { useFactoryDisplayContext } from '../state';
+import { FactoryDisplayProductionList } from './FactoryDisplayProductionList';
 import { SelectEquipmentSheet } from './SelectEquipmentSheet';
 import { SelectRecipeSheet } from './SelectRecipeSheet';
-import { FactoryDisplayProductionItem } from './FactoryDisplayProductionItem';
 
 export const FactoryDisplayEquipment: Component = () => {
-    const { state, updateState } = useFactoryDisplayContext();
+    const { state, updateState, isEditable, isRebalanceEnabled } = useFactoryDisplayContext();
     const [isProductionSheetOpen, setProductionSheetOpen] = createSignal(false);
     const [isEquipmentSheetOpen, setEquipmentSheetOpen] = createSignal(false);
 
@@ -35,7 +33,7 @@ export const FactoryDisplayEquipment: Component = () => {
                     <Button style="light" square>
                         <IconHandbook size={32} />
                     </Button>
-                    <Show when={state.isEditable}>
+                    <Show when={isRebalanceEnabled() || isEditable()}>
                         <Button
                             style="light"
                             color={state.isEditingEfficiencies ? 'primary' : undefined}
@@ -44,6 +42,8 @@ export const FactoryDisplayEquipment: Component = () => {
                         >
                             <IconCog size={32} />
                         </Button>
+                    </Show>
+                    <Show when={isEditable()}>
                         <Button style="light" square onClick={() => setEquipmentSheetOpen(true)}>
                             <IconHammer size={32} />
                         </Button>
@@ -57,14 +57,18 @@ export const FactoryDisplayEquipment: Component = () => {
                         <InfoDisplay
                             title="No equipment selected"
                             actions={
-                                <Button color="primary" onClick={() => setEquipmentSheetOpen(true)}>
-                                    Add equipment
-                                </Button>
+                                <Show when={isEditable()}>
+                                    <Button color="primary" onClick={() => setEquipmentSheetOpen(true)}>
+                                        Add equipment
+                                    </Button>
+                                </Show>
                             }
                         >
-                            Your equpment selection is empty. Add new equipment using the button below or{' '}
-                            <IconHammer size={16} /> button above. After that, you can select recipes to run on that
-                            equipment.
+                            <Show when={isEditable()} fallback="This factory has no equipment installed.">
+                                Your equpment selection is empty. Add new equipment using the button below or{' '}
+                                <IconHammer size={16} /> button above. After that, you can select recipes to run on that
+                                equipment.
+                            </Show>
                         </InfoDisplay>
                     }
                 >
@@ -80,7 +84,7 @@ export const FactoryDisplayEquipment: Component = () => {
                                     <Text size="h2" ellipsis>
                                         {equipment.equipmentId}
                                     </Text>
-                                    <Show when={state.isEditable}>
+                                    <Show when={isEditable()}>
                                         <Spacer />
                                         <Button
                                             style="light"
@@ -94,38 +98,7 @@ export const FactoryDisplayEquipment: Component = () => {
                                         </Button>
                                     </Show>
                                 </GroupHeader>
-                                <List striped>
-                                    <For
-                                        each={Object.values(equipment.production)}
-                                        fallback={
-                                            <InfoDisplay>
-                                                No recipes selected. Use the <IconProduction size={16} /> button above
-                                                on this equipment to select a recipe that will be run by this equipment.
-                                            </InfoDisplay>
-                                        }
-                                    >
-                                        {(item) => {
-                                            return (
-                                                <ListItem>
-                                                    <FactoryDisplayProductionItem
-                                                        equipment={equipment}
-                                                        recipeId={item.recipeId}
-                                                        efficiencyEditable={state.isEditingEfficiencies}
-                                                        onShareUpdate={(efficiency) =>
-                                                            updateState(
-                                                                'factoryEquipment',
-                                                                index(),
-                                                                'production',
-                                                                String(item.recipeId),
-                                                                { manualEfficiency: efficiency },
-                                                            )
-                                                        }
-                                                    />
-                                                </ListItem>
-                                            );
-                                        }}
-                                    </For>
-                                </List>
+                                <FactoryDisplayProductionList equipment={equipment} />
                             </Group>
                         );
                     }}

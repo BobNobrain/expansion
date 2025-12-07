@@ -17,6 +17,9 @@
     border-top: 4px solid var(--tfa-top-color, var(--tfa-color));
     border-bottom: 4px solid transparent;
     background-color: var(--tfa-background);
+
+    transition: 0.2s ease-in-out;
+    transition-property: border-color, background-color, color;
 }
 .action-item:active {
     border-bottom-width: 0;
@@ -64,6 +67,18 @@
     --tfa-color: var(--p-main-800);
     --tfa-background: transparent;
     --tfa-background-loading: var(--p-main-500);
+}
+
+.color-error {
+    --tfa-color: var(--p-red-500);
+    --tfa-background: var(--p-red-500-25);
+    --tfa-background-loading: var(--p-red-300);
+}
+
+.color-success {
+    --tfa-color: var(--p-green-500);
+    --tfa-background: var(--p-green-500-25);
+    --tfa-background-loading: var(--p-green-300);
 }
 
 .action-item.disabled {

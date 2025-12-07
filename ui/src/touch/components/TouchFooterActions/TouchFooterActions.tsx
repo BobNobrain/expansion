@@ -1,17 +1,19 @@
 import type { Component, ParentComponent } from 'solid-js';
-import styles from './TouchFooterActions.module.css';
 import { A } from '@solidjs/router';
+import styles from './TouchFooterActions.module.css';
 
 export const TouchFooterActions: ParentComponent = (props) => {
     return <div class={styles.actions}>{props.children}</div>;
 };
 
-export type TouchFooterActionColor = 'primary' | 'semiprimary' | 'secondary';
+export type TouchFooterActionColor = 'primary' | 'semiprimary' | 'secondary' | 'error' | 'success';
 
 const colorStyles = {
     primary: styles.colorPrimary,
     semiprimary: styles.colorSemiprimary,
     secondary: styles.colorSecondary,
+    error: styles.colorError,
+    success: styles.colorSuccess,
 };
 
 export type TouchFooterActionLinkProps = {

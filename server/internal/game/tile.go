@@ -2,9 +2,27 @@ package game
 
 import (
 	"srv/internal/utils/phys"
+	"strconv"
+	"strings"
 )
 
 type TileID int
+
+func (id TileID) String() string {
+	return strings.ToUpper(strconv.FormatInt(int64(id), 16))
+}
+func (id TileID) IsValid() bool {
+	return id >= 0
+}
+
+func ParseTileIDString(str string) TileID {
+	i, err := strconv.ParseInt(str, 16, 64)
+	if err != nil {
+		return -1
+	}
+
+	return TileID(i)
+}
 
 type TileOccupation byte
 

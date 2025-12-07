@@ -242,3 +242,7 @@ func (mc *MaterialCompound) ToMap() map[string]float64 {
 	}
 	return result
 }
+
+func (mc *MaterialCompound) Len() int {
+	return len(mc.components)
+}

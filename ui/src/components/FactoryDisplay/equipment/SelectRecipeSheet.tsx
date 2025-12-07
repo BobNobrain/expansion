@@ -1,34 +1,53 @@
 import { createEffect, createMemo, createSignal, For, type Component } from 'solid-js';
 import { Button, List, ListItem, PageHeader, PageHeaderActions, PageHeaderTitle } from '@/atoms';
 import { RecipeDisplay } from '@/components/RecipeDisplay/RecipeDisplay';
-import type { FactoryProduction } from '@/domain/Base';
+import type { FactoryProductionPlan } from '@/domain/Base';
+import { areSetsEqual } from '@/lib/misc';
 import { TouchBottomSheet } from '@/touch/components/TouchBottomSheet/TouchBottomSheet';
-import { useRecipesList, useSelectedEquipment } from '../hooks';
+import { useSelectedEquipment } from '../hooks';
 import { useFactoryDisplayContext } from '../state';
 
 export const SelectRecipeSheet: Component<{
     isOpen: boolean;
     setIsOpen: (v: boolean) => void;
 }> = (props) => {
-    const { state, updateState } = useFactoryDisplayContext();
+    const { state, updateState, allRecipesList } = useFactoryDisplayContext();
 
     const selectedEquipment = useSelectedEquipment();
 
     const selectedEquipmentRecipeIds = createMemo(() =>
-        Object.values(selectedEquipment()?.production ?? {}).map((pr) => pr.recipeId),
+        (selectedEquipment()?.production ?? []).map((pr) => pr.recipeId),
     );
 
-    const [getRecipeIds, setRecipeIds] = createSignal(new Set<number>(selectedEquipmentRecipeIds()));
+    const [getRecipeIds, setRecipeIds] = createSignal(new Set<string>(selectedEquipmentRecipeIds()));
     createEffect(() => {
-        setRecipeIds(new Set<number>(selectedEquipmentRecipeIds()));
+        setRecipeIds((oldIds) => {
+            const newIds = new Set<string>(selectedEquipmentRecipeIds());
+            if (areSetsEqual(oldIds, newIds)) {
+                return oldIds;
+            }
+
+            return newIds;
+        });
     });
 
-    const recipes = useRecipesList(selectedEquipment);
+    const recipes = createMemo(() => {
+        const equipmentIndex = state.equipmentIndexForRecipeSelector;
+        if (equipmentIndex === -1) {
+            return [];
+        }
+
+        const equipmentId = state.factoryEquipment[equipmentIndex].equipmentId;
+        return allRecipesList().filter((r) => r.equipment === equipmentId);
+    });
 
     return (
         <TouchBottomSheet
             isOpen={props.isOpen}
-            onClose={() => props.setIsOpen(false)}
+            onClose={() => {
+                updateState('equipmentIndexForRecipeSelector', -1);
+                props.setIsOpen(false);
+            }}
             header={
                 <PageHeader>
                     <PageHeaderTitle>Select Recipes</PageHeaderTitle>
@@ -37,23 +56,18 @@ export const SelectRecipeSheet: Component<{
                             disabled={getRecipeIds().size === 0}
                             onClick={() => {
                                 const productionItems = Array.from(getRecipeIds().values()).map(
-                                    (recipeId): FactoryProduction => {
+                                    (recipeId): FactoryProductionPlan => {
                                         return {
                                             recipeId,
                                             manualEfficiency: 1,
-                                            dynamicOutputs: {},
                                         };
                                     },
                                 );
+                                const index = state.equipmentIndexForRecipeSelector;
+                                updateState('equipmentIndexForRecipeSelector', -1);
 
-                                const result: Record<string, FactoryProduction> = {};
-
-                                for (const item of productionItems) {
-                                    result[item.recipeId] = item;
-                                }
-
-                                updateState('factoryEquipment', state.equipmentIndexForRecipeSelector, {
-                                    production: result,
+                                updateState('factoryEquipment', index, {
+                                    production: productionItems,
                                 });
 
                                 props.setIsOpen(false);

@@ -20,16 +20,14 @@ export type BasesRouteInfo =
 
 export enum TileBaseTab {
     Overview = 'overview',
-    Production = 'production',
-    ConstructionSites = 'sites',
+    // Factories = 'factories',
     Inventory = 'inventory',
 }
 
 const worldContentTabs: Record<string, true> = {
-    [TileBaseTab.Production]: true,
-    [TileBaseTab.ConstructionSites]: true,
-    [TileBaseTab.Inventory]: true,
     [TileBaseTab.Overview]: true,
+    // [TileBaseTab.Factories]: true,
+    [TileBaseTab.Inventory]: true,
 };
 
 export function useBasesRouteInfo(): () => BasesRouteInfo {

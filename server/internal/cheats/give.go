@@ -28,6 +28,11 @@ func (g *giveCheatImpl) Run(
 
 	base.Inventory.Add(inv)
 
+	err = repos.Bases().UpdateBaseContent(*base)
+	if err != nil {
+		return nil, err
+	}
+
 	events.BaseUpdated.Publish(events.BaseUpdatedPayload{
 		BaseID: base.ID,
 		Base:   base,

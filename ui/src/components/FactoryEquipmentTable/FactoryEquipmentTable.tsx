@@ -28,7 +28,7 @@ export const FactoryEquipmentTable: Component<FactoryEquipmentTableProps> = (pro
             },
             {
                 header: { icon: IconUnknown },
-                content: (row) => Object.values(row.production).length.toFixed(0),
+                content: (row) => row.production.length.toFixed(0),
                 align: 'right',
                 width: 64,
             },

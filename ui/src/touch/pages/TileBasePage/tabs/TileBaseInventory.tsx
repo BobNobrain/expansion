@@ -2,42 +2,27 @@ import { createMemo, createSignal, Show, type Component } from 'solid-js';
 import { Button, PageHeader, PageHeaderActions, PageHeaderIcon, PageHeaderTitle } from '@/atoms';
 import { type InventoryEntry, InventoryTable, InventoryGrid } from '@/components/Inventory';
 import { IconCalendar, IconContext, IconStorage, IconUnknown } from '@/icons';
-import { createConstantPredictable, createLinearPredictable } from '@/lib/predictables';
+import { createConstantPredictable } from '@/lib/predictables';
+import { useBase } from '../hooks';
 
-const t0 = new Date();
 type DisplayMode = 'grid' | 'table';
 
 export const TileBaseInventory: Component = () => {
-    const inventoryEntries = createMemo<InventoryEntry[]>(() => [
-        {
-            commodity: 'limestone',
-            amount: createLinearPredictable({ t0, x0: 25, deltaT: 1000, deltaX: 0.001 }),
-        },
-        {
-            commodity: 'coal',
-            amount: createLinearPredictable({ t0, x0: 25, deltaT: 1000, deltaX: 0.002 }),
-        },
-        {
-            commodity: 'ironOre',
-            amount: createLinearPredictable({ t0, x0: 25, deltaT: 1000, deltaX: 0.0015 }),
-        },
-        {
-            commodity: 'steel',
-            amount: createLinearPredictable({ t0, x0: 25, deltaT: 1000, deltaX: 0.01 }),
-        },
-        {
-            commodity: 'oxygen',
-            amount: createLinearPredictable({ t0, x0: 25, deltaT: 1000, deltaX: -0.003 }),
-        },
-        {
-            commodity: 'steelBeams',
-            amount: createConstantPredictable(58),
-        },
-        {
-            commodity: 'water',
-            amount: createLinearPredictable({ t0, x0: 25, deltaT: 1000, deltaX: -0.003 }),
-        },
-    ]);
+    const base = useBase();
+
+    const inventoryEntries = createMemo(() => {
+        const inventory = base()?.inventory;
+        if (!inventory) {
+            return [];
+        }
+
+        return Object.entries(inventory).map(([cid, amount]): InventoryEntry => {
+            return {
+                commodity: cid,
+                amount: createConstantPredictable(amount),
+            };
+        });
+    });
 
     const [displayMode, setDisplayMode] = createSignal<DisplayMode>('grid');
     const setDisplayModeGrid = () => setDisplayMode('grid');

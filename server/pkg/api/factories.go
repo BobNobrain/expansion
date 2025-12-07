@@ -3,7 +3,11 @@ package api
 import "time"
 
 const (
-	FactoriesQueryTypeByBaseID = "byBaseId"
+	FactoriesQueryTypeByBaseID = "factories/byBaseId"
+)
+
+const (
+	FactoriesTableName = "factories"
 )
 
 type FactoriesQueryByBaseID struct {
@@ -23,9 +27,9 @@ type FactoriesTableRow struct {
 	Inventory map[string]float64 `json:"inventory"`
 	Employees map[string]int     `json:"employees"`
 
-	UpgradeTarget       []FactoriesTableRowEquipment `json:"upgradeTarget,omitempty"`
-	UpgradeContribution Contribution                 `json:"upgradeContribution,omitempty"`
-	UpgradeLastUpdated  time.Time                    `json:"upgradeLastUpdated"`
+	UpgradeTarget       []FactoriesTableRowEquipmentPlan `json:"upgradeTarget,omitempty"`
+	UpgradeContribution Contribution                     `json:"upgradeContribution,omitempty"`
+	UpgradeLastUpdated  time.Time                        `json:"upgradeLastUpdated"`
 }
 
 type FactoriesTableRowEquipment struct {
@@ -40,4 +44,16 @@ type FactoriesTableRowProductionItem struct {
 	Inputs           map[string]float64 `json:"inputs"`
 	Outputs          map[string]float64 `json:"outputs"`
 	ManualEfficiency float64            `json:"manualEfficiency"`
+}
+
+type FactoriesTableRowEquipmentPlan struct {
+	EquipmentID string `json:"equipmentId"`
+	Count       int    `json:"count"`
+
+	Production []FactoriesTableRowProductionPlan `json:"production"`
+}
+
+type FactoriesTableRowProductionPlan struct {
+	RecipeID         string  `json:"recipeId"`
+	ManualEfficiency float64 `json:"manualEfficiency"`
 }

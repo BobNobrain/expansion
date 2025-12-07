@@ -96,6 +96,10 @@ func (arg cheatCommandArg) Inventory() map[string]float64 {
 			return !unicode.IsDigit(r) && r != '.'
 		})
 
+		if nameStarts == -1 {
+			continue
+		}
+
 		var amount float64 = 1.0
 		if nameStarts > 0 {
 			amount, _ = strconv.ParseFloat(item[:nameStarts], 64)

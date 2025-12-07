@@ -7,6 +7,7 @@ import (
 	"srv/internal/game/gamelogic"
 	"srv/internal/globals/events"
 	"srv/internal/utils/common"
+	"time"
 )
 
 type upgradeFactoryUsecase struct {
@@ -66,6 +67,7 @@ func (uc *upgradeFactoryUsecase) Run(
 	// updates
 	updatedFactory := factory
 	updatedFactory.Upgrade = input.Project
+	updatedFactory.Upgrade.LastUpdated = time.Now()
 
 	// saving
 	err = tx.Factories().UpdateBaseFactory(updatedFactory)

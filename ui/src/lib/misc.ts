@@ -14,3 +14,17 @@ export function mapValues<K extends PropertyKey, V, U>(
 
     return result;
 }
+
+export function areSetsEqual<T>(s1: Set<T>, s2: Set<T>): boolean {
+    if (s1.size !== s2.size) {
+        return false;
+    }
+
+    for (const item of s1.values()) {
+        if (!s2.has(item)) {
+            return false;
+        }
+    }
+
+    return true;
+}

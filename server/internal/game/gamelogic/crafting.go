@@ -29,6 +29,25 @@ func (l *CraftingRecipeLogic) GetRecipesAt(worldData game.WorldData, tileID game
 	}
 }
 
+func (l *CraftingRecipeLogic) ConvertCompoundToResources(mc *material.MaterialCompound) []game.ResourceDeposit {
+	const DEPOSIT_RESOURCE_SCALE = 10.0
+	result := make([]game.ResourceDeposit, 0, mc.Len())
+
+	for _, mat := range mc.ListMaterials() {
+		resource := l.reg.GetResourceForMaterial(mat.GetID())
+		if resource.CommodityID.IsNil() {
+			continue
+		}
+
+		result = append(result, game.ResourceDeposit{
+			ResourceID: resource.ResourceID,
+			Abundance:  mc.GetPercentage(mat.GetID()) * DEPOSIT_RESOURCE_SCALE,
+		})
+	}
+
+	return result
+}
+
 type RecipeLibrary struct {
 	reg          *globaldata.CraftingRegistry
 	locationInfo game.TileData
@@ -66,10 +85,9 @@ func (l *RecipeLibrary) instantiateDynamicRecipeTemplate(
 	into map[game.RecipeID]game.Recipe,
 ) {
 	// TODO: put these numbers into config
-	const ATMOSPHERE_RESOURCE_SCALE = 5.0
-	const OCEAN_RESOURCE_SCALE = 15.0
-	const SNOW_RESOURCE_SCALE = 10.0
-	const DEPOSIT_RESOURCE_SCALE = 10.0
+	const ATMOSPHERE_RESOURCE_SCALE = 0.5
+	const OCEAN_RESOURCE_SCALE = 1.5
+	const SNOW_RESOURCE_SCALE = 1.0
 
 	if template.AffectedByAtmosphere && !l.locationInfo.Composition.Atmosphere.IsEmpty() {
 		const MAX_RESOURCE_PRESSURE_BAR = 3.0
@@ -78,27 +96,34 @@ func (l *RecipeLibrary) instantiateDynamicRecipeTemplate(
 			atmResourceScale = max(0.01, l.locationInfo.Pressure.Bar()/MAX_RESOURCE_PRESSURE_BAR)
 		}
 
-		l.addDynamicRecipes(template, l.locationInfo.Composition.Atmosphere, into, atmResourceScale)
+		l.addDynamicRecipes(
+			template,
+			CraftingLogic().ConvertCompoundToResources(l.locationInfo.Composition.Atmosphere),
+			into,
+			atmResourceScale,
+		)
 	}
 
 	if template.AffectedByOcean && !l.locationInfo.Composition.Oceans.IsEmpty() {
-		l.addDynamicRecipes(template, l.locationInfo.Composition.Oceans, into, OCEAN_RESOURCE_SCALE)
+		l.addDynamicRecipes(
+			template,
+			CraftingLogic().ConvertCompoundToResources(l.locationInfo.Composition.Oceans),
+			into,
+			OCEAN_RESOURCE_SCALE,
+		)
 	}
 
 	if template.AffectedBySnow && !l.locationInfo.Composition.Snow.IsEmpty() {
-		l.addDynamicRecipes(template, l.locationInfo.Composition.Snow, into, SNOW_RESOURCE_SCALE)
+		l.addDynamicRecipes(
+			template,
+			CraftingLogic().ConvertCompoundToResources(l.locationInfo.Composition.Snow),
+			into,
+			SNOW_RESOURCE_SCALE,
+		)
 	}
 
 	if template.AffectedByResources {
-		for _, deposit := range l.locationInfo.Resources {
-			cid := l.reg.GetResourceData(deposit.ResourceID).CommodityID
-			if cid.IsNil() {
-				continue
-			}
-
-			recipe := template.InstantiateWithDynamicOutput(cid, deposit.Abundance*DEPOSIT_RESOURCE_SCALE)
-			into[recipe.RecipeID] = recipe
-		}
+		l.addDynamicRecipes(template, l.locationInfo.Resources, into, 1.0)
 	}
 
 	if template.AffectedByFertility {
@@ -112,18 +137,18 @@ func (l *RecipeLibrary) instantiateDynamicRecipeTemplate(
 }
 
 func (l *RecipeLibrary) addDynamicRecipes(
-	t game.RecipeTemplate,
-	mc *material.MaterialCompound,
+	template game.RecipeTemplate,
+	deps []game.ResourceDeposit,
 	into map[game.RecipeID]game.Recipe,
 	scale float64,
 ) {
-	for _, mat := range mc.ListMaterials() {
-		resource := l.reg.GetResourceForMaterial(mat.GetID())
-		if resource.CommodityID.IsNil() {
+	for _, deposit := range deps {
+		cid := l.reg.GetResourceData(deposit.ResourceID).CommodityID
+		if cid.IsNil() {
 			continue
 		}
 
-		recipe := t.InstantiateWithDynamicOutput(resource.CommodityID, mc.GetPercentage(mat.GetID())*scale)
+		recipe := template.InstantiateWithDynamicOutput(cid, deposit.Abundance*scale)
 		into[recipe.RecipeID] = recipe
 	}
 }

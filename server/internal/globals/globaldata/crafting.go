@@ -67,9 +67,11 @@ func (r *CraftingRegistry) GetRecipesForEquipment(eid game.EquipmentID) []game.R
 
 	for _, recipe := range r.allRecipes {
 		if recipe.Equipment != eid {
+			fmt.Printf("eid %s != %s, skipping\n", recipe.Equipment, eid)
 			continue
 		}
 
+		fmt.Printf("found rtid %s\n", recipe.TemplateID)
 		result = append(result, recipe)
 	}
 
@@ -232,6 +234,24 @@ func makeRecipeTemplateId(rtdata assets.RecipesAssetRecipe) game.RecipeTemplateI
 	slices.Sort(sortedOutCids)
 
 	var builder strings.Builder
+	if rtdata.AffectedByAtmosphere {
+		builder.WriteByte('A')
+	}
+	if rtdata.AffectedByOcean {
+		builder.WriteByte('O')
+	}
+	if rtdata.AffectedBySnow {
+		builder.WriteByte('S')
+	}
+	if rtdata.AffectedByResource {
+		builder.WriteByte('R')
+	}
+	if rtdata.AffectedByFertility {
+		builder.WriteByte('F')
+	}
+
+	builder.WriteByte('@')
+	builder.WriteString(rtdata.Equipment)
 
 	for _, cid := range sortedInCids {
 		builder.WriteString(fmt.Sprintf("%.2f%s", rtdata.Inputs[cid], cid[:3]))

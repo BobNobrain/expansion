@@ -77,11 +77,11 @@ export const staticRecipesAsset = createJSONAsset({
         const gameTimeDaySeconds = GAME_TIME_DAY_MS / 1000;
 
         return {
-            recipes: raw.recipes.map((data, index) => {
+            recipes: raw.recipes.map((data) => {
                 const scaleFactor = gameTimeDaySeconds / 3600;
 
                 return {
-                    id: index,
+                    id: data.id,
                     inputs: Inventory.multiply(data.inputs as unknown as Record<string, number>, scaleFactor),
                     outputs: Inventory.multiply(data.outputs as unknown as Record<string, number>, scaleFactor),
                     equipment: data.equipment,

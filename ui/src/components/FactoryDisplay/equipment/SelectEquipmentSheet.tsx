@@ -5,8 +5,7 @@ import {
     EquipmentSelectionList,
     type EquipmentSelectionListProps,
 } from '@/components/EquipmentSelectionList/EquipmentSelectionList';
-import type { FactoryEquipment } from '@/domain/Base';
-import { WorkforceData } from '@/domain/City';
+import type { FactoryEquipmentPlan } from '@/domain/Base';
 import type { ResourceDeposit } from '@/domain/World';
 import { IconArea, IconEquipment } from '@/icons';
 import { buildingsAsset } from '@/lib/assetmanager';
@@ -71,7 +70,10 @@ export const SelectEquipmentSheet: Component<{
     });
 
     const updateCounts = () => {
-        updateState('factoryEquipment', (eqs): FactoryEquipment[] => {
+        // to fix unnecessary calculations
+        updateState('equipmentIndexForRecipeSelector', -1);
+
+        updateState('factoryEquipment', (eqs): FactoryEquipmentPlan[] => {
             const counts = getCounts();
             const newIds = new Set(Object.keys(counts));
 
@@ -88,11 +90,10 @@ export const SelectEquipmentSheet: Component<{
                     continue;
                 }
 
-                const newEq: FactoryEquipment = {
+                const newEq: FactoryEquipmentPlan = {
                     equipmentId: newId,
                     count,
-                    employees: WorkforceData.empty<number>(),
-                    production: {},
+                    production: [],
                 };
                 copy.push(newEq);
             }

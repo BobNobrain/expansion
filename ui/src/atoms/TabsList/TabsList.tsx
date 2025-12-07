@@ -8,6 +8,8 @@ export type TabsListProps = {
     tabs: TabHeader[];
     style?: 'standalone' | 'pagetop';
     scrollable?: boolean;
+    /** @default 'replace' */
+    navmode?: 'replace' | 'push';
 };
 
 export type TabHeader = {
@@ -30,7 +32,12 @@ export const TabsList: Component<TabsListProps> = (props) => {
                 {(tabHeader) => {
                     return (
                         <li class={styles.header}>
-                            <A href={tabHeader.href} class={styles.link} activeClass={styles.active}>
+                            <A
+                                href={tabHeader.href}
+                                class={styles.link}
+                                activeClass={styles.active}
+                                replace={props.navmode !== 'push'}
+                            >
                                 <Show when={tabHeader.icon}>
                                     <Dynamic component={tabHeader.icon} size={24} />
                                 </Show>

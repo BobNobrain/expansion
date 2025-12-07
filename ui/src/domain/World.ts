@@ -74,6 +74,7 @@ export namespace World {
 export type WorldTileConditions = {
     soilFertility: number;
     resources: ResourceDeposit[];
+    snowResources: ResourceDeposit[];
     oceanResources: ResourceDeposit[];
     atmosphericResources: ResourceDeposit[];
 };

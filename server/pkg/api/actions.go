@@ -54,23 +54,13 @@ type CreateFactoryPayload struct {
 
 type UpgradeFactoryPayload struct {
 	FactoryID int                              `json:"factoryId"`
-	Equipment []UpgradeFactoryPayloadEquipment `json:"equipment"`
-}
-type UpgradeFactoryPayloadEquipment struct {
-	EquipmentID string `json:"equipment"`
-	Count       int    `json:"count"`
-
-	Production []UpgradeFactoryPayloadProduction `json:"production"`
-}
-type UpgradeFactoryPayloadProduction struct {
-	RecipeID         string  `json:"recipeId"`
-	ManualEfficiency float64 `json:"manualEfficiency"`
+	Equipment []FactoriesTableRowEquipmentPlan `json:"equipment"`
 }
 
 type RebalanceFactoryPayload struct {
 	FactoryID int `json:"factoryId"`
 
-	Plan [][]UpgradeFactoryPayloadProduction `json:"plan"`
+	Plan [][]FactoriesTableRowProductionPlan `json:"plan"`
 }
 
 type ContributeToFactoryPayload struct {

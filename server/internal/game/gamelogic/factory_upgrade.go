@@ -40,30 +40,30 @@ func (l *FactoryUpgradeLogic) ValidateUpgradeProject(
 }
 
 func (l *FactoryUpgradeLogic) validateProduction(
-	prod game.FactoryUpgradeProjectEqipment,
+	eqPlan game.FactoryUpgradeProjectEqipment,
 	craftbook *RecipeLibrary,
 	fieldNameForError string,
 ) common.Error {
-	eq := l.reg.GetEquipment(prod.EquipmentID)
+	eq := l.reg.GetEquipment(eqPlan.EquipmentID)
 	if eq.EquipmentID.IsEmpty() {
 		return common.NewValidationError(
 			fmt.Sprintf("%s.EquipmentID", fieldNameForError),
 			"Invalid equipment ID",
-			common.WithDetail("value", prod.EquipmentID),
+			common.WithDetail("value", eqPlan.EquipmentID),
 		)
 	}
 
-	if prod.Count <= 0 {
+	if eqPlan.Count <= 0 {
 		return common.NewValidationError(
 			fmt.Sprintf("%s.Count", fieldNameForError),
 			"Invalid equipment count",
-			common.WithDetail("value", prod.Count),
+			common.WithDetail("value", eqPlan.Count),
 		)
 	}
 
-	availableRecipes := craftbook.CreateAllRecipesForEquipment(prod.EquipmentID)
+	availableRecipes := craftbook.CreateAllRecipesForEquipment(eqPlan.EquipmentID)
 
-	for i, p := range prod.Production {
+	for i, p := range eqPlan.Production {
 		_, found := availableRecipes[p.RecipeID]
 
 		if !found {
@@ -71,6 +71,7 @@ func (l *FactoryUpgradeLogic) validateProduction(
 				fmt.Sprintf("%s.Production[%d].RecipeID", fieldNameForError, i),
 				"Invalid recipe ID",
 				common.WithDetail("value", p.RecipeID),
+				common.WithDetail("nRecipes", len(availableRecipes)),
 			)
 		}
 

@@ -1,10 +1,25 @@
-const ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyz';
-const LEN = 16;
+export type FormatNumericIdOptions = {
+    prefix?: string;
+    length?: number;
+};
 
-export function randomID(): string {
-    const letters = new Array<string>(LEN).fill('');
-    for (let i = 0; i < LEN; i++) {
-        letters[i] = ALPHABET[Math.floor(Math.random() * LEN)];
+const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const ALEN = ALPHABET.length;
+const MSRN = 47;
+
+export function formatNumericId(id: number, { prefix = '', length = 7 }: FormatNumericIdOptions = {}): string {
+    const digits = new Array<string>(length);
+
+    let remainder = id;
+    for (let i = length - 1; i >= 0; i--) {
+        const randomOffset = MSRN * i + id;
+        const digit = remainder % ALEN;
+        const letter = ALPHABET[(randomOffset + digit) % ALEN];
+
+        digits[i] = letter;
+        remainder -= digit;
+        remainder /= ALEN;
     }
-    return letters.join('');
+
+    return prefix + digits.join('');
 }

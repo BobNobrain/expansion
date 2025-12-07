@@ -127,3 +127,29 @@ func (cid CelestialID) IsAsteroidID() bool {
 
 	return true
 }
+
+type GalacticTileID string
+
+func MakeGalacticTileID(worldID CelestialID, tileID TileID) GalacticTileID {
+	return GalacticTileID(fmt.Sprintf("%s#%s", worldID, tileID.String()))
+}
+
+func (id GalacticTileID) GetWorldID() CelestialID {
+	idx := strings.Index(string(id), "#")
+	if idx == -1 {
+		return ""
+	}
+
+	return CelestialID(id[:idx])
+}
+func (id GalacticTileID) GetTileID() TileID {
+	idx := strings.Index(string(id), "#")
+	if idx == -1 {
+		return -1
+	}
+
+	return ParseTileIDString(string(id[idx+1:]))
+}
+func (id GalacticTileID) String() string {
+	return string(id)
+}
