@@ -1,9 +1,11 @@
 import { type Component, createMemo, createSignal, For, Show } from 'solid-js';
 import { Text } from '@/atoms';
 import { CommodityIcon } from '@/components/CommodityIcon';
-import { renderGameTimeConstantSpeed, renderGameTimeSpeed } from '@/domain/GameTime';
+import { Inventory } from '@/domain/Inventory';
+import { renderPredictableSpeed } from '@/lib/predictables';
 import { useNow } from '@/lib/solid/useNow';
 import { formatScalar } from '@/lib/strings';
+import { renderConstantSpeed } from '@/lib/time';
 import { type InventoryEntryWithData, type InventoryEntry } from '../types';
 import { getDeltaColor, useEnrichedEntries } from '../utils';
 import styles from './InventoryGrid.module.css';
@@ -22,14 +24,14 @@ const InventoryGridItem: Component<{ item: InventoryEntryWithData; mode: 'M' | '
 
     const speed = createMemo(() => {
         if (props.item.speed !== undefined) {
-            return renderGameTimeConstantSpeed(props.item.speed);
+            return renderConstantSpeed(props.item.speed, Inventory.STANDARD_TIME_DELTA);
         }
 
         if (!props.item.amount) {
             return undefined;
         }
 
-        return renderGameTimeSpeed(
+        return renderPredictableSpeed(
             {
                 predict: (at) =>
                     props.item.amount!.predict(at) * (props.mode === 'M' ? props.item.mass : props.item.volume),

@@ -10,9 +10,10 @@ type EquipmentAssetBuilding struct {
 }
 
 type EquipmentAssetEquipment struct {
-	Building  string                                      `json:"building"`
-	Area      int                                         `json:"area"`
-	Operators map[string]EquipmentAssetEquipmentOperators `json:"operators"`
+	Building          string                                      `json:"building"`
+	Area              int                                         `json:"area"`
+	Operators         map[string]EquipmentAssetEquipmentOperators `json:"operators"`
+	ConstructionParts map[string]float64                          `json:"constructedFrom"`
 }
 
 type EquipmentAssetEquipmentOperators struct {

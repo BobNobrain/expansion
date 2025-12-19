@@ -3,6 +3,7 @@ package usecases
 import (
 	"srv/internal/components"
 	"srv/internal/game"
+	"srv/internal/game/gamelogic"
 	"srv/internal/utils/common"
 )
 
@@ -11,7 +12,7 @@ func getFactoryByID(
 	fid game.FactoryID,
 	fieldNameForError string,
 ) (game.Factory, common.Error) {
-	factories, err := tx.Factories().ResolveFactories([]game.FactoryID{fid})
+	factories, err := tx.Factories().ResolveFactories([]game.FactoryID{fid}, gamelogic.FactoryUpdates())
 	if err != nil {
 		return game.Factory{}, err
 	}

@@ -1,4 +1,4 @@
-import { createMemo, createSignal } from 'solid-js';
+import { createEffect, createMemo, createSignal } from 'solid-js';
 import { Contribution } from '@/domain/Contribution';
 import { Inventory } from '@/domain/Inventory';
 
@@ -13,6 +13,11 @@ type SliderRow = {
 
 export function createContributionState(value: () => Contribution, available: () => Inventory | null) {
     const [currentCounts, setCurrentCounts] = createSignal<Record<string, number>>({});
+
+    createEffect(() => {
+        value();
+        setCurrentCounts({});
+    });
 
     const provided = createMemo(() => Contribution.getContributedTotal(value()));
 
@@ -65,5 +70,5 @@ export function createContributionState(value: () => Contribution, available: ()
         return true;
     });
 
-    return { sliders, fillAll, isSelectionEmpty };
+    return { currentCounts, sliders, fillAll, isSelectionEmpty };
 }

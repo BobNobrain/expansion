@@ -15,18 +15,16 @@ import {
     type DefinitionListItem,
 } from '@/atoms';
 import { Factory } from '@/domain/Base';
-import { GAME_TIME_DAY_MS } from '@/domain/GameTime';
 import { World } from '@/domain/World';
 import { FactoryStatusLabel } from '@/components/FactoryStatusLabel/FactoryStatusLabel';
 import { InventoryTable, type InventoryEntry } from '@/components/Inventory';
-import { IconArea, IconEquipment, IconUnknown } from '@/icons';
-import { formatNumericId } from '@/lib/id';
+import { IconArea, IconEquipment, IconTransfer } from '@/icons';
 import { buildingsAsset } from '@/lib/assetmanager';
+import { formatNumericId } from '@/lib/id';
+import { calcPredictableStandartSpeed } from '@/lib/predictables';
 import { useAsset } from '@/lib/solid/asset';
-import { createLinearPredictable } from '@/lib/predictables';
 import { formatInteger } from '@/lib/strings';
 import { getBasesRoute } from '@/routes/bases';
-import { useTotalInOuts } from '../production/useTotalInOuts';
 import { useFactoryDisplayContext } from '../state';
 
 type FactoryInfo = {
@@ -128,8 +126,6 @@ export const FactoryDisplayOverview: Component = () => {
         };
     });
 
-    const inventorySpeeds = useTotalInOuts();
-
     const inventoryEntries = createMemo((): InventoryEntry[] => {
         const f = factory();
         if (!f) {
@@ -137,21 +133,14 @@ export const FactoryDisplayOverview: Component = () => {
         }
 
         const inv = f.inventory;
-        const speeds = inventorySpeeds();
+        const now = new Date(); // TODO: this is not reactive, which may cause issues later
 
-        return Object.entries(inv).map(([cid, amount]) => {
-            const speed = speeds[cid] ?? 0;
-
+        return Object.entries(inv).map(([cid, amount]): InventoryEntry => {
             return {
                 commodity: cid,
                 // TODO: get these values from API instead
-                amount: createLinearPredictable({
-                    t0: f.updatedTo,
-                    x0: amount,
-                    deltaT: GAME_TIME_DAY_MS,
-                    deltaX: speed,
-                }),
-                speed,
+                amount: amount,
+                speed: calcPredictableStandartSpeed(amount, now),
             };
         });
     });
@@ -167,7 +156,7 @@ export const FactoryDisplayOverview: Component = () => {
                 <PageHeaderTitle>Inventory</PageHeaderTitle>
                 <PageHeaderActions pushRight>
                     <Button square style="light">
-                        <IconUnknown size={32} />
+                        <IconTransfer size={32} />
                     </Button>
                 </PageHeaderActions>
             </PageHeader>

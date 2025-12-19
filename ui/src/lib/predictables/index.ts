@@ -1,3 +1,6 @@
+import { Inventory } from '@/domain/Inventory';
+import { Duration, renderConstantSpeed, type RenderSpeedOptions } from '@/lib/time';
+
 export type Predictable = {
     predict: (at: Date | number) => number;
 };
@@ -7,7 +10,7 @@ export type LinearPredictableOptions = {
     t0: Date;
     deltaX: number;
     /** In milliseconds */
-    deltaT: number;
+    deltaT: Duration;
 };
 
 export function createConstantPredictable(value: number): Predictable {
@@ -15,7 +18,7 @@ export function createConstantPredictable(value: number): Predictable {
 }
 
 export function createLinearPredictable(opts: LinearPredictableOptions): Predictable {
-    const speed = opts.deltaX / opts.deltaT;
+    const speed = opts.deltaX / Duration.toMs(opts.deltaT);
     const x0 = opts.x0;
     const t0 = opts.t0.getTime();
 
@@ -28,16 +31,22 @@ export function createLinearPredictable(opts: LinearPredictableOptions): Predict
 }
 
 export enum LimitedPredictableMode {
-    Max = 'max',
-    Min = 'min',
+    Before = 'before',
+    After = 'after',
 }
 
-export function createLimitedPredictable(inner: Predictable, x: number, mode: LimitedPredictableMode): Predictable {
+export function createLimitedPredictable(inner: Predictable, tLim: Date, mode: LimitedPredictableMode): Predictable {
     return {
         predict(at) {
-            const innerValue = inner.predict(at);
-            const isMaxMode = mode === LimitedPredictableMode.Max;
-            return isMaxMode ? Math.max(innerValue, x) : Math.min(innerValue, x);
+            const tAt = typeof at === 'number' ? at : at.getTime();
+            const isBefore = tAt < tLim.getTime();
+            const isBeforeMode = mode === LimitedPredictableMode.Before;
+
+            if (isBefore === isBeforeMode) {
+                return inner.predict(tLim);
+            }
+
+            return inner.predict(at);
         },
     };
 }
@@ -54,8 +63,18 @@ export function sumPredictables(ps: Predictable[]): Predictable {
     };
 }
 
-export function calcPredictableDelta(p: Predictable, at: Date, period: number): number {
+export function calcPredictableDelta(p: Predictable, at: Date, period: Duration): number {
     const x = p.predict(at);
-    const xdx = p.predict(at.getTime() + period);
+    const xdx = p.predict(at.getTime() + Duration.toMs(period));
     return xdx - x;
+}
+
+export function calcPredictableStandartSpeed(p: Predictable, at: Date): number {
+    return calcPredictableDelta(p, at, Inventory.STANDARD_TIME_DELTA);
+}
+
+export function renderPredictableSpeed(p: Predictable, at: Date, opts?: RenderSpeedOptions): string {
+    const timeDelta: Duration = { h: 1 };
+    const xDelta = calcPredictableDelta(p, at, timeDelta);
+    return renderConstantSpeed(xDelta, timeDelta, opts);
 }

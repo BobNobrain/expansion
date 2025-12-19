@@ -15,7 +15,8 @@ import {
     type FactoriesTableRow,
 } from '@/lib/net/types.generated';
 import { ws } from '@/lib/net/ws';
-import { updater, cleaner } from './misc';
+import { updater, cleaner, parsePredictable } from './misc';
+import { mapValues } from '@/lib/misc';
 
 export const dfFactories = createDatafrontTable<FactoriesTableRow, Factory>({
     name: FactoriesTableName,
@@ -47,7 +48,7 @@ export const dfFactories = createDatafrontTable<FactoriesTableRow, Factory>({
             baseId: data.baseId,
             createdAt: new Date(data.created),
             employees: data.employees,
-            inventory: Inventory.from(data.inventory),
+            inventory: mapValues(data.inventory, parsePredictable),
             status: data.status as FactoryStatus,
             updatedTo: new Date(data.updatedTo),
 

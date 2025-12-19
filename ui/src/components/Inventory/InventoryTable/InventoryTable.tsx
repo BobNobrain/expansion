@@ -1,9 +1,10 @@
 import { type Component, createMemo, createSignal, type ParentComponent, Show } from 'solid-js';
 import { Container, DataTable, type DataTableColumn, InlineLoader, Text } from '@/atoms';
 import { CommodityIcon } from '@/components/CommodityIcon';
-import { renderGameTimeConstantSpeed } from '@/domain/GameTime';
+import { Inventory } from '@/domain/Inventory';
 import { useNow } from '@/lib/solid/useNow';
 import { formatInteger, formatScalar } from '@/lib/strings';
+import { renderConstantSpeed } from '@/lib/time';
 import type { InventoryEntryWithData, InventoryEntry } from '../types';
 import { getDeltaColor, useEnrichedEntries } from '../utils';
 import styles from './InventoryTable.module.css';
@@ -22,7 +23,7 @@ const ItemCell: Component<{ row: InventoryEntryWithData }> = (props) => {
             return undefined;
         }
 
-        return renderGameTimeConstantSpeed(props.row.speed, { quantized: props.row.quantized, noTimeUnit: true });
+        return renderConstantSpeed(props.row.speed, { h: 1 }, { noTimeUnit: true });
     });
 
     return (
@@ -95,8 +96,8 @@ const SpeedCell: Component<{ row: InventoryEntryWithData; showQuantizedSize: boo
 
         const amount = props.row.speed;
         return {
-            m: renderGameTimeConstantSpeed(amount * props.row.mass, { unit: 't' }),
-            v: renderGameTimeConstantSpeed(amount * props.row.volume, { unit: 'm³' }),
+            m: renderConstantSpeed(amount * props.row.mass, Inventory.STANDARD_TIME_DELTA, { unit: 't' }),
+            v: renderConstantSpeed(amount * props.row.volume, Inventory.STANDARD_TIME_DELTA, { unit: 'm³' }),
         };
     });
 
@@ -115,7 +116,7 @@ const SpeedCell: Component<{ row: InventoryEntryWithData; showQuantizedSize: boo
             fallback={
                 <Show when={props.row.speed !== undefined} fallback={<Text>--</Text>}>
                     <Text color={deltaColor()}>
-                        {renderGameTimeConstantSpeed(props.row.speed!, { quantized: true })}
+                        {renderConstantSpeed(props.row.speed!, Inventory.STANDARD_TIME_DELTA)}
                     </Text>
                 </Show>
             }

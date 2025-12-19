@@ -1,11 +1,13 @@
 import { createMemo, createSignal, For, Show, type Component } from 'solid-js';
-import { InfoDisplay, List, ListItem, Text } from '@/atoms';
+import { InfoDisplay, List, ListItem, Spacer } from '@/atoms';
 import type { ContributionHistoryItem } from '@/domain/Contribution';
 import type { Inventory } from '@/domain/Inventory';
 import { createConstantPredictable } from '@/lib/predictables';
+import { UserLink } from '@/views/UserLink/UserLink';
 import { GameTimeLabel } from '../GameTimeLabel/GameTimeLabel';
 import { InventoryTable, type InventoryEntry } from '../Inventory';
 import styles from './ContributionHistory.module.css';
+import { IconChevronRight } from '@/icons';
 
 const Item: Component<{
     author: string;
@@ -23,13 +25,17 @@ const Item: Component<{
     });
 
     return (
-        <ListItem selected={isExpanded()} onClick={() => setExpanded((x) => !x)}>
+        <ListItem onClick={() => setExpanded((x) => !x)} padded={false}>
             <div class={styles.itemTitle}>
-                <Text bold>{props.author}</Text>
-                <GameTimeLabel value={props.date} />
+                <GameTimeLabel value={props.date} />, by&nbsp;
+                <UserLink id={props.author} />
+                <Spacer />
+                <IconChevronRight size={24} rotate={isExpanded() ? 90 : 0} />
             </div>
             <Show when={isExpanded()}>
-                <InventoryTable entries={inventoryEntries()} />
+                <div class={styles.tableContainer}>
+                    <InventoryTable entries={inventoryEntries()} />
+                </div>
             </Show>
         </ListItem>
     );
@@ -40,10 +46,16 @@ export type ContributionHistoryProps = {
 };
 
 export const ContributionHistory: Component<ContributionHistoryProps> = (props) => {
+    const sortedHistory = createMemo(() => {
+        const sorted = props.history.slice();
+        sorted.sort((a, b) => b.date.getTime() - a.date.getTime());
+        return sorted;
+    });
+
     return (
         <List striped>
             <For
-                each={props.history}
+                each={sortedHistory()}
                 fallback={
                     <ListItem>
                         <InfoDisplay title="No contributions yet">

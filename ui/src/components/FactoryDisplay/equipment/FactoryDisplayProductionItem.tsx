@@ -5,8 +5,8 @@ import { Inventory } from '@/domain/Inventory';
 import type { Recipe } from '@/domain/Recipe';
 import type { SemanticColor } from '@/lib/appearance';
 import { formatPercentage } from '@/lib/strings';
-import styles from './styles.module.css';
 import { useFactoryDisplayContext } from '../state';
+import styles from './styles.module.css';
 
 export const FactoryDisplayProductionItem: Component<{
     recipeId: string;
@@ -64,6 +64,7 @@ export const FactoryDisplayProductionItem: Component<{
                         {formatPercentage(props.effectiveScale / props.equipmentCount)}
                     </Text>
                 }
+                belowArrow="1h"
             />
             <Show when={props.efficiencyEditable}>
                 <div class={styles.productionItemSlider}>

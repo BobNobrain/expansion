@@ -79,12 +79,12 @@ func (t *baseEnvsTable) queryByFactoryID(
 	req dfapi.DFTableQueryRequest,
 	ctx dfcore.DFRequestContext,
 ) (*dfcore.TableResponse, common.Error) {
-	factories, err := t.factoriesRepo.ResolveFactories([]game.FactoryID{game.FactoryID(payload.FactoryID)})
+	overviews, err := t.factoriesRepo.ResolveFactoryOverviews([]game.FactoryID{game.FactoryID(payload.FactoryID)})
 	if err != nil {
 		return nil, err
 	}
 
-	if len(factories) == 0 {
+	if len(overviews) == 0 {
 		return nil, common.NewValidationError(
 			"BaseEnvsQueryByFactoryID.FactoryID",
 			"Specified factory does not exist",
@@ -92,19 +92,9 @@ func (t *baseEnvsTable) queryByFactoryID(
 		)
 	}
 
-	baseIds := make([]game.BaseID, 0, len(factories))
-	for _, f := range factories {
-		baseIds = append(baseIds, f.BaseID)
-	}
-
-	bases, err := t.basesRepo.ResolveBases(baseIds)
-	if err != nil {
-		return nil, err
-	}
-
-	ids := make([]game.GalacticTileID, 0, len(bases))
-	for _, base := range bases {
-		ids = append(ids, game.MakeGalacticTileID(base.WorldID, base.TileID))
+	ids := make([]game.GalacticTileID, 0, len(overviews))
+	for _, overview := range overviews {
+		ids = append(ids, game.MakeGalacticTileID(overview.WorldID, overview.TileID))
 	}
 
 	return t.resolveGalacticTileIDs(ids)

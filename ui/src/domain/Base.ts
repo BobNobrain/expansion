@@ -2,7 +2,7 @@ import type { BuildingsAsset } from '../lib/assetmanager';
 import { WorkforceData, type WorkforceType } from './City';
 import { ConstructionCost } from './Commodity';
 import type { Contribution } from './Contribution';
-import { Inventory } from './Inventory';
+import { Inventory, type DynamicInventory } from './Inventory';
 import type { Recipe } from './Recipe';
 import type { WorldTileConditions } from './World';
 
@@ -49,7 +49,7 @@ export type Factory = {
     updatedTo: Date;
 
     equipment: FactoryEquipment[];
-    inventory: Inventory;
+    inventory: DynamicInventory;
     employees: WorkforceData<number>;
 
     upgradeProject: {

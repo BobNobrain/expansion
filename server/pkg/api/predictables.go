@@ -20,6 +20,6 @@ type LinearPredictable struct {
 
 type LimitedPredictable struct {
 	Inner Predictable `json:"inner"`
-	X     float64     `json:"x"`
+	T     time.Time   `json:"t"`
 	Mode  string      `json:"mode"`
 }

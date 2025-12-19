@@ -3,6 +3,8 @@ package game
 import (
 	"math"
 	"srv/internal/utils"
+	"srv/internal/utils/predictable"
+	"time"
 )
 
 type Inventory map[CommodityID]float64
@@ -44,6 +46,10 @@ func (i Inventory) Remove(delta InventoryDelta) bool {
 	return i.applyDelta(delta, -1)
 }
 func (i Inventory) applyDelta(delta InventoryDelta, multiplier float64) bool {
+	if delta == nil {
+		return true
+	}
+
 	result := make(map[CommodityID]float64)
 
 	for cid, amount := range delta {
@@ -130,4 +136,50 @@ func (d InventoryDelta) IsPositive() bool {
 	}
 
 	return true
+}
+
+type DynamicInventory map[CommodityID]predictable.Predictable
+
+func MakeDynamicInventoryFrom(static Inventory, speeds InventoryDelta, staticTime time.Time, baseTime time.Duration) DynamicInventory {
+	result := DynamicInventory{}
+
+	cids := make(map[CommodityID]bool)
+	for cid := range static {
+		cids[cid] = true
+	}
+	for cid := range speeds {
+		cids[cid] = true
+	}
+
+	for cid := range cids {
+		amount := static[cid]
+		delta := speeds[cid]
+		result[cid] = predictable.NewLinear(amount, staticTime, delta, baseTime)
+	}
+
+	return result
+}
+
+func (di DynamicInventory) SetLimits(limit time.Time) {
+	for cid, p := range di {
+		di[cid] = predictable.NewLimited(p, limit, predictable.LimitModeAfter)
+	}
+}
+
+func (di DynamicInventory) Sample(at time.Time) Inventory {
+	result := MakeEmptyInventory()
+
+	for cid, p := range di {
+		result[cid] = p.Sample(at)
+	}
+
+	return result
+}
+
+func (di DynamicInventory) ToMap() map[string]predictable.EncodedPredictable {
+	result := make(map[string]predictable.EncodedPredictable)
+	for cid, p := range di {
+		result[string(cid)] = p.Wrap()
+	}
+	return result
 }

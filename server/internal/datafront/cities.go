@@ -93,7 +93,7 @@ func encodeCity(city game.City) common.Encodable {
 
 	popCounts := make(map[string]api.Predictable)
 	for wf, count := range city.Population.ByWorkforceType {
-		popCounts[wf.String()] = serializePredictable(count.Wrap())
+		popCounts[wf.String()] = encodePredictable(count.Wrap())
 	}
 
 	return common.AsEncodable(api.CitiesTableRow{

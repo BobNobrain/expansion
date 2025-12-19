@@ -1,4 +1,4 @@
-import { createSignal, For, Show, type Component } from 'solid-js';
+import { createMemo, createSignal, For, Show, type Component, type JSX } from 'solid-js';
 import {
     Button,
     Container,
@@ -13,14 +13,78 @@ import {
     Text,
 } from '@/atoms';
 import { EquipmentIcon } from '@/components/EquipmentIcon/EquipmentIcon';
-import { IconCog, IconEquipment, IconHammer, IconHandbook, IconProduction } from '@/icons';
+import { IconBalance, IconCross, IconEquipment, IconHammer, IconHandbook, IconProduction, IconTick } from '@/icons';
 import { useFactoryDisplayContext } from '../state';
 import { FactoryDisplayProductionList } from './FactoryDisplayProductionList';
 import { SelectEquipmentSheet } from './SelectEquipmentSheet';
 import { SelectRecipeSheet } from './SelectRecipeSheet';
 
+const EquipmentActions: Component = () => {
+    const { state, updateState, isEditable, isRebalanceEnabled, onRebalance, isRebalanceInProgress, resetState } =
+        useFactoryDisplayContext();
+
+    const content = createMemo((): JSX.Element[] => {
+        const editable = isEditable();
+        const isEditing = state.isEditingEfficiencies;
+        const isRebalanceable = isRebalanceEnabled();
+
+        if (!editable && isRebalanceable && isEditing) {
+            return [
+                <Button
+                    style="light"
+                    square
+                    loading={isRebalanceInProgress()}
+                    onClick={() => {
+                        updateState('isEditingEfficiencies', false);
+                        resetState();
+                    }}
+                >
+                    <IconCross size={32} />
+                </Button>,
+                <Button
+                    style="light"
+                    square
+                    loading={isRebalanceInProgress()}
+                    onClick={() => {
+                        onRebalance({ target: state.factoryEquipment });
+                        updateState('isEditingEfficiencies', false);
+                    }}
+                >
+                    <IconTick size={32} color="success" />
+                </Button>,
+            ];
+        }
+
+        const result: JSX.Element[] = [
+            <Button style="light" square>
+                <IconHandbook size={32} />
+            </Button>,
+        ];
+
+        if (editable || isRebalanceable) {
+            result.push(
+                <Button
+                    style="light"
+                    color={isEditing ? 'primary' : undefined}
+                    square
+                    loading={isRebalanceInProgress()}
+                    onClick={() => {
+                        updateState('isEditingEfficiencies', true);
+                    }}
+                >
+                    <IconBalance size={32} />
+                </Button>,
+            );
+        }
+
+        return result;
+    });
+
+    return <PageHeaderActions pushRight>{content()}</PageHeaderActions>;
+};
+
 export const FactoryDisplayEquipment: Component = () => {
-    const { state, updateState, isEditable, isRebalanceEnabled } = useFactoryDisplayContext();
+    const { state, updateState, isEditable } = useFactoryDisplayContext();
     const [isProductionSheetOpen, setProductionSheetOpen] = createSignal(false);
     const [isEquipmentSheetOpen, setEquipmentSheetOpen] = createSignal(false);
 
@@ -29,26 +93,7 @@ export const FactoryDisplayEquipment: Component = () => {
             <PageHeader>
                 <PageHeaderTitle>Equipment</PageHeaderTitle>
                 <PageHeaderIcon icon={IconEquipment} text={state.factoryEquipment.length.toString()} />
-                <PageHeaderActions pushRight>
-                    <Button style="light" square>
-                        <IconHandbook size={32} />
-                    </Button>
-                    <Show when={isRebalanceEnabled() || isEditable()}>
-                        <Button
-                            style="light"
-                            color={state.isEditingEfficiencies ? 'primary' : undefined}
-                            square
-                            onClick={() => updateState('isEditingEfficiencies', (v) => !v)}
-                        >
-                            <IconCog size={32} />
-                        </Button>
-                    </Show>
-                    <Show when={isEditable()}>
-                        <Button style="light" square onClick={() => setEquipmentSheetOpen(true)}>
-                            <IconHammer size={32} />
-                        </Button>
-                    </Show>
-                </PageHeaderActions>
+                <EquipmentActions />
             </PageHeader>
             <Container hasGap padded>
                 <For

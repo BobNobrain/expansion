@@ -1,15 +1,15 @@
+import { createMemo, type Component } from 'solid-js';
 import { DefinitionList, Text, type DefinitionListItem } from '@/atoms';
-import { GameTimeDuration, renderGameTimeConstantSpeed } from '@/domain/GameTime';
 import { Inventory, type StorageSize } from '@/domain/Inventory';
 import { commoditiesAsset } from '@/lib/assetmanager';
 import { useAsset } from '@/lib/solid/asset';
 import { formatScalar } from '@/lib/strings';
-import { createMemo, type Component } from 'solid-js';
+import { Duration, renderConstantSpeed } from '@/lib/time';
 
 type StorageInfo = {
     rate: StorageSize;
     capacity: StorageSize;
-    timeToFill: number;
+    timeToFill: Duration;
 };
 
 const DEFS: DefinitionListItem<StorageInfo>[] = [
@@ -20,11 +20,11 @@ const DEFS: DefinitionListItem<StorageInfo>[] = [
             return (
                 <Text color="dim">
                     <Text color={rate.mass > 0 ? 'error' : 'default'}>
-                        {renderGameTimeConstantSpeed(rate.mass, { unit: 't' })}
+                        {renderConstantSpeed(rate.mass, Inventory.STANDARD_TIME_DELTA, { unit: 't' })}
                     </Text>{' '}
                     /{' '}
                     <Text color={rate.volume > 0 ? 'error' : 'default'}>
-                        {renderGameTimeConstantSpeed(rate.volume, { unit: 'm³' })}
+                        {renderConstantSpeed(rate.volume, Inventory.STANDARD_TIME_DELTA, { unit: 'm³' })}
                     </Text>
                 </Text>
             );
@@ -43,7 +43,7 @@ const DEFS: DefinitionListItem<StorageInfo>[] = [
     {
         title: 'Overflows In',
         description: 'How fast the inventory will be filled, stopping the factory production',
-        render: ({ timeToFill }) => GameTimeDuration.toString({ days: timeToFill }),
+        render: ({ timeToFill }) => Duration.toString(timeToFill),
     },
 ];
 
@@ -56,13 +56,15 @@ export const StorageTotals: Component<{ totals: Inventory; capacity: StorageSize
         const massFilledIn = props.capacity.mass / rate.mass;
         const volumeFilledIn = props.capacity.volume / rate.volume;
 
+        const timeToFill = Math.min(
+            massFilledIn > 0 ? massFilledIn : Infinity,
+            volumeFilledIn > 0 ? volumeFilledIn : Infinity,
+        );
+
         return {
             rate,
             capacity: props.capacity,
-            timeToFill: Math.min(
-                massFilledIn > 0 ? massFilledIn : Infinity,
-                volumeFilledIn > 0 ? volumeFilledIn : Infinity,
-            ),
+            timeToFill: Duration.mul(Inventory.STANDARD_TIME_DELTA, timeToFill),
         };
     });
 

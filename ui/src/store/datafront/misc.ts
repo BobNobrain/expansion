@@ -1,3 +1,4 @@
+import { Inventory } from '@/domain/Inventory';
 import { createDatafrontCleaner } from '@/lib/datafront/cleaner';
 import { createDatafrontUpdater } from '@/lib/datafront/updater';
 import type { Predictable as ApiPredictable } from '@/lib/net/types.generated';
@@ -19,21 +20,26 @@ export function parsePredictable({ b, c, l }: ApiPredictable): Predictable {
     }
 
     if (l) {
-        return createLinearPredictable({ x0: l.x, t0: new Date(l.t), deltaX: l.v, deltaT: 1 });
+        return createLinearPredictable({
+            x0: l.x,
+            t0: new Date(l.t),
+            deltaX: l.v,
+            deltaT: Inventory.STANDARD_TIME_DELTA,
+        });
     }
 
     if (b) {
-        let mode = LimitedPredictableMode.Max;
+        let mode = LimitedPredictableMode.After;
         switch (b.mode) {
-            case 'max':
-                mode = LimitedPredictableMode.Max;
+            case 'after':
+                mode = LimitedPredictableMode.After;
                 break;
-            case 'min':
-                mode = LimitedPredictableMode.Min;
+            case 'before':
+                mode = LimitedPredictableMode.Before;
                 break;
         }
 
-        return createLimitedPredictable(parsePredictable(b.inner), b.x, mode);
+        return createLimitedPredictable(parsePredictable(b.inner), new Date(b.t), mode);
     }
 
     throw new Error('could not parse predictable');

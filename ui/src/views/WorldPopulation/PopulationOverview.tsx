@@ -9,10 +9,9 @@ import {
     Text,
 } from '@/atoms';
 import { type City, WORKFORCE_TYPES, type WorkforceType } from '@/domain/City';
-import { renderGameTimeSpeed } from '@/domain/GameTime';
 import { IconPeople } from '@/icons';
 import { type UseTableResult } from '@/lib/datafront/types';
-import { type Predictable, sumPredictables } from '@/lib/predictables';
+import { type Predictable, renderPredictableSpeed, sumPredictables } from '@/lib/predictables';
 import { useNow } from '@/lib/solid/useNow';
 import { formatInteger } from '@/lib/strings';
 
@@ -77,7 +76,7 @@ export const PopulationOverview: Component<Props> = (props) => {
             width: 96,
             align: 'right',
             content: (row) => {
-                const speed = renderGameTimeSpeed(row.amount, now());
+                const speed = renderPredictableSpeed(row.amount, now());
                 if (speed.startsWith('+')) {
                     return <Text color="success">{speed}</Text>;
                 }

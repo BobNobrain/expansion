@@ -12,18 +12,18 @@ import (
 
 func TestFactoryLogicUpdateBasic(t *testing.T) {
 	logger.Init()
-	factory, l, t0, mockReg := setup2()
+	factory, updater, t0, mockReg := setup2()
 
 	factory.Equipment = append(factory.Equipment, game.FactoryEquipment{
 		EquipmentID: game.EquipmentID("E1"),
 		Count:       1,
 		Production: []game.FactoryProductionItem{
 			{
-				Recipe:           mockReg.GetRecipe(game.RecipeTemplateID(0)).Instantiate(),
+				Recipe:           mockReg.GetRecipesForEquipment(game.EquipmentID("E1"))[0].Instantiate(),
 				ManualEfficiency: 1.0,
 			},
 			{
-				Recipe:           mockReg.GetRecipe(game.RecipeTemplateID(1)).Instantiate(),
+				Recipe:           mockReg.GetRecipesForEquipment(game.EquipmentID("E1"))[1].Instantiate(),
 				ManualEfficiency: 1.0,
 			},
 		},
@@ -33,19 +33,19 @@ func TestFactoryLogicUpdateBasic(t *testing.T) {
 	factory.Employees[game.WorkforceTypeIntern] = 2
 	factory.Employees[game.WorkforceTypeWorker] = 1
 
-	factory.Inventory[game.CommodityID("a")] = 2
-	factory.Inventory[game.CommodityID("b")] = 2
+	factory.StaticInventory[game.CommodityID("a")] = 2
+	factory.StaticInventory[game.CommodityID("b")] = 2
 
-	l.RunAutomaticUpdates(t0.Add(5 * time.Minute))
+	updater.UpdateTo(factory, t0.Add(5*time.Minute))
 
-	assertInventoryAmount(t, factory.Inventory, "a", 0.0)
-	assertInventoryAmount(t, factory.Inventory, "b", 0.0)
-	assertInventoryAmount(t, factory.Inventory, "c", 0.0)
-	assertInventoryAmount(t, factory.Inventory, "d", 1.0)
+	assertInventoryAmount(t, factory.StaticInventory, "a", 0.0)
+	assertInventoryAmount(t, factory.StaticInventory, "b", 0.0)
+	assertInventoryAmount(t, factory.StaticInventory, "c", 0.0)
+	assertInventoryAmount(t, factory.StaticInventory, "d", 1.0)
 
 	assert(t, factory.Status == game.FactoryProductionStatusHalted, "the factory should be halted")
 
-	updatedMinutes := factory.Updated.Sub(t0).Minutes()
+	updatedMinutes := factory.UpdatedTo.Sub(t0).Minutes()
 	assertFloatEquals(t, updatedMinutes, 1.0, "updated time (m)")
 }
 
@@ -53,16 +53,15 @@ func setup2() (*game.Factory, *gamelogic.FactoryUpdatesLogic, time.Time, *global
 	t0 := time.Date(2025, time.January, 1, 12, 0, 0, 0, time.UTC)
 
 	factory := &game.Factory{
-		Status:    game.FactoryProductionStatusActive,
-		Equipment: []game.FactoryEquipment{},
-		Inventory: make(map[game.CommodityID]float64),
-		Employees: make(map[game.WorkforceType]int),
-		Updated:   t0,
+		Status:          game.FactoryProductionStatusActive,
+		Equipment:       []game.FactoryEquipment{},
+		StaticInventory: make(map[game.CommodityID]float64),
+		Employees:       make(map[game.WorkforceType]int),
+		UpdatedTo:       t0,
 	}
 
-	l := gamelogic.NewFactoryUpdatesLogic(factory)
 	mockReg := setUpMockRegistry2()
-	l.MockRegistry(mockReg)
+	l := gamelogic.FactoryUpdatesMocked(mockReg)
 
 	return factory, l, t0, mockReg
 }

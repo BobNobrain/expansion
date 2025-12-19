@@ -24,8 +24,8 @@ type FactoriesTableRow struct {
 
 	Equipment []FactoriesTableRowEquipment `json:"equipment"`
 
-	Inventory map[string]float64 `json:"inventory"`
-	Employees map[string]int     `json:"employees"`
+	Inventory map[string]Predictable `json:"inventory"`
+	Employees map[string]int         `json:"employees"`
 
 	UpgradeTarget       []FactoriesTableRowEquipmentPlan `json:"upgradeTarget,omitempty"`
 	UpgradeContribution Contribution                     `json:"upgradeContribution,omitempty"`

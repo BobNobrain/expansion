@@ -26,6 +26,10 @@ export function createState(initial: () => Factory | null) {
 
     const [state, updateState] = createStore<FactoryDisplayState>(initialState);
 
+    const resetState = () => {
+        updateState('factoryEquipment', () => getInitialStateEquipment(initial()));
+    };
+
     createEffect(() => {
         updateState('factoryEquipment', () => getInitialStateEquipment(initial()));
     });
@@ -33,6 +37,7 @@ export function createState(initial: () => Factory | null) {
     return {
         state,
         updateState,
+        resetState,
 
         validateAndGetResult: (): FactoryDisplayEditResult | null => {
             if (!state.factoryEquipment.length) {
@@ -89,7 +94,7 @@ function getInitialStateEquipment(f: Factory | null): FactoryEquipmentPlan[] {
 
 type FactoryDisplayContext = Omit<ReturnType<typeof createState>, 'validateAndGetResult'> & {
     factory: () => Factory | null;
-    isEditable: () => void;
+    isEditable: () => boolean;
     isRebalanceEnabled: () => boolean;
     isLoading: () => boolean;
     availableArea: () => number;
@@ -97,8 +102,14 @@ type FactoryDisplayContext = Omit<ReturnType<typeof createState>, 'validateAndGe
     worldId: () => string | null;
     baseInventory: () => Inventory | null;
     tileConditions: () => WorldTileConditions;
-    onRebalance: (rebalance: FactoryDisplayRebalanceResult) => void;
+
     onUpgrade: (f: Factory, ev: MouseEvent) => void;
+
+    isRebalanceInProgress: () => boolean;
+    onRebalance: (rebalance: FactoryDisplayRebalanceResult) => void;
+
+    isSubmittingContribution: () => boolean;
+    onSubmitContribution: (contribution: Inventory) => void;
 
     allRecipes: () => Record<string, Recipe>;
     allRecipesList: () => Recipe[];
@@ -110,6 +121,7 @@ const FactoryDisplayContext = createContext<FactoryDisplayContext>({
         return outOfContext();
     },
     updateState: outOfContext,
+    resetState: outOfContext,
 
     factory: outOfContext,
     isEditable: outOfContext,
@@ -121,8 +133,14 @@ const FactoryDisplayContext = createContext<FactoryDisplayContext>({
     worldId: outOfContext,
     baseInventory: outOfContext,
     tileConditions: outOfContext,
+
+    isRebalanceInProgress: outOfContext,
     onRebalance: outOfContext,
+
     onUpgrade: outOfContext,
+
+    isSubmittingContribution: outOfContext,
+    onSubmitContribution: outOfContext,
 
     allRecipes: outOfContext,
     allRecipesList: outOfContext,

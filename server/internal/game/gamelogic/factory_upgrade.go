@@ -106,6 +106,7 @@ func (l *FactoryUpgradeLogic) GetConstructionCosts(fup game.FactoryUpgradeProjec
 		result.AmountsRequired.Add(eqData.ConstructionParts)
 	}
 
+	result.History = fup.Progress
 	return result
 }
 
@@ -115,7 +116,6 @@ func (l *FactoryUpgradeLogic) ContributeToUpgradeProject(
 	fieldNameForError string,
 ) (*game.Contribution, common.Error) {
 	constructionCosts := l.GetConstructionCosts(factory.Upgrade)
-	constructionCosts.History = factory.Upgrade.Progress
 
 	ok := constructionCosts.Contribute(contribution.Contributor, contribution.Date, contribution.AmountsProvided)
 	if !ok {
@@ -126,7 +126,7 @@ func (l *FactoryUpgradeLogic) ContributeToUpgradeProject(
 		)
 	}
 
-	factory.Upgrade.Progress = append(factory.Upgrade.Progress, contribution)
+	factory.Upgrade.Progress = constructionCosts.History
 	factory.Upgrade.LastUpdated = time.Now()
 
 	return constructionCosts, nil

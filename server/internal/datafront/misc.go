@@ -7,7 +7,7 @@ import (
 	"srv/pkg/api"
 )
 
-func serializePredictable(e predictable.EncodedPredictable) api.Predictable {
+func encodePredictable(e predictable.EncodedPredictable) api.Predictable {
 	if e.Constant != nil {
 		return api.Predictable{
 			Const: &api.ConstantPredictable{
@@ -29,9 +29,9 @@ func serializePredictable(e predictable.EncodedPredictable) api.Predictable {
 	if e.Limited != nil {
 		return api.Predictable{
 			Limited: &api.LimitedPredictable{
-				X:     e.Limited.XLim,
+				T:     e.Limited.TLim,
 				Mode:  string(e.Limited.Mode),
-				Inner: serializePredictable(e.Limited.Inner),
+				Inner: encodePredictable(e.Limited.Inner),
 			},
 		}
 	}

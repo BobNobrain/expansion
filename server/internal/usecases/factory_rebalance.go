@@ -7,6 +7,7 @@ import (
 	"srv/internal/game/gamelogic"
 	"srv/internal/globals/events"
 	"srv/internal/utils/common"
+	"time"
 )
 
 type rebalanceFactoryUsecase struct {
@@ -59,6 +60,7 @@ func (uc *rebalanceFactoryUsecase) Run(
 	updatedFactory, err := gamelogic.FactoryRebalance().ApplyRebalancePlan(
 		input.Plan,
 		factory,
+		time.Now(),
 		craftbook,
 		"RebalanceFactoryUsecaseInput.Plan",
 	)
@@ -72,7 +74,7 @@ func (uc *rebalanceFactoryUsecase) Run(
 	}
 
 	events.FactoryUpdated.Publish(events.FactoryUpdatedPayload{
-		FactoryID: factory.FactoryID,
+		Factory: updatedFactory,
 	})
 
 	return tx.Commit()

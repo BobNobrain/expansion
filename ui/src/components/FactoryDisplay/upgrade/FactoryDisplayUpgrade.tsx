@@ -71,7 +71,8 @@ const DEFS: DefinitionListItem<UpgradeInfo>[] = [
 ];
 
 export const FactoryDisplayUpgrade: Component = () => {
-    const { onUpgrade, factory, isLoading, baseInventory } = useFactoryDisplayContext();
+    const { onUpgrade, factory, isLoading, baseInventory, isSubmittingContribution, onSubmitContribution } =
+        useFactoryDisplayContext();
     const buildings = useAsset(buildingsAsset);
 
     const info = createMemo((): UpgradeInfo | null => {
@@ -93,8 +94,16 @@ export const FactoryDisplayUpgrade: Component = () => {
     });
 
     const contribution = createMemo(() => factory()?.upgradeProject.contribution ?? Contribution.empty());
+    const { currentCounts, fillAll, sliders, isSelectionEmpty } = createContributionState(contribution, baseInventory);
 
-    const { fillAll, sliders, isSelectionEmpty } = createContributionState(contribution, baseInventory);
+    const canEditUpgrade = () => {
+        const f = factory();
+        if (!f) {
+            return true;
+        }
+
+        return !Factory.isUpgradeInProgress(f);
+    };
 
     return (
         <>
@@ -112,7 +121,7 @@ export const FactoryDisplayUpgrade: Component = () => {
                             onUpgrade(f, ev);
                         }}
                     >
-                        Edit
+                        {canEditUpgrade() ? 'Edit' : 'View'}
                     </Button>
                 </PageHeaderActions>
             </PageHeader>
@@ -124,7 +133,16 @@ export const FactoryDisplayUpgrade: Component = () => {
                     <Button square style="light" onClick={fillAll}>
                         <IconUnknown size={32} />
                     </Button>
-                    <Button square style="light" color="primary" disabled={isSelectionEmpty()}>
+                    <Button
+                        square
+                        style="light"
+                        color="primary"
+                        disabled={isSelectionEmpty()}
+                        loading={isSubmittingContribution()}
+                        onClick={() => {
+                            onSubmitContribution(currentCounts());
+                        }}
+                    >
                         <IconHammer size={32} />
                     </Button>
                 </PageHeaderActions>

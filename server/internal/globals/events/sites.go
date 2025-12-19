@@ -24,10 +24,11 @@ type FactoryCreatedPayload struct {
 	Owner  domain.UserID
 }
 type FactoryUpdatedPayload struct {
-	FactoryID game.FactoryID
+	Factory game.Factory
 }
 type FactoryRemovedPayload struct {
 	FactoryID game.FactoryID
+	BaseID    game.BaseID
 }
 
 var (

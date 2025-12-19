@@ -32,6 +32,7 @@ import { useFactoryRelatedData } from './hooks';
 import { dfUpgradeFactory } from '@/store/datafront';
 import { createIdempotencyToken } from '@/lib/datafront/utils';
 import { useFormController } from '@/lib/solid/form';
+import { Factory } from '@/domain/Base';
 
 export const EditFactoryPage: Component = () => {
     const routeInfo = useEditFactoryRouteInfo();
@@ -93,7 +94,7 @@ export const EditFactoryPage: Component = () => {
         const route = routeInfo();
 
         return {
-            title: 'Create Factory',
+            title: 'Factory Upgrade',
             subtitle: baseContent ? World.formatGalacticTileId(baseContent.worldId, baseContent.tileId) : undefined,
 
             customFooter: () => {
@@ -156,12 +157,21 @@ export const EditFactoryPage: Component = () => {
         ];
     });
 
+    const isEditable = () => {
+        const f = factory.result();
+        if (!f) {
+            return false;
+        }
+
+        return !Factory.isUpgradeInProgress(f);
+    };
+
     return (
         <TouchContentSingle>
             <TabsList style="pagetop" scrollable tabs={tabs()} />
             <FactoryDisplay
                 factory={factory.result()}
-                editable
+                editable={isEditable()}
                 isLoading={isFactoryLoading()}
                 availableArea={500}
                 tileId={base.result()?.tileId ?? null}

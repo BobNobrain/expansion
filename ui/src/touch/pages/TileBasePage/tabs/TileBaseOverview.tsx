@@ -17,7 +17,7 @@ import {
 import { FactoryStatusLabel } from '@/components/FactoryStatusLabel/FactoryStatusLabel';
 import { GameTimeLabel } from '@/components/GameTimeLabel/GameTimeLabel';
 import { Factory, type BaseContent } from '@/domain/Base';
-import { IconArea, IconContext, IconEquipment, IconFactory, IconHammer, IconPlus } from '@/icons';
+import { IconArea, IconEquipment, IconFactory, IconPlus } from '@/icons';
 import { buildingsAsset } from '@/lib/assetmanager';
 import { useAsset } from '@/lib/solid/asset';
 import { emulateLinkClick } from '@/lib/solid/emulateLinkClick';
@@ -120,14 +120,6 @@ export const TileBaseOverview: Component = () => {
         <>
             <PageHeader>
                 <PageHeaderTitle>Base Overview</PageHeaderTitle>
-                <PageHeaderActions pushRight>
-                    <Button square style="light">
-                        <IconHammer size={32} block />
-                    </Button>
-                    <Button square style="light">
-                        <IconContext size={32} block />
-                    </Button>
-                </PageHeaderActions>
             </PageHeader>
             <DefinitionList items={DEFS} value={base()} />
 

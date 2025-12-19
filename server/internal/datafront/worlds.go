@@ -179,7 +179,7 @@ func encodeWorld(w game.WorldData) common.Encodable {
 		OceansContent:     w.Composition.Oceans.ToMap(),
 		AtmosphereContent: w.Composition.Atmosphere.ToMap(),
 
-		NPops:      serializePredictable(w.NPops.Wrap()),
+		NPops:      encodePredictable(w.NPops.Wrap()),
 		TileCities: tileCities,
 		TileBases:  tileBases,
 	})

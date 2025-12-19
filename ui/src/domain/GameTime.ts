@@ -1,4 +1,4 @@
-import { calcPredictableDelta, type Predictable } from '../lib/predictables';
+import { createDurationScale } from '@/lib/time/duration';
 import { formatScalar } from '../lib/strings';
 
 // TODO: fetch these from the server
@@ -66,10 +66,6 @@ export type RenderGameTimeSpeedOptions = {
     noTimeUnit?: boolean;
 };
 
-export function renderGameTimeSpeed(p: Predictable, now: Date, opts?: RenderGameTimeSpeedOptions): string {
-    const deltaPerDay = calcPredictableDelta(p, now, GAME_TIME_DAY_MS);
-    return renderGameTimeConstantSpeed(deltaPerDay, opts);
-}
 export function renderGameTimeConstantSpeed(
     deltaPerDay: number,
     { unit = '', noTimeUnit }: RenderGameTimeSpeedOptions = {},
@@ -127,55 +123,16 @@ export function renderGameTimeRelative(target: Date, now: Date): string {
     return parts.join(' ');
 }
 
-export type GameTimeDuration = {
-    days?: number;
-    months?: number;
-    years?: number;
-};
+const gameTimeDurationScale = createDurationScale({
+    keys: ['d', 'm', 'y'],
+    scales: [1, 30, 12],
+});
+
+export type GameTimeDuration = typeof gameTimeDurationScale.zero;
 
 export namespace GameTimeDuration {
-    export function normalize({
-        days = 0,
-        months = 0,
-        years = 0,
-    }: Readonly<GameTimeDuration>): Required<GameTimeDuration> {
-        if (days >= 30) {
-            months += Math.floor(days / 30);
-            days %= 30;
-        }
-
-        if (months >= 12) {
-            years += Math.floor(months / 12);
-            months %= 12;
-        }
-
-        return { days, months, years };
-    }
-
-    export function isFinite(gtd: Readonly<GameTimeDuration>): boolean {
-        return [gtd.days ?? 0, gtd.months ?? 0, gtd.years ?? 0].every(Number.isFinite);
-    }
-
-    const TO_STRING_UNITS = ['y', 'm', 'd'];
-    export function toString(gtd: Readonly<GameTimeDuration>, options: { digits?: number } = {}): string {
-        if (!isFinite(gtd)) {
-            return '--';
-        }
-
-        const normalized = normalize(gtd);
-
-        return [normalized.years, normalized.months, normalized.days]
-            .map((n, idx) => {
-                if (n === 0) {
-                    return undefined;
-                }
-
-                return (
-                    formatScalar(n, { digits: idx === 2 ? options.digits ?? 1 : 0, noShortenings: true }) +
-                    TO_STRING_UNITS[idx]
-                );
-            })
-            .filter(Boolean)
-            .join(' ');
-    }
+    export const normalize = gameTimeDurationScale.normalize;
+    export const toString = gameTimeDurationScale.toString;
+    export const toDays = gameTimeDurationScale.valueOf;
+    export const mul = gameTimeDurationScale.mul;
 }

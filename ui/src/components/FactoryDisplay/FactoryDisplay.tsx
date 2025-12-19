@@ -16,6 +16,8 @@ import {
 export type FactoryDisplayProps = {
     factory: Factory | null;
     editable?: boolean;
+
+    isRebalanceInProgress?: boolean;
     onRebalance?: (rebalance: FactoryDisplayRebalanceResult) => void;
 
     availableArea: number;
@@ -29,10 +31,13 @@ export type FactoryDisplayProps = {
 
     formControllerRef?: (c: FormController<FactoryDisplayEditResult>) => void;
     onUpgrade?: (f: Factory, ev: MouseEvent) => void;
+
+    isSubmittingContribution?: boolean;
+    onSubmitContribution?: (contribution: Inventory) => void;
 };
 
 export const FactoryDisplay: ParentComponent<FactoryDisplayProps> = (props) => {
-    const { state, validateAndGetResult, updateState } = createState(() => props.factory);
+    const { state, validateAndGetResult, updateState, resetState } = createState(() => props.factory);
 
     const controller = createFormController({ validateAndGetResult });
     useFormControllerRef(controller.controller, props, 'formControllerRef');
@@ -52,6 +57,8 @@ export const FactoryDisplay: ParentComponent<FactoryDisplayProps> = (props) => {
 
         const statics = recipes.recipes;
         const dynamics = props.dynamicRecipes;
+
+        console.log(statics);
 
         if (!dynamics.length) {
             return statics;
@@ -73,10 +80,13 @@ export const FactoryDisplay: ParentComponent<FactoryDisplayProps> = (props) => {
             value={{
                 state,
                 updateState: updateStateWithNotify,
+                resetState,
 
                 factory: () => props.factory,
-                isEditable: () => props.editable,
+                isEditable: () => props.editable ?? false,
+
                 isRebalanceEnabled: () => Boolean(props.onRebalance),
+                isRebalanceInProgress: () => props.isRebalanceInProgress ?? false,
                 onRebalance: (r) => props.onRebalance?.(r),
 
                 availableArea: () => props.availableArea,
@@ -86,6 +96,9 @@ export const FactoryDisplay: ParentComponent<FactoryDisplayProps> = (props) => {
                 tileConditions: () => props.tileConditions,
                 isLoading: () => props.isLoading,
                 onUpgrade: (f, ev) => props.onUpgrade?.(f, ev),
+
+                isSubmittingContribution: () => props.isSubmittingContribution ?? false,
+                onSubmitContribution: (items) => props.onSubmitContribution?.(items),
 
                 allRecipesList,
                 allRecipes,

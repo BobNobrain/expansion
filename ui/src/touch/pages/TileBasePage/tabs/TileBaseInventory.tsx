@@ -1,7 +1,7 @@
 import { createMemo, createSignal, Show, type Component } from 'solid-js';
 import { Button, PageHeader, PageHeaderActions, PageHeaderIcon, PageHeaderTitle } from '@/atoms';
 import { type InventoryEntry, InventoryTable, InventoryGrid } from '@/components/Inventory';
-import { IconCalendar, IconContext, IconStorage, IconUnknown } from '@/icons';
+import { IconCalendar, IconGrid, IconStorage, IconTable, IconTransfer } from '@/icons';
 import { createConstantPredictable } from '@/lib/predictables';
 import { useBase } from '../hooks';
 
@@ -41,7 +41,7 @@ export const TileBaseInventory: Component = () => {
                         color={displayMode() === 'grid' ? 'primary' : undefined}
                         onClick={setDisplayModeGrid}
                     >
-                        <IconContext size={32} block />
+                        <IconGrid size={32} block />
                     </Button>
                     <Button
                         square
@@ -49,10 +49,10 @@ export const TileBaseInventory: Component = () => {
                         color={displayMode() === 'table' ? 'primary' : undefined}
                         onClick={setDisplayModeTable}
                     >
-                        <IconUnknown size={32} block />
+                        <IconTable size={32} block />
                     </Button>
                     <Button square style="light">
-                        <IconUnknown size={32} block />
+                        <IconTransfer size={32} block />
                     </Button>
                 </PageHeaderActions>
             </PageHeader>

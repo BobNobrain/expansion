@@ -9,14 +9,18 @@ import {
     FactoryDisplayUpgrade,
 } from '@/components/FactoryDisplay';
 import { Factory } from '@/domain/Base';
+import type { Inventory } from '@/domain/Inventory';
 import { World } from '@/domain/World';
 import { IconFactory, IconPeople, IconEquipment, IconUnknown } from '@/icons';
+import { createIdempotencyToken } from '@/lib/datafront/utils';
 import { emulateLinkClick } from '@/lib/solid/emulateLinkClick';
 import { getBasesRoute } from '@/routes/bases';
 import { ViewFactoryTab, getEditFactoryRoute, getViewFactoryRoute, useViewFactoryRouteInfo } from '@/routes/factories';
+import { dfContributeToFactory, dfRebalanceFactory } from '@/store/datafront';
 import { TouchContentSingle } from '@/touch/components/TouchContentSingle/TouchContentSingle';
 import { usePageContextBinding } from '@/touch/components/TouchPage';
 import { useFactoryRelatedData } from './hooks';
+import type { FactoryDisplayRebalanceResult } from '@/components/FactoryDisplay/state';
 
 export const ViewFactoryPage: Component = () => {
     const routeInfo = useViewFactoryRouteInfo();
@@ -77,6 +81,43 @@ export const ViewFactoryPage: Component = () => {
         ].filter(Boolean as unknown as <T>(x: T | null) => x is T);
     });
 
+    const contributeIdempotencyToken = createIdempotencyToken();
+    const contribute = dfContributeToFactory.use(contributeIdempotencyToken.getToken);
+    const onContributeClick = (amounts: Inventory) => {
+        const f = factory.result();
+        if (!f) {
+            return;
+        }
+
+        contributeIdempotencyToken.aquire();
+        contribute.run(
+            { factoryId: f.id, amounts },
+            {
+                onSuccess: contributeIdempotencyToken.release,
+                onError: contributeIdempotencyToken.release,
+            },
+        );
+    };
+
+    const rebalance = dfRebalanceFactory.use(() => Date.now().toString());
+    const onRebalanceClick = (result: FactoryDisplayRebalanceResult) => {
+        const f = factory.result();
+        if (!f) {
+            return;
+        }
+
+        if (rebalance.isLoading()) {
+            return;
+        }
+
+        rebalance.run({
+            factoryId: f.id,
+            plan: result.target.map((eq) =>
+                eq.production.map((p) => ({ recipeId: p.recipeId, manualEfficiency: p.manualEfficiency })),
+            ),
+        });
+    };
+
     return (
         <TouchContentSingle>
             <TabsList style="pagetop" scrollable tabs={tabs()} />
@@ -102,6 +143,10 @@ export const ViewFactoryPage: Component = () => {
 
                     emulateLinkClick({ navigate, href, replace }, ev);
                 }}
+                onSubmitContribution={onContributeClick}
+                isSubmittingContribution={contribute.isLoading()}
+                isRebalanceInProgress={rebalance.isLoading()}
+                onRebalance={onRebalanceClick}
             >
                 <TabContent
                     active={routeInfo().tab}

@@ -14,7 +14,7 @@ export type GameTimeLabelProps = Omit<TextProps, 'children'> & {
 };
 
 // TODO: put this into user settings
-const [globalMode, setGlobalMode] = createSignal<GameTimeLabelMode>('gameAbsolute');
+const [globalMode, setGlobalMode] = createSignal<GameTimeLabelMode>('realAbsolute');
 
 const transitions: Record<GameTimeLabelMode, GameTimeLabelMode> = {
     gameAbsolute: 'gameRelative',

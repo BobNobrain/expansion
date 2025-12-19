@@ -76,7 +76,7 @@ func (uc *upgradeFactoryUsecase) Run(
 	}
 
 	events.FactoryUpdated.Publish(events.FactoryUpdatedPayload{
-		FactoryID: factory.FactoryID,
+		Factory: updatedFactory,
 	})
 
 	return tx.Commit()

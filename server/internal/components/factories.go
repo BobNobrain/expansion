@@ -2,16 +2,20 @@ package components
 
 import (
 	"srv/internal/game"
+	"srv/internal/game/gamelogic"
 	"srv/internal/utils/common"
 )
 
+// should it exist?
 type FactoriesRepoReadonly interface {
-	GetBaseFactories(game.BaseID) ([]game.Factory, common.Error)
-	ResolveFactories([]game.FactoryID) ([]game.Factory, common.Error)
+	ResolveFactoryOverviews([]game.FactoryID) ([]game.FactoryStaticOverview, common.Error)
 }
 
 type FactoriesRepo interface {
 	FactoriesRepoReadonly
+
+	GetBaseFactories(game.BaseID, *gamelogic.FactoryUpdatesLogic) ([]game.Factory, common.Error)
+	ResolveFactories([]game.FactoryID, *gamelogic.FactoryUpdatesLogic) ([]game.Factory, common.Error)
 
 	CreateBaseFactory(game.Factory) common.Error
 	UpdateBaseFactory(game.Factory) common.Error

@@ -7,6 +7,21 @@ SELECT *
 FROM factories
 WHERE id = ANY($1::INTEGER [ ]);
 
+-- name: ResolveFactoryOverviews :many
+SELECT factories.id,
+    factories.base_id,
+    factories.created_at,
+    COALESCE(factory_base.world_id, ''),
+    COALESCE(factory_base.tile_id, -1)
+FROM factories
+    LEFT JOIN (
+        SELECT bases.id,
+            bases.world_id,
+            bases.tile_id
+        FROM bases
+    ) AS factory_base ON factory_base.id = factories.base_id
+WHERE factories.id = ANY($1::INTEGER [ ]);
+
 -- name: GetBaseFactories :many
 SELECT *
 FROM factories

@@ -64,7 +64,7 @@ type RebalanceFactoryPayload struct {
 }
 
 type ContributeToFactoryPayload struct {
-	FactoryID int                `json:"baseId"`
+	FactoryID int                `json:"factoryId"`
 	Amounts   map[string]float64 `json:"amounts"`
 }
 

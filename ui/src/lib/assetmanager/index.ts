@@ -3,11 +3,10 @@ import type commoditiesRawAsset from '@/../assets/commodities.generated.json';
 import type recipesRawAsset from '@/../assets/recipes.generated.json';
 import type { Building, Equipment } from '@/domain/Base';
 import type { CommodityData } from '@/domain/Commodity';
+import { Inventory } from '@/domain/Inventory';
 import type { Recipe } from '@/domain/Recipe';
 import { mapValues } from '../misc';
 import { type Asset, createJSONAsset } from './asset';
-import { GAME_TIME_DAY_MS } from '@/domain/GameTime';
-import { Inventory } from '@/domain/Inventory';
 
 export { Asset };
 // TODO: generate proper typings from json schema
@@ -74,16 +73,12 @@ export type RecipesAsset = { recipes: Recipe[] };
 export const staticRecipesAsset = createJSONAsset({
     url: '/assets/recipes.generated.json',
     map: (raw: typeof recipesRawAsset): RecipesAsset => {
-        const gameTimeDaySeconds = GAME_TIME_DAY_MS / 1000;
-
         return {
             recipes: raw.recipes.map((data) => {
-                const scaleFactor = gameTimeDaySeconds / 3600;
-
                 return {
                     id: data.id,
-                    inputs: Inventory.multiply(data.inputs as unknown as Record<string, number>, scaleFactor),
-                    outputs: Inventory.multiply(data.outputs as unknown as Record<string, number>, scaleFactor),
+                    inputs: Inventory.from(data.inputs as unknown as Record<string, number>),
+                    outputs: Inventory.from(data.outputs as unknown as Record<string, number>),
                     equipment: data.equipment,
                 };
             }),

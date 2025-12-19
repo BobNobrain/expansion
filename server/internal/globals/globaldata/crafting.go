@@ -206,10 +206,11 @@ func (r *CraftingRegistry) FillEquipment(equipmentData *assets.EquipmentAsset) {
 		}
 
 		r.equipment[eid] = game.EquipmentData{
-			EquipmentID: eid,
-			Area:        float64(eqData.Area),
-			Building:    game.BaseBuildingID(eqData.Building),
-			Jobs:        jobs,
+			EquipmentID:       eid,
+			Area:              float64(eqData.Area),
+			Building:          game.BaseBuildingID(eqData.Building),
+			Jobs:              jobs,
+			ConstructionParts: game.MakeInventoryDeltaFrom(eqData.ConstructionParts),
 		}
 	}
 }

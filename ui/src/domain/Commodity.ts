@@ -1,4 +1,4 @@
-import { formatScalar } from '../lib/strings';
+import { formatInteger, formatScalar } from '../lib/strings';
 import type { StorageSize } from './Inventory';
 
 export type CommodityData = {
@@ -19,7 +19,7 @@ export namespace Commodity {
         }
 
         if (c.quantized) {
-            return formatScalar(amount, {
+            return formatInteger(amount, {
                 digits: opts?.strictQuantized ? 0 : 1,
                 explicitPlusSign: opts?.explicitPlusSign,
             });

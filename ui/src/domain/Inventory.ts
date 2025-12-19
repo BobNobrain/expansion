@@ -1,3 +1,5 @@
+import type { Predictable } from '@/lib/predictables';
+import type { Duration } from '@/lib/time';
 import type { CommodityData } from './Commodity';
 
 export type StorageSize = {
@@ -21,6 +23,8 @@ export namespace StorageSize {
 export type Inventory = Record<string, number>;
 
 export namespace Inventory {
+    export const STANDARD_TIME_DELTA: Duration = { h: 1 };
+
     export function empty(): Inventory {
         return {};
     }
@@ -62,3 +66,5 @@ export namespace Inventory {
         return result;
     }
 }
+
+export type DynamicInventory = Record<string, Predictable>;

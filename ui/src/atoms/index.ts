@@ -18,7 +18,6 @@ export * from './Link/Link';
 export * from './List';
 export * from './NumberInput/NumberInput';
 export * from './PageHeader';
-export * from './ProgressBar/ProgressBar';
 export * from './Skeleton';
 export * from './TabContent/TabContent';
 export * from './TabsList/TabsList';

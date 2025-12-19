@@ -80,15 +80,32 @@ func ParseFactoryStatus(s string) FactoryProductionStatus {
 	}
 }
 
+type FactoryStaticOverview struct {
+	FactoryID FactoryID
+	BaseID    BaseID
+	WorldID   CelestialID
+	TileID    TileID
+	BuiltAt   time.Time
+}
+
+type FactoryProductionSnapshot struct {
+	Date            time.Time
+	Status          FactoryProductionStatus
+	StaticInventory Inventory
+	ProductionLines [][]FactoryProductionItem
+}
+
 type Factory struct {
 	FactoryID FactoryID
 	BaseID    BaseID
 	Status    FactoryProductionStatus
 	Equipment []FactoryEquipment
-	Inventory Inventory
 	Employees map[WorkforceType]int
-	Updated   time.Time
+	UpdatedTo time.Time
 	BuiltAt   time.Time
+
+	StaticInventory  Inventory
+	DynamicInventory DynamicInventory
 
 	Upgrade FactoryUpgradeProject
 }
@@ -97,12 +114,12 @@ func MakeEmptyFactory() Factory {
 	now := time.Now()
 
 	return Factory{
-		Status:    FactoryProductionStatusActive,
-		Equipment: nil,
-		Inventory: MakeEmptyInventory(),
-		Employees: make(map[WorkforceType]int),
-		Updated:   now,
-		BuiltAt:   now,
+		Status:          FactoryProductionStatusActive,
+		Equipment:       nil,
+		StaticInventory: MakeEmptyInventory(),
+		Employees:       make(map[WorkforceType]int),
+		UpdatedTo:       now,
+		BuiltAt:         now,
 		Upgrade: FactoryUpgradeProject{
 			Equipment:   nil,
 			Progress:    nil,

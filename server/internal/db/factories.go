@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"srv/internal/db/dbq"
 	"srv/internal/game"
+	"srv/internal/game/gamelogic"
 	"srv/internal/utils"
 	"srv/internal/utils/common"
 	"time"
@@ -40,22 +41,86 @@ type factoryDataProductionItemJSON struct {
 	Outputs          map[string]float64 `json:"outputs,omitempty"`
 }
 
-func (b *factoriesRepoImpl) GetBaseFactories(bid game.BaseID) ([]game.Factory, common.Error) {
+func (b *factoriesRepoImpl) ResolveFactoryOverviews(fids []game.FactoryID) ([]game.FactoryStaticOverview, common.Error) {
+	rows, dberr := b.q.ResolveFactoryOverviews(b.ctx, utils.ConvertInts[game.FactoryID, int32](fids))
+	if dberr != nil {
+		return nil, makeDBError(dberr, "FactoriesRepo::ResolveFactoryOverviews")
+	}
+
+	overviews := make([]game.FactoryStaticOverview, 0, len(rows))
+	for _, row := range rows {
+		overviews = append(overviews, game.FactoryStaticOverview{
+			FactoryID: game.FactoryID(row.ID),
+			BaseID:    game.BaseID(row.BaseID),
+			WorldID:   game.CelestialID(row.WorldID),
+			TileID:    game.TileID(row.TileID),
+			BuiltAt:   row.CreatedAt.Time,
+		})
+	}
+
+	return overviews, nil
+}
+
+func (b *factoriesRepoImpl) actualizeAndSave(
+	fs []game.Factory,
+	updater *gamelogic.FactoryUpdatesLogic,
+	now time.Time,
+) common.Error {
+	factoriesToUpdate := make([]game.Factory, 0)
+	for i, f := range fs {
+		updatedFactory := f
+		hasUpdated := updater.UpdateTo(&updatedFactory, now)
+		if hasUpdated {
+			factoriesToUpdate = append(factoriesToUpdate, f)
+		}
+		updatedFactory.DynamicInventory = updater.GetDynamicInventory(f)
+		fs[i] = updatedFactory
+	}
+
+	for _, f := range factoriesToUpdate {
+		err := b.UpdateBaseFactory(f)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (b *factoriesRepoImpl) GetBaseFactories(bid game.BaseID, updater *gamelogic.FactoryUpdatesLogic) ([]game.Factory, common.Error) {
 	rows, dberr := b.q.GetBaseFactories(b.ctx, int32(bid))
 	if dberr != nil {
 		return nil, makeDBError(dberr, "FactoriesRepo::GetBaseFactories")
 	}
 
-	return utils.MapSliceFailable(rows, decodeFactory)
+	factories, err := utils.MapSliceFailable(rows, decodeFactory)
+	if err != nil {
+		return nil, err
+	}
+
+	err = b.actualizeAndSave(factories, updater, time.Now())
+	if err != nil {
+		return nil, err
+	}
+	return factories, nil
 }
 
-func (b *factoriesRepoImpl) ResolveFactories(ids []game.FactoryID) ([]game.Factory, common.Error) {
+func (b *factoriesRepoImpl) ResolveFactories(ids []game.FactoryID, updater *gamelogic.FactoryUpdatesLogic) ([]game.Factory, common.Error) {
 	rows, dberr := b.q.ResolveFactories(b.ctx, utils.ConvertInts[game.FactoryID, int32](ids))
 	if dberr != nil {
 		return nil, makeDBError(dberr, "FactoriesRepo::ResolveFactories")
 	}
 
-	return utils.MapSliceFailable(rows, decodeFactory)
+	factories, err := utils.MapSliceFailable(rows, decodeFactory)
+	if err != nil {
+		return nil, err
+	}
+
+	err = b.actualizeAndSave(factories, updater, time.Now())
+	if err != nil {
+		return nil, err
+	}
+	return factories, nil
 }
 
 func (b *factoriesRepoImpl) CreateBaseFactory(factory game.Factory) common.Error {
@@ -94,7 +159,7 @@ func (b *factoriesRepoImpl) UpdateBaseFactory(factory game.Factory) common.Error
 	dberr := b.q.UpdateFactory(b.ctx, dbq.UpdateFactoryParams{
 		ID:        int32(factory.FactoryID),
 		Data:      factoryData,
-		UpdatedTo: pgtype.Timestamptz{Time: factory.Updated, Valid: true},
+		UpdatedTo: pgtype.Timestamptz{Time: factory.UpdatedTo, Valid: true},
 	})
 	if dberr != nil {
 		return makeDBError(dberr, "FactoriesRepo::UpdateBaseFactory")
@@ -112,12 +177,13 @@ func decodeFactory(row dbq.Factory) (game.Factory, common.Error) {
 		FactoryID: game.FactoryID(row.ID),
 		BaseID:    game.BaseID(row.BaseID),
 		BuiltAt:   row.CreatedAt.Time,
-		Updated:   row.UpdatedTo.Time,
 
+		UpdatedTo: row.UpdatedTo.Time,
 		Status:    game.FactoryProductionStatus(rowData.Status),
-		Inventory: game.MakeInventoryFrom(rowData.Inventory),
 		Employees: make(map[game.WorkforceType]int),
 		Equipment: utils.MapSlice(rowData.Equipment, decodeFactoryEquipment),
+
+		StaticInventory: game.MakeInventoryFrom(rowData.Inventory),
 
 		Upgrade: game.FactoryUpgradeProject{
 			Equipment: utils.MapSlice(rowData.UpgradeTarget, func(data factoryDataEquipmentJSON) game.FactoryUpgradeProjectEqipment {
@@ -175,7 +241,7 @@ func encodeFactoryData(factory game.Factory) factoryDataJSON {
 	data := factoryDataJSON{
 		Status:    byte(factory.Status),
 		Employees: utils.MapKeys(factory.Employees, func(wf game.WorkforceType) string { return wf.String() }),
-		Inventory: factory.Inventory.ToMap(),
+		Inventory: factory.StaticInventory.ToMap(),
 		Equipment: utils.MapSlice(factory.Equipment, encodeFactoryEquipment),
 
 		UpgradeTarget: utils.MapSlice(factory.Upgrade.Equipment, func(eq game.FactoryUpgradeProjectEqipment) factoryDataEquipmentJSON {

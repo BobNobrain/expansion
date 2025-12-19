@@ -79,7 +79,7 @@ type BaseBuildingID string
 
 type BaseBuildingData struct {
 	BuildingID  BaseBuildingID
-	MatsPerArea map[CommodityID]float64
+	MatsPerArea Inventory
 }
 
 type EquipmentID string
@@ -105,8 +105,8 @@ type RecipeTemplateID string
 
 type RecipeTemplate struct {
 	TemplateID    RecipeTemplateID
-	StaticInputs  map[CommodityID]float64
-	StaticOutputs map[CommodityID]float64
+	StaticInputs  InventoryDelta
+	StaticOutputs InventoryDelta
 	Equipment     EquipmentID
 	BaseDuration  time.Duration
 
@@ -129,8 +129,8 @@ func (t RecipeTemplate) Instantiate() Recipe {
 		RecipeID:    RecipeID(t.TemplateID),
 		TemplateID:  t.TemplateID,
 		EquipmentID: t.Equipment,
-		Inputs:      make(map[CommodityID]float64),
-		Outputs:     make(map[CommodityID]float64),
+		Inputs:      MakeEmptyInventoryDelta(),
+		Outputs:     MakeEmptyInventoryDelta(),
 	}
 
 	timeScale := t.GetDurationScale()
@@ -145,7 +145,7 @@ func (t RecipeTemplate) Instantiate() Recipe {
 	return result
 }
 func (t RecipeTemplate) GetDurationScale() float64 {
-	return 1 / t.BaseDuration.Hours()
+	return 1.0 / t.BaseDuration.Hours()
 }
 
 func (t RecipeTemplate) InstantiateWithScaledOutputs(scale float64) Recipe {
@@ -169,7 +169,7 @@ type RecipeID string
 type Recipe struct {
 	RecipeID    RecipeID
 	TemplateID  RecipeTemplateID
-	Inputs      map[CommodityID]float64
-	Outputs     map[CommodityID]float64
+	Inputs      InventoryDelta
+	Outputs     InventoryDelta
 	EquipmentID EquipmentID
 }

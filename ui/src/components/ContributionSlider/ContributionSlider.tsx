@@ -53,6 +53,7 @@ export const ContributionSlider: Component<ContributionSliderProps> = (props) =>
                         value={props.value}
                         onUpdate={props.onUpdate}
                         valueRange={{ from: 0, to: props.available }}
+                        valueStep={commodityData()?.quantized ? 1 : undefined}
                         left={{ color: 'primary' }}
                     />
                 </Show>

@@ -1,6 +1,7 @@
 package datafront
 
 import (
+	"context"
 	"srv/internal/components"
 	"srv/internal/datafront/dfcore"
 	"srv/internal/game"
@@ -13,26 +14,28 @@ import (
 )
 
 type factoriesTable struct {
-	repo components.FactoriesRepoReadonly
-	sub  *events.Subscription
+	storage components.Storage
+	sub     *events.Subscription
 
 	table     *dfcore.QueryableTable
 	qByBaseID *dfcore.TrackableTableQuery[api.FactoriesQueryByBaseID]
 }
 
-func (gdf *GameDataFront) InitFactories(repo components.FactoriesRepoReadonly) {
+func (gdf *GameDataFront) InitFactories(storage components.Storage) {
 	if gdf.factories != nil {
 		panic("GameDataFront.InitFactories() has already been called!")
 	}
 
 	factories := &factoriesTable{
-		repo: repo,
-		sub:  events.NewSubscription(),
+		storage: storage,
+		sub:     events.NewSubscription(),
 	}
 	factories.table = dfcore.NewQueryableTable(factories.queryByIDs)
 	factories.qByBaseID = dfcore.NewTrackableTableQuery(factories.queryByBaseID, factories.table)
 
-	// events.SubscribeTyped(bases.sub, events.CityCreated, cities.onNewCityFounded)
+	events.SubscribeTyped(factories.sub, events.FactoryCreated, factories.onFactoryCreated)
+	events.SubscribeTyped(factories.sub, events.FactoryUpdated, factories.onFactoryUpdated)
+	events.SubscribeTyped(factories.sub, events.FactoryRemoved, factories.onFactoryRemoved)
 
 	gdf.factories = factories
 	gdf.df.AttachTable(api.FactoriesTableName, factories.table)
@@ -47,12 +50,20 @@ func (t *factoriesTable) queryByIDs(
 	req dfapi.DFTableRequest,
 	ctx dfcore.DFRequestContext,
 ) (*dfcore.TableResponse, common.Error) {
-	factories, err := t.repo.ResolveFactories(utils.ParseInts[game.FactoryID](req.IDs))
+	tx, err := t.storage.StartTransaction(context.TODO())
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+
+	repo := tx.Factories()
+
+	factories, err := repo.ResolveFactories(utils.ParseInts[game.FactoryID](req.IDs), gamelogic.FactoryUpdates())
 	if err != nil {
 		return nil, err
 	}
 
-	return dfcore.NewTableResponseFromList(factories, identifyFactory, encodeFactory), nil
+	return dfcore.NewTableResponseFromList(factories, identifyFactory, encodeFactory), tx.Commit()
 }
 
 func (t *factoriesTable) queryByBaseID(
@@ -60,12 +71,35 @@ func (t *factoriesTable) queryByBaseID(
 	req dfapi.DFTableQueryRequest,
 	ctx dfcore.DFRequestContext,
 ) (*dfcore.TableResponse, common.Error) {
-	factories, err := t.repo.GetBaseFactories(game.BaseID(payload.BaseID))
+	tx, err := t.storage.StartTransaction(context.TODO())
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+
+	repo := tx.Factories()
+
+	factories, err := repo.GetBaseFactories(game.BaseID(payload.BaseID), gamelogic.FactoryUpdates())
 	if err != nil {
 		return nil, err
 	}
 
-	return dfcore.NewTableResponseFromList(factories, identifyFactory, encodeFactory), nil
+	return dfcore.NewTableResponseFromList(factories, identifyFactory, encodeFactory), tx.Commit()
+}
+
+func (t *factoriesTable) onFactoryCreated(ev events.FactoryCreatedPayload) {
+	t.qByBaseID.PublishChangedNotification(api.FactoriesQueryByBaseID{BaseID: int(ev.BaseID)})
+}
+func (t *factoriesTable) onFactoryRemoved(ev events.FactoryRemovedPayload) {
+	t.qByBaseID.PublishChangedNotification(api.FactoriesQueryByBaseID{BaseID: int(ev.BaseID)})
+}
+func (t *factoriesTable) onFactoryUpdated(ev events.FactoryUpdatedPayload) {
+	t.table.PublishEntities(
+		dfcore.NewTableResponseFromSingle(
+			identifyFactory(ev.Factory),
+			encodeFactory(ev.Factory),
+		),
+	)
 }
 
 func identifyFactory(f game.Factory) dfcore.EntityID {
@@ -77,10 +111,11 @@ func encodeFactory(f game.Factory) common.Encodable {
 		BaseID:    int(f.BaseID),
 		Status:    f.Status.String(),
 		CreatedAt: f.BuiltAt,
-		UpdatedTo: f.Updated,
-		Inventory: f.Inventory.ToMap(),
+
+		UpdatedTo: f.UpdatedTo,
 		Employees: utils.MapKeys(f.Employees, func(wf game.WorkforceType) string { return wf.String() }),
 		Equipment: utils.MapSlice(utils.UnNilSlice(f.Equipment), encodeFactoryEquipment),
+		Inventory: utils.MapValues(f.DynamicInventory.ToMap(), encodePredictable),
 
 		UpgradeTarget: utils.MapSlice(utils.UnNilSlice(f.Upgrade.Equipment), func(eqPlan game.FactoryUpgradeProjectEqipment) api.FactoriesTableRowEquipmentPlan {
 			return api.FactoriesTableRowEquipmentPlan{

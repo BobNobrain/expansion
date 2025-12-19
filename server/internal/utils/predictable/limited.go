@@ -7,8 +7,8 @@ import (
 type LimitedPredictableMode string
 
 const (
-	LimitModeMax LimitedPredictableMode = "max"
-	LimitModeMin LimitedPredictableMode = "min"
+	LimitModeAfter  LimitedPredictableMode = "after"
+	LimitModeBefore LimitedPredictableMode = "before"
 )
 
 type LimitedPredictable interface {
@@ -17,43 +17,42 @@ type LimitedPredictable interface {
 }
 
 type limitedPredictableImpl struct {
-	Inner     Predictable
-	XLim      float64
-	IsMaxMode bool
+	Inner        Predictable
+	TLim         time.Time
+	IsBeforeMode bool
 }
 
 type limitedPredictableSerialized struct {
 	Inner EncodedPredictable     `json:"inner"`
-	XLim  float64                `json:"x"`
+	TLim  time.Time              `json:"t"`
 	Mode  LimitedPredictableMode `json:"mode"`
 }
 
 func (s limitedPredictableSerialized) toImpl() *limitedPredictableImpl {
 	return &limitedPredictableImpl{
-		Inner:     s.Inner.ToPredictable(),
-		XLim:      s.XLim,
-		IsMaxMode: s.Mode == LimitModeMax,
+		Inner:        s.Inner.ToPredictable(),
+		TLim:         s.TLim,
+		IsBeforeMode: s.Mode == LimitModeBefore,
 	}
 }
 
 func (l *limitedPredictableImpl) Sample(at time.Time) float64 {
-	unlimited := l.Inner.Sample(at)
-
-	if l.IsMaxMode {
-		return max(l.XLim, unlimited)
+	// BeforeMode means the value is at the limit *before* `TLim`
+	if l.IsBeforeMode == at.Before(l.TLim) {
+		return l.Inner.Sample(l.TLim)
 	}
-	return min(l.XLim, unlimited)
+	return l.Inner.Sample(at)
 }
 func (l *limitedPredictableImpl) Wrap() EncodedPredictable {
-	mode := LimitModeMin
-	if l.IsMaxMode {
-		mode = LimitModeMax
+	mode := LimitModeAfter
+	if l.IsBeforeMode {
+		mode = LimitModeBefore
 	}
 
 	return EncodedPredictable{
 		Limited: &limitedPredictableSerialized{
 			Inner: l.Inner.Wrap(),
-			XLim:  l.XLim,
+			TLim:  l.TLim,
 			Mode:  mode,
 		},
 	}
@@ -63,20 +62,20 @@ func (l *limitedPredictableImpl) Add(x float64) {
 }
 func (l *limitedPredictableImpl) Clone() Predictable {
 	return &limitedPredictableImpl{
-		Inner:     l.Inner.Clone(),
-		XLim:      l.XLim,
-		IsMaxMode: l.IsMaxMode,
+		Inner:        l.Inner.Clone(),
+		TLim:         l.TLim,
+		IsBeforeMode: l.IsBeforeMode,
 	}
 }
 
-func (l *limitedPredictableImpl) SetLimit(time.Time, LimitedPredictableMode) LimitedPredictable {
+func (l *limitedPredictableImpl) SetLimit(at time.Time, mode LimitedPredictableMode) LimitedPredictable {
 	panic("unimplemented")
 }
 
-func NewLimited(inner Predictable, limit float64, mode LimitedPredictableMode) LimitedPredictable {
+func NewLimited(inner Predictable, limit time.Time, mode LimitedPredictableMode) LimitedPredictable {
 	return &limitedPredictableImpl{
-		Inner:     inner,
-		XLim:      limit,
-		IsMaxMode: mode == LimitModeMax,
+		Inner:        inner,
+		TLim:         limit,
+		IsBeforeMode: mode == LimitModeBefore,
 	}
 }
