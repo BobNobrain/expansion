@@ -27,10 +27,12 @@ import { getViewFactoryRoute } from '@/routes/factories';
 import { dfCreateFactory, dfFactoriesByBaseId } from '@/store/datafront';
 import { useBase } from '../hooks';
 import { formatNumericId } from '@/lib/id';
+import { OperationDisplay } from '@/components/OperationDisplay/OperationDisplay';
 
 const DEFS: DefinitionListItem<BaseContent>[] = [
     {
         title: 'Location',
+        skeletonLength: 25,
         render: (value) => {
             return (
                 <Link
@@ -41,17 +43,19 @@ const DEFS: DefinitionListItem<BaseContent>[] = [
     },
     {
         title: 'Created',
+        skeletonLength: 23,
         render: (value) => <GameTimeLabel value={value.created} />,
     },
     {
         title: 'Registration',
+        skeletonLength: 10,
         render: (value) => formatNumericId(value.id, { prefix: 'B-', length: 6 }),
     },
 ];
 
 export const TileBaseOverview: Component = () => {
     const navigate = useNavigate();
-    const base = useBase();
+    const { base, isLoading, error } = useBase();
 
     const factories = dfFactoriesByBaseId.use(() => {
         const baseId = base()?.id;
@@ -121,7 +125,16 @@ export const TileBaseOverview: Component = () => {
             <PageHeader>
                 <PageHeaderTitle>Base Overview</PageHeaderTitle>
             </PageHeader>
-            <DefinitionList items={DEFS} value={base()} />
+            <Show
+                when={isLoading() || base()}
+                fallback={
+                    <OperationDisplay title="Failed to load base" error={error()}>
+                        The base you're looking for does not exist.
+                    </OperationDisplay>
+                }
+            >
+                <DefinitionList items={DEFS} value={base()} isLoading={isLoading()} />
+            </Show>
 
             <PageHeader>
                 <PageHeaderTitle>Factories</PageHeaderTitle>

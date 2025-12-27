@@ -12,13 +12,13 @@ func (bid BaseID) String() string {
 }
 
 type BaseOverview struct {
-	ID            BaseID
-	Created       time.Time
-	Operator      CompanyID
-	WorldID       CelestialID
-	TileID        TileID
-	DevelopedArea float64
-	NFactories    int
+	ID         BaseID
+	Created    time.Time
+	Operator   CompanyID
+	WorldID    CelestialID
+	TileID     TileID
+	CityID     CityID
+	NFactories int
 }
 
 type Base struct {
@@ -38,48 +38,6 @@ func (f FactoryID) String() string {
 	return strconv.Itoa(int(f))
 }
 
-type FactoryProductionStatus byte
-
-const (
-	// The factory has been manually disabled and should not be automatically turned back on
-	FactoryProductionStatusDisabled FactoryProductionStatus = iota
-	// The factory is running, producing outputs and consuming inputs
-	FactoryProductionStatusActive
-	// The factory is being prevented from functioning properly (due to lack of inputs, storage, etc). Should the issues
-	// be resolved, it will become active again.
-	FactoryProductionStatusHalted
-)
-
-// Returns true for any factory status that permits factory operation (i.e. its production running)
-func (s FactoryProductionStatus) IsActive() bool {
-	return s == FactoryProductionStatusActive
-}
-
-func (s FactoryProductionStatus) String() string {
-	switch s {
-	case FactoryProductionStatusDisabled:
-		return "disabled"
-	case FactoryProductionStatusActive:
-		return "active"
-	case FactoryProductionStatusHalted:
-		return "halted"
-	default:
-		return ""
-	}
-}
-func ParseFactoryStatus(s string) FactoryProductionStatus {
-	switch s {
-	case "disabled":
-		return FactoryProductionStatusDisabled
-	case "active":
-		return FactoryProductionStatusActive
-	case "halted":
-		return FactoryProductionStatusHalted
-	default:
-		return FactoryProductionStatusDisabled
-	}
-}
-
 type FactoryStaticOverview struct {
 	FactoryID FactoryID
 	BaseID    BaseID
@@ -88,24 +46,15 @@ type FactoryStaticOverview struct {
 	BuiltAt   time.Time
 }
 
-type FactoryProductionSnapshot struct {
-	Date            time.Time
-	Status          FactoryProductionStatus
-	StaticInventory Inventory
-	ProductionLines [][]FactoryProductionItem
-}
-
 type Factory struct {
 	FactoryID FactoryID
 	BaseID    BaseID
-	Status    FactoryProductionStatus
-	Equipment []FactoryEquipment
-	Employees map[WorkforceType]int
-	UpdatedTo time.Time
 	BuiltAt   time.Time
 
-	StaticInventory  Inventory
-	DynamicInventory DynamicInventory
+	Equipment []FactoryEquipment
+	Employees map[WorkforceType]int
+
+	Production FactoryProductionPeriod
 
 	Upgrade FactoryUpgradeProject
 }
@@ -114,12 +63,13 @@ func MakeEmptyFactory() Factory {
 	now := time.Now()
 
 	return Factory{
-		Status:          FactoryProductionStatusActive,
-		Equipment:       nil,
-		StaticInventory: MakeEmptyInventory(),
-		Employees:       make(map[WorkforceType]int),
-		UpdatedTo:       now,
-		BuiltAt:         now,
+		BuiltAt: now,
+
+		Equipment: make([]FactoryEquipment, 0),
+		Employees: make(map[WorkforceType]int),
+
+		Production: MakeEmptyFactoryProductionPeriod(now),
+
 		Upgrade: FactoryUpgradeProject{
 			Equipment:   nil,
 			Progress:    nil,

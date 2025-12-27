@@ -64,7 +64,16 @@ func (b *basesRepoImpl) ResolveBases(ids []game.BaseID) ([]game.Base, common.Err
 	return utils.MapSliceFailable(rows, decodeBase)
 }
 
-func (b *basesRepoImpl) GetCompanyBases(cid game.CompanyID) ([]game.Base, common.Error) {
+func (b *basesRepoImpl) ResolveOverviews(ids []game.BaseID) ([]game.BaseOverview, common.Error) {
+	rows, dberr := b.q.ResolveBaseOverviews(b.ctx, utils.ConvertInts[game.BaseID, int32](ids))
+	if dberr != nil {
+		return nil, makeDBError(dberr, "BasesRepo::ResolveOverviews")
+	}
+
+	return utils.MapSlice(rows, decodeBaseOverview), nil
+}
+
+func (b *basesRepoImpl) GetCompanyBases(cid game.CompanyID) ([]game.BaseOverview, common.Error) {
 	uuid, err := parseUUID(cid)
 	if err != nil {
 		return nil, err
@@ -75,10 +84,10 @@ func (b *basesRepoImpl) GetCompanyBases(cid game.CompanyID) ([]game.Base, common
 		return nil, makeDBError(dberr, "BasesRepo::GetCompanyBases")
 	}
 
-	return utils.MapSliceFailable(rows, decodeBase)
+	return utils.MapSlice(rows, decodeBaseOverview), nil
 }
 
-func (b *basesRepoImpl) GetCompanyBasesOnPlanet(cid game.CompanyID, worldID game.CelestialID) ([]game.Base, common.Error) {
+func (b *basesRepoImpl) GetCompanyBasesOnPlanet(cid game.CompanyID, worldID game.CelestialID) ([]game.BaseOverview, common.Error) {
 	uuid, err := parseUUID(cid)
 	if err != nil {
 		return nil, err
@@ -92,7 +101,7 @@ func (b *basesRepoImpl) GetCompanyBasesOnPlanet(cid game.CompanyID, worldID game
 		return nil, makeDBError(dberr, "BasesRepo::GetCompanyBasesOnPlanet")
 	}
 
-	return utils.MapSliceFailable(rows, decodeBase)
+	return utils.MapSlice(rows, decodeBaseOverview), nil
 }
 
 func (b *basesRepoImpl) CreateBase(payload components.CreateBasePayload) common.Error {
@@ -174,4 +183,16 @@ func decodeBase(row dbq.Base) (game.Base, common.Error) {
 	}
 
 	return base, nil
+}
+
+func decodeBaseOverview(row dbq.BaseOverview) game.BaseOverview {
+	return game.BaseOverview{
+		ID:         game.BaseID(row.ID),
+		Created:    row.EstablishedAt.Time,
+		Operator:   game.CompanyID(row.CompanyID.String()),
+		WorldID:    game.CelestialID(row.WorldID),
+		TileID:     game.TileID(row.TileID),
+		CityID:     game.CityID(row.CityID),
+		NFactories: int(row.NFactories),
+	}
 }

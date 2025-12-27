@@ -34,14 +34,19 @@ WHERE city_id = $1;
 
 -- name: GetBasesByCompanyID :many
 SELECT *
-FROM bases
+FROM base_overviews
 WHERE company_id = $1;
 
 -- name: GetBasesByCompanyIDAndWorldID :many
 SELECT *
-FROM bases
+FROM base_overviews
 WHERE company_id = $1
     and world_id = $2;
+
+-- name: ResolveBaseOverviews :many
+SELECT *
+FROM base_overviews
+WHERE id = ANY($1::INTEGER [ ]);
 
 -- name: UpdateBase :exec
 UPDATE bases

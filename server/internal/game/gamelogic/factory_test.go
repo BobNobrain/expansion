@@ -1,6 +1,7 @@
 package gamelogic_test
 
 import (
+	"fmt"
 	"srv/internal/game"
 	"srv/internal/game/gamelogic"
 	"srv/internal/globals/assets"
@@ -12,18 +13,30 @@ import (
 
 func TestFactoryLogicUpdateBasic(t *testing.T) {
 	logger.Init()
-	factory, updater, t0, mockReg := setup2()
+	factory, updater, t0, _ := setup2()
 
 	factory.Equipment = append(factory.Equipment, game.FactoryEquipment{
 		EquipmentID: game.EquipmentID("E1"),
-		Count:       1,
+		Count:       2, // each recipe gets 1 building assigned to it, so no time scaling is happening
 		Production: []game.FactoryProductionItem{
 			{
-				Recipe:           mockReg.GetRecipesForEquipment(game.EquipmentID("E1"))[0].Instantiate(),
+				Recipe: game.RecipeTemplate{
+					TemplateID:    "RT1",
+					Equipment:     "E1",
+					StaticInputs:  game.MakeInventoryDeltaFrom(map[string]float64{"a": 1, "b": 1}),
+					StaticOutputs: game.MakeInventoryDeltaFrom(map[string]float64{"c": 1}),
+					BaseDuration:  time.Minute,
+				}.Instantiate(),
 				ManualEfficiency: 1.0,
 			},
 			{
-				Recipe:           mockReg.GetRecipesForEquipment(game.EquipmentID("E1"))[1].Instantiate(),
+				Recipe: game.RecipeTemplate{
+					TemplateID:    "RT2",
+					Equipment:     "E1",
+					StaticInputs:  game.MakeInventoryDeltaFrom(map[string]float64{"a": 1, "b": 1, "c": 1}),
+					StaticOutputs: game.MakeInventoryDeltaFrom(map[string]float64{"d": 1}),
+					BaseDuration:  time.Minute,
+				}.Instantiate(),
 				ManualEfficiency: 1.0,
 			},
 		},
@@ -33,31 +46,40 @@ func TestFactoryLogicUpdateBasic(t *testing.T) {
 	factory.Employees[game.WorkforceTypeIntern] = 2
 	factory.Employees[game.WorkforceTypeWorker] = 1
 
-	factory.StaticInventory[game.CommodityID("a")] = 2
-	factory.StaticInventory[game.CommodityID("b")] = 2
+	initialInventory := game.MakeEmptyInventory()
+	initialInventory[game.CommodityID("a")] = 2
+	initialInventory[game.CommodityID("b")] = 2
 
-	updater.UpdateTo(factory, t0.Add(5*time.Minute))
+	factory.Production = game.MakeFactoryProductionPeriodFrom(t0, factory.Equipment, initialInventory)
+	fmt.Printf("%+v\n", factory.Production)
 
-	assertInventoryAmount(t, factory.StaticInventory, "a", 0.0)
-	assertInventoryAmount(t, factory.StaticInventory, "b", 0.0)
-	assertInventoryAmount(t, factory.StaticInventory, "c", 0.0)
-	assertInventoryAmount(t, factory.StaticInventory, "d", 1.0)
+	t1 := t0.Add(5 * time.Minute)
+	updater.UpdateTo(factory, t1)
 
-	assert(t, factory.Status == game.FactoryProductionStatusHalted, "the factory should be halted")
+	resultingInventory := factory.Production.CalculateInventoryAt(t1)
 
-	updatedMinutes := factory.UpdatedTo.Sub(t0).Minutes()
+	fmt.Printf("%+v\n", factory.Production)
+
+	assertInventoryAmount(t, resultingInventory, "a", 0.0)
+	assertInventoryAmount(t, resultingInventory, "b", 0.0)
+	assertInventoryAmount(t, resultingInventory, "c", 0.0)
+	assertInventoryAmount(t, resultingInventory, "d", 1.0)
+
+	assert(t, factory.Production.Status() == game.FactoryProductionStatusHalted, "the factory should be halted")
+
+	updatedMinutes := factory.Production.Start().Sub(t0).Minutes()
 	assertFloatEquals(t, updatedMinutes, 1.0, "updated time (m)")
+
+	assert(t, factory.Production.IsInfinite(), "current production period should be infinite")
 }
 
 func setup2() (*game.Factory, *gamelogic.FactoryUpdatesLogic, time.Time, *globaldata.CraftingRegistry) {
 	t0 := time.Date(2025, time.January, 1, 12, 0, 0, 0, time.UTC)
 
 	factory := &game.Factory{
-		Status:          game.FactoryProductionStatusActive,
-		Equipment:       []game.FactoryEquipment{},
-		StaticInventory: make(map[game.CommodityID]float64),
-		Employees:       make(map[game.WorkforceType]int),
-		UpdatedTo:       t0,
+		Equipment:  []game.FactoryEquipment{},
+		Employees:  make(map[game.WorkforceType]int),
+		Production: game.MakeEmptyFactoryProductionPeriod(t0),
 	}
 
 	mockReg := setUpMockRegistry2()

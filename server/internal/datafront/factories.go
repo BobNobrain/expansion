@@ -109,13 +109,13 @@ func encodeFactory(f game.Factory) common.Encodable {
 	return common.AsEncodable(api.FactoriesTableRow{
 		FactoryID: int(f.FactoryID),
 		BaseID:    int(f.BaseID),
-		Status:    f.Status.String(),
+		Status:    f.Production.Status().String(),
 		CreatedAt: f.BuiltAt,
 
-		UpdatedTo: f.UpdatedTo,
+		UpdatedTo: f.Production.Start(),
 		Employees: utils.MapKeys(f.Employees, func(wf game.WorkforceType) string { return wf.String() }),
 		Equipment: utils.MapSlice(utils.UnNilSlice(f.Equipment), encodeFactoryEquipment),
-		Inventory: utils.MapValues(f.DynamicInventory.ToMap(), encodePredictable),
+		Inventory: utils.MapValues(f.Production.GetDynamicInventory().ToMap(), encodePredictable),
 
 		UpgradeTarget: utils.MapSlice(utils.UnNilSlice(f.Upgrade.Equipment), func(eqPlan game.FactoryUpgradeProjectEqipment) api.FactoriesTableRowEquipmentPlan {
 			return api.FactoriesTableRowEquipmentPlan{

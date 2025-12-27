@@ -1,12 +1,12 @@
 import { type Component } from 'solid-js';
 import { PageHeader, PageHeaderIcon, PageHeaderTitle } from '@/atoms';
 import { IconFlag } from '@/icons';
-import { dfBasesByCompanyId, useOwnCompanies } from '@/store/datafront';
+import { dfBaseOverviewsByCompanyId, useOwnCompanies } from '@/store/datafront';
 import { BasesTable } from '../../../views/BasesTable/BasesTable';
 
 export const BasesPage: Component = () => {
     const userCompanies = useOwnCompanies();
-    const bases = dfBasesByCompanyId.use(() => {
+    const bases = dfBaseOverviewsByCompanyId.use(() => {
         const companies = userCompanies.result();
         const ids = Object.keys(companies);
         if (!ids.length) {

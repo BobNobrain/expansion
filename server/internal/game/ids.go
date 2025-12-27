@@ -121,7 +121,7 @@ func CreateAsteroidID(starID CelestialID, rnd *rand.Rand) CelestialID {
 }
 
 func (cid CelestialID) IsAsteroidID() bool {
-	if len(cid) != 17 || len(cid) != 18 {
+	if len(cid) != 17 && len(cid) != 18 {
 		return false
 	}
 

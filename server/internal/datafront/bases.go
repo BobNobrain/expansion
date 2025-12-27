@@ -4,7 +4,6 @@ import (
 	"srv/internal/components"
 	"srv/internal/datafront/dfcore"
 	"srv/internal/game"
-	"srv/internal/game/gamelogic"
 	"srv/internal/globals/events"
 	"srv/internal/globals/logger"
 	"srv/internal/utils"
@@ -19,8 +18,6 @@ type basesTable struct {
 	sub        *events.Subscription
 
 	table       *dfcore.QueryableTable
-	qByCompany  *dfcore.TrackableTableQuery[api.BasesQueryByCompanyID]
-	qByBranch   *dfcore.TrackableTableQuery[api.BasesQueryByBranch]
 	qByLocation *dfcore.TrackableTableQuery[api.BasesQueryByLocation]
 }
 
@@ -35,18 +32,14 @@ func (gdf *GameDataFront) InitBases(repo components.BasesRepoReadonly, worlds co
 		sub:        events.NewSubscription(),
 	}
 	bases.table = dfcore.NewQueryableTable(bases.queryByIDs)
-	bases.qByCompany = dfcore.NewTrackableTableQuery(bases.queryByCompanyID, bases.table)
-	bases.qByBranch = dfcore.NewTrackableTableQuery(bases.queryByBranch, bases.table)
 	bases.qByLocation = dfcore.NewTrackableTableQuery(bases.queryByLocation, bases.table)
 
 	events.SubscribeTyped(bases.sub, events.BaseCreated, bases.onBaseCreated)
 	events.SubscribeTyped(bases.sub, events.BaseUpdated, bases.onBaseUpdated)
 
 	gdf.bases = bases
-	gdf.df.AttachTable("bases", bases.table)
-	gdf.df.AttachTableQuery("bases/"+api.BasesQueryTypeByCompanyID, bases.qByCompany)
-	gdf.df.AttachTableQuery("bases/"+api.BasesQueryTypeByBranch, bases.qByBranch)
-	gdf.df.AttachTableQuery("bases/"+api.BasesQueryTypeByLocation, bases.qByLocation)
+	gdf.df.AttachTable(api.BasesTableName, bases.table)
+	gdf.df.AttachTableQuery(api.BasesQueryTypeByLocation, bases.qByLocation)
 }
 
 func (t *basesTable) dispose() {
@@ -77,36 +70,6 @@ func (t *basesTable) queryByIDs(
 		worldsById[w.ID] = w
 	}
 
-	return dfcore.NewTableResponseFromList(bases, identifyBase, func(b game.Base) common.Encodable {
-		dr := gamelogic.CraftingLogic().GetRecipesAt(worldsById[b.WorldID], b.TileID).CreateAllDynamicRecipes()
-
-		return encodeBaseWithRecipes(b, dr)
-	}), nil
-}
-
-func (t *basesTable) queryByCompanyID(
-	payload api.BasesQueryByCompanyID,
-	req dfapi.DFTableQueryRequest,
-	ctx dfcore.DFRequestContext,
-) (*dfcore.TableResponse, common.Error) {
-	bases, err := t.basesRepo.GetCompanyBases(game.CompanyID(payload.CompanyID))
-	if err != nil {
-		return nil, err
-	}
-
-	return dfcore.NewTableResponseFromList(bases, identifyBase, encodeBase), nil
-}
-
-func (t *basesTable) queryByBranch(
-	payload api.BasesQueryByBranch,
-	req dfapi.DFTableQueryRequest,
-	ctx dfcore.DFRequestContext,
-) (*dfcore.TableResponse, common.Error) {
-	bases, err := t.basesRepo.GetCompanyBasesOnPlanet(game.CompanyID(payload.CompanyID), game.CelestialID(payload.WorldID))
-	if err != nil {
-		return nil, err
-	}
-
 	return dfcore.NewTableResponseFromList(bases, identifyBase, encodeBase), nil
 }
 
@@ -128,8 +91,6 @@ func (t *basesTable) queryByLocation(
 }
 
 func (t *basesTable) onBaseCreated(ev events.BaseCreatedPayload) {
-	t.qByCompany.PublishChangedNotification(api.BasesQueryByCompanyID{CompanyID: string(ev.Operator)})
-	t.qByBranch.PublishChangedNotification(api.BasesQueryByBranch{WorldID: string(ev.WorldID)})
 	t.qByLocation.PublishChangedNotification(api.BasesQueryByLocation{WorldID: string(ev.WorldID), TileID: int(ev.TileID)})
 }
 func (t *basesTable) onBaseUpdated(ev events.BaseUpdatedPayload) {
@@ -178,19 +139,4 @@ func baseToApi(b game.Base) api.BasesTableRow {
 
 func encodeBase(b game.Base) common.Encodable {
 	return common.AsEncodable(baseToApi(b))
-}
-
-func encodeBaseWithRecipes(b game.Base, drs map[game.RecipeID]game.Recipe) common.Encodable {
-	data := baseToApi(b)
-
-	for _, r := range drs {
-		data.DynamicRecipes = append(data.DynamicRecipes, api.BasesTableRowRecipe{
-			RecipeID:    string(r.RecipeID),
-			Inputs:      utils.ConvertStringKeys[game.CommodityID, string](r.Inputs),
-			Outputs:     utils.ConvertStringKeys[game.CommodityID, string](r.Outputs),
-			EquipmentID: string(r.EquipmentID),
-		})
-	}
-
-	return common.AsEncodable(data)
 }

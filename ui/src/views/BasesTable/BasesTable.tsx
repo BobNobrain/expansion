@@ -2,7 +2,7 @@ import { createMemo, type JSX, Show, type Component } from 'solid-js';
 import { useNavigate } from '@solidjs/router';
 import { DataTable, type DataTableColumn, InlineLoader, SkeletonText } from '@/atoms';
 import { CelestialBodyTitle } from '@/components/CelestialBodyTitle/CelestialBodyTitle';
-import { type BaseContent } from '@/domain/Base';
+import { type BaseOverview } from '@/domain/Base';
 import { type City } from '@/domain/City';
 import { IconCity, IconFactory, IconFlag, IconPlanet } from '@/icons';
 import { type UseTableResult } from '@/lib/datafront/types';
@@ -12,7 +12,7 @@ import { getBasesRoute } from '@/routes/bases';
 import { dfCities } from '@/store/datafront';
 
 export type BasesTableProps = {
-    bases: UseTableResult<BaseContent>;
+    bases: UseTableResult<BaseOverview>;
     empty?: JSX.Element;
 };
 
@@ -67,7 +67,7 @@ export const BasesTable: Component<BasesTableProps> = (props) => {
                 worldName: undefined,
                 tileId: base.tileId,
                 city: loadedCities[base.cityId] ?? null,
-                nFactories: 0,
+                nFactories: base.nFactories,
                 url: getBasesRoute({ worldId: base.worldId, tileId: base.tileId }),
             };
         }),

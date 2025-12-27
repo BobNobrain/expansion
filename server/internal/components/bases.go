@@ -6,8 +6,9 @@ import (
 )
 
 type BasesRepoReadonly interface {
-	GetCompanyBases(game.CompanyID) ([]game.Base, common.Error)
-	GetCompanyBasesOnPlanet(game.CompanyID, game.CelestialID) ([]game.Base, common.Error)
+	GetCompanyBases(game.CompanyID) ([]game.BaseOverview, common.Error)
+	GetCompanyBasesOnPlanet(game.CompanyID, game.CelestialID) ([]game.BaseOverview, common.Error)
+	ResolveOverviews([]game.BaseID) ([]game.BaseOverview, common.Error)
 
 	GetBase(game.BaseID) (*game.Base, common.Error)
 	GetBaseAt(game.CelestialID, game.TileID) (*game.Base, common.Error)

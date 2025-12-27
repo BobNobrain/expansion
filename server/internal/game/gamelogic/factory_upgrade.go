@@ -157,7 +157,10 @@ func (l *FactoryUpgradeLogic) ApplyUpgrade(
 		})
 	}
 
+	nextProductionPeriod := factory.Production.AlterConfiguration(now, newEquipment)
+
 	factory.Equipment = newEquipment
+	factory.Production = nextProductionPeriod
 
 	factory.Upgrade.Equipment = nil
 	factory.Upgrade.Progress = nil

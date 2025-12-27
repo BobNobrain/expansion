@@ -46,6 +46,7 @@ func (m *Monolith) Start() error {
 	gdf.InitWorlds(store.Worlds())
 	gdf.InitCities(store.Cities())
 	gdf.InitBases(store.Bases(), store.Worlds())
+	gdf.InitBaseOverviews(store.Bases())
 	gdf.InitFactories(store)
 	gdf.InitBaseEnvs(store.Factories(), store.Bases(), store.Worlds())
 

@@ -5,6 +5,7 @@ import (
 	"srv/internal/game"
 	"srv/internal/globals/globaldata"
 	"srv/internal/utils/common"
+	"time"
 )
 
 type FactoryRebalanceLogic struct {
@@ -23,65 +24,10 @@ func FactoryRebalance() *FactoryRebalanceLogic {
 	return globalFactoryRebalanceLogic
 }
 
-// func (l *FactoryRebalanceLogic) ValidateEquipment(feq game.FactoryEquipment, fieldNameForError string) common.Error {
-// 	if feq.Count <= 0 {
-// 		return common.NewValidationError(
-// 			fieldNameForError+".Count",
-// 			"Equipment count should be a positive integer",
-// 			common.WithDetail("value", feq.Count),
-// 		)
-// 	}
-
-// 	eqData := l.reg.GetEquipment(feq.EquipmentID)
-// 	if eqData.EquipmentID.IsEmpty() {
-// 		return common.NewValidationError(
-// 			fieldNameForError+".EquipmentID",
-// 			"Specified equipment does not exist",
-// 			common.WithDetail("value", feq.EquipmentID),
-// 			common.WithRetriable(),
-// 		)
-// 	}
-
-// 	for rid, productionItem := range feq.Production {
-// 		recipeTemplateId := productionItem.Recipe.TemplateID
-// 		recipeTemplateData := l.reg.GetRecipe(recipeTemplateId)
-
-// 		if !recipeTemplateData.IsValid() {
-// 			return common.NewValidationError(
-// 				fmt.Sprintf("%s.Production[%d].Template", fieldNameForError, rid),
-// 				"Specified recipe does not exist",
-// 				common.WithDetail("value", recipeTemplateId),
-// 				common.WithRetriable(),
-// 			)
-// 		}
-
-// 		if recipeTemplateData.Equipment != feq.EquipmentID {
-// 			return common.NewValidationError(
-// 				fmt.Sprintf("%s.Production[%d].Template", fieldNameForError, rid),
-// 				"Mismatching equipment for specified recipe",
-// 				common.WithDetail("value", feq.EquipmentID),
-// 				common.WithDetail("expected", recipeTemplateData.Equipment),
-// 				common.WithDetail("recipeID", recipeTemplateId),
-// 				common.WithRetriable(),
-// 			)
-// 		}
-
-// 		if productionItem.ManualEfficiency <= 0.0 || 1.0 < productionItem.ManualEfficiency {
-// 			return common.NewValidationError(
-// 				fmt.Sprintf("%s.Production[%d].ManualEfficiency", fieldNameForError, rid),
-// 				"Manual efficiency should be > 0.0 and <= 1.0",
-// 				common.WithDetail("value", productionItem.ManualEfficiency),
-// 				common.WithRetriable(),
-// 			)
-// 		}
-// 	}
-
-// 	return nil
-// }
-
 func (l *FactoryRebalanceLogic) ApplyRebalancePlan(
 	plan game.FactoryRebalancePlan,
 	to game.Factory,
+	now time.Time,
 	craftbook *RecipeLibrary,
 	fieldNameForError string,
 ) (game.Factory, common.Error) {
@@ -101,6 +47,9 @@ func (l *FactoryRebalanceLogic) ApplyRebalancePlan(
 
 		to.Equipment[i].Production = newProduction
 	}
+
+	newProductionPeriod := to.Production.AlterConfiguration(now, to.Equipment)
+	to.Production = newProductionPeriod
 
 	return to, nil
 }

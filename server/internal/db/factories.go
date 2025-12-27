@@ -19,6 +19,7 @@ type factoriesRepoImpl struct {
 }
 
 type factoryDataJSON struct {
+	// TODO: remove (it is calculated from production recipes and current inventory anyways)
 	Status    byte                       `json:"status"`
 	Employees map[string]int             `json:"wf"`
 	Inventory map[string]float64         `json:"inv"`
@@ -70,10 +71,11 @@ func (b *factoriesRepoImpl) actualizeAndSave(
 	for i, f := range fs {
 		updatedFactory := f
 		hasUpdated := updater.UpdateTo(&updatedFactory, now)
+
 		if hasUpdated {
 			factoriesToUpdate = append(factoriesToUpdate, f)
 		}
-		updatedFactory.DynamicInventory = updater.GetDynamicInventory(f)
+
 		fs[i] = updatedFactory
 	}
 
@@ -159,7 +161,7 @@ func (b *factoriesRepoImpl) UpdateBaseFactory(factory game.Factory) common.Error
 	dberr := b.q.UpdateFactory(b.ctx, dbq.UpdateFactoryParams{
 		ID:        int32(factory.FactoryID),
 		Data:      factoryData,
-		UpdatedTo: pgtype.Timestamptz{Time: factory.UpdatedTo, Valid: true},
+		UpdatedTo: pgtype.Timestamptz{Time: factory.Production.Start(), Valid: true},
 	})
 	if dberr != nil {
 		return makeDBError(dberr, "FactoriesRepo::UpdateBaseFactory")
@@ -173,17 +175,20 @@ func decodeFactory(row dbq.Factory) (game.Factory, common.Error) {
 		return game.Factory{}, nil
 	}
 
+	equipment := utils.MapSlice(rowData.Equipment, decodeFactoryEquipment)
+
 	factory := game.Factory{
 		FactoryID: game.FactoryID(row.ID),
 		BaseID:    game.BaseID(row.BaseID),
 		BuiltAt:   row.CreatedAt.Time,
 
-		UpdatedTo: row.UpdatedTo.Time,
-		Status:    game.FactoryProductionStatus(rowData.Status),
+		Production: game.MakeFactoryProductionPeriodFrom(
+			row.UpdatedTo.Time,
+			equipment,
+			game.MakeInventoryFrom(rowData.Inventory),
+		),
 		Employees: make(map[game.WorkforceType]int),
-		Equipment: utils.MapSlice(rowData.Equipment, decodeFactoryEquipment),
-
-		StaticInventory: game.MakeInventoryFrom(rowData.Inventory),
+		Equipment: equipment,
 
 		Upgrade: game.FactoryUpgradeProject{
 			Equipment: utils.MapSlice(rowData.UpgradeTarget, func(data factoryDataEquipmentJSON) game.FactoryUpgradeProjectEqipment {
@@ -239,9 +244,9 @@ func decodeFactoryEquipment(eqData factoryDataEquipmentJSON) game.FactoryEquipme
 
 func encodeFactoryData(factory game.Factory) factoryDataJSON {
 	data := factoryDataJSON{
-		Status:    byte(factory.Status),
+		Status:    byte(factory.Production.Status()),
 		Employees: utils.MapKeys(factory.Employees, func(wf game.WorkforceType) string { return wf.String() }),
-		Inventory: factory.StaticInventory.ToMap(),
+		Inventory: factory.Production.GetStartingInventory().ToMap(),
 		Equipment: utils.MapSlice(factory.Equipment, encodeFactoryEquipment),
 
 		UpgradeTarget: utils.MapSlice(factory.Upgrade.Equipment, func(eq game.FactoryUpgradeProjectEqipment) factoryDataEquipmentJSON {

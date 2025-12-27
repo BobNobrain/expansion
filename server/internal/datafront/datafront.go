@@ -22,6 +22,7 @@ type GameDataFront struct {
 	factories *factoriesTable
 	baseEnvs  *baseEnvsTable
 
+	baseOverviews  *baseOverviewsTable
 	sysOverviews   *sysOverviewsTable
 	worldOverviews *worldOverviewsTable
 }

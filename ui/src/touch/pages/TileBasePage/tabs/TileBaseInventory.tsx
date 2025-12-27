@@ -8,7 +8,7 @@ import { useBase } from '../hooks';
 type DisplayMode = 'grid' | 'table';
 
 export const TileBaseInventory: Component = () => {
-    const base = useBase();
+    const { base } = useBase();
 
     const inventoryEntries = createMemo(() => {
         const inventory = base()?.inventory;

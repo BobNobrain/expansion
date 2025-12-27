@@ -10,11 +10,12 @@ export type BaseOverview = {
     id: number;
     worldId: string;
     tileId: string;
+    cityId: number;
 
     created: Date;
     operator: string;
 
-    nEquipment: number;
+    nFactories: number;
     /** 0..1 */
     areaUsage: number;
     /** 0..1 */

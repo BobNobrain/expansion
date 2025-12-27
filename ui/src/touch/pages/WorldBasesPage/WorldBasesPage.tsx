@@ -2,7 +2,7 @@ import { type Component } from 'solid-js';
 import { PageHeader, PageHeaderIcon, PageHeaderTitle } from '@/atoms';
 import { IconFlag } from '@/icons';
 import { useBasesRouteInfo } from '@/routes/bases';
-import { dfBasesByBranch, useOwnCompanies } from '@/store/datafront';
+import { dfBaseOverviewsByBranch, useOwnCompanies } from '@/store/datafront';
 import { BasesTable } from '@/views/BasesTable/BasesTable';
 import { useBasesPageContextBinding } from './binding';
 
@@ -12,7 +12,7 @@ export const WorldBasesPage: Component = () => {
     const routeInfo = useBasesRouteInfo();
     const userCompanies = useOwnCompanies();
 
-    const bases = dfBasesByBranch.use(() => {
+    const bases = dfBaseOverviewsByBranch.use(() => {
         const companies = userCompanies.result();
         const ids = Object.keys(companies);
         if (!ids.length) {

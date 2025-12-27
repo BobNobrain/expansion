@@ -1,11 +1,13 @@
 import { createMemo, For, type JSX } from 'solid-js';
 import styles from './DefinitionList.module.css';
+import { SkeletonText } from '../Skeleton';
 
 export type DefinitionListItem<V> = {
     title: string;
     description?: string;
     render: ((value: V) => JSX.Element | null) | keyof V;
     renderLoading?: () => JSX.Element;
+    skeletonLength?: number;
 };
 
 export type DefinitionListProperties<V> = Record<keyof V, DefinitionListItem<V>>;
@@ -42,7 +44,7 @@ export function DefinitionList<V extends Record<string, unknown>>(props: Definit
                 if (definition.renderLoading) {
                     rendered.value = definition.renderLoading();
                 }
-                rendered.value = null; // TODO: skeleton
+                rendered.value = <SkeletonText length={definition.skeletonLength} />;
             }
 
             items.push(rendered);
