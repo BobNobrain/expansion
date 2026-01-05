@@ -13,13 +13,7 @@ import {
 import { World } from '@/domain/World';
 import { useBlink } from '@/lib/solid/blink';
 import { getBasesRoute } from '@/routes/bases';
-import {
-    EditFactoryTab,
-    getEditFactoryRoute,
-    getViewFactoryRoute,
-    useEditFactoryRouteInfo,
-    ViewFactoryTab,
-} from '@/routes/factories';
+import { EditFactoryTab, factoryEditRoute, factoryViewRoute, ViewFactoryTab } from '@/routes/factories';
 import { TouchContentSingle } from '@/touch/components/TouchContentSingle/TouchContentSingle';
 import {
     TouchFooterActionButton,
@@ -33,9 +27,10 @@ import { dfUpgradeFactory } from '@/store/datafront';
 import { createIdempotencyToken } from '@/lib/datafront/utils';
 import { useFormController } from '@/lib/solid/form';
 import { Factory } from '@/domain/Base';
+import { useRouteInfo } from '@/routes/utils';
 
 export const EditFactoryPage: Component = () => {
-    const routeInfo = useEditFactoryRouteInfo();
+    const routeInfo = useRouteInfo(factoryEditRoute);
     const navigate = useNavigate();
     const { base, dynamicRecipes, factory, tileConditions, isFactoryLoading, baseInventory } =
         useFactoryRelatedData(routeInfo);
@@ -101,7 +96,7 @@ export const EditFactoryPage: Component = () => {
                 return (
                     <TouchFooterActions>
                         <TouchFooterActionLink
-                            href={getViewFactoryRoute({ factoryId: route.factoryId, tab: ViewFactoryTab.Upgrade })}
+                            href={factoryViewRoute.render({ factoryId: route.factoryId, tab: ViewFactoryTab.Upgrade })}
                             text="Cancel"
                             color="secondary"
                         />
@@ -137,22 +132,22 @@ export const EditFactoryPage: Component = () => {
             {
                 title: 'Production',
                 icon: IconFactory,
-                href: getEditFactoryRoute({ ...route, tab: EditFactoryTab.Production }),
+                href: factoryEditRoute.render({ ...route, tab: EditFactoryTab.Production }),
             },
             {
                 title: 'Inventory',
                 icon: IconStorage,
-                href: getEditFactoryRoute({ ...route, tab: EditFactoryTab.Inventory }),
+                href: factoryEditRoute.render({ ...route, tab: EditFactoryTab.Inventory }),
             },
             {
                 title: 'Workforce',
                 icon: IconPeople,
-                href: getEditFactoryRoute({ ...route, tab: EditFactoryTab.Workforce }),
+                href: factoryEditRoute.render({ ...route, tab: EditFactoryTab.Workforce }),
             },
             {
                 title: 'Construction',
                 icon: IconConstruction,
-                href: getEditFactoryRoute({ ...route, tab: EditFactoryTab.Construction }),
+                href: factoryEditRoute.render({ ...route, tab: EditFactoryTab.Construction }),
             },
         ];
     });
@@ -182,7 +177,7 @@ export const EditFactoryPage: Component = () => {
                 formControllerRef={formController.ref}
             >
                 <TabContent
-                    active={routeInfo().tab}
+                    active={routeInfo().tab ?? EditFactoryTab.Production}
                     components={{
                         [EditFactoryTab.Production]: FactoryDisplayEquipment,
                         [EditFactoryTab.Inventory]: FactoryDisplayProduction,

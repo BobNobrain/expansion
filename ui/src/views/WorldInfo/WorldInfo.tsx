@@ -158,9 +158,9 @@ export const WorldInfo: Component = () => {
                 rKm: data.params.radiusKm,
             },
             habitants: {
-                cities: data.population.cities,
-                population: data.population.pops,
-                bases: data.population.bases,
+                cities: Object.keys(data.tileCityCenterIDs).length,
+                population: data.population.predict(new Date()), // TODO: proper updates
+                bases: Object.keys(data.tileBaseIDs).length,
             },
             environment: {
                 tK: data.surface.tempK,

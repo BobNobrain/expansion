@@ -2,7 +2,8 @@ import { type Component } from 'solid-js';
 import { PageHeader, PageHeaderIcon, PageHeaderTitle } from '@/atoms';
 import { IconFlag } from '@/icons';
 import { dfBaseOverviewsByCompanyId, useOwnCompanies } from '@/store/datafront';
-import { BasesTable } from '../../../views/BasesTable/BasesTable';
+import { BasesTable } from '@/views/BasesTable/BasesTable';
+import { useBasesPageContextBinding } from '../WorldBasesPage/binding';
 
 export const BasesPage: Component = () => {
     const userCompanies = useOwnCompanies();
@@ -15,6 +16,8 @@ export const BasesPage: Component = () => {
 
         return { companyId: companies[ids[0]].id };
     });
+
+    useBasesPageContextBinding();
 
     return (
         <>

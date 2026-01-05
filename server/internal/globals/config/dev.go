@@ -36,6 +36,9 @@ func getDevConfig() *SrvConfig {
 		HTTP: HTTPConfig{
 			Port:                "8031",
 			StaticFilesLocation: statics,
+			GameUrlPrefix:       "/game",
+			SocketPath:          "/game/sock",
+			ApiPath:             "/api",
 		},
 
 		World: WorldConfig{

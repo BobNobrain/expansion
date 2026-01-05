@@ -6,6 +6,7 @@ import type { CommodityData } from '@/domain/Commodity';
 import { Inventory } from '@/domain/Inventory';
 import type { Recipe } from '@/domain/Recipe';
 import { mapValues } from '../misc';
+import { getResourceFullPathname } from '../net/urls';
 import { type Asset, createJSONAsset } from './asset';
 
 export { Asset };
@@ -15,7 +16,7 @@ type CommoditiesRawAsset = typeof commoditiesRawAsset;
 export type CommoditiesAsset = Record<string, CommodityData>;
 
 export const commoditiesAsset = createJSONAsset({
-    url: '/assets/commodities.generated.json',
+    url: getResourceFullPathname('/assets/commodities.generated.json'),
     map: (raw: CommoditiesRawAsset): CommoditiesAsset => {
         return mapValues(raw.commodities, (data, id) => {
             return {
@@ -39,7 +40,7 @@ export type BuildingsAsset = {
 };
 
 export const buildingsAsset = createJSONAsset({
-    url: '/assets/buildings.generated.json',
+    url: getResourceFullPathname('/assets/buildings.generated.json'),
     map: (raw: BuildingsRawAsset): BuildingsAsset => {
         return {
             buildings: mapValues(raw.buildings, (data, id) => {
@@ -71,7 +72,7 @@ export const buildingsAsset = createJSONAsset({
 export type RecipesAsset = { recipes: Recipe[] };
 
 export const staticRecipesAsset = createJSONAsset({
-    url: '/assets/recipes.generated.json',
+    url: getResourceFullPathname('/assets/recipes.generated.json'),
     map: (raw: typeof recipesRawAsset): RecipesAsset => {
         return {
             recipes: raw.recipes.map((data) => {

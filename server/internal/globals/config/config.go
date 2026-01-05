@@ -23,6 +23,9 @@ type WorldConfig struct {
 type HTTPConfig struct {
 	Port                string
 	StaticFilesLocation string
+	GameUrlPrefix       string
+	SocketPath          string
+	ApiPath             string
 }
 
 type AuthConfig struct {

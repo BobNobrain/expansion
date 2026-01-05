@@ -2,6 +2,11 @@ import { useParams } from '@solidjs/router';
 import { createMemo } from 'solid-js';
 
 const ROUTE_BASE = '/bases';
+
+export const BASES_ALL_ROUTE_TEMPLATE = ROUTE_BASE;
+export const BASES_WORLD_ROUTE_TEMPLATE = `${ROUTE_BASE}/:worldId`;
+export const BASES_TILE_ROUTE_TEMPLATE = `${ROUTE_BASE}/:worldId/:tileId/:tab?`;
+
 export type BasesRouteParams = { worldId?: string; tileId?: string; tab?: string };
 
 export type TileBaseRouteInfo = {

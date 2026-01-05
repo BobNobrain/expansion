@@ -4,5 +4,5 @@ export { FactoryDisplayOverview } from './overview/FactoryDisplayOverview';
 export { FactoryDisplay } from './FactoryDisplay';
 export { FactoryDisplayProduction } from './production/FactoryDisplayProduction';
 export { FactoryDisplayUpgrade } from './upgrade/FactoryDisplayUpgrade';
-export type { FactoryDisplayEditResult } from './state';
+export type { FactoryDisplayEditResult, FactoryDisplayRebalanceResult } from './state';
 export { FactoryDisplayWorkforce } from './workforce/FactoryDisplayWorkforce';

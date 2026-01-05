@@ -18,6 +18,7 @@ export function createJSONAsset<Raw, T>({ url, map }: CreateJSONAssetOptions<Raw
         }
 
         const json = (await response.json()) as Raw;
+        console.log(`[assets] fetched ${url}`);
         return map ? map(json) : (json as unknown as T);
     };
 

@@ -6,6 +6,7 @@
     "scripts": {
         "build:desktop": "node build/esbuild.js desktop",
         "build:editor": "node build/esbuild.js editor",
+        "build:touch": "node build/esbuild.js touch",
         "test": "echo \"Error: no test specified\" && exit 1",
         "serve:desktop": "ESBUILD_SERVE=1 node build/esbuild.js desktop",
         "serve:touch": "ESBUILD_SERVE=1 node build/esbuild.js touch",

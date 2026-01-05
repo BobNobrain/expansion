@@ -25,8 +25,8 @@ async function main() {
         entryNames: '[name]',
         bundle: true,
         metafile: true,
-        publicPath: '/',
-        outdir: path.resolve('out'),
+        publicPath: '/game',
+        outdir: path.resolve('out', entry),
         outbase: path.resolve('src', 'entries'),
         minify: false,
         sourcemap: true,
@@ -40,7 +40,7 @@ async function main() {
                 files: [
                     {
                         entryPoints: [entryPath],
-                        filename: `${entry}.html`,
+                        filename: `index.html`,
                         htmlTemplate: path.resolve(__dirname, 'index.html'),
                         scriptLoading: 'blocking',
                         findRelatedCssFiles: true,
@@ -52,7 +52,16 @@ async function main() {
                 assets: [
                     {
                         from: './assets/**/*',
-                        to: './out/assets',
+                        to: `./out/${entry}/assets`,
+                    },
+                ],
+            }),
+            copy({
+                resolveFrom: 'cwd',
+                assets: [
+                    {
+                        from: './public/**/*',
+                        to: `./out/${entry}`,
                     },
                 ],
             }),
@@ -68,7 +77,7 @@ async function main() {
         console.log(`Serving ${entryPath}`);
         await ctx.serve({
             port: 3000,
-            servedir: path.resolve('out'),
+            servedir: path.resolve('out', entry),
             onRequest: (req) => {
                 console.log(`[${req.status}] ${req.method} ${req.path} (${req.timeInMS} ms)`);
             },

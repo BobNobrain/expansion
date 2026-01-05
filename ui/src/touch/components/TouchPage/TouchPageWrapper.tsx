@@ -2,7 +2,7 @@ import { createMemo, createSignal, Show, type ParentComponent } from 'solid-js';
 import { Dynamic } from 'solid-js/web';
 import { IconBack, IconContext, IconFlag, IconGalaxy, IconShip, IconUser } from '@/icons';
 import { useGoBack } from '@/lib/solid/useGoBack';
-import { UserFeed } from '@/views/UserFeed/UserFeed';
+import { SidePanelContent } from '@/views/SidePanelContent/SidePanelContent';
 import { TouchHeader, TouchHeaderButton, TouchHeaderTitle } from '../TouchHeader/TouchHeader';
 import { TouchLoginModal } from '../TouchLoginModal/TouchLoginModal';
 import { TouchNavBar, type TouchNavBarItem } from '../TouchNavBar/TouchNavBar';
@@ -76,7 +76,7 @@ export const TouchPageWrapper: ParentComponent = (props) => {
         >
             <PageContext.Provider value={ctx}>{props.children}</PageContext.Provider>
             <TouchSidePanel side="right" active={isUserPanelVisible()} onClose={closeUserPanel}>
-                <UserFeed />
+                <SidePanelContent />
             </TouchSidePanel>
             <TouchLoginModal />
             <TouchOfflineIndicator />

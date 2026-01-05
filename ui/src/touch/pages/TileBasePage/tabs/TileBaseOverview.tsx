@@ -23,7 +23,7 @@ import { useAsset } from '@/lib/solid/asset';
 import { emulateLinkClick } from '@/lib/solid/emulateLinkClick';
 import { formatInteger } from '@/lib/strings';
 import { getExploreRoute } from '@/routes/explore';
-import { getViewFactoryRoute } from '@/routes/factories';
+import { factoryViewRoute } from '@/routes/factories';
 import { dfCreateFactory, dfFactoriesByBaseId } from '@/store/datafront';
 import { useBase } from '../hooks';
 import { formatNumericId } from '@/lib/id';
@@ -165,7 +165,7 @@ export const TileBaseOverview: Component = () => {
                 onRowClick={(row, ev) => {
                     emulateLinkClick(
                         {
-                            href: getViewFactoryRoute({ factoryId: row.id }),
+                            href: factoryViewRoute.render({ factoryId: row.id }),
                             navigate,
                         },
                         ev,

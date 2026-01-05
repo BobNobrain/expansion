@@ -2,7 +2,7 @@ import { useParams } from '@solidjs/router';
 import { createMemo } from 'solid-js';
 
 const ROUTE_BASE = '/galaxy';
-export const EXPLORE_ROUTE_DEFINITION = `${ROUTE_BASE}/:id?/:tab?`;
+export const EXPLORE_ROUTE_TEMPLATE = `${ROUTE_BASE}/:id?/:tab?`;
 export type ExploreRouteParams = { id?: string; tab?: string };
 
 export type ExploreObjectType = 'galaxy' | 'sector' | 'system' | 'world';

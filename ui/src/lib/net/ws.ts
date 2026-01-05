@@ -1,6 +1,6 @@
-import type {} from './types.generated';
-import type { DFGenericResponse, DFGenericEvent, DFError, DFGenericRequest } from './datafront.generated';
 import { createSignal } from 'solid-js';
+import type { DFGenericResponse, DFGenericEvent, DFError, DFGenericRequest } from './datafront.generated';
+import { getResourceFullPathname } from './urls';
 
 type PendingRequests = {
     id: number;
@@ -21,6 +21,8 @@ export type RequestType =
     | 'log'
     | '-log'
     | 'action';
+
+const SOCKET_PATH = getResourceFullPathname('/sock');
 
 class WSClient {
     public readonly isOnline: () => boolean;
@@ -56,7 +58,7 @@ class WSClient {
                 this.sock!.addEventListener('error', reject);
             });
         }
-        this.sock = new WebSocket(`ws://${window.location.host}/sock`);
+        this.sock = new WebSocket(`ws://${window.location.host}${SOCKET_PATH}`);
         console.debug('[ws] connecting...');
         this.setIsConnecting(true);
 

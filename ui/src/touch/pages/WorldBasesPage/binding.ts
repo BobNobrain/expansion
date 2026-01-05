@@ -1,6 +1,6 @@
 import { useNavigate } from '@solidjs/router';
-import { getUpperRoute, useBasesRouteInfo } from '../../../routes/bases';
-import { usePageContextBinding } from '../../components/TouchPage';
+import { getUpperRoute, useBasesRouteInfo } from '@/routes/bases';
+import { usePageContextBinding } from '@/touch/components/TouchPage';
 
 export function useBasesPageContextBinding() {
     const routeInfo = useBasesRouteInfo();

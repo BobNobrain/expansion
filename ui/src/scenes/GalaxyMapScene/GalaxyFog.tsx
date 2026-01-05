@@ -4,6 +4,7 @@ import { GraphicsQuality, useDeviceSettings } from '@/store/settings';
 import { SceneObject } from '@/three/SceneObject/SceneObject';
 import { useSceneRenderer } from '@/three/context';
 import { GalaxyFogMaterial, type NoiseLayer } from './GalaxyFogMaterial';
+import { getResourceFullPathname } from '@/lib/net/urls';
 
 export type GalaxyFogProps = {
     innerR: number;
@@ -37,7 +38,7 @@ export const GalaxyFog: Component<GalaxyFogProps> = (props) => {
     }
 
     const txLoader = new TextureLoader();
-    txLoader.load(`/assets/tx/galaxy-${txSize}.png`, setTx);
+    txLoader.load(getResourceFullPathname(`/assets/tx/galaxy-${txSize}.png`), setTx);
 
     const getQuad = createMemo(() => {
         const tx = getTx();

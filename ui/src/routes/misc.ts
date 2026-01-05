@@ -1,11 +1,11 @@
+import { createRouteTemplate, stringParam } from './utils';
+
 const USER_ROUTE_BASE = '/users';
-export const USER_ROUTE_DEFINITION = `${USER_ROUTE_BASE}/:uid`;
-export type UserRouteParams = { uname?: string };
+export const userRoute = createRouteTemplate(`${USER_ROUTE_BASE}/:uid`, {
+    uid: stringParam,
+});
 
-export type GetUserRouteParams = {
-    uname: string;
-};
-
-export function getUserRoute({ uname: uname }: GetUserRouteParams): string {
-    return [USER_ROUTE_BASE, uname].join('/');
-}
+const COMPANY_ROUTE_BASE = '/companies';
+export const companyRoute = createRouteTemplate(`${COMPANY_ROUTE_BASE}/:cid`, {
+    cid: stringParam,
+});

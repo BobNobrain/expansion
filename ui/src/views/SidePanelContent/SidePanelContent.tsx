@@ -1,15 +1,28 @@
-import { Show, type Component } from 'solid-js';
-import { Button, Container, Spacer, SkeletonText, Text } from '@/atoms';
+import { For, Show, type Component } from 'solid-js';
+import {
+    Button,
+    Container,
+    Spacer,
+    SkeletonText,
+    Text,
+    PageHeader,
+    PageHeaderTitle,
+    PageHeaderIcon,
+    InfoDisplay,
+} from '@/atoms';
 import { GameTimeLabel } from '@/components/GameTimeLabel/GameTimeLabel';
-import { IconCross, IconUser } from '@/icons';
+import { IconCross, IconDocument, IconEnvelope, IconUser } from '@/icons';
 import { useNow } from '@/lib/solid/useNow';
 import { useAuth } from '@/store/auth';
-import { dfMe } from '@/store/datafront';
+import { dfCompaniesByOwnerId, dfMe } from '@/store/datafront';
+import { CompanyCard } from '@/components/CompanyCard/CompanyCard';
 
-export const UserFeed: Component = () => {
+export const SidePanelContent: Component = () => {
     const { logout } = useAuth();
     const me = dfMe.use();
     const now = useNow();
+
+    const userCompanies = dfCompaniesByOwnerId.use(() => (me.value() ? { ownerId: me.value()!.user.id } : null));
 
     return (
         <Container hasGap padded fullHeight direction="column">
@@ -33,11 +46,17 @@ export const UserFeed: Component = () => {
                 </Button>
             </Container>
 
-            <div>(no company info available)</div>
-            <div>Subscription status: FREE (verified)</div>
-            <div>0 new messages</div>
-            <div>0 pending contracts</div>
-            <div>Other notifications</div>
+            <For each={Object.values(userCompanies.result())} fallback={<CompanyCard company={null} isLoading />}>
+                {(c) => <CompanyCard company={c} />}
+            </For>
+
+            <PageHeader>
+                <PageHeaderTitle>Inbox</PageHeaderTitle>
+                <PageHeaderIcon icon={IconEnvelope} text="0" />
+                <PageHeaderIcon icon={IconDocument} text="0" />
+            </PageHeader>
+
+            <InfoDisplay title="Empty">There are no pending contracts or unread messages left.</InfoDisplay>
 
             <Spacer />
             <div>

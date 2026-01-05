@@ -2,6 +2,7 @@ package http
 
 import (
 	"net/http"
+	"srv/internal/globals/config"
 	"srv/internal/globals/logger"
 	"srv/internal/transport"
 
@@ -15,7 +16,7 @@ var upgrader = websocket.Upgrader{
 }
 
 func (srv *httpServerImpl) serveSocket() {
-	srv.server.HandleFunc("/sock", func(w http.ResponseWriter, r *http.Request) {
+	srv.server.HandleFunc(config.HTTP().SocketPath, func(w http.ResponseWriter, r *http.Request) {
 		logger.Info(logger.FromMessage("ws", "receivied a connection request"))
 		auth, err := checkTokenCookie(r, srv.auth)
 
