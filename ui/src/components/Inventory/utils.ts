@@ -1,5 +1,5 @@
 import type { SemanticColor } from '@/lib/appearance';
-import type { InventoryEntry, InventoryEntryWithData } from './types';
+import type { InventoryDisplayMode, InventoryEntry, InventoryEntryWithData } from './types';
 import { createMemo } from 'solid-js';
 import { useAsset } from '@/lib/solid/asset';
 import { commoditiesAsset } from '@/lib/assetmanager';
@@ -31,4 +31,22 @@ export function getDeltaColor(delta: string): SemanticColor {
     }
 
     return 'secondary';
+}
+
+export function getDisplaySettings(mode: InventoryDisplayMode | undefined) {
+    let amounts = true;
+    let speeds = false;
+
+    switch (mode) {
+        case 'speeds':
+            speeds = true;
+            amounts = false;
+            break;
+
+        case 'both':
+            speeds = true;
+            break;
+    }
+
+    return { amounts, speeds };
 }

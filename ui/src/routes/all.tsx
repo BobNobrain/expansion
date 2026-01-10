@@ -3,6 +3,7 @@ import { BasesPage } from '@/touch/pages/BasesPage/BasesPage';
 import { CartographyPage } from '@/touch/pages/CartographyPage/CartographyPage';
 import { CompanyPage } from '@/touch/pages/CompanyPage/CompanyPage';
 import { EditFactoryPage, ViewFactoryPage } from '@/touch/pages/FactoryPage';
+import { InventoryTransferPage } from '@/touch/pages/InventoryTransferPage/InventoryTransferPage';
 import { TileBasePage } from '@/touch/pages/TileBasePage/TileBasePage';
 import { WorldBasesPage } from '@/touch/pages/WorldBasesPage/WorldBasesPage';
 import { UserPage } from '@/touch/pages/UserPage/UserPage';
@@ -10,6 +11,7 @@ import { BASES_ALL_ROUTE_TEMPLATE, BASES_TILE_ROUTE_TEMPLATE, BASES_WORLD_ROUTE_
 import { EXPLORE_ROUTE_TEMPLATE } from './explore';
 import { factoryEditRoute, factoryViewRoute } from './factories';
 import { companyRoute, userRoute } from './misc';
+import { inventoryTransferRoute } from './transfer';
 
 export function basesRouteDefs() {
     return (
@@ -28,6 +30,10 @@ export function factoryRouteDefs() {
             <Route path={factoryEditRoute.template} component={EditFactoryPage} />
         </>
     );
+}
+
+export function inventoryRouteDefs() {
+    return <Route path={inventoryTransferRoute.template} component={InventoryTransferPage} />;
 }
 
 export function exploreRouteDefs() {

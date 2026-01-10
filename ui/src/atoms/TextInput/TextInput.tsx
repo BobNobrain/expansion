@@ -129,7 +129,7 @@ export const TextInput: Component<TextInputProps> = (props) => {
                 class={styles.input}
                 value={props.value}
                 onInput={updateValue}
-                readOnly={props.readonly}
+                readOnly={props.readonly || props.disabled}
                 inputMode={props.inputMode}
                 type={props.password ? 'password' : 'text'}
                 placeholder={props.placeholder}

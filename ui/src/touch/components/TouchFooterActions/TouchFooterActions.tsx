@@ -18,6 +18,7 @@ const colorStyles = {
 
 export type TouchFooterActionLinkProps = {
     href: string;
+    replace?: boolean;
     text: string;
     color?: TouchFooterActionColor;
     loading?: boolean;
@@ -28,6 +29,7 @@ export const TouchFooterActionLink: Component<TouchFooterActionLinkProps> = (pro
         <A
             class={styles.link}
             href={props.href}
+            replace={props.replace}
             activeClass={styles.active}
             classList={{
                 [colorStyles[props.color ?? 'secondary']]: true,

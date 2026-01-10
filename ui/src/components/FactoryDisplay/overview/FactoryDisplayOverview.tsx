@@ -26,6 +26,9 @@ import { useAsset } from '@/lib/solid/asset';
 import { formatInteger } from '@/lib/strings';
 import { getBasesRoute } from '@/routes/bases';
 import { useFactoryDisplayContext } from '../state';
+import { emulateLinkClick } from '@/lib/solid/emulateLinkClick';
+import { inventoryTransferRoute } from '@/routes/transfer';
+import { useNavigate } from '@solidjs/router';
 
 type FactoryInfo = {
     factory: Factory;
@@ -103,6 +106,7 @@ const DEFS: DefinitionListItem<FactoryInfo>[] = [
 
 export const FactoryDisplayOverview: Component = () => {
     const { factory, isLoading, worldId, tileId, onUpgrade } = useFactoryDisplayContext();
+    const navigate = useNavigate();
     const buildings = useAsset(buildingsAsset);
 
     const info = createMemo((): FactoryInfo | null => {
@@ -155,7 +159,20 @@ export const FactoryDisplayOverview: Component = () => {
             <PageHeader>
                 <PageHeaderTitle>Inventory</PageHeaderTitle>
                 <PageHeaderActions pushRight>
-                    <Button square style="light">
+                    <Button
+                        square
+                        style="light"
+                        loading={factory() === null}
+                        onClick={(ev) => {
+                            emulateLinkClick(
+                                {
+                                    href: inventoryTransferRoute.render({ sourceId: 'F' + (factory()?.id ?? '') }),
+                                    navigate,
+                                },
+                                ev,
+                            );
+                        }}
+                    >
                         <IconTransfer size={32} />
                     </Button>
                 </PageHeaderActions>

@@ -32,7 +32,7 @@ type ExtractRequiredParams<T extends string> = T extends `${string}/:${infer Par
     ? SkipIfWithQuestion<ParamName>
     : never;
 
-type ParamOverride<T> = {
+type ParamDefinition<T> = {
     defaultValue: T;
     parse: (value: string) => T | null;
     stringify?: (value: T) => string;
@@ -41,32 +41,28 @@ type ParamOverride<T> = {
 export function createRouteTemplate<
     Template extends string,
     Params extends {
-        [Key in ExtractRequiredParams<Template>]: any;
-    } & {
-        [Key in ExtractOptionalParams<Template>]?: any;
+        [Key in ExtractParams<Template>]: any;
     },
 >(
     template: Template,
-    overrides: {
-        [Key in keyof Params]: ParamOverride<Params[Key]>;
+    defs: {
+        [Key in keyof Params]: ParamDefinition<Params[Key]>;
     },
 ) {
     const parse = (
         params: Partial<Record<string, string>>,
     ): {
-        [Key in ExtractRequiredParams<Template>]: Params[Key];
-    } & {
-        [Key in ExtractOptionalParams<Template>]?: Params[Key];
+        [Key in ExtractParams<Template>]: Params[Key];
     } => {
         const result: Record<string, unknown> = {};
-        for (const key of Object.keys(params)) {
-            if (overrides[key as never]) {
+        for (const key of Object.keys(defs)) {
+            if (defs[key as never]) {
                 const strValue = params[key];
-                const override = overrides[key as never] as ParamOverride<keyof Params>;
+                const paramDef = defs[key as never] as ParamDefinition<keyof Params>;
                 if (strValue === undefined) {
-                    result[key] = override.defaultValue;
+                    result[key] = paramDef.defaultValue;
                 } else {
-                    result[key] = override.parse(strValue) ?? override.defaultValue;
+                    result[key] = paramDef.parse(strValue) ?? paramDef.defaultValue;
                 }
             } else {
                 result[key] = params[key] as never;
@@ -79,7 +75,7 @@ export function createRouteTemplate<
     const fragments = template.split('/');
     const render = (
         params: {
-            [Key in ExtractRequiredParams<Template>]: Params[Key];
+            [Key in ExtractRequiredParams<Template> & keyof Params]: Params[Key];
         } & {
             [Key in ExtractOptionalParams<Template>]?: Params[Key];
         },
@@ -105,12 +101,12 @@ export function createRouteTemplate<
     return { template, parse, render };
 }
 
-export const stringParam: ParamOverride<string> = {
+export const stringParam: ParamDefinition<string> = {
     defaultValue: '',
     parse: String,
 };
 
-export const integerParam: ParamOverride<number> = {
+export const integerParam: ParamDefinition<number> = {
     defaultValue: 0,
     parse: (input: string | undefined) => {
         if (!input) {
@@ -126,7 +122,7 @@ export const integerParam: ParamOverride<number> = {
     },
 };
 
-export const enumParam = <T extends string>(values: T[]): ParamOverride<T> => {
+export const enumParam = <T extends string>(values: T[]): ParamDefinition<T> => {
     return {
         defaultValue: values[0],
         parse: (value) => {

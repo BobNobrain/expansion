@@ -41,6 +41,9 @@
     border-width: 1px 0 1px 0;
     border-radius: 2px;
 }
+.content.no-padding {
+    padding: 0;
+}
 
 .header {
     display: flex;
@@ -49,6 +52,11 @@
     margin-right: -8px;
     margin-bottom: 16px;
 }
+.content.no-padding .header {
+    margin: 0;
+    margin-left: 8px;
+}
+
 .title {
     margin: 0;
     padding: 0;

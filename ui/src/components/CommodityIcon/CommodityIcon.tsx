@@ -20,6 +20,7 @@ export type CommodityIconProps = {
     category?: string;
     badge?: JSX.Element;
     size?: BlockIconSize;
+    checked?: boolean;
 };
 
 const iconsByCategory: Record<string, Icon> = {
@@ -73,6 +74,7 @@ export const CommodityIcon: Component<CommodityIconProps> = (props) => {
             icon={icon()}
             badge={props.badge}
             size={props.size}
+            checked={props.checked}
             class={classesByCategory[category()] ?? styles.catUnknown}
         />
     );

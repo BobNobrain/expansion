@@ -8,6 +8,11 @@
     padding: 8px 12px;
 }
 
+.grid.inset {
+    margin-left: calc(-1 * var(--container-actual-padding-h));
+    margin-right: calc(-1 * var(--container-actual-padding-h));
+}
+
 .item {
     height: 100%;
     overflow: hidden;
@@ -19,6 +24,10 @@
     border-bottom: 1px solid var(--p-main-700);
     border-radius: 8px;
     background-color: var(--p-main-900-10);
+}
+.item.selected {
+    border-bottom-color: var(--p-primary-500);
+    background-color: var(--p-main-900-25);
 }
 
 .item-top {
@@ -46,6 +55,10 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.selected .label {
+    color: var(--p-primary-500);
 }
 
 .quantity {

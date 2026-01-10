@@ -5,17 +5,20 @@ import { Inventory } from '@/domain/Inventory';
 import { useNow } from '@/lib/solid/useNow';
 import { formatInteger, formatScalar } from '@/lib/strings';
 import { renderConstantSpeed } from '@/lib/time';
-import type { InventoryEntryWithData, InventoryEntry } from '../types';
-import { getDeltaColor, useEnrichedEntries } from '../utils';
+import type { InventoryEntryWithData, InventoryEntry, InventoryDisplayMode } from '../types';
+import { getDeltaColor, getDisplaySettings, useEnrichedEntries } from '../utils';
 import styles from './InventoryTable.module.css';
 
 export type InventoryTableProps = {
     loading?: boolean;
     entries: InventoryEntry[];
-    display?: 'amounts' | 'speeds' | 'both';
+    display?: InventoryDisplayMode;
+    inset?: boolean;
+    selectedEntries?: Set<string>;
+    onEntryClick?: (entry: InventoryEntry) => void;
 };
 
-const ItemCell: Component<{ row: InventoryEntryWithData }> = (props) => {
+const ItemCell: Component<{ row: InventoryEntryWithData; checked: boolean }> = (props) => {
     const now = useNow('10s');
 
     const delta = createMemo(() => {
@@ -31,6 +34,7 @@ const ItemCell: Component<{ row: InventoryEntryWithData }> = (props) => {
             <CommodityIcon
                 commodity={props.row.commodity}
                 size="md"
+                checked={props.checked}
                 badge={
                     <Show when={props.row.quantized}>
                         <Show
@@ -49,7 +53,9 @@ const ItemCell: Component<{ row: InventoryEntryWithData }> = (props) => {
                 }
             />
             <div class={styles.itemCellLabels}>
-                <div class={styles.itemCellTitle}>{props.row.commodity}</div>
+                <Text tag="div" color={props.checked ? 'primary' : undefined} class={styles.itemCellTitle}>
+                    {props.row.commodity}
+                </Text>
             </div>
         </div>
     );
@@ -145,30 +151,18 @@ export const InventoryTable: ParentComponent<InventoryTableProps> = (props) => {
     };
 
     const columns = createMemo(() => {
-        let displayAmounts = true;
-        let displaySpeeds = false;
-
-        switch (props.display) {
-            case 'speeds':
-                displaySpeeds = true;
-                displayAmounts = false;
-                break;
-
-            case 'both':
-                displaySpeeds = true;
-                break;
-        }
+        const display = getDisplaySettings(props.display);
 
         const columns: DataTableColumn<InventoryEntryWithData>[] = [
             {
                 header: { text: 'Item' },
                 content: (row) => {
-                    return <ItemCell row={row} />;
+                    return <ItemCell row={row} checked={props.selectedEntries?.has(row.commodity) ?? false} />;
                 },
             },
         ];
 
-        if (displayAmounts) {
+        if (display.amounts) {
             columns.push({
                 header: { text: 'Amount' },
                 width: 90,
@@ -178,7 +172,7 @@ export const InventoryTable: ParentComponent<InventoryTableProps> = (props) => {
             });
         }
 
-        if (displaySpeeds) {
+        if (display.speeds) {
             columns.push({
                 header: { text: 'Rate' },
                 width: 90,
@@ -194,7 +188,14 @@ export const InventoryTable: ParentComponent<InventoryTableProps> = (props) => {
     const rows = useEnrichedEntries(() => props.entries);
 
     return (
-        <DataTable columns={columns()} rows={rows()}>
+        <DataTable
+            columns={columns()}
+            rows={rows()}
+            inset={props.inset}
+            onRowClick={(row) => {
+                props.onEntryClick?.(row);
+            }}
+        >
             <Show when={props.loading} fallback={props.children ?? 'Storage is empty'}>
                 <InlineLoader />
             </Show>

@@ -8,6 +8,7 @@ export type TouchModalProps = {
     title?: string | JSX.Element;
     isOpen: boolean;
     top?: boolean;
+    noPadding?: boolean;
     onClose?: () => void;
 };
 
@@ -21,7 +22,7 @@ export const TouchModal: ParentComponent<TouchModalProps> = (props) => {
             }}
             onClick={props.onClose}
         >
-            <div class={styles.content} onClick={stopPropagation}>
+            <div class={styles.content} classList={{ [styles.noPadding]: props.noPadding }} onClick={stopPropagation}>
                 <Show when={props.title}>
                     <header class={styles.header}>
                         <h2 class={styles.title}>{props.title}</h2>

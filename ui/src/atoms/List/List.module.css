@@ -3,10 +3,20 @@
     padding: 8px 0;
     margin: 0;
 }
+.list.inset {
+    margin-left: calc(-1 * var(--container-actual-padding-h));
+    margin-right: calc(-1 * var(--container-actual-padding-h));
+    /* width: calc(100% + 2 * var(--container-actual-padding-h)); */
+}
 
 .item {
     border: solid transparent;
     border-width: 0 2px;
+}
+
+.inset .item {
+    padding-left: var(--container-actual-padding-h);
+    padding-right: var(--container-actual-padding-h);
 }
 
 .striped > .item:nth-child(2n) {
@@ -38,4 +48,27 @@
 
 .paddingBoth {
     composes: paddingV paddingH;
+}
+
+.content {
+    display: flex;
+}
+.icon-wrapper {
+    flex: 0 0 32px;
+    text-align: center;
+    align-content: center;
+    margin-right: 8px;
+}
+.content-main {
+    overflow: hidden;
+    flex: 1 1 auto;
+}
+.content-title, .content-subtitle {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.selected .content-title {
+    color: var(--p-primary-500);
 }

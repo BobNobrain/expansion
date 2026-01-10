@@ -11,3 +11,5 @@ export type InventoryEntryWithData = InventoryEntry & {
     volume: number;
     quantized: boolean;
 };
+
+export type InventoryDisplayMode = 'amounts' | 'speeds' | 'both';

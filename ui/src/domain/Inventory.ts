@@ -14,6 +14,14 @@ export namespace StorageSize {
         return { mass: 0, volume: 0 };
     }
 
+    export function infinite(): StorageSize {
+        return { mass: Infinity, volume: Infinity };
+    }
+
+    export function isInfinite(s: StorageSize): boolean {
+        return !Number.isFinite(s.mass) || !Number.isFinite(s.volume);
+    }
+
     export function addInto(target: StorageSize, addition: Readonly<StorageSize>, factor = 1.0) {
         target.mass += addition.mass * factor;
         target.volume += addition.volume * factor;
@@ -65,6 +73,91 @@ export namespace Inventory {
 
         return result;
     }
+
+    export function counts(i: Inventory): Record<string, number> {
+        return i;
+    }
+
+    export function getAllCommodities(i: Inventory): Set<string> {
+        return new Set(Object.keys(Inventory.counts(i)));
+    }
+
+    export function clone(i: Inventory): Inventory {
+        return { ...i };
+    }
 }
 
 export type DynamicInventory = Record<string, Predictable>;
+
+export namespace DynamicInventory {
+    export function sample(d: DynamicInventory, t: Date | number): Inventory {
+        const result = Inventory.empty();
+        for (const [cid, p] of Object.entries(d)) {
+            result[cid] = p.predict(t);
+        }
+        return result;
+    }
+}
+
+export enum StorageType {
+    Base = 'base',
+    Factory = 'factory',
+}
+
+export type Storage = {
+    id: string;
+    name: string;
+    type: StorageType;
+    staticContent: Inventory;
+    dynamicContent: DynamicInventory | null;
+    sizeLimit: StorageSize;
+};
+
+export namespace Storage {
+    export function measureFilledPercentage(
+        s: Storage,
+        now: Date,
+        commoditiesData: Record<string, CommodityData>,
+    ): number {
+        if (StorageSize.isInfinite(s.sizeLimit)) {
+            return 0;
+        }
+
+        if (s.sizeLimit.mass === 0 || s.sizeLimit.volume === 0) {
+            return 1;
+        }
+
+        const staticSize = Inventory.measure(s.staticContent, commoditiesData);
+        const dynamicSize = s.dynamicContent
+            ? Inventory.measure(DynamicInventory.sample(s.dynamicContent, now), commoditiesData)
+            : StorageSize.zero();
+
+        const massPercentage = (staticSize.mass + dynamicSize.mass) / s.sizeLimit.mass;
+        const volumePercentage = (staticSize.volume + dynamicSize.volume) / s.sizeLimit.volume;
+
+        return Math.min(1, Math.max(massPercentage, volumePercentage, 0));
+    }
+
+    export function getCommodityAmount(
+        storage: Pick<Storage, 'staticContent' | 'dynamicContent'>,
+        cid: string,
+        at: Date | number,
+    ): number {
+        let amount = storage?.staticContent[cid] ?? 0;
+        if (storage.dynamicContent && storage.dynamicContent[cid]) {
+            amount += storage.dynamicContent[cid].predict(at);
+        }
+        return amount;
+    }
+
+    export function sampleStorage(
+        storage: Pick<Storage, 'staticContent' | 'dynamicContent'>,
+        at: Date | number,
+    ): Inventory {
+        const result = Inventory.clone(storage.staticContent);
+        if (storage.dynamicContent) {
+            Inventory.addInto(result, DynamicInventory.sample(storage.dynamicContent, at));
+        }
+        return result;
+    }
+}

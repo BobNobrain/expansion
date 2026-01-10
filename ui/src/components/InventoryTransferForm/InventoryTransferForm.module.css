@@ -1,0 +1,10 @@
+.transfer-selectors {
+    display: grid;
+    grid-template-columns: 1fr 32px 1fr;
+    column-gap: 8px;
+    grid-template-rows: 1fr;
+}
+
+.arrow {
+    align-content: center;
+}

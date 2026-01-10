@@ -1,4 +1,4 @@
-import { createMemo, createSignal } from 'solid-js';
+import { createEffect, createMemo, createSignal } from 'solid-js';
 import { type ValidationState } from './types';
 
 export type ValidationStateController = {
@@ -103,4 +103,40 @@ export function useCombinedValidationState(states: () => (ValidationState | unde
 
         return { type: 'ok', explicitSuccess, message };
     });
+}
+
+export type UseValidatorOptions<T> = {
+    validate: (value: T) => ValidationState;
+    signal: () => T;
+};
+
+export type Validator = {
+    validate: () => boolean;
+    validity: () => ValidationState;
+};
+
+export function createValidator<T>({ validate, signal }: UseValidatorOptions<T>): Validator {
+    let initial = true;
+    const [validity, setValidity] = createSignal<ValidationState>({ type: 'ok' });
+
+    const triggerValidation = (value: T): boolean => {
+        const state = validate(value);
+        setValidity(state);
+        return state.type === 'ok';
+    };
+
+    createEffect(() => {
+        const value = signal();
+        if (initial) {
+            initial = false;
+            return;
+        }
+
+        triggerValidation(value);
+    });
+
+    return {
+        validity,
+        validate: () => triggerValidation(signal()),
+    };
 }

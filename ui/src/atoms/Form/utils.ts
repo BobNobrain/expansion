@@ -4,7 +4,7 @@ import type { ValidationState } from './types';
 export type FormFieldState<T> = {
     get: () => T;
     set: (value: T) => void;
-    // update: (f: (old: T) => T) => void;
+    update: (f: (old: T) => T) => void;
     validity: () => ValidationState;
     validate: () => boolean;
 };
@@ -41,6 +41,12 @@ export function createFormFieldState<T>(
         get,
         set: (value) => {
             set(value as never);
+            if (validity().type === 'error') {
+                validate();
+            }
+        },
+        update: (f) => {
+            set(f);
             if (validity().type === 'error') {
                 validate();
             }

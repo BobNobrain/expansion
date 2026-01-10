@@ -14,6 +14,8 @@ export type ContributionSliderProps = {
 
     value: number;
     onUpdate?: (value: number) => void;
+
+    labels?: 'contribution' | 'transfer';
 };
 
 // const HANDLE_SIZE_PX = 24;
@@ -26,17 +28,36 @@ export const ContributionSlider: Component<ContributionSliderProps> = (props) =>
     const totalText = createMemo(() => Commodity.stringifyAmount(commodityData(), props.total));
     const valueText = createMemo(() => Commodity.stringifyAmount(commodityData(), props.value));
 
+    const transferLabelColor = createMemo(() => {
+        if (props.value >= props.total) {
+            return 'success';
+        }
+
+        return 'bright';
+    });
+
     return (
         <div class={styles.wrapper}>
             <div class={styles.info}>
                 <CommodityIconWithLabel commodity={props.commodity} />
                 <div class={styles.numbers}>
-                    <Text color="bright">{providedText()}</Text>{' '}
-                    <Show when={props.value}>
-                        <Text color="success">+{valueText()}</Text>
+                    <Show
+                        when={props.labels === 'transfer'}
+                        fallback={
+                            <>
+                                <Text color="bright">{providedText()}</Text>{' '}
+                                <Show when={props.value}>
+                                    <Text color="success">+{valueText()}</Text>
+                                </Show>
+                                {' / '}
+                                <Text color="bright">{totalText()}</Text>
+                            </>
+                        }
+                    >
+                        <Text color={transferLabelColor()}>{valueText()}</Text>
+                        {' / '}
+                        <Text>{totalText()}</Text>
                     </Show>
-                    {' / '}
-                    <Text color="bright">{totalText()}</Text>
                 </div>
             </div>
             <HBarRow>
