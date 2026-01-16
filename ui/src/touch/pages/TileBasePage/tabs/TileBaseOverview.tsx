@@ -16,20 +16,28 @@ import {
 } from '@/atoms';
 import { FactoryStatusLabel } from '@/components/FactoryStatusLabel/FactoryStatusLabel';
 import { GameTimeLabel } from '@/components/GameTimeLabel/GameTimeLabel';
+import { OperationDisplay } from '@/components/OperationDisplay/OperationDisplay';
 import { Factory, type BaseContent } from '@/domain/Base';
 import { IconArea, IconEquipment, IconFactory, IconPlus } from '@/icons';
 import { buildingsAsset } from '@/lib/assetmanager';
 import { useAsset } from '@/lib/solid/asset';
 import { emulateLinkClick } from '@/lib/solid/emulateLinkClick';
+import { formatNumericId } from '@/lib/id';
 import { formatInteger } from '@/lib/strings';
 import { getExploreRoute } from '@/routes/explore';
 import { factoryViewRoute } from '@/routes/factories';
-import { dfCreateFactory, dfFactoriesByBaseId } from '@/store/datafront';
+import { useModalRouteState } from '@/routes/modals';
+import { dfFactoriesByBaseId } from '@/store/datafront';
+import { TouchModal } from '@/touch/components/TouchModal';
+import { CreateFactoryForm } from '@/views/CreateFactoryForm/CreateFactoryForm';
 import { useBase } from '../hooks';
-import { formatNumericId } from '@/lib/id';
-import { OperationDisplay } from '@/components/OperationDisplay/OperationDisplay';
 
 const DEFS: DefinitionListItem<BaseContent>[] = [
+    {
+        title: 'Name',
+        skeletonLength: 10,
+        render: 'name',
+    },
     {
         title: 'Location',
         skeletonLength: 25,
@@ -62,19 +70,14 @@ export const TileBaseOverview: Component = () => {
         return baseId ? { baseId } : null;
     });
 
-    const createFactory = dfCreateFactory.use(() => Object.keys(factories).length.toString());
-    const onCreateFactoryClick = () => {
-        const baseId = base()?.id;
-        if (!baseId) {
-            return;
-        }
-
-        createFactory.run({ baseId });
-    };
-
     const buildings = useAsset(buildingsAsset);
 
     const COLUMNS: DataTableColumn<Factory>[] = [
+        {
+            header: { text: 'Name' },
+            width: 120,
+            content: 'name',
+        },
         {
             header: { text: 'Status' },
             width: 88,
@@ -100,6 +103,7 @@ export const TileBaseOverview: Component = () => {
         },
         {
             header: { text: 'Created' },
+            width: 120,
             content: (factory) => <GameTimeLabel value={factory.createdAt} />,
         },
     ];
@@ -119,6 +123,8 @@ export const TileBaseOverview: Component = () => {
 
         return total.toString();
     });
+
+    const createFactoryModal = useModalRouteState('createFactory');
 
     return (
         <>
@@ -149,12 +155,7 @@ export const TileBaseOverview: Component = () => {
                     isTextLoading={factories.isLoading() || !buildings()}
                 />
                 <PageHeaderActions pushRight>
-                    <Button
-                        square
-                        style="light"
-                        loading={factories.isLoading() || createFactory.isLoading()}
-                        onClick={onCreateFactoryClick}
-                    >
+                    <Button square style="light" loading={factories.isLoading()} onClick={createFactoryModal.open}>
                         <IconPlus size={32} block />
                     </Button>
                 </PageHeaderActions>
@@ -162,6 +163,7 @@ export const TileBaseOverview: Component = () => {
             <DataTable
                 rows={Object.values(factories.result())}
                 columns={COLUMNS}
+                stickLeft
                 onRowClick={(row, ev) => {
                     emulateLinkClick(
                         {
@@ -175,16 +177,21 @@ export const TileBaseOverview: Component = () => {
                 <InfoDisplay
                     title="No factories"
                     actions={
-                        <Button
-                            color="primary"
-                            loading={factories.isLoading() || createFactory.isLoading()}
-                            onClick={onCreateFactoryClick}
-                        >
+                        <Button color="primary" loading={factories.isLoading()} onClick={createFactoryModal.open}>
                             Create
                         </Button>
                     }
                 ></InfoDisplay>
             </DataTable>
+
+            <TouchModal isOpen={createFactoryModal.isOpen()} onClose={createFactoryModal.close} title="Create Factory">
+                <CreateFactoryForm
+                    baseId={base()?.id}
+                    nFactoriesExisting={Object.keys(factories.result()).length}
+                    onCancel={createFactoryModal.close}
+                    onSuccess={createFactoryModal.close}
+                />
+            </TouchModal>
         </>
     );
 };

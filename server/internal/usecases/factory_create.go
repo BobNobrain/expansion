@@ -14,6 +14,7 @@ type createFactoryUsecase struct {
 
 type CreateFactoryUsecaseInput struct {
 	BaseID game.BaseID
+	Name   string
 }
 
 func NewCreateFactoryUsecase(store components.GlobalReposReadonly) components.Usecase[CreateFactoryUsecaseInput] {
@@ -47,6 +48,7 @@ func (uc *createFactoryUsecase) Run(
 
 	factory := game.MakeEmptyFactory()
 	factory.BaseID = base.ID
+	factory.Name = input.Name
 
 	err = tx.Factories().CreateBaseFactory(factory)
 	if err != nil {

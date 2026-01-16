@@ -136,6 +136,7 @@ func (b *factoriesRepoImpl) CreateBaseFactory(factory game.Factory) common.Error
 	dberr := b.q.CreateFactory(b.ctx, dbq.CreateFactoryParams{
 		BaseID: int32(factory.BaseID),
 		Data:   factoryDataJSON,
+		Name:   factory.Name,
 	})
 	if dberr != nil {
 		return makeDBError(dberr, "FactoriesRepo::CreateBaseFactory")

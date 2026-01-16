@@ -72,6 +72,7 @@ func (gdf *GameDataFront) InitFactoryActions(
 		func(payload api.CreateFactoryPayload) usecases.CreateFactoryUsecaseInput {
 			return usecases.CreateFactoryUsecaseInput{
 				BaseID: game.BaseID(payload.BaseID),
+				Name:   payload.FactoryName,
 			}
 		},
 	))
