@@ -10,7 +10,7 @@ import (
 )
 
 type foundCityUsecase struct {
-	store components.Storage
+	store components.GlobalReposReadonly
 }
 
 type FoundCityUsecaseInput struct {
@@ -19,7 +19,7 @@ type FoundCityUsecaseInput struct {
 	TileID  game.TileID
 }
 
-func NewFoundCityUsecase(store components.Storage) components.Usecase[FoundCityUsecaseInput] {
+func NewFoundCityUsecase(store components.GlobalReposReadonly) components.Usecase[FoundCityUsecaseInput] {
 	return &foundCityUsecase{
 		store: store,
 	}

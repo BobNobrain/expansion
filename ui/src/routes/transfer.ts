@@ -7,7 +7,7 @@ export enum InventoryTransferTab {
     Adjustment = 'adjust',
 }
 
-export const inventoryTransferRoute = createRouteTemplate(`${ROUTE_BASE}/:sourceId/:tab?`, {
-    sourceId: stringParam,
+export const inventoryTransferRoute = createRouteTemplate(`${ROUTE_BASE}/:location/:tab?`, {
+    location: stringParam,
     tab: enumParam([InventoryTransferTab.Selection, InventoryTransferTab.Adjustment]),
 });

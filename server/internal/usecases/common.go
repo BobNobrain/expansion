@@ -8,7 +8,7 @@ import (
 )
 
 func getFactoryByID(
-	tx components.StorageRepos,
+	tx components.GlobalReposTx,
 	fid game.FactoryID,
 	fieldNameForError string,
 ) (game.Factory, common.Error) {
@@ -29,7 +29,7 @@ func getFactoryByID(
 	return factory, nil
 }
 
-func getFactoryLocationData(tx components.StorageRepos, factory game.Factory) (*game.Base, game.WorldData, common.Error) {
+func getFactoryLocationData(tx components.GlobalReposTx, factory game.Factory) (*game.Base, game.WorldData, common.Error) {
 	base, err := tx.Bases().GetBase(factory.BaseID)
 	if err != nil {
 		return nil, game.WorldData{}, err

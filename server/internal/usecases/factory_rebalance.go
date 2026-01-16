@@ -11,7 +11,7 @@ import (
 )
 
 type rebalanceFactoryUsecase struct {
-	store components.Storage
+	store components.GlobalReposReadonly
 }
 
 type RebalanceFactoryUsecaseInput struct {
@@ -19,7 +19,7 @@ type RebalanceFactoryUsecaseInput struct {
 	Plan      game.FactoryRebalancePlan
 }
 
-func NewRebalanceFactoryUsecase(store components.Storage) components.Usecase[RebalanceFactoryUsecaseInput] {
+func NewRebalanceFactoryUsecase(store components.GlobalReposReadonly) components.Usecase[RebalanceFactoryUsecaseInput] {
 	return &rebalanceFactoryUsecase{
 		store: store,
 	}

@@ -20,6 +20,8 @@ import {
     ActionChangeUpgradeProject,
     type ContributeToFactoryPayload,
     ActionContributeToUpgrade,
+    type TransferFactoryItemsPayload,
+    ActionTransferFactoryItems,
 } from '@/lib/net/types.generated';
 import { ws } from '@/lib/net/ws';
 
@@ -36,6 +38,10 @@ export const dfRebalanceFactory = createDatafrontAction<RebalanceFactoryPayload>
 export const dfUpgradeFactory = createDatafrontAction<UpgradeFactoryPayload>({ name: ActionChangeUpgradeProject, ws });
 export const dfContributeToFactory = createDatafrontAction<ContributeToFactoryPayload>({
     name: ActionContributeToUpgrade,
+    ws,
+});
+export const dfTransferFactoryItems = createDatafrontAction<TransferFactoryItemsPayload>({
+    name: ActionTransferFactoryItems,
     ws,
 });
 

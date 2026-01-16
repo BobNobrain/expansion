@@ -11,7 +11,7 @@ export const PageHeader: ParentComponent = (props) => {
 
 export const PageHeaderTitle: ParentComponent = (props) => {
     return (
-        <Text size="h2" color="primary">
+        <Text size="h2" color="primary" ellipsis>
             {props.children}
         </Text>
     );

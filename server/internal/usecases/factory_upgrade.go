@@ -11,7 +11,7 @@ import (
 )
 
 type upgradeFactoryUsecase struct {
-	store components.Storage
+	store components.GlobalReposReadonly
 }
 
 type UpgradeFactoryUsecaseInput struct {
@@ -19,7 +19,7 @@ type UpgradeFactoryUsecaseInput struct {
 	Project   game.FactoryUpgradeProject
 }
 
-func NewUpgradeFactoryUsecase(store components.Storage) components.Usecase[UpgradeFactoryUsecaseInput] {
+func NewUpgradeFactoryUsecase(store components.GlobalReposReadonly) components.Usecase[UpgradeFactoryUsecaseInput] {
 	return &upgradeFactoryUsecase{
 		store: store,
 	}

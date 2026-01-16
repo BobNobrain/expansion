@@ -7,7 +7,7 @@ import (
 )
 
 type cheatUsecase struct {
-	store  components.Storage
+	store  components.GlobalReposReadonly
 	engine components.CheatEngine
 }
 
@@ -18,7 +18,7 @@ type CheatUsecaseOutput struct {
 	Result common.Encodable
 }
 
-func NewCheatUsecase(store components.Storage, engine components.CheatEngine) components.UsecaseWithOutput[CheatUsecaseInput, CheatUsecaseOutput] {
+func NewCheatUsecase(store components.GlobalReposReadonly, engine components.CheatEngine) components.UsecaseWithOutput[CheatUsecaseInput, CheatUsecaseOutput] {
 	return &cheatUsecase{
 		store:  store,
 		engine: engine,

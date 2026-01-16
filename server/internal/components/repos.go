@@ -5,8 +5,13 @@ import (
 	"srv/internal/utils/common"
 )
 
-type Storage interface {
-	StartTransaction(context.Context) (StorageRepos, common.Error)
+type GlobalRepos interface {
+	StartTransaction(context.Context) (GlobalReposTx, common.Error)
+}
+
+type GlobalReposReadonly interface {
+	GlobalRepos
+
 	Dispose()
 
 	Users() UserRepoReadonly
@@ -22,7 +27,7 @@ type Storage interface {
 	ClearTable(string) error
 }
 
-type StorageRepos interface {
+type GlobalReposTx interface {
 	Commit() common.Error
 	Rollback() common.Error
 

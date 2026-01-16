@@ -45,6 +45,25 @@ func (i Inventory) Add(delta InventoryDelta) bool {
 func (i Inventory) Remove(delta InventoryDelta) bool {
 	return i.applyDelta(delta, -1)
 }
+
+func (i Inventory) RemoveAsMuchAsPossible(delta InventoryDelta) InventoryDelta {
+	if delta == nil {
+		return nil
+	}
+
+	factualDelta := make(map[CommodityID]float64)
+
+	for cid, amount := range delta {
+		available := i.GetAmount(cid)
+		factual := min(available, amount)
+
+		factualDelta[cid] = factual
+		i.SetAmount(cid, available-factual)
+	}
+
+	return factualDelta
+}
+
 func (i Inventory) applyDelta(delta InventoryDelta, multiplier float64) bool {
 	if delta == nil {
 		return true

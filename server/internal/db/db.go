@@ -40,7 +40,7 @@ type storageWithTx struct {
 	factories *factoriesRepoImpl
 }
 
-func NewDBStorage() components.Storage {
+func NewDBStorage() components.GlobalReposReadonly {
 	ctx := context.Background()
 	cfg := config.DB()
 
@@ -95,7 +95,7 @@ func (db *storageImpl) Factories() components.FactoriesRepoReadonly {
 	return db.factories
 }
 
-func (db *storageImpl) StartTransaction(ctx context.Context) (components.StorageRepos, common.Error) {
+func (db *storageImpl) StartTransaction(ctx context.Context) (components.GlobalReposTx, common.Error) {
 	tx, err := db.conn.Begin(ctx)
 	if err != nil {
 		return nil, common.NewUnknownError(err)

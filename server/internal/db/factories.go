@@ -181,6 +181,7 @@ func decodeFactory(row dbq.Factory) (game.Factory, common.Error) {
 		FactoryID: game.FactoryID(row.ID),
 		BaseID:    game.BaseID(row.BaseID),
 		BuiltAt:   row.CreatedAt.Time,
+		Name:      row.Name,
 
 		Production: game.MakeFactoryProductionPeriodFrom(
 			row.UpdatedTo.Time,
@@ -246,7 +247,7 @@ func encodeFactoryData(factory game.Factory) factoryDataJSON {
 	data := factoryDataJSON{
 		Status:    byte(factory.Production.Status()),
 		Employees: utils.MapKeys(factory.Employees, func(wf game.WorkforceType) string { return wf.String() }),
-		Inventory: factory.Production.GetStartingInventory().ToMap(),
+		Inventory: factory.Production.GetStartingInventoryClone().ToMap(),
 		Equipment: utils.MapSlice(factory.Equipment, encodeFactoryEquipment),
 
 		UpgradeTarget: utils.MapSlice(factory.Upgrade.Equipment, func(eq game.FactoryUpgradeProjectEqipment) factoryDataEquipmentJSON {

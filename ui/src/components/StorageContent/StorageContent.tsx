@@ -130,7 +130,13 @@ export const StorageContent: Component<StorageContentProps> = (props) => {
                                 }
 
                                 emulateLinkClick(
-                                    { navigate, href: inventoryTransferRoute.render({ sourceId: props.storage.id }) },
+                                    {
+                                        navigate,
+                                        href: inventoryTransferRoute.render(
+                                            { location: props.storage.location },
+                                            { sourceId: props.storage.id },
+                                        ),
+                                    },
                                     ev,
                                 );
                             }}

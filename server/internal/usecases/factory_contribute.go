@@ -11,7 +11,7 @@ import (
 )
 
 type contributeToFactoryUsecase struct {
-	store components.Storage
+	store components.GlobalReposReadonly
 }
 
 type ContributeToFactoryUsecaseInput struct {
@@ -20,7 +20,7 @@ type ContributeToFactoryUsecaseInput struct {
 	// TODO: specify inventory id to withdraw materials from
 }
 
-func NewContributeToFactoryUsecase(store components.Storage) components.Usecase[ContributeToFactoryUsecaseInput] {
+func NewContributeToFactoryUsecase(store components.GlobalReposReadonly) components.Usecase[ContributeToFactoryUsecaseInput] {
 	return &contributeToFactoryUsecase{
 		store: store,
 	}

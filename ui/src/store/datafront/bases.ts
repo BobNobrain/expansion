@@ -28,6 +28,7 @@ export const dfBases = createDatafrontTable<BasesTableRow, BaseContent>({
             worldId: data.worldId,
             tileId: World.makeTileId(data.tileId),
             cityId: data.cityId,
+            name: data.name,
 
             created: new Date(data.established),
             operator: data.companyId,
@@ -56,6 +57,7 @@ export const dfBaseOverviews = createDatafrontTable<BaseOverviewsTableRow, BaseO
             worldId: data.worldId,
             tileId: World.makeTileId(data.tileId),
             cityId: data.cityId,
+            name: data.name,
             areaUsage: 0,
             employment: 0,
             inventoryUsage: 0,

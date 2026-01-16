@@ -179,6 +179,7 @@ func decodeBase(row dbq.Base) (game.Base, common.Error) {
 		WorldID:   game.CelestialID(row.WorldID),
 		TileID:    game.TileID(row.TileID),
 		CityID:    game.CityID(row.CityID),
+		Name:      row.Name,
 		Inventory: game.MakeInventoryFrom(baseData.Inventory),
 	}
 
@@ -194,5 +195,6 @@ func decodeBaseOverview(row dbq.BaseOverview) game.BaseOverview {
 		TileID:     game.TileID(row.TileID),
 		CityID:     game.CityID(row.CityID),
 		NFactories: int(row.NFactories),
+		Name:       row.Name,
 	}
 }

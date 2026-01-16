@@ -8,6 +8,7 @@ import {
 import { WorkforceData } from '@/domain/City';
 import { Inventory } from '@/domain/Inventory';
 import { createDatafrontTable } from '@/lib/datafront/table';
+import { mapValues } from '@/lib/misc';
 import {
     FactoriesQueryTypeByBaseID,
     type FactoriesQueryByBaseID,
@@ -16,7 +17,6 @@ import {
 } from '@/lib/net/types.generated';
 import { ws } from '@/lib/net/ws';
 import { updater, cleaner, parsePredictable } from './misc';
-import { mapValues } from '@/lib/misc';
 
 export const dfFactories = createDatafrontTable<FactoriesTableRow, Factory>({
     name: FactoriesTableName,
@@ -46,6 +46,7 @@ export const dfFactories = createDatafrontTable<FactoriesTableRow, Factory>({
             }),
 
             baseId: data.baseId,
+            name: data.name,
             createdAt: new Date(data.created),
             employees: data.employees,
             inventory: mapValues(data.inventory, parsePredictable),

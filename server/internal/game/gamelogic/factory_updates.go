@@ -62,15 +62,26 @@ func (l *FactoryUpdatesLogic) UpdateTo(f *game.Factory, now time.Time) bool {
 	return hasUpdated
 }
 
-func (l *FactoryUpdatesLogic) WithdrawItems(f *game.Factory, items game.InventoryDelta, now time.Time) bool {
+func (l *FactoryUpdatesLogic) AddItems(f *game.Factory, items game.InventoryDelta, now time.Time) bool {
 	_, after := f.Production.SplitAt(now)
-	hasSuccesfullyWithdrawn := after.GetStartingInventory().Remove(items)
-	if !hasSuccesfullyWithdrawn {
+	inv := after.GetStartingInventoryClone()
+
+	ok := inv.Add(items)
+	if !ok {
 		return false
 	}
-
-	f.Production = after
+	f.Production = after.WithStartingInventory(inv)
 	return true
+}
+
+func (l *FactoryUpdatesLogic) WithdrawItems(f *game.Factory, items game.InventoryDelta, now time.Time) game.InventoryDelta {
+	_, after := f.Production.SplitAt(now)
+	inv := after.GetStartingInventoryClone()
+
+	factualDelta := inv.RemoveAsMuchAsPossible(items)
+
+	f.Production = after.WithStartingInventory(inv)
+	return factualDelta
 }
 
 // type factoryUpdate struct {

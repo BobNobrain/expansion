@@ -11,6 +11,7 @@ export type BaseOverview = {
     worldId: string;
     tileId: string;
     cityId: number;
+    name: string;
 
     created: Date;
     operator: string;
@@ -29,6 +30,7 @@ export type BaseContent = {
     worldId: string;
     tileId: string;
     cityId: number;
+    name: string;
 
     created: Date;
     operator: string;
@@ -46,6 +48,7 @@ export type Factory = {
     id: number;
     baseId: number;
     status: FactoryStatus;
+    name: string;
     createdAt: Date;
     updatedTo: Date;
 

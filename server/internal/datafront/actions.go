@@ -65,6 +65,7 @@ func (gdf *GameDataFront) InitFactoryActions(
 	upgradeFactory components.Usecase[usecases.UpgradeFactoryUsecaseInput],
 	rebalanceFactory components.Usecase[usecases.RebalanceFactoryUsecaseInput],
 	contributeToFactory components.Usecase[usecases.ContributeToFactoryUsecaseInput],
+	transferFactoryItems components.Usecase[usecases.TransferFactoryItemsUsecaseInput],
 ) {
 	gdf.df.AttachAction(api.ActionCreateFactory, newActionFromUsecase(
 		createFactory,
@@ -137,6 +138,17 @@ func (gdf *GameDataFront) InitFactoryActions(
 			return usecases.ContributeToFactoryUsecaseInput{
 				FactoryID: game.FactoryID(payload.FactoryID),
 				Amounts:   game.MakeInventoryDeltaFrom(payload.Amounts),
+			}
+		},
+	))
+
+	gdf.df.AttachAction(api.ActionTransferFactoryItems, newActionFromUsecase(
+		transferFactoryItems,
+		func(payload api.TransferFactoryItemsPayload) usecases.TransferFactoryItemsUsecaseInput {
+			return usecases.TransferFactoryItemsUsecaseInput{
+				FactoryID:         game.FactoryID(payload.FactoryID),
+				Items:             game.MakeInventoryDeltaFrom(payload.Amounts),
+				FromFactoryToBase: payload.FromFactoryToBase,
 			}
 		},
 	))

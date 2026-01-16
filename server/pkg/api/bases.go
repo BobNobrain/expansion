@@ -19,6 +19,7 @@ type BasesTableRow struct {
 	TileID    int    `json:"tileId"`
 	CompanyID string `json:"companyId"`
 	CityID    int    `json:"cityId"`
+	Name      string `json:"name"`
 
 	CreatedAt time.Time `json:"established"`
 
@@ -51,6 +52,7 @@ type BaseOverviewsTableRow struct {
 	CompanyID  string `json:"companyId"`
 	CityID     int    `json:"cityId"`
 	NFactories int    `json:"nFactories"`
+	Name       string `json:"name"`
 
 	CreatedAt time.Time `json:"established"`
 }

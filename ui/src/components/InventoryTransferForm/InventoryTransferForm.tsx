@@ -6,11 +6,12 @@ import { createFormState, FormContextProvider, usePrefilledInitialValues } from 
 export type InventoryTransferFormResult = {
     selection: Inventory;
     targetStorageId: string;
+    sourceStorageId: string;
 };
 
 export type InventoryTransferFormProps = {
-    source: Storage | null;
-    targets: Storage[];
+    sourceId: string | null;
+    storages: Storage[];
 
     controllerRef?: (c: FormController<InventoryTransferFormResult>) => void;
     isLoading?: boolean;
@@ -18,20 +19,20 @@ export type InventoryTransferFormProps = {
 
 export const InventoryTransferForm: ParentComponent<InventoryTransferFormProps> = (props) => {
     const { state, updateState, ...rest } = createFormState({
-        targets: () => props.targets,
+        targets: () => props.storages,
     });
     const { controller, onDataUpdated } = createFormController<InventoryTransferFormResult>({
         validateAndGetResult: () => {
-            const { selectedTargetId, selection } = state;
+            const { selectedTargetId, selectedSourceId, selection } = state;
             if (Object.keys(selection).length === 0 || Object.values(selection).every((count) => count === 0)) {
                 return null;
             }
 
-            if (selectedTargetId === null) {
+            if (selectedTargetId === null || selectedSourceId === null) {
                 return null;
             }
 
-            return { selection, targetStorageId: selectedTargetId };
+            return { selection, targetStorageId: selectedTargetId, sourceStorageId: selectedSourceId };
         },
     });
     const updateAndNotify: typeof updateState = (...args: unknown[]) => {
@@ -43,8 +44,8 @@ export const InventoryTransferForm: ParentComponent<InventoryTransferFormProps> 
     useFormControllerRef(controller, props, 'controllerRef');
 
     usePrefilledInitialValues({
-        source: () => props.source,
-        targets: () => props.targets,
+        sourceId: () => props.sourceId,
+        allStorages: () => props.storages,
         update: updateAndNotify,
     });
 
@@ -54,8 +55,7 @@ export const InventoryTransferForm: ParentComponent<InventoryTransferFormProps> 
                 ...rest,
                 state,
                 updateState: updateAndNotify,
-                source: () => props.source,
-                targets: () => props.targets,
+                allStorages: () => props.storages,
                 isLoading: () => props.isLoading ?? false,
             }}
         >

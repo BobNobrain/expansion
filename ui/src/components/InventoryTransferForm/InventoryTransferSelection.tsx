@@ -6,19 +6,19 @@ import { useFormContext } from './state';
 import { TransferSelector } from './TransferSelector';
 
 export const InventoryTransferSelection: Component = () => {
-    const { source, isLoading, updateState, selectedCommodityIds } = useFormContext();
+    const { selectedSource, isLoading, updateState, selectedCommodityIds } = useFormContext();
 
     return (
         <Container padded>
-            <TransferSelector />
+            <TransferSelector editable />
 
             <StorageContent
-                storage={source()}
+                storage={selectedSource()}
                 inset
                 isLoading={isLoading()}
                 selection={selectedCommodityIds()}
                 onSelect={(cid) => {
-                    const storage = source();
+                    const storage = selectedSource();
 
                     updateState(({ selection }) => {
                         if (!storage) {
@@ -37,7 +37,7 @@ export const InventoryTransferSelection: Component = () => {
                     });
                 }}
                 onSelectAll={() => {
-                    const storage = source();
+                    const storage = selectedSource();
                     updateState(({ selection }) => {
                         if (!storage) {
                             return {};

@@ -56,8 +56,11 @@ export function createRouteTemplate<
     } => {
         const result: Record<string, unknown> = {};
         for (const key of Object.keys(defs)) {
+            const paramValueRaw = params[key];
+            const paramValueDecoded = paramValueRaw === undefined ? undefined : decodeURIComponent(paramValueRaw);
+
             if (defs[key as never]) {
-                const strValue = params[key];
+                const strValue = paramValueDecoded;
                 const paramDef = defs[key as never] as ParamDefinition<keyof Params>;
                 if (strValue === undefined) {
                     result[key] = paramDef.defaultValue;
@@ -65,7 +68,7 @@ export function createRouteTemplate<
                     result[key] = paramDef.parse(strValue) ?? paramDef.defaultValue;
                 }
             } else {
-                result[key] = params[key] as never;
+                result[key] = paramValueDecoded as never;
             }
         }
 
@@ -79,8 +82,9 @@ export function createRouteTemplate<
         } & {
             [Key in ExtractOptionalParams<Template>]?: Params[Key];
         },
+        query?: Record<string, string>,
     ) => {
-        return (
+        const pathname =
             '/' +
             fragments
                 .map((fragment) => {
@@ -88,14 +92,34 @@ export function createRouteTemplate<
                         return fragment;
                     }
 
-                    const name = fragment.endsWith('?')
-                        ? fragment.substring(1, fragment.length - 1)
-                        : fragment.substring(1);
-                    return params[name as never];
+                    const isOptional = fragment.endsWith('?');
+                    const name = isOptional ? fragment.substring(1, fragment.length - 1) : fragment.substring(1);
+
+                    const def = defs[name as keyof Params];
+                    const value = params[name as never];
+                    const provided = name in params;
+
+                    let strValue: string | undefined;
+                    if (provided) {
+                        strValue = (def.stringify ?? String)(value);
+                    } else if (!isOptional) {
+                        strValue = (def.stringify ?? String)(def.defaultValue);
+                    }
+
+                    return strValue === undefined ? undefined : encodeURIComponent(strValue);
                 })
                 .filter(Boolean as unknown as <T>(t: T | undefined) => t is T)
-                .join('/')
-        );
+                .join('/');
+
+        if (!query) {
+            return pathname;
+        }
+
+        const qs = Object.entries(query)
+            .map(([name, value]) => [encodeURIComponent(name), encodeURIComponent(value)].join('='))
+            .join('&');
+
+        return [pathname, qs].join('?');
     };
 
     return { template, parse, render };

@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 )
@@ -19,6 +20,7 @@ type BaseOverview struct {
 	TileID     TileID
 	CityID     CityID
 	NFactories int
+	Name       string
 }
 
 type Base struct {
@@ -28,98 +30,32 @@ type Base struct {
 	WorldID  CelestialID
 	TileID   TileID
 	CityID   CityID
+	Name     string
 
 	Inventory Inventory
 }
 
-type FactoryID int
-
-func (f FactoryID) String() string {
-	return strconv.Itoa(int(f))
+func (b *Base) AsStorage() Storage {
+	return b
 }
 
-type FactoryStaticOverview struct {
-	FactoryID FactoryID
-	BaseID    BaseID
-	WorldID   CelestialID
-	TileID    TileID
-	BuiltAt   time.Time
+func (b *Base) GetStorageID() StorageID {
+	return MakeBaseStorageID(b.ID)
 }
 
-type Factory struct {
-	FactoryID FactoryID
-	BaseID    BaseID
-	BuiltAt   time.Time
-
-	Equipment []FactoryEquipment
-	Employees map[WorkforceType]int
-
-	Production FactoryProductionPeriod
-
-	Upgrade FactoryUpgradeProject
+func (b *Base) GetName() string {
+	// TBD: base names
+	return fmt.Sprintf("Base at %s", MakeGalacticTileID(b.WorldID, b.TileID).String())
 }
 
-func MakeEmptyFactory() Factory {
-	now := time.Now()
-
-	return Factory{
-		BuiltAt: now,
-
-		Equipment: make([]FactoryEquipment, 0),
-		Employees: make(map[WorkforceType]int),
-
-		Production: MakeEmptyFactoryProductionPeriod(now),
-
-		Upgrade: FactoryUpgradeProject{
-			Equipment:   nil,
-			Progress:    nil,
-			LastUpdated: now,
-		},
-	}
+func (b *Base) GetInventoryRef() Inventory {
+	return b.Inventory
 }
 
-type FactoryEquipment struct {
-	EquipmentID EquipmentID
-	Count       int
-	Production  []FactoryProductionItem
+func (b *Base) GetDynamicInventoryCopy() DynamicInventory {
+	return nil
 }
 
-type FactoryProductionItem struct {
-	Recipe           Recipe
-	ManualEfficiency float64
-}
-
-type FactoryUpgradeProject struct {
-	Equipment   []FactoryUpgradeProjectEqipment
-	Progress    []ContributionHistoryItem
-	LastUpdated time.Time
-}
-
-type FactoryUpgradeProjectEqipment struct {
-	EquipmentID EquipmentID
-	Count       int
-	Production  []FactoryProductionPlan
-}
-
-func (fup FactoryUpgradeProject) IsEmpty() bool {
-	return len(fup.Equipment) == 0
-}
-func (fup FactoryUpgradeProject) IsPlanned() bool {
-	return !fup.IsEmpty() && !fup.IsInProgress()
-}
-func (fup FactoryUpgradeProject) IsInProgress() bool {
-	return len(fup.Progress) > 0
-}
-
-type FactoryRebalancePlan struct {
-	EquipmentRebalances []FactoryEquipmentRebalancePlan
-}
-
-type FactoryEquipmentRebalancePlan struct {
-	Production []FactoryProductionPlan
-}
-
-type FactoryProductionPlan struct {
-	RecipeID         RecipeID
-	ManualEfficiency float64
+func (b *Base) GetSizeLimit() StorageSize {
+	return MakeInfiniteStorageSize()
 }

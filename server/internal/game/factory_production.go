@@ -78,8 +78,10 @@ func (period FactoryProductionPeriod) NeedsUpdate(now time.Time) bool {
 	return !period.IsInfinite() && period.end.Before(now)
 }
 
-func (period FactoryProductionPeriod) GetStartingInventory() Inventory {
-	return period.inventory
+func (period FactoryProductionPeriod) GetStartingInventoryClone() Inventory {
+	// modifying this inventory will cause the FactoryProductionPeriod object to
+	// be broken, as its calculated end will no longer be correct
+	return period.inventory.Clone()
 }
 
 func (period FactoryProductionPeriod) Status() FactoryProductionStatus {
@@ -124,6 +126,12 @@ func (period FactoryProductionPeriod) SplitAt(t time.Time) (FactoryProductionPer
 	secondHalf.inventory = period.CalculateInventoryAt(t)
 
 	return firstHalf, secondHalf
+}
+
+func (period FactoryProductionPeriod) WithStartingInventory(inv Inventory) FactoryProductionPeriod {
+	period.inventory = inv
+	period.end, period.endReason = period.calcEnd()
+	return period
 }
 
 func (period FactoryProductionPeriod) AlterConfiguration(at time.Time, eqs []FactoryEquipment) FactoryProductionPeriod {

@@ -11,7 +11,7 @@ import {
     type FactoryDisplayEditResult,
 } from '@/components/FactoryDisplay';
 import { World } from '@/domain/World';
-import { useBlink } from '@/lib/solid/blink';
+import { createBlinker } from '@/lib/solid/blink';
 import { getBasesRoute } from '@/routes/bases';
 import { EditFactoryTab, factoryEditRoute, factoryViewRoute, ViewFactoryTab } from '@/routes/factories';
 import { TouchContentSingle } from '@/touch/components/TouchContentSingle/TouchContentSingle';
@@ -44,7 +44,7 @@ export const EditFactoryPage: Component = () => {
     const saveToken = createIdempotencyToken();
     const saveUpgradePlan = dfUpgradeFactory.use(saveToken.getToken);
 
-    const saveButtonColor = useBlink<TouchFooterActionColor>({ initialValue: 'semiprimary', durationMs: 500 });
+    const saveButtonColor = createBlinker<TouchFooterActionColor>({ initialValue: 'semiprimary', durationMs: 500 });
 
     const onSaveClick = () => {
         saveToken.aquire();

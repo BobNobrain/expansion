@@ -1,6 +1,8 @@
 import type { Predictable } from '@/lib/predictables';
 import type { Duration } from '@/lib/time';
 import type { CommodityData } from './Commodity';
+import type { BaseContent, Factory } from './Base';
+import { World } from './World';
 
 export type StorageSize = {
     /* tons */
@@ -111,9 +113,13 @@ export type Storage = {
     staticContent: Inventory;
     dynamicContent: DynamicInventory | null;
     sizeLimit: StorageSize;
+    location: string;
 };
 
 export namespace Storage {
+    const BASE_STORAGE_ID_PREFIX = 'B';
+    const FACTORY_STORAGE_ID_PREFIX = 'F';
+
     export function measureFilledPercentage(
         s: Storage,
         now: Date,
@@ -159,5 +165,63 @@ export namespace Storage {
             Inventory.addInto(result, DynamicInventory.sample(storage.dynamicContent, at));
         }
         return result;
+    }
+
+    export function craftFactoryStorageId(factoryId: Factory['id']): string {
+        return FACTORY_STORAGE_ID_PREFIX + factoryId.toString();
+    }
+    export function craftBaseStorageId(baseId: BaseContent['id']): string {
+        return BASE_STORAGE_ID_PREFIX + baseId.toString();
+    }
+    export function extractFactoryId(storageId: string): number | null {
+        if (storageId[0] !== FACTORY_STORAGE_ID_PREFIX) {
+            return null;
+        }
+
+        return Number.parseInt(storageId.substring(1));
+    }
+    export function extractBaseId(storageId: string): number | null {
+        if (storageId[0] !== BASE_STORAGE_ID_PREFIX) {
+            return null;
+        }
+
+        return Number.parseInt(storageId.substring(1));
+    }
+    export function getStorageTypeFromId(storageId: string): StorageType | null {
+        switch (storageId[0]) {
+            case BASE_STORAGE_ID_PREFIX:
+                return StorageType.Base;
+            case FACTORY_STORAGE_ID_PREFIX:
+                return StorageType.Factory;
+            default:
+                return null;
+        }
+    }
+
+    export function fromFactory(f: Factory, location: string | { worldId: string; tileId: string | number }): Storage {
+        const storageLocation =
+            typeof location === 'string' ? location : World.formatGalacticTileId(location.worldId, location.tileId);
+
+        return {
+            id: craftFactoryStorageId(f.id),
+            name: f.name,
+            type: StorageType.Factory,
+            sizeLimit: StorageSize.infinite(),
+            staticContent: Inventory.empty(),
+            dynamicContent: f.inventory,
+            location: storageLocation,
+        };
+    }
+
+    export function fromBaseContent(b: BaseContent): Storage {
+        return {
+            id: craftBaseStorageId(b.id),
+            name: b.name,
+            type: StorageType.Base,
+            sizeLimit: StorageSize.infinite(),
+            staticContent: b.inventory,
+            dynamicContent: null,
+            location: World.formatGalacticTileId(b.worldId, b.tileId),
+        };
     }
 }

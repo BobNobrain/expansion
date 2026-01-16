@@ -9,14 +9,14 @@ import (
 )
 
 type createFactoryUsecase struct {
-	store components.Storage
+	store components.GlobalReposReadonly
 }
 
 type CreateFactoryUsecaseInput struct {
 	BaseID game.BaseID
 }
 
-func NewCreateFactoryUsecase(store components.Storage) components.Usecase[CreateFactoryUsecaseInput] {
+func NewCreateFactoryUsecase(store components.GlobalReposReadonly) components.Usecase[CreateFactoryUsecaseInput] {
 	return &createFactoryUsecase{
 		store: store,
 	}

@@ -10,7 +10,7 @@ import (
 )
 
 type createBaseUsecase struct {
-	store components.Storage
+	store components.GlobalReposReadonly
 }
 
 type CreateBaseUsecaseInput struct {
@@ -19,7 +19,7 @@ type CreateBaseUsecaseInput struct {
 	Operator game.CompanyID
 }
 
-func NewCreateBaseUsecase(store components.Storage) components.Usecase[CreateBaseUsecaseInput] {
+func NewCreateBaseUsecase(store components.GlobalReposReadonly) components.Usecase[CreateBaseUsecaseInput] {
 	return &createBaseUsecase{
 		store: store,
 	}

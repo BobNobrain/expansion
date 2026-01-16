@@ -18,6 +18,7 @@ type FactoriesTableRow struct {
 	FactoryID int    `json:"id"`
 	BaseID    int    `json:"baseId"`
 	Status    string `json:"status"`
+	Name      string `json:"name"`
 
 	CreatedAt time.Time `json:"created"`
 	UpdatedTo time.Time `json:"updatedTo"`

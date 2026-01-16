@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS bases (
     city_id INTEGER NOT NULL REFERENCES cities,
     company_id UUID NOT NULL REFERENCES companies,
     established_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    name TEXT NOT NULL,
     data JSONB NOT NULL DEFAULT '{}'::JSONB
 );
 
@@ -32,6 +33,7 @@ CREATE TABLE IF NOT EXISTS factories (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_to TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    name TEXT NOT NULL,
     data JSONB NOT NULL DEFAULT '{}'::JSONB
 );
 
@@ -44,6 +46,7 @@ SELECT id,
     city_id,
     company_id,
     established_at,
+    name,
     COALESCE(base_factories.n_factories, 0) AS n_factories
 FROM bases
     LEFT JOIN (

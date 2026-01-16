@@ -16,7 +16,7 @@ import { TransferSelector } from './TransferSelector';
 import { Inventory, Storage } from '@/domain/Inventory';
 
 export const InventoryTransferAdjustment: Component = () => {
-    const { state, source, selectedCommodityIds, updateState } = useFormContext();
+    const { state, selectedSource, selectedCommodityIds, updateState } = useFormContext();
     const now = useNow('10s');
 
     const sliders = createMemo(() => {
@@ -26,7 +26,7 @@ export const InventoryTransferAdjustment: Component = () => {
             return {
                 cid,
                 available: () => {
-                    const storage = source();
+                    const storage = selectedSource();
                     if (!storage) {
                         return 0;
                     }
@@ -64,7 +64,7 @@ export const InventoryTransferAdjustment: Component = () => {
                         style="light"
                         onClick={() => {
                             updateState(({ selection }) => {
-                                const storage = source();
+                                const storage = selectedSource();
                                 if (!storage) {
                                     return {};
                                 }

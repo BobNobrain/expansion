@@ -29,6 +29,7 @@ import { useFactoryDisplayContext } from '../state';
 import { emulateLinkClick } from '@/lib/solid/emulateLinkClick';
 import { inventoryTransferRoute } from '@/routes/transfer';
 import { useNavigate } from '@solidjs/router';
+import { Storage } from '@/domain/Inventory';
 
 type FactoryInfo = {
     factory: Factory;
@@ -162,11 +163,30 @@ export const FactoryDisplayOverview: Component = () => {
                     <Button
                         square
                         style="light"
-                        loading={factory() === null}
+                        loading={worldId() === null || tileId() === null || factory() === null}
                         onClick={(ev) => {
+                            const wid = worldId();
+                            if (!wid) {
+                                return;
+                            }
+
+                            const tid = tileId();
+                            if (!tid) {
+                                return;
+                            }
+
+                            const fid = factory()?.id;
+                            if (!fid) {
+                                return;
+                            }
+
+                            const factoryLocation = World.formatGalacticTileId(wid, tid);
                             emulateLinkClick(
                                 {
-                                    href: inventoryTransferRoute.render({ sourceId: 'F' + (factory()?.id ?? '') }),
+                                    href: inventoryTransferRoute.render(
+                                        { location: factoryLocation },
+                                        { sourceId: Storage.craftFactoryStorageId(fid) },
+                                    ),
                                     navigate,
                                 },
                                 ev,

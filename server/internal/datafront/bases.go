@@ -131,6 +131,7 @@ func baseToApi(b game.Base) api.BasesTableRow {
 		CompanyID: string(b.Operator),
 		CityID:    int(b.CityID),
 		CreatedAt: b.Created,
+		Name:      b.Name,
 		Storage: api.BasesTableRowStorage{
 			Inventory: b.Inventory.ToMap(),
 		},

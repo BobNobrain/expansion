@@ -17,7 +17,7 @@ import (
 
 type Monolith struct {
 	// runner components.Runner
-	store components.Storage
+	store components.GlobalReposReadonly
 	gdf   *datafront.GameDataFront
 }
 
@@ -68,6 +68,7 @@ func (m *Monolith) Start() error {
 		usecases.NewUpgradeFactoryUsecase(store),
 		usecases.NewRebalanceFactoryUsecase(store),
 		usecases.NewContributeToFactoryUsecase(store),
+		usecases.NewTransferFactoryItemsUsecase(store),
 	)
 
 	if config.World().AllowCheats {

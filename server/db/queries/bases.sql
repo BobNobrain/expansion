@@ -5,9 +5,10 @@ INSERT INTO bases (
         tile_id,
         company_id,
         city_id,
+        name,
         data
     )
-VALUES ($1, $2, $3, $4, $5, $6);
+VALUES ($1, $2, $3, $4, $5, $6, $7);
 
 -- name: GetBaseByID :one
 SELECT *
@@ -51,6 +52,11 @@ WHERE id = ANY($1::INTEGER [ ]);
 -- name: UpdateBase :exec
 UPDATE bases
 SET data = $2
+WHERE id = $1;
+
+-- name: RenameBase :exec
+UPDATE bases
+SET name = $2
 WHERE id = $1;
 
 -- name: DestroyBase :exec

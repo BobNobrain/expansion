@@ -69,6 +69,19 @@ export namespace World {
         const tileId = typeof tileIdOrIndex === 'number' ? makeTileId(tileIdOrIndex) : tileIdOrIndex;
         return `${worldId}#${tileId}`;
     }
+    export function parseGalacticTileId(gtid: string): { worldId: string; tileId: string; tileIndex: number } | null {
+        const [worldId, tileId] = gtid.split('#');
+        if (!tileId || !worldId) {
+            return null;
+        }
+
+        const tileIndex = parseTileId(tileId);
+        if (tileIndex === undefined) {
+            return null;
+        }
+
+        return { worldId, tileId, tileIndex };
+    }
 }
 
 export type WorldTileConditions = {

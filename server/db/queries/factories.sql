@@ -1,6 +1,6 @@
 -- name: CreateFactory :exec
-INSERT INTO factories (base_id, data)
-VALUES ($1, $2);
+INSERT INTO factories (base_id, name, data)
+VALUES ($1, $2, $3);
 
 -- name: ResolveFactories :many
 SELECT *
@@ -11,6 +11,7 @@ WHERE id = ANY($1::INTEGER [ ]);
 SELECT factories.id,
     factories.base_id,
     factories.created_at,
+    factories.name,
     COALESCE(factory_base.world_id, ''),
     COALESCE(factory_base.tile_id, -1)
 FROM factories
@@ -32,6 +33,11 @@ UPDATE factories
 SET data = $2,
     updated_at = NOW(),
     updated_to = $3
+WHERE id = $1;
+
+-- name: RenameFactory :exec
+UPDATE factories
+SET name = $2
 WHERE id = $1;
 
 -- name: DestroyFactory :exec

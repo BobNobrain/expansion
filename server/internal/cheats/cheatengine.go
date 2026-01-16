@@ -9,7 +9,7 @@ import (
 )
 
 type Cheat interface {
-	Run(cheatCommand, components.StorageRepos, components.UsecaseContext) (common.Encodable, common.Error)
+	Run(cheatCommand, components.GlobalReposTx, components.UsecaseContext) (common.Encodable, common.Error)
 }
 
 type cheatEngine struct {
@@ -26,7 +26,7 @@ func NewCheatEngine() components.CheatEngine {
 	return engine
 }
 
-func (c *cheatEngine) Execute(cmd string, repos components.StorageRepos, context components.UsecaseContext) (common.Encodable, common.Error) {
+func (c *cheatEngine) Execute(cmd string, repos components.GlobalReposTx, context components.UsecaseContext) (common.Encodable, common.Error) {
 	parsed, err := ParseCheatCommand(cmd)
 	if err != nil {
 		return nil, err

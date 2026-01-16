@@ -56,3 +56,6 @@ export type DatafrontError = {
     details?: unknown;
     retry?: () => void;
 };
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type DfActionPayload<T> = T extends DatafrontAction<infer Payload, any> ? Payload : never;

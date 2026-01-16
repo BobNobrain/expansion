@@ -15,7 +15,7 @@ func newGiveCheat() Cheat {
 
 func (g *giveCheatImpl) Run(
 	cmd cheatCommand,
-	repos components.StorageRepos,
+	repos components.GlobalReposTx,
 	context components.UsecaseContext,
 ) (common.Encodable, common.Error) {
 	baseID := game.BaseID(cmd.GetNextArg("base", "baseId").Int())

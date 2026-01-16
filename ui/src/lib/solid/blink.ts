@@ -10,7 +10,7 @@ export type UseBlinkOptions<T> = {
     initialValue: T;
 };
 
-export function useBlink<T>({ initialValue, durationMs: defaultDuration }: UseBlinkOptions<T>): UseBlinkResult<T> {
+export function createBlinker<T>({ initialValue, durationMs: defaultDuration }: UseBlinkOptions<T>): UseBlinkResult<T> {
     const [getValue, setValue] = createSignal(initialValue);
     let timeoutId: number | undefined;
 

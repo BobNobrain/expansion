@@ -1,13 +1,13 @@
 import { createMemo, Show, type Component } from 'solid-js';
-import { useNavigate } from '@solidjs/router';
+import { useNavigate, useSearchParams } from '@solidjs/router';
 import { TabContent } from '@/atoms';
 import {
     InventoryTransferForm,
     InventoryTransferSelection,
     InventoryTransferAdjustment,
+    type InventoryTransferFormResult,
 } from '@/components/InventoryTransferForm';
-import { type Storage, Inventory, StorageSize, StorageType } from '@/domain/Inventory';
-import { createLinearPredictable } from '@/lib/predictables';
+import { Storage, StorageType } from '@/domain/Inventory';
 import { useFormController } from '@/lib/solid/form';
 import { inventoryTransferRoute, InventoryTransferTab } from '@/routes/transfer';
 import { useRouteInfo } from '@/routes/utils';
@@ -16,62 +16,69 @@ import {
     TouchFooterActionButton,
     TouchFooterActionLink,
     TouchFooterActions,
+    type TouchFooterActionColor,
 } from '@/touch/components/TouchFooterActions/TouchFooterActions';
 import { usePageContextBinding } from '@/touch/components/TouchPage';
+import { dfBasesByLocation, dfFactoriesByBaseId, dfTransferFactoryItems } from '@/store/datafront';
+import { World } from '@/domain/World';
+import { createIdempotencyToken, useSingleEntity } from '@/lib/datafront/utils';
+import { createBlinker } from '@/lib/solid/blink';
+import type { DfActionPayload } from '@/lib/datafront/types';
 
 export const InventoryTransferPage: Component = () => {
     const routeInfo = useRouteInfo(inventoryTransferRoute);
+    const [searchParams] = useSearchParams<{ sourceId?: string }>();
     const navigate = useNavigate();
 
-    const formController = useFormController();
-    const testNow = new Date();
+    const formController = useFormController<InventoryTransferFormResult>();
 
-    const source = createMemo((old): Storage | null => {
-        const id = routeInfo().sourceId;
-        if (!id) {
+    const tileBases = dfBasesByLocation.use(() => {
+        const location = routeInfo().location;
+        const parsed = World.parseGalacticTileId(location);
+        if (!parsed) {
             return null;
         }
 
-        if (old?.id === id) {
-            return old;
-        }
-
         return {
-            id,
-            type: StorageType.Factory,
-            name: 'Factory A',
-            staticContent: Inventory.from({
-                limestone: 10,
-                steelBeams: 20,
-            }),
-            dynamicContent: {
-                concrete: createLinearPredictable({ t0: testNow, x0: 10, deltaT: { h: 1 }, deltaX: 10 }),
-                steel: createLinearPredictable({ t0: testNow, x0: 50, deltaT: { h: 1 }, deltaX: -10 }),
-            },
-            sizeLimit: StorageSize.infinite(),
+            worldId: parsed.worldId,
+            tileId: parsed.tileIndex,
         };
     });
+    const tileBaseSingle = useSingleEntity(tileBases);
 
-    const targets = createMemo((): Storage[] => {
-        return [
-            {
-                id: '1',
-                type: StorageType.Factory,
-                name: 'Factory B',
-                staticContent: Inventory.empty(),
-                dynamicContent: null,
-                sizeLimit: StorageSize.infinite(),
-            },
-            {
-                id: '2',
-                type: StorageType.Base,
-                name: 'Base',
-                staticContent: Inventory.empty(),
-                dynamicContent: null,
-                sizeLimit: StorageSize.infinite(),
-            },
-        ];
+    const tileFactories = dfFactoriesByBaseId.use(() => {
+        const base = tileBaseSingle();
+        if (!base) {
+            return null;
+        }
+
+        return { baseId: base.id };
     });
+
+    const availableStorages = createMemo((): Storage[] => {
+        const base = tileBaseSingle();
+        const factories = Object.values(tileFactories.result());
+        const location = routeInfo().location;
+        const parsed = World.parseGalacticTileId(location);
+
+        const result: Storage[] = [];
+
+        if (base !== null) {
+            result.push(Storage.fromBaseContent(base));
+        }
+
+        if (factories.length && parsed) {
+            result.push(
+                ...factories.map((f) => Storage.fromFactory(f, { worldId: parsed.worldId, tileId: parsed.tileId })),
+            );
+        }
+
+        return result;
+    });
+
+    const idempotencyToken = createIdempotencyToken();
+    const transferAction = dfTransferFactoryItems.use(idempotencyToken.getToken);
+    const submitButtonColor = createBlinker<TouchFooterActionColor>({ initialValue: 'primary', durationMs: 500 });
 
     const Footer: Component = () => {
         return (
@@ -97,7 +104,31 @@ export const InventoryTransferPage: Component = () => {
                 </Show>
                 <Show
                     when={routeInfo().tab === InventoryTransferTab.Selection}
-                    fallback={<TouchFooterActionButton color="primary" text="Confirm" />}
+                    fallback={
+                        <TouchFooterActionButton
+                            color={submitButtonColor.getValue()}
+                            text="Confirm"
+                            onClick={() => {
+                                const result = formController.validateAndGetResult();
+                                if (!result) {
+                                    submitButtonColor.blink('error');
+                                    return;
+                                }
+
+                                idempotencyToken.aquire();
+                                transferAction.run(getTransferPayload(result), {
+                                    onError: () => {
+                                        submitButtonColor.blink('error');
+                                        idempotencyToken.release();
+                                    },
+                                    onSuccess: () => {
+                                        submitButtonColor.blink('success');
+                                        idempotencyToken.release();
+                                    },
+                                });
+                            }}
+                        />
+                    }
                 >
                     <TouchFooterActionLink
                         href={inventoryTransferRoute.render({ ...routeInfo(), tab: InventoryTransferTab.Adjustment })}
@@ -127,7 +158,12 @@ export const InventoryTransferPage: Component = () => {
 
     return (
         <TouchContentSingle>
-            <InventoryTransferForm source={source()} targets={targets()} controllerRef={formController.ref}>
+            <InventoryTransferForm
+                sourceId={searchParams.sourceId || null}
+                storages={availableStorages()}
+                isLoading={tileBases.isLoading() || tileFactories.isLoading() || transferAction.isLoading()}
+                controllerRef={formController.ref}
+            >
                 <TabContent
                     active={routeInfo().tab ?? InventoryTransferTab.Selection}
                     components={{
@@ -139,3 +175,24 @@ export const InventoryTransferPage: Component = () => {
         </TouchContentSingle>
     );
 };
+
+function getTransferPayload(result: InventoryTransferFormResult) {
+    const payload: DfActionPayload<typeof dfTransferFactoryItems> = {
+        factoryId: -1,
+        amounts: result.selection,
+        fromFactoryToBase: false,
+    };
+    switch (Storage.getStorageTypeFromId(result.sourceStorageId)) {
+        case StorageType.Factory:
+            payload.factoryId = Storage.extractFactoryId(result.sourceStorageId)!;
+            payload.fromFactoryToBase = true;
+            break;
+
+        case StorageType.Base:
+            payload.factoryId = Storage.extractFactoryId(result.targetStorageId)!;
+            payload.fromFactoryToBase = false;
+            break;
+    }
+
+    return payload;
+}

@@ -15,7 +15,7 @@ import (
 
 type exploreWorldUsecase struct {
 	wg    *worldgen.WorldGen
-	store components.Storage
+	store components.GlobalReposReadonly
 }
 
 type ExploreWorldUsecaseInput struct {
@@ -24,7 +24,7 @@ type ExploreWorldUsecaseInput struct {
 
 func NewExploreWorldUsecase(
 	wg *worldgen.WorldGen,
-	store components.Storage,
+	store components.GlobalReposReadonly,
 ) components.Usecase[ExploreWorldUsecaseInput] {
 	return &exploreWorldUsecase{
 		wg:    wg,

@@ -14,14 +14,14 @@ import (
 )
 
 type factoriesTable struct {
-	storage components.Storage
+	storage components.GlobalReposReadonly
 	sub     *events.Subscription
 
 	table     *dfcore.QueryableTable
 	qByBaseID *dfcore.TrackableTableQuery[api.FactoriesQueryByBaseID]
 }
 
-func (gdf *GameDataFront) InitFactories(storage components.Storage) {
+func (gdf *GameDataFront) InitFactories(storage components.GlobalReposReadonly) {
 	if gdf.factories != nil {
 		panic("GameDataFront.InitFactories() has already been called!")
 	}
@@ -111,6 +111,7 @@ func encodeFactory(f game.Factory) common.Encodable {
 		BaseID:    int(f.BaseID),
 		Status:    f.Production.Status().String(),
 		CreatedAt: f.BuiltAt,
+		Name:      f.Name,
 
 		UpdatedTo: f.Production.Start(),
 		Employees: utils.MapKeys(f.Employees, func(wf game.WorkforceType) string { return wf.String() }),
