@@ -18,7 +18,7 @@ import { FactoryStatusLabel } from '@/components/FactoryStatusLabel/FactoryStatu
 import { GameTimeLabel } from '@/components/GameTimeLabel/GameTimeLabel';
 import { OperationDisplay } from '@/components/OperationDisplay/OperationDisplay';
 import { Factory, type BaseContent } from '@/domain/Base';
-import { IconArea, IconEquipment, IconFactory, IconPlus } from '@/icons';
+import { IconArea, IconCross, IconEquipment, IconFactory, IconNametag, IconPlus } from '@/icons';
 import { buildingsAsset } from '@/lib/assetmanager';
 import { useAsset } from '@/lib/solid/asset';
 import { emulateLinkClick } from '@/lib/solid/emulateLinkClick';
@@ -30,6 +30,7 @@ import { useModalRouteState } from '@/routes/modals';
 import { dfFactoriesByBaseId } from '@/store/datafront';
 import { TouchModal } from '@/touch/components/TouchModal';
 import { CreateFactoryForm } from '@/views/CreateFactoryForm/CreateFactoryForm';
+import { RenameBaseForm } from '@/views/RenameBaseForm/RenameBaseForm';
 import { useBase } from '../hooks';
 
 const DEFS: DefinitionListItem<BaseContent>[] = [
@@ -125,11 +126,20 @@ export const TileBaseOverview: Component = () => {
     });
 
     const createFactoryModal = useModalRouteState('createFactory');
+    const renameBaseModal = useModalRouteState('renameBase');
 
     return (
         <>
             <PageHeader>
                 <PageHeaderTitle>Base Overview</PageHeaderTitle>
+                <PageHeaderActions pushRight>
+                    <Button square style="light" onClick={renameBaseModal.open}>
+                        <IconNametag size={32} />
+                    </Button>
+                    <Button square style="light">
+                        <IconCross size={32} color="error" />
+                    </Button>
+                </PageHeaderActions>
             </PageHeader>
             <Show
                 when={isLoading() || base()}
@@ -139,7 +149,7 @@ export const TileBaseOverview: Component = () => {
                     </OperationDisplay>
                 }
             >
-                <DefinitionList items={DEFS} value={base()} isLoading={isLoading()} />
+                <DefinitionList inset items={DEFS} value={base()} isLoading={isLoading()} />
             </Show>
 
             <PageHeader>
@@ -164,6 +174,7 @@ export const TileBaseOverview: Component = () => {
                 rows={Object.values(factories.result())}
                 columns={COLUMNS}
                 stickLeft
+                inset
                 onRowClick={(row, ev) => {
                     emulateLinkClick(
                         {
@@ -181,7 +192,10 @@ export const TileBaseOverview: Component = () => {
                             Create
                         </Button>
                     }
-                ></InfoDisplay>
+                >
+                    This base does not have any factories built. You need to create a factory for the base to start
+                    producing something.
+                </InfoDisplay>
             </DataTable>
 
             <TouchModal isOpen={createFactoryModal.isOpen()} onClose={createFactoryModal.close} title="Create Factory">
@@ -190,6 +204,15 @@ export const TileBaseOverview: Component = () => {
                     nFactoriesExisting={Object.keys(factories.result()).length}
                     onCancel={createFactoryModal.close}
                     onSuccess={createFactoryModal.close}
+                />
+            </TouchModal>
+
+            <TouchModal isOpen={renameBaseModal.isOpen()} onClose={renameBaseModal.close} title="Rename">
+                <RenameBaseForm
+                    baseId={base()?.id}
+                    currentName={base()?.name}
+                    onSuccess={renameBaseModal.close}
+                    onCancel={renameBaseModal.close}
                 />
             </TouchModal>
         </>

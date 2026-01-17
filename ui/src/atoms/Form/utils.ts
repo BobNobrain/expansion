@@ -41,9 +41,13 @@ export function createFormFieldState<T>(
         get,
         set: (value) => {
             set(value as never);
-            if (validity().type === 'error') {
-                validate();
-            }
+
+            // to avoid any unnecessary dependencies in effects where .set is used
+            setTimeout(() => {
+                if (validity().type === 'error') {
+                    validate();
+                }
+            }, 0);
         },
         update: (f) => {
             set(f);

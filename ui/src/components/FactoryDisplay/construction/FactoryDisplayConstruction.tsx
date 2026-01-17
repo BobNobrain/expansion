@@ -37,7 +37,7 @@ export const FactoryDisplayConstruction: Component = () => {
             <PageHeader>
                 <PageHeaderTitle>Construction Costs</PageHeaderTitle>
             </PageHeader>
-            <InventoryTable entries={inventoryEntries()} loading={buildings() === null}>
+            <InventoryTable inset entries={inventoryEntries()} loading={buildings() === null}>
                 <InfoDisplay title="Nothing to construct yet">
                     You need to add equipment to this factory to be able to construct it.
                 </InfoDisplay>

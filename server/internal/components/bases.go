@@ -1,6 +1,7 @@
 package components
 
 import (
+	"srv/internal/domain"
 	"srv/internal/game"
 	"srv/internal/utils/common"
 )
@@ -27,5 +28,6 @@ type BasesRepo interface {
 
 	CreateBase(CreateBasePayload) common.Error
 	UpdateBaseContent(game.Base) common.Error
+	RenameBase(game.BaseID, domain.UserID, string) common.Error
 	DeleteBase(game.BaseID) common.Error
 }

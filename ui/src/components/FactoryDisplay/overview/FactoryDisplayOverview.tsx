@@ -4,7 +4,6 @@ import {
     Button,
     Container,
     DefinitionList,
-    InfoDisplay,
     Link,
     PageHeader,
     PageHeaderActions,
@@ -14,22 +13,21 @@ import {
     Text,
     type DefinitionListItem,
 } from '@/atoms';
-import { Factory } from '@/domain/Base';
-import { World } from '@/domain/World';
 import { FactoryStatusLabel } from '@/components/FactoryStatusLabel/FactoryStatusLabel';
-import { InventoryTable, type InventoryEntry } from '@/components/Inventory';
-import { IconArea, IconEquipment, IconTransfer } from '@/icons';
+import { StorageContent } from '@/components/StorageContent/StorageContent';
+import { Factory } from '@/domain/Base';
+import { Storage } from '@/domain/Inventory';
+import { World } from '@/domain/World';
+import { IconArea, IconCross, IconEquipment, IconNametag } from '@/icons';
 import { buildingsAsset } from '@/lib/assetmanager';
 import { formatNumericId } from '@/lib/id';
-import { calcPredictableStandartSpeed } from '@/lib/predictables';
 import { useAsset } from '@/lib/solid/asset';
 import { formatInteger } from '@/lib/strings';
 import { getBasesRoute } from '@/routes/bases';
+import { useModalRouteState } from '@/routes/modals';
+import { TouchModal } from '@/touch/components/TouchModal';
+import { RenameFactoryForm } from '@/views/RenameFactoryForm/RenameFactoryForm';
 import { useFactoryDisplayContext } from '../state';
-import { emulateLinkClick } from '@/lib/solid/emulateLinkClick';
-import { inventoryTransferRoute } from '@/routes/transfer';
-import { useNavigate } from '@solidjs/router';
-import { Storage } from '@/domain/Inventory';
 
 type FactoryInfo = {
     factory: Factory;
@@ -42,6 +40,10 @@ type FactoryInfo = {
 };
 
 const DEFS: DefinitionListItem<FactoryInfo>[] = [
+    {
+        title: 'Name',
+        render: ({ factory }) => factory.name,
+    },
     {
         title: 'Status',
         render: ({ factory }) => <FactoryStatusLabel factory={factory} />,
@@ -107,7 +109,7 @@ const DEFS: DefinitionListItem<FactoryInfo>[] = [
 
 export const FactoryDisplayOverview: Component = () => {
     const { factory, isLoading, worldId, tileId, onUpgrade } = useFactoryDisplayContext();
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
     const buildings = useAsset(buildingsAsset);
 
     const info = createMemo((): FactoryInfo | null => {
@@ -131,77 +133,52 @@ export const FactoryDisplayOverview: Component = () => {
         };
     });
 
-    const inventoryEntries = createMemo((): InventoryEntry[] => {
+    const storage = createMemo(() => {
         const f = factory();
         if (!f) {
-            return [];
+            return null;
         }
 
-        const inv = f.inventory;
-        const now = new Date(); // TODO: this is not reactive, which may cause issues later
+        const wid = worldId();
+        if (!wid) {
+            return null;
+        }
 
-        return Object.entries(inv).map(([cid, amount]): InventoryEntry => {
-            return {
-                commodity: cid,
-                // TODO: get these values from API instead
-                amount: amount,
-                speed: calcPredictableStandartSpeed(amount, now),
-            };
-        });
+        const tid = tileId();
+        if (!tid) {
+            return null;
+        }
+
+        return Storage.fromFactory(f, { worldId: wid, tileId: tid });
     });
+
+    const renameModal = useModalRouteState('renameFactory');
 
     return (
         <>
             <PageHeader>
                 <PageHeaderTitle>Overview</PageHeaderTitle>
-            </PageHeader>
-            <DefinitionList items={DEFS} value={info()} isLoading={factory() === null} />
-
-            <PageHeader>
-                <PageHeaderTitle>Inventory</PageHeaderTitle>
                 <PageHeaderActions pushRight>
-                    <Button
-                        square
-                        style="light"
-                        loading={worldId() === null || tileId() === null || factory() === null}
-                        onClick={(ev) => {
-                            const wid = worldId();
-                            if (!wid) {
-                                return;
-                            }
-
-                            const tid = tileId();
-                            if (!tid) {
-                                return;
-                            }
-
-                            const fid = factory()?.id;
-                            if (!fid) {
-                                return;
-                            }
-
-                            const factoryLocation = World.formatGalacticTileId(wid, tid);
-                            emulateLinkClick(
-                                {
-                                    href: inventoryTransferRoute.render(
-                                        { location: factoryLocation },
-                                        { sourceId: Storage.craftFactoryStorageId(fid) },
-                                    ),
-                                    navigate,
-                                },
-                                ev,
-                            );
-                        }}
-                    >
-                        <IconTransfer size={32} />
+                    <Button square style="light" onClick={renameModal.open}>
+                        <IconNametag size={32} />
+                    </Button>
+                    <Button square style="light">
+                        <IconCross size={32} color="error" />
                     </Button>
                 </PageHeaderActions>
             </PageHeader>
-            <InventoryTable entries={inventoryEntries()} loading={isLoading()} display="both">
-                <InfoDisplay title="Nothing to show">
-                    This factory does not produce or consume anything, and the storage is empty.
-                </InfoDisplay>
-            </InventoryTable>
+            <DefinitionList inset items={DEFS} value={info()} isLoading={factory() === null} />
+
+            <StorageContent inset storage={storage()} isLoading={isLoading()} allowTransfer />
+
+            <TouchModal isOpen={renameModal.isOpen()} onClose={renameModal.close} title="Rename">
+                <RenameFactoryForm
+                    factoryId={factory()?.id}
+                    currentName={factory()?.name}
+                    onSuccess={renameModal.close}
+                    onCancel={renameModal.close}
+                />
+            </TouchModal>
         </>
     );
 };

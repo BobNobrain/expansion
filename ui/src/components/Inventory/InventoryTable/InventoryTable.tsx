@@ -8,6 +8,7 @@ import { renderConstantSpeed } from '@/lib/time';
 import type { InventoryEntryWithData, InventoryEntry, InventoryDisplayMode } from '../types';
 import { getDeltaColor, getDisplaySettings, useEnrichedEntries } from '../utils';
 import styles from './InventoryTable.module.css';
+import { renderPredictableSpeed } from '@/lib/predictables';
 
 export type InventoryTableProps = {
     loading?: boolean;
@@ -95,25 +96,34 @@ const AmountCell: Component<{ row: InventoryEntryWithData; showQuantizedSize: bo
 };
 
 const SpeedCell: Component<{ row: InventoryEntryWithData; showQuantizedSize: boolean }> = (props) => {
-    const size = createMemo(() => {
-        if (!props.row.speed) {
+    const now = useNow('10s');
+
+    const speed = createMemo(() => {
+        if (props.row.speed !== undefined) {
+            const amount = props.row.speed;
+            return {
+                m: renderConstantSpeed(amount * props.row.mass, Inventory.STANDARD_TIME_DELTA, { unit: 't' }),
+                v: renderConstantSpeed(amount * props.row.volume, Inventory.STANDARD_TIME_DELTA, { unit: 'm³' }),
+            };
+        }
+
+        if (!props.row.amount) {
             return null;
         }
 
-        const amount = props.row.speed;
         return {
-            m: renderConstantSpeed(amount * props.row.mass, Inventory.STANDARD_TIME_DELTA, { unit: 't' }),
-            v: renderConstantSpeed(amount * props.row.volume, Inventory.STANDARD_TIME_DELTA, { unit: 'm³' }),
+            m: renderPredictableSpeed(props.row.amount, now(), { unit: 't', multiplier: props.row.mass }),
+            v: renderPredictableSpeed(props.row.amount, now(), { unit: 'm³', multiplier: props.row.volume }),
         };
     });
 
     const deltaColor = createMemo(() => {
-        const speed = props.row.speed;
-        if (!speed) {
+        const delta = speed()?.m;
+        if (!delta) {
             return undefined;
         }
 
-        return speed > 0 ? 'success' : 'error';
+        return getDeltaColor(delta);
     });
 
     return (
@@ -127,13 +137,13 @@ const SpeedCell: Component<{ row: InventoryEntryWithData; showQuantizedSize: boo
                 </Show>
             }
         >
-            <Show when={size()} fallback={<Text>--</Text>}>
+            <Show when={speed()} fallback={<Text>--</Text>}>
                 <Container direction="column" secondaryAlignment="end">
                     <Text size="small" color={deltaColor()}>
-                        {size()!.m}
+                        {speed()!.m}
                     </Text>
                     <Text size="small" color={deltaColor()}>
-                        {size()!.v}
+                        {speed()!.v}
                     </Text>
                 </Container>
             </Show>

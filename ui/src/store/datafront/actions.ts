@@ -22,6 +22,10 @@ import {
     ActionContributeToUpgrade,
     type TransferFactoryItemsPayload,
     ActionTransferFactoryItems,
+    type RenameFactoryPayload,
+    ActionRenameFactory,
+    type RenameBasePayload,
+    ActionRenameBase,
 } from '@/lib/net/types.generated';
 import { ws } from '@/lib/net/ws';
 
@@ -31,6 +35,7 @@ export const dfExploreWorld = createDatafrontAction<ExploreWorldPayload>({ name:
 export const dfFoundCity = createDatafrontAction<FoundCityPayload>({ name: ActionFoundCity, ws });
 
 export const dfCreateBase = createDatafrontAction<CreateBasePayload>({ name: ActionCreateBase, ws });
+export const dfRenameBase = createDatafrontAction<RenameBasePayload>({ name: ActionRenameBase, ws });
 export const dfRemoveBase = createDatafrontAction<RemoveBasePayload>({ name: ActionRemoveBase, ws });
 
 export const dfCreateFactory = createDatafrontAction<CreateFactoryPayload>({ name: ActionCreateFactory, ws });
@@ -42,6 +47,10 @@ export const dfContributeToFactory = createDatafrontAction<ContributeToFactoryPa
 });
 export const dfTransferFactoryItems = createDatafrontAction<TransferFactoryItemsPayload>({
     name: ActionTransferFactoryItems,
+    ws,
+});
+export const dfRenameFactory = createDatafrontAction<RenameFactoryPayload>({
+    name: ActionRenameFactory,
     ws,
 });
 

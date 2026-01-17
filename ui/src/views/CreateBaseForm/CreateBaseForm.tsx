@@ -1,5 +1,15 @@
 import { type Component, createMemo } from 'solid-js';
-import { Banner, Button, Container, Form, FormActions, FormField, Text, TextInput } from '@/atoms';
+import {
+    Banner,
+    Button,
+    Container,
+    createFormFieldState,
+    Form,
+    FormActions,
+    FormField,
+    TextInput,
+    useValidateAll,
+} from '@/atoms';
 import type { City } from '@/domain/City';
 import { type Company } from '@/domain/Company';
 import { World } from '@/domain/World';
@@ -27,9 +37,25 @@ export const CreateBaseForm: Component<CreateBaseFormProps> = (props) => {
         return all[ids[0]];
     });
 
+    const defaultName = createMemo(() => {
+        return `Base at ${location()}`;
+    });
+
+    const baseName = createFormFieldState('', {
+        validateOnChange: false,
+        validator: (_value) => {
+            return { type: 'ok' };
+        },
+    });
+    const validateForm = useValidateAll([baseName]);
+
     const onSubmit = () => {
         const operator = selectedCompany();
         if (!operator) {
+            return;
+        }
+
+        if (!validateForm()) {
             return;
         }
 
@@ -38,6 +64,7 @@ export const CreateBaseForm: Component<CreateBaseFormProps> = (props) => {
                 worldId: props.worldId,
                 tileId: World.parseTileId(props.tileId)!,
                 operator: operator.id,
+                name: baseName.get(),
             },
             {
                 onSuccess: props.onSuccess,
@@ -52,9 +79,15 @@ export const CreateBaseForm: Component<CreateBaseFormProps> = (props) => {
             </Banner>
             <Container background="light" padded>
                 <FormField>
-                    <Text size="large" tag="div">
-                        Details
-                    </Text>
+                    <TextInput
+                        label="Base Name"
+                        placeholder={defaultName()}
+                        value={baseName.get()}
+                        onUpdate={baseName.set}
+                        validity={baseName.validity()}
+                        onBlur={baseName.validate}
+                        clearable
+                    />
                 </FormField>
                 <FormField>
                     <TextInput label="Location" value={location()} disabled />

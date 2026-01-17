@@ -1,67 +1,19 @@
-import { createMemo, createSignal, Show, type Component } from 'solid-js';
-import { Button, PageHeader, PageHeaderActions, PageHeaderIcon, PageHeaderTitle } from '@/atoms';
-import { type InventoryEntry, InventoryTable, InventoryGrid } from '@/components/Inventory';
-import { IconCalendar, IconGrid, IconStorage, IconTable, IconTransfer } from '@/icons';
-import { createConstantPredictable } from '@/lib/predictables';
+import { createMemo, type Component } from 'solid-js';
 import { useBase } from '../hooks';
-
-type DisplayMode = 'grid' | 'table';
+import { StorageContent } from '@/components/StorageContent/StorageContent';
+import { Storage } from '@/domain/Inventory';
 
 export const TileBaseInventory: Component = () => {
-    const { base } = useBase();
+    const { base, isLoading } = useBase();
 
-    const inventoryEntries = createMemo(() => {
-        const inventory = base()?.inventory;
-        if (!inventory) {
-            return [];
+    const storage = createMemo(() => {
+        const b = base();
+        if (!b) {
+            return null;
         }
 
-        return Object.entries(inventory).map(([cid, amount]): InventoryEntry => {
-            return {
-                commodity: cid,
-                amount: createConstantPredictable(amount),
-            };
-        });
+        return Storage.fromBaseContent(b);
     });
 
-    const [displayMode, setDisplayMode] = createSignal<DisplayMode>('grid');
-    const setDisplayModeGrid = () => setDisplayMode('grid');
-    const setDisplayModeTable = () => setDisplayMode('table');
-
-    return (
-        <>
-            <PageHeader>
-                <PageHeaderTitle>Inventory</PageHeaderTitle>
-                <PageHeaderIcon icon={IconStorage} text="35%" />
-                <PageHeaderIcon icon={IconCalendar} text="14d" />
-                <PageHeaderActions pushRight>
-                    <Button
-                        square
-                        style="light"
-                        color={displayMode() === 'grid' ? 'primary' : undefined}
-                        onClick={setDisplayModeGrid}
-                    >
-                        <IconGrid size={32} block />
-                    </Button>
-                    <Button
-                        square
-                        style="light"
-                        color={displayMode() === 'table' ? 'primary' : undefined}
-                        onClick={setDisplayModeTable}
-                    >
-                        <IconTable size={32} block />
-                    </Button>
-                    <Button square style="light">
-                        <IconTransfer size={32} block />
-                    </Button>
-                </PageHeaderActions>
-            </PageHeader>
-            <Show when={displayMode() === 'grid'}>
-                <InventoryGrid entries={inventoryEntries()} />
-            </Show>
-            <Show when={displayMode() === 'table'}>
-                <InventoryTable entries={inventoryEntries()} />
-            </Show>
-        </>
-    );
+    return <StorageContent storage={storage()} isLoading={isLoading()} inset allowTransfer showStats />;
 };

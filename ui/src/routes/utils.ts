@@ -36,6 +36,7 @@ type ParamDefinition<T> = {
     defaultValue: T;
     parse: (value: string) => T | null;
     stringify?: (value: T) => string;
+    alwaysRender?: boolean;
 };
 
 export function createRouteTemplate<
@@ -102,7 +103,7 @@ export function createRouteTemplate<
                     let strValue: string | undefined;
                     if (provided) {
                         strValue = (def.stringify ?? String)(value);
-                    } else if (!isOptional) {
+                    } else if (!isOptional || def.alwaysRender) {
                         strValue = (def.stringify ?? String)(def.defaultValue);
                     }
 
@@ -146,8 +147,12 @@ export const integerParam: ParamDefinition<number> = {
     },
 };
 
-export const enumParam = <T extends string>(values: T[]): ParamDefinition<T> => {
+export const enumParam = <T extends string>(
+    values: T[],
+    options?: Pick<ParamDefinition<string>, 'alwaysRender'>,
+): ParamDefinition<T> => {
     return {
+        ...options,
         defaultValue: values[0],
         parse: (value) => {
             if (!values.includes(value as T)) {

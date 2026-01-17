@@ -7,6 +7,7 @@ const (
 
 	// base management
 	ActionCreateBase = "base.create"
+	ActionRenameBase = "base.rename"
 	ActionRemoveBase = "base.remove"
 
 	// base factories
@@ -15,6 +16,7 @@ const (
 	ActionChangeUpgradeProject = "factory.upgrade"
 	ActionContributeToUpgrade  = "factory.contribute"
 	ActionTransferFactoryItems = "factory.transfer"
+	ActionRenameFactory        = "factory.rename"
 
 	// inventory management
 	ActionTransferItems = "transferItems"
@@ -39,6 +41,10 @@ type CreateBasePayload struct {
 	TileID   int    `json:"tileId"`
 	Operator string `json:"operator"`
 	Name     string `json:"name"`
+}
+type RenameBasePayload struct {
+	BaseID   int    `json:"baseId"`
+	BaseName string `json:"name"`
 }
 type RemoveBasePayload struct {
 	BaseID int `json:"baseId"`
@@ -73,6 +79,11 @@ type TransferFactoryItemsPayload struct {
 	FactoryID         int                `json:"factoryId"`
 	FromFactoryToBase bool               `json:"fromFactoryToBase"`
 	Amounts           map[string]float64 `json:"amounts"`
+}
+
+type RenameFactoryPayload struct {
+	FactoryID   int    `json:"factoryId"`
+	FactoryName string `json:"name"`
 }
 
 type FoundCityPayload struct {

@@ -66,7 +66,7 @@ const InventoryGridItem: Component<{
                     props.item.amount!.predict(at) * (props.mode === 'M' ? props.item.mass : props.item.volume),
             },
             now(),
-            { unit: 't' },
+            { unit: props.mode === 'M' ? 't' : 'm³' },
         );
     });
 

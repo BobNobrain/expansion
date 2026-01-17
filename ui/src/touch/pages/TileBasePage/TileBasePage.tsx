@@ -1,10 +1,9 @@
 import { createMemo, type Component } from 'solid-js';
-import { TabContent, type TabHeader, TabsList } from '@/atoms';
+import { Container, TabContent, type TabHeader, TabsList } from '@/atoms';
 import { IconFlag, IconStorage } from '@/icons';
 import { useTileBaseRouteInfo, getBasesRoute, TileBaseTab } from '@/routes/bases';
 import { TouchContentSingle } from '@/touch/components/TouchContentSingle/TouchContentSingle';
 import { useBasesPageContextBinding } from '../WorldBasesPage/binding';
-// import { TileBaseFactories } from './tabs/TileBaseFactories';
 import { TileBaseInventory } from './tabs/TileBaseInventory';
 import { TileBaseOverview } from './tabs/TileBaseOverview';
 
@@ -22,11 +21,6 @@ export const TileBasePage: Component = () => {
                 icon: IconFlag,
                 href: getBasesRoute({ ...route, tab: TileBaseTab.Overview }),
             },
-            // {
-            //     title: 'Production',
-            //     icon: IconFactory,
-            //     href: getBasesRoute({ ...route, tab: TileBaseTab.Factories }),
-            // },
             {
                 title: 'Inventory',
                 icon: IconStorage,
@@ -38,14 +32,15 @@ export const TileBasePage: Component = () => {
     return (
         <TouchContentSingle>
             <TabsList style="pagetop" scrollable tabs={tabs()} />
-            <TabContent
-                active={routeInfo().tab}
-                components={{
-                    [TileBaseTab.Overview]: TileBaseOverview,
-                    // [TileBaseTab.Factories]: TileBaseFactories,
-                    [TileBaseTab.Inventory]: TileBaseInventory,
-                }}
-            />
+            <Container padded>
+                <TabContent
+                    active={routeInfo().tab}
+                    components={{
+                        [TileBaseTab.Overview]: TileBaseOverview,
+                        [TileBaseTab.Inventory]: TileBaseInventory,
+                    }}
+                />
+            </Container>
         </TouchContentSingle>
     );
 };

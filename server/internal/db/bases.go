@@ -6,6 +6,7 @@ import (
 	"errors"
 	"srv/internal/components"
 	"srv/internal/db/dbq"
+	"srv/internal/domain"
 	"srv/internal/game"
 	"srv/internal/utils"
 	"srv/internal/utils/common"
@@ -144,6 +145,18 @@ func (b *basesRepoImpl) UpdateBaseContent(base game.Base) common.Error {
 	})
 	if dberr != nil {
 		return makeDBError(jerr, "BasesRepo::UpdateBaseContent")
+	}
+
+	return nil
+}
+
+func (b *basesRepoImpl) RenameBase(bid game.BaseID, uid domain.UserID, name string) common.Error {
+	dberr := b.q.RenameBase(b.ctx, dbq.RenameBaseParams{
+		ID:   int32(bid),
+		Name: name,
+	})
+	if dberr != nil {
+		return makeDBError(dberr, "BasesRepo::RenameBase")
 	}
 
 	return nil

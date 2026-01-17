@@ -1,6 +1,6 @@
 import { createMemo, type Component } from 'solid-js';
 import { useNavigate } from '@solidjs/router';
-import { type TabHeader, TabsList, TabContent } from '@/atoms';
+import { type TabHeader, TabsList, TabContent, Container } from '@/atoms';
 import {
     FactoryDisplay,
     FactoryDisplayEquipment,
@@ -122,43 +122,45 @@ export const ViewFactoryPage: Component = () => {
     return (
         <TouchContentSingle>
             <TabsList style="pagetop" scrollable tabs={tabs()} />
-            <FactoryDisplay
-                factory={factory.result()}
-                editable={false}
-                isLoading={isFactoryLoading()}
-                availableArea={500}
-                tileId={base.result()?.tileId ?? null}
-                worldId={base.result()?.worldId ?? null}
-                baseInventory={baseInventory()}
-                tileConditions={tileConditions()}
-                dynamicRecipes={dynamicRecipes()}
-                onUpgrade={(f, ev) => {
-                    let href: string;
-                    let replace = false;
-                    if (Factory.hasUpgradePlanned(f) && routeInfo().tab !== ViewFactoryTab.Upgrade) {
-                        href = factoryViewRoute.render({ factoryId: f.id, tab: ViewFactoryTab.Upgrade });
-                        replace = true;
-                    } else {
-                        href = factoryEditRoute.render({ factoryId: f.id });
-                    }
+            <Container padded>
+                <FactoryDisplay
+                    factory={factory.result()}
+                    editable={false}
+                    isLoading={isFactoryLoading()}
+                    availableArea={500}
+                    tileId={base.result()?.tileId ?? null}
+                    worldId={base.result()?.worldId ?? null}
+                    baseInventory={baseInventory()}
+                    tileConditions={tileConditions()}
+                    dynamicRecipes={dynamicRecipes()}
+                    onUpgrade={(f, ev) => {
+                        let href: string;
+                        let replace = false;
+                        if (Factory.hasUpgradePlanned(f) && routeInfo().tab !== ViewFactoryTab.Upgrade) {
+                            href = factoryViewRoute.render({ factoryId: f.id, tab: ViewFactoryTab.Upgrade });
+                            replace = true;
+                        } else {
+                            href = factoryEditRoute.render({ factoryId: f.id });
+                        }
 
-                    emulateLinkClick({ navigate, href, replace }, ev);
-                }}
-                onSubmitContribution={onContributeClick}
-                isSubmittingContribution={contribute.isLoading()}
-                isRebalanceInProgress={rebalance.isLoading()}
-                onRebalance={onRebalanceClick}
-            >
-                <TabContent
-                    active={routeInfo().tab ?? ViewFactoryTab.Overview}
-                    components={{
-                        [ViewFactoryTab.Overview]: FactoryDisplayOverview,
-                        [ViewFactoryTab.Upgrade]: FactoryDisplayUpgrade,
-                        [ViewFactoryTab.Production]: FactoryDisplayEquipment,
-                        [ViewFactoryTab.Workforce]: FactoryDisplayWorkforce,
+                        emulateLinkClick({ navigate, href, replace }, ev);
                     }}
-                />
-            </FactoryDisplay>
+                    onSubmitContribution={onContributeClick}
+                    isSubmittingContribution={contribute.isLoading()}
+                    isRebalanceInProgress={rebalance.isLoading()}
+                    onRebalance={onRebalanceClick}
+                >
+                    <TabContent
+                        active={routeInfo().tab ?? ViewFactoryTab.Overview}
+                        components={{
+                            [ViewFactoryTab.Overview]: FactoryDisplayOverview,
+                            [ViewFactoryTab.Upgrade]: FactoryDisplayUpgrade,
+                            [ViewFactoryTab.Production]: FactoryDisplayEquipment,
+                            [ViewFactoryTab.Workforce]: FactoryDisplayWorkforce,
+                        }}
+                    />
+                </FactoryDisplay>
+            </Container>
         </TouchContentSingle>
     );
 };

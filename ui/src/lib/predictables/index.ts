@@ -73,8 +73,17 @@ export function calcPredictableStandartSpeed(p: Predictable, at: Date): number {
     return calcPredictableDelta(p, at, Inventory.STANDARD_TIME_DELTA);
 }
 
-export function renderPredictableSpeed(p: Predictable, at: Date, opts?: RenderSpeedOptions): string {
+export function renderPredictableSpeed(
+    p: Predictable,
+    at: Date,
+    opts?: RenderSpeedOptions & { multiplier?: number },
+): string {
     const timeDelta: Duration = { h: 1 };
-    const xDelta = calcPredictableDelta(p, at, timeDelta);
+
+    let xDelta = calcPredictableDelta(p, at, timeDelta);
+    if (opts?.multiplier) {
+        xDelta *= opts.multiplier;
+    }
+
     return renderConstantSpeed(xDelta, timeDelta, opts);
 }

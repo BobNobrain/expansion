@@ -68,5 +68,5 @@ export const StorageTotals: Component<{ totals: Inventory; capacity: StorageSize
         };
     });
 
-    return <DefinitionList items={DEFS} value={value()} />;
+    return <DefinitionList inset items={DEFS} value={value()} />;
 };

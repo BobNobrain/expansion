@@ -11,7 +11,7 @@ import {
     InfoDisplay,
 } from '@/atoms';
 import { GameTimeLabel } from '@/components/GameTimeLabel/GameTimeLabel';
-import { IconCross, IconDocument, IconEnvelope, IconUser } from '@/icons';
+import { IconDocument, IconEnvelope, IconExit, IconUser } from '@/icons';
 import { useNow } from '@/lib/solid/useNow';
 import { useAuth } from '@/store/auth';
 import { dfCompaniesByOwnerId, dfMe } from '@/store/datafront';
@@ -41,8 +41,8 @@ export const SidePanelContent: Component = () => {
                         </Show>
                     </Text>
                 </Container>
-                <Button style="text" onClick={logout}>
-                    <IconCross size={16} />
+                <Button square style="text" onClick={logout}>
+                    <IconExit size={32} />
                 </Button>
             </Container>
 

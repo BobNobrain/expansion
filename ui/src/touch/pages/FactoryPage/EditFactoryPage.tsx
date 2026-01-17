@@ -1,6 +1,6 @@
 import { createEffect, createMemo, type Component } from 'solid-js';
 import { useNavigate } from '@solidjs/router';
-import { TabContent, TabsList, type TabHeader } from '@/atoms';
+import { Container, TabContent, TabsList, type TabHeader } from '@/atoms';
 import { IconConstruction, IconFactory, IconPeople, IconStorage } from '@/icons';
 import {
     FactoryDisplay,
@@ -10,10 +10,15 @@ import {
     FactoryDisplayWorkforce,
     type FactoryDisplayEditResult,
 } from '@/components/FactoryDisplay';
+import { Factory } from '@/domain/Base';
 import { World } from '@/domain/World';
+import { createIdempotencyToken } from '@/lib/datafront/utils';
 import { createBlinker } from '@/lib/solid/blink';
+import { useFormController } from '@/lib/solid/form';
 import { getBasesRoute } from '@/routes/bases';
 import { EditFactoryTab, factoryEditRoute, factoryViewRoute, ViewFactoryTab } from '@/routes/factories';
+import { useRouteInfo } from '@/routes/utils';
+import { dfUpgradeFactory } from '@/store/datafront';
 import { TouchContentSingle } from '@/touch/components/TouchContentSingle/TouchContentSingle';
 import {
     TouchFooterActionButton,
@@ -23,11 +28,6 @@ import {
 } from '@/touch/components/TouchFooterActions/TouchFooterActions';
 import { usePageContextBinding } from '@/touch/components/TouchPage';
 import { useFactoryRelatedData } from './hooks';
-import { dfUpgradeFactory } from '@/store/datafront';
-import { createIdempotencyToken } from '@/lib/datafront/utils';
-import { useFormController } from '@/lib/solid/form';
-import { Factory } from '@/domain/Base';
-import { useRouteInfo } from '@/routes/utils';
 
 export const EditFactoryPage: Component = () => {
     const routeInfo = useRouteInfo(factoryEditRoute);
@@ -164,28 +164,30 @@ export const EditFactoryPage: Component = () => {
     return (
         <TouchContentSingle>
             <TabsList style="pagetop" scrollable tabs={tabs()} />
-            <FactoryDisplay
-                factory={factory.result()}
-                editable={isEditable()}
-                isLoading={isFactoryLoading()}
-                availableArea={500}
-                tileId={base.result()?.tileId ?? null}
-                worldId={base.result()?.worldId ?? null}
-                baseInventory={baseInventory()}
-                tileConditions={tileConditions()}
-                dynamicRecipes={dynamicRecipes()}
-                formControllerRef={formController.ref}
-            >
-                <TabContent
-                    active={routeInfo().tab ?? EditFactoryTab.Production}
-                    components={{
-                        [EditFactoryTab.Production]: FactoryDisplayEquipment,
-                        [EditFactoryTab.Inventory]: FactoryDisplayProduction,
-                        [EditFactoryTab.Workforce]: FactoryDisplayWorkforce,
-                        [EditFactoryTab.Construction]: FactoryDisplayConstruction,
-                    }}
-                />
-            </FactoryDisplay>
+            <Container padded>
+                <FactoryDisplay
+                    factory={factory.result()}
+                    editable={isEditable()}
+                    isLoading={isFactoryLoading()}
+                    availableArea={500}
+                    tileId={base.result()?.tileId ?? null}
+                    worldId={base.result()?.worldId ?? null}
+                    baseInventory={baseInventory()}
+                    tileConditions={tileConditions()}
+                    dynamicRecipes={dynamicRecipes()}
+                    formControllerRef={formController.ref}
+                >
+                    <TabContent
+                        active={routeInfo().tab ?? EditFactoryTab.Production}
+                        components={{
+                            [EditFactoryTab.Production]: FactoryDisplayEquipment,
+                            [EditFactoryTab.Inventory]: FactoryDisplayProduction,
+                            [EditFactoryTab.Workforce]: FactoryDisplayWorkforce,
+                            [EditFactoryTab.Construction]: FactoryDisplayConstruction,
+                        }}
+                    />
+                </FactoryDisplay>
+            </Container>
         </TouchContentSingle>
     );
 };

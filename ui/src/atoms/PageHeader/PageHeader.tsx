@@ -30,7 +30,7 @@ export const PageHeaderIcon: Component<PageHeaderIconProps> = (props) => {
             <Show when={props.text}>
                 <span class={styles.iconText}>
                     <Show when={props.isTextLoading} fallback={props.text}>
-                        <SkeletonText length={props.loadingSkeletonLength} />
+                        <SkeletonText length={props.loadingSkeletonLength ?? 3} />
                     </Show>
                 </span>
             </Show>

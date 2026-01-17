@@ -9,11 +9,12 @@ import {
     PageHeaderActions,
     PageHeaderTitle,
 } from '@/atoms';
+import { Inventory, Storage } from '@/domain/Inventory';
+import { IconArrowLeftLimit, IconArrowRightLimit } from '@/icons';
 import { useNow } from '@/lib/solid/useNow';
 import { ContributionSlider } from '../ContributionSlider/ContributionSlider';
 import { useFormContext } from './state';
 import { TransferSelector } from './TransferSelector';
-import { Inventory, Storage } from '@/domain/Inventory';
 
 export const InventoryTransferAdjustment: Component = () => {
     const { state, selectedSource, selectedCommodityIds, updateState } = useFormContext();
@@ -46,6 +47,7 @@ export const InventoryTransferAdjustment: Component = () => {
                 <PageHeaderTitle>Adjust amounts</PageHeaderTitle>
                 <PageHeaderActions pushRight>
                     <Button
+                        square
                         style="light"
                         onClick={() => {
                             updateState('selection', (selection) => {
@@ -58,9 +60,10 @@ export const InventoryTransferAdjustment: Component = () => {
                             });
                         }}
                     >
-                        Zero
+                        <IconArrowLeftLimit size={32} />
                     </Button>
                     <Button
+                        square
                         style="light"
                         onClick={() => {
                             updateState(({ selection }) => {
@@ -80,7 +83,7 @@ export const InventoryTransferAdjustment: Component = () => {
                             });
                         }}
                     >
-                        Max
+                        <IconArrowRightLimit size={32} />
                     </Button>
                 </PageHeaderActions>
             </PageHeader>

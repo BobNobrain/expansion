@@ -95,7 +95,7 @@ export const FactoryDisplayEquipment: Component = () => {
                 <PageHeaderIcon icon={IconEquipment} text={state.factoryEquipment.length.toString()} />
                 <EquipmentActions />
             </PageHeader>
-            <Container hasGap padded>
+            <Container hasGap>
                 <For
                     each={state.factoryEquipment}
                     fallback={

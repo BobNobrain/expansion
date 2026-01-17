@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"srv/internal/db/dbq"
+	"srv/internal/domain"
 	"srv/internal/game"
 	"srv/internal/game/gamelogic"
 	"srv/internal/utils"
@@ -166,6 +167,18 @@ func (b *factoriesRepoImpl) UpdateBaseFactory(factory game.Factory) common.Error
 	})
 	if dberr != nil {
 		return makeDBError(dberr, "FactoriesRepo::UpdateBaseFactory")
+	}
+	return nil
+}
+
+func (b *factoriesRepoImpl) RenameFactory(fid game.FactoryID, uid domain.UserID, newName string) common.Error {
+	dberr := b.q.RenameFactory(b.ctx, dbq.RenameFactoryParams{
+		ID:   int32(fid),
+		Name: newName,
+	})
+
+	if dberr != nil {
+		return makeDBError(dberr, "FactoriesRepo::RenameFactory")
 	}
 	return nil
 }

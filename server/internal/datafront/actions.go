@@ -47,6 +47,7 @@ func (gdf *GameDataFront) InitCityActions(foundCity components.Usecase[usecases.
 
 func (gdf *GameDataFront) InitBaseActions(
 	createBase components.Usecase[usecases.CreateBaseUsecaseInput],
+	renameBase components.Usecase[usecases.RenameBaseUsecaseInput],
 ) {
 	gdf.df.AttachAction(api.ActionCreateBase, newActionFromUsecase(
 		createBase,
@@ -58,6 +59,16 @@ func (gdf *GameDataFront) InitBaseActions(
 			}
 		},
 	))
+
+	gdf.df.AttachAction(api.ActionRenameBase, newActionFromUsecase(
+		renameBase,
+		func(payload api.RenameBasePayload) usecases.RenameBaseUsecaseInput {
+			return usecases.RenameBaseUsecaseInput{
+				BaseID:   game.BaseID(payload.BaseID),
+				BaseName: payload.BaseName,
+			}
+		},
+	))
 }
 
 func (gdf *GameDataFront) InitFactoryActions(
@@ -66,6 +77,7 @@ func (gdf *GameDataFront) InitFactoryActions(
 	rebalanceFactory components.Usecase[usecases.RebalanceFactoryUsecaseInput],
 	contributeToFactory components.Usecase[usecases.ContributeToFactoryUsecaseInput],
 	transferFactoryItems components.Usecase[usecases.TransferFactoryItemsUsecaseInput],
+	renameFactory components.Usecase[usecases.RenameFactoryUsecaseInput],
 ) {
 	gdf.df.AttachAction(api.ActionCreateFactory, newActionFromUsecase(
 		createFactory,
@@ -150,6 +162,16 @@ func (gdf *GameDataFront) InitFactoryActions(
 				FactoryID:         game.FactoryID(payload.FactoryID),
 				Items:             game.MakeInventoryDeltaFrom(payload.Amounts),
 				FromFactoryToBase: payload.FromFactoryToBase,
+			}
+		},
+	))
+
+	gdf.df.AttachAction(api.ActionRenameFactory, newActionFromUsecase(
+		renameFactory,
+		func(payload api.RenameFactoryPayload) usecases.RenameFactoryUsecaseInput {
+			return usecases.RenameFactoryUsecaseInput{
+				FactoryID:   game.FactoryID(payload.FactoryID),
+				FactoryName: payload.FactoryName,
 			}
 		},
 	))

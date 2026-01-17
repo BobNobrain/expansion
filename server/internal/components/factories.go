@@ -1,6 +1,7 @@
 package components
 
 import (
+	"srv/internal/domain"
 	"srv/internal/game"
 	"srv/internal/game/gamelogic"
 	"srv/internal/utils/common"
@@ -19,5 +20,6 @@ type FactoriesRepo interface {
 
 	CreateBaseFactory(game.Factory) common.Error
 	UpdateBaseFactory(game.Factory) common.Error
+	RenameFactory(game.FactoryID, domain.UserID, string) common.Error
 	DeleteBaseFactory(game.FactoryID) common.Error
 }

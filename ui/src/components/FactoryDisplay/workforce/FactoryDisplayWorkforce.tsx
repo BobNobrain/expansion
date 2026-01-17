@@ -57,7 +57,7 @@ export const FactoryDisplayWorkforce: Component = () => {
             <PageHeader>
                 <PageHeaderTitle>Jobs</PageHeaderTitle>
             </PageHeader>
-            <DataTable columns={COLUMNS} rows={rows()}>
+            <DataTable inset columns={COLUMNS} rows={rows()}>
                 <InfoDisplay title="No jobs">
                     This factory does not require workers and will not create jobs.
                 </InfoDisplay>

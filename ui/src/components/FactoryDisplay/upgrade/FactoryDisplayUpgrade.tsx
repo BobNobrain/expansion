@@ -10,17 +10,17 @@ import {
     Text,
     type DefinitionListItem,
 } from '@/atoms';
+import { ContributionHistory } from '@/components/ContributionHistory/ContributionHistory';
 import { ContributionSlider } from '@/components/ContributionSlider/ContributionSlider';
+import { GameTimeLabel } from '@/components/GameTimeLabel/GameTimeLabel';
 import { Factory } from '@/domain/Base';
 import { Contribution } from '@/domain/Contribution';
-import { useFactoryDisplayContext } from '../state';
-import { formatInteger } from '@/lib/strings';
+import { IconArea, IconArrowRightLimit, IconEquipment, IconHammer } from '@/icons';
 import { useAsset } from '@/lib/solid/asset';
 import { buildingsAsset } from '@/lib/assetmanager';
-import { GameTimeLabel } from '@/components/GameTimeLabel/GameTimeLabel';
-import { IconArea, IconEquipment, IconHammer, IconUnknown } from '@/icons';
+import { formatInteger } from '@/lib/strings';
+import { useFactoryDisplayContext } from '../state';
 import { createContributionState } from './contribution';
-import { ContributionHistory } from '@/components/ContributionHistory/ContributionHistory';
 
 type UpgradeInfo = {
     deltaEquipment: number;
@@ -125,13 +125,13 @@ export const FactoryDisplayUpgrade: Component = () => {
                     </Button>
                 </PageHeaderActions>
             </PageHeader>
-            <DefinitionList value={info()} items={DEFS} isLoading={isLoading()} />
+            <DefinitionList inset value={info()} items={DEFS} isLoading={isLoading()} />
 
             <PageHeader>
                 <PageHeaderTitle>Contribute</PageHeaderTitle>
                 <PageHeaderActions pushRight>
                     <Button square style="light" onClick={fillAll}>
-                        <IconUnknown size={32} />
+                        <IconArrowRightLimit size={32} />
                     </Button>
                     <Button
                         square

@@ -107,10 +107,10 @@
     cursor: wait;
 }
 
-.button > svg:first-child:not(:last-child) {
+.button:not(.square) > svg:first-child {
     margin-left: -8px;
 }
-.button > svg:last-child:not(:first-child) {
+.button:not(.square) > svg:last-child {
     margin-right: -8px;
 }
 
