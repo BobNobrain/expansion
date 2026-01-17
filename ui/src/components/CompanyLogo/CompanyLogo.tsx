@@ -10,7 +10,7 @@ export type CompanyLogoProps = {
 export const CompanyLogo: Component<CompanyLogoProps> = (props) => {
     // TBD
     return (
-        <div style="text-align: center; align-content: center; height: 100%; background: var(--p-main-100)">
+        <div style="text-align: center; align-content: center; height: 100%; min-height: 75px; max-height: 100%; background: var(--p-main-100)">
             <Text size="h1" bold>
                 {props.companyName ?? 'Loading...'}
             </Text>

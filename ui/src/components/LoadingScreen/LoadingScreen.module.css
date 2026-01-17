@@ -1,0 +1,68 @@
+.wrapper {
+    padding-top: 48px;
+    padding-bottom: 64px;
+    overflow: hidden;
+    contain: paint;
+}
+
+.message {
+    text-align: center;
+}
+
+.loaders {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    padding-top: 24px;
+}
+
+.loader {
+    width: 24px;
+    height: 24px;
+
+    will-change: transform, background-color, box-shadow;
+
+    animation: loader-bouncing infinite alternate ease-in-out 1s, loader-blinking infinite alternate ease-in-out 1s;
+}
+
+.loader0, .loader1, .loader2, .loader3, .loader4 {
+    composes: loader;
+}
+
+.loader0 {
+    animation-delay: -1.0s;
+}
+.loader1 {
+    animation-delay: -0.8s;
+}
+.loader2 {
+    animation-delay: -0.6s;
+}
+.loader3 {
+    animation-delay: -0.4s;
+}
+.loader4 {
+    animation-delay: -0.2s;
+}
+
+@keyframes loader-bouncing {
+    0% {
+        transform: scaleY(1);
+    }
+    100% {
+        transform: scaleY(3);
+    }
+}
+@keyframes loader-blinking {
+    0% {
+        background-color: var(--p-main-900-25);
+        box-shadow: 0 0 0 var(--p-main-900-25);
+    }
+    50% {
+        background-color: var(--p-primary-500);
+    }
+    100% {
+        background-color: var(--p-primary-700);
+        box-shadow: 0 0 8px var(--p-main-900);
+    }
+}

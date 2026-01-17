@@ -37,12 +37,12 @@ func (srv *httpServerImpl) serveAuthAPI() {
 
 	srv.server.HandleFunc("/api/logout", func(w http.ResponseWriter, r *http.Request) {
 		_, err := checkTokenCookie(r, srv.auth)
+		clearTokenCookie(w)
 		if err != nil {
 			respondError(w, http.StatusUnauthorized, transport.NewUnauthorizedError())
 			return
 		}
 
-		clearTokenCookie(w)
 		respondJson(w, http.StatusOK, &api.LogoutResponseBody{Ok: true})
 	})
 }

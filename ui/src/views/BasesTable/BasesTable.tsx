@@ -14,6 +14,7 @@ import { dfCities } from '@/store/datafront';
 export type BasesTableProps = {
     bases: UseTableResult<BaseOverview>;
     empty?: JSX.Element;
+    inset?: boolean;
 };
 
 type BasesListRow = {
@@ -77,6 +78,7 @@ export const BasesTable: Component<BasesTableProps> = (props) => {
 
     return (
         <DataTable
+            inset={props.inset}
             columns={BASES_COLUMNS}
             rows={basesList()}
             onRowClick={(row, ev) => {

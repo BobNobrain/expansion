@@ -1,14 +1,23 @@
 import type { Component } from 'solid-js';
-import { DefinitionList, PageHeader, PageHeaderIcon, PageHeaderTitle, type DefinitionListItem } from '@/atoms';
+import {
+    Container,
+    DefinitionList,
+    InfoDisplay,
+    PageHeader,
+    PageHeaderIcon,
+    PageHeaderTitle,
+    type DefinitionListItem,
+} from '@/atoms';
 import { CompanyLogo } from '@/components/CompanyLogo/CompanyLogo';
 import { GameTimeLabel } from '@/components/GameTimeLabel/GameTimeLabel';
 import type { Company } from '@/domain/Company';
-import { IconBriefcase } from '@/icons';
+import { IconBriefcase, IconFlag } from '@/icons';
 import { companyRoute } from '@/routes/misc';
 import { useRouteInfo } from '@/routes/utils';
-import { dfCompanies } from '@/store/datafront';
+import { dfBaseOverviewsByCompanyId, dfCompanies } from '@/store/datafront';
 import { TouchContentDouble } from '@/touch/components/TouchContentDouble/TouchContentDouble';
 import { UserLink } from '@/views/UserLink/UserLink';
+import { BasesTable } from '@/views/BasesTable/BasesTable';
 
 const COMPANY_DEFS: DefinitionListItem<Company>[] = [
     {
@@ -32,6 +41,8 @@ export const CompanyPage: Component = () => {
     const routeInfo = useRouteInfo(companyRoute);
     const company = dfCompanies.useSingle(() => routeInfo().cid || null);
 
+    const bases = dfBaseOverviewsByCompanyId.use(() => ({ companyId: routeInfo().cid }));
+
     return (
         <TouchContentDouble
             display={
@@ -44,12 +55,32 @@ export const CompanyPage: Component = () => {
             height="l"
             initiallyExpanded
         >
-            <PageHeader>
-                <PageHeaderTitle>Company</PageHeaderTitle>
-                <PageHeaderIcon icon={IconBriefcase} />
-            </PageHeader>
+            <Container padded>
+                <PageHeader>
+                    <PageHeaderTitle>Company</PageHeaderTitle>
+                    <PageHeaderIcon icon={IconBriefcase} />
+                </PageHeader>
 
-            <DefinitionList items={COMPANY_DEFS} value={company.result()} isLoading={company.isLoading()} />
+                <DefinitionList inset items={COMPANY_DEFS} value={company.result()} isLoading={company.isLoading()} />
+
+                <PageHeader>
+                    <PageHeaderTitle>Company Bases</PageHeaderTitle>
+                    <PageHeaderIcon
+                        icon={IconFlag}
+                        text={Object.keys(bases.result()).length.toString()}
+                        isTextLoading={bases.isLoading()}
+                    />
+                </PageHeader>
+                <BasesTable
+                    inset
+                    bases={bases}
+                    empty={
+                        <InfoDisplay title="No bases">
+                            This company has not established any bases anywhere in the universe.
+                        </InfoDisplay>
+                    }
+                />
+            </Container>
         </TouchContentDouble>
     );
 };

@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"srv/internal/components"
 	"srv/internal/transport"
-	"time"
 )
 
 const tokenCookieName = "token"
@@ -26,8 +25,9 @@ func clearTokenCookie(w http.ResponseWriter) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     tokenCookieName,
 		Value:    "",
-		Expires:  time.Now(),
-		Secure:   true,
+		MaxAge:   -1,
+		Path:     "/",
+		Secure:   false, // TODO: for local development
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 	})
@@ -42,7 +42,7 @@ func checkTokenCookie(r *http.Request, auth components.Authenticator) (*componen
 	return auth.CheckToken(tokenCookie.Value)
 }
 
-func respondJson(w http.ResponseWriter, statusCode int, jsonData interface{}) {
+func respondJson(w http.ResponseWriter, statusCode int, jsonData any) {
 	w.WriteHeader(statusCode)
 	w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(jsonData)

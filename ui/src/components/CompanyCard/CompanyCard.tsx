@@ -9,11 +9,12 @@ import styles from './CompanyCard.module.css';
 export type CompanyCardProps = {
     company: Company | null;
     isLoading?: boolean;
+    onClick?: (ev: MouseEvent) => void;
 };
 
 export const CompanyCard: Component<CompanyCardProps> = (props) => {
     return (
-        <Island>
+        <Island onClick={props.onClick}>
             <Container direction="row" hasGap>
                 <div class={styles.logoCanvas}>
                     <CompanyLogo

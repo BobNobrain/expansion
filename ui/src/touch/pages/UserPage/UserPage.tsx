@@ -1,9 +1,12 @@
 import { type Component } from 'solid-js';
 import { useNavigate } from '@solidjs/router';
 import {
+    Button,
+    Container,
     DataTable,
     DefinitionList,
     PageHeader,
+    PageHeaderActions,
     PageHeaderIcon,
     PageHeaderTitle,
     type DataTableColumn,
@@ -13,7 +16,7 @@ import { GameTimeLabel } from '@/components/GameTimeLabel/GameTimeLabel';
 import { OperationDisplay } from '@/components/OperationDisplay/OperationDisplay';
 import type { Company } from '@/domain/Company';
 import type { User } from '@/domain/User';
-import { IconBriefcase, IconUser } from '@/icons';
+import { IconBriefcase, IconDocument, IconEnvelope, IconUser } from '@/icons';
 import { emulateLinkClick } from '@/lib/solid/emulateLinkClick';
 import { companyRoute, userRoute } from '@/routes/misc';
 import { useRouteInfo } from '@/routes/utils';
@@ -55,37 +58,48 @@ export const UserPage: Component = () => {
 
     return (
         <TouchContentSingle>
-            <PageHeader>
-                <PageHeaderTitle>User Info</PageHeaderTitle>
-                <PageHeaderIcon icon={IconUser} />
-            </PageHeader>
-            <DefinitionList items={USER_DEFS} value={user.result()} isLoading={user.isLoading()} />
+            <Container padded>
+                <PageHeader>
+                    <PageHeaderTitle>User Info</PageHeaderTitle>
+                    <PageHeaderIcon icon={IconUser} />
+                    <PageHeaderActions pushRight>
+                        <Button square style="light">
+                            <IconEnvelope size={32} />
+                        </Button>
+                        <Button square style="light">
+                            <IconDocument size={32} />
+                        </Button>
+                    </PageHeaderActions>
+                </PageHeader>
+                <DefinitionList inset items={USER_DEFS} value={user.result()} isLoading={user.isLoading()} />
 
-            <PageHeader>
-                <PageHeaderTitle>User Companies</PageHeaderTitle>
-                <PageHeaderIcon
-                    icon={IconBriefcase}
-                    isTextLoading={userCompanies.isLoading()}
-                    text={Object.keys(userCompanies.result()).length.toString()}
-                    loadingSkeletonLength={2}
-                />
-            </PageHeader>
+                <PageHeader>
+                    <PageHeaderTitle>User Companies</PageHeaderTitle>
+                    <PageHeaderIcon
+                        icon={IconBriefcase}
+                        isTextLoading={userCompanies.isLoading()}
+                        text={Object.keys(userCompanies.result()).length.toString()}
+                        loadingSkeletonLength={2}
+                    />
+                </PageHeader>
 
-            <DataTable
-                columns={COMPANY_COLUMNS}
-                rows={Object.values(userCompanies.result())}
-                onRowClick={(company, ev) => {
-                    emulateLinkClick({ href: companyRoute.render({ cid: company.id }), navigate }, ev);
-                }}
-            >
-                <OperationDisplay
-                    title="No companies"
-                    error={userCompanies.error()}
-                    loading={userCompanies.isLoading()}
+                <DataTable
+                    inset
+                    columns={COMPANY_COLUMNS}
+                    rows={Object.values(userCompanies.result())}
+                    onRowClick={(company, ev) => {
+                        emulateLinkClick({ href: companyRoute.render({ cid: company.id }), navigate }, ev);
+                    }}
                 >
-                    This user has not registered any companies yet.
-                </OperationDisplay>
-            </DataTable>
+                    <OperationDisplay
+                        title="No companies"
+                        error={userCompanies.error()}
+                        loading={userCompanies.isLoading()}
+                    >
+                        This user has not registered any companies yet.
+                    </OperationDisplay>
+                </DataTable>
+            </Container>
         </TouchContentSingle>
     );
 };

@@ -1,5 +1,5 @@
 import { Show, type Component } from 'solid-js';
-import { InlineLoader } from '@/atoms';
+import { LoadingScreen } from '@/components/LoadingScreen/LoadingScreen';
 import { LogInForm } from '@/components/LogInGuard/LogInForm/LogInForm';
 import { ws } from '@/lib/net/ws';
 import { useAuth } from '@/store/auth';
@@ -14,7 +14,7 @@ export const TouchLoginModal: Component = () => {
                 <LogInForm loading={isLoading()} onSubmit={login} error={error()} />
             </Show>
             <Show when={ws.isConnecting()}>
-                <InlineLoader /> Connecting...
+                <LoadingScreen />
             </Show>
         </TouchModal>
     );

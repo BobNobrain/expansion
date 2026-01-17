@@ -16,11 +16,15 @@ import { useNow } from '@/lib/solid/useNow';
 import { useAuth } from '@/store/auth';
 import { dfCompaniesByOwnerId, dfMe } from '@/store/datafront';
 import { CompanyCard } from '@/components/CompanyCard/CompanyCard';
+import { emulateLinkClick } from '@/lib/solid/emulateLinkClick';
+import { useNavigate } from '@solidjs/router';
+import { companyRoute } from '@/routes/misc';
 
 export const SidePanelContent: Component = () => {
     const { logout } = useAuth();
     const me = dfMe.use();
     const now = useNow();
+    const navigate = useNavigate();
 
     const userCompanies = dfCompaniesByOwnerId.use(() => (me.value() ? { ownerId: me.value()!.user.id } : null));
 
@@ -47,7 +51,20 @@ export const SidePanelContent: Component = () => {
             </Container>
 
             <For each={Object.values(userCompanies.result())} fallback={<CompanyCard company={null} isLoading />}>
-                {(c) => <CompanyCard company={c} />}
+                {(c) => (
+                    <CompanyCard
+                        company={c}
+                        onClick={(ev) => {
+                            emulateLinkClick(
+                                {
+                                    href: companyRoute.render({ cid: c.id }),
+                                    navigate,
+                                },
+                                ev,
+                            );
+                        }}
+                    />
+                )}
             </For>
 
             <PageHeader>

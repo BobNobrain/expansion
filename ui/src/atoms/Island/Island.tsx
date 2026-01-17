@@ -8,6 +8,7 @@ export type IslandProps = {
     color?: SemanticColor | 'background';
     style?: IslandStyle;
     padded?: boolean;
+    onClick?: (ev: MouseEvent) => void;
 };
 
 export const Island: ParentComponent<IslandProps> = (props) => {
@@ -19,6 +20,7 @@ export const Island: ParentComponent<IslandProps> = (props) => {
                 [styles[props.style ?? 'solid']]: true,
                 [styles.padded]: props.padded,
             }}
+            onClick={props.onClick}
         >
             {props.children}
         </div>
