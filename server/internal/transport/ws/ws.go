@@ -57,6 +57,7 @@ func (c *wsClient) handleInbox() {
 			ClientID: c.id,
 			OnBehalf: c.user.ID,
 			Type:     parsed.Type,
+			Received: time.Now(),
 			Request:  parsed.Request,
 		})
 

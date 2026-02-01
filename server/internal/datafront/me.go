@@ -3,6 +3,7 @@ package datafront
 import (
 	"srv/internal/components"
 	"srv/internal/datafront/dfcore"
+	"srv/internal/domain"
 	"srv/internal/utils/common"
 	"srv/pkg/api"
 )
@@ -22,9 +23,9 @@ func (gdf *GameDataFront) InitMeSingleton(users components.UserRepoReadonly) {
 	gdf.me = me
 }
 
-func (me *meSingleton) getValue(ctx dfcore.DFRequestContext) (common.Encodable, common.Error) {
+func (me *meSingleton) getValue(ctx domain.RequestContext) (common.Encodable, common.Error) {
 	user, err := me.users.Get(components.GetUserRequest{
-		UserID: ctx.OnBehalf,
+		UserID: ctx.UserID,
 	})
 
 	if err != nil {

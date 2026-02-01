@@ -3,6 +3,7 @@ package datafront
 import (
 	"srv/internal/components"
 	"srv/internal/datafront/dfcore"
+	"srv/internal/domain"
 	"srv/internal/globals/events"
 	"srv/internal/utils/common"
 	"srv/pkg/api"
@@ -32,7 +33,7 @@ func (oc *onlineSingleton) dispose() {
 	oc.sub.UnsubscribeAll()
 }
 
-func (oc *onlineSingleton) getValue(_ dfcore.DFRequestContext) (common.Encodable, common.Error) {
+func (oc *onlineSingleton) getValue(_ domain.RequestContext) (common.Encodable, common.Error) {
 	onlineCount, err := oc.tracker.GetOnlineCount()
 	if err != nil {
 		return nil, err

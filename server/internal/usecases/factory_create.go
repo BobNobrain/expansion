@@ -47,6 +47,7 @@ func (uc *createFactoryUsecase) Run(
 	}
 
 	factory := game.MakeEmptyFactory()
+	factory.OwnerID = uctx.Author
 	factory.BaseID = base.ID
 	factory.Name = input.Name
 

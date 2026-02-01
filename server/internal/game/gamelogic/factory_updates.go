@@ -84,51 +84,20 @@ func (l *FactoryUpdatesLogic) WithdrawItems(f *game.Factory, items game.Inventor
 	return factualDelta
 }
 
-// type factoryUpdate struct {
-// 	deltaHours float64
-// 	reason     factoryUpdateReason
-// 	speeds     map[game.CommodityID]float64
-// }
+func (l *FactoryUpdatesLogic) GetDemolishInventory(f game.Factory, at time.Time) game.InventoryDelta {
+	// when demolishing a factory, we should get back:
+	// 1. its current inventory
+	result := f.Production.CalculateInventoryAt(at).ToDelta()
 
-// func (u *factoryUpdate) calculateSpeeds(f game.Factory) {
-// 	u.speeds = make(map[game.CommodityID]float64)
+	// 2. equipment and building parts from its current production lines
+	for _, eq := range f.Equipment {
+		result.Add(Construction().GetConstructionCosts(eq.EquipmentID, eq.Count), 1)
+	}
 
-// 	for _, eq := range f.Equipment {
-// 		totalManualEfficiencies := 0.0
-// 		for _, production := range eq.Production {
-// 			totalManualEfficiencies += production.ManualEfficiency
-// 		}
+	// 3. everything we have contributed to its upgrade so far
+	for _, contribution := range f.Upgrade.Progress {
+		result.Add(contribution.AmountsProvided, 1)
+	}
 
-// 		// cannot move the whole calculation to just a method of game.Factory,
-// 		// because it needs the workforce efficiency calculation
-// 		wfEfficiency := 1.0 // TODO: calculate workforce efficiency
-
-// 		eqEff := float64(eq.Count) * wfEfficiency / totalManualEfficiencies
-
-// 		for _, production := range eq.Production {
-// 			eff := eqEff * production.ManualEfficiency
-
-// 			for cid, delta := range production.Recipe.Inputs {
-// 				u.speeds[cid] -= delta * eff
-// 			}
-// 			for cid, delta := range production.Recipe.Outputs {
-// 				u.speeds[cid] += delta * eff
-// 			}
-// 		}
-// 	}
-// }
-
-// func (u *factoryUpdate) isDue(lastUpdate time.Time, now time.Time) bool {
-// 	if math.IsInf(u.deltaHours, 1) || u.reason == factoryUpdateReasonNone {
-// 		return false
-// 	}
-
-// 	return now.Sub(lastUpdate).Hours() < u.deltaHours
-// }
-// func (u *factoryUpdate) isNever() bool {
-// 	return math.IsInf(u.deltaHours, 1) && u.reason == factoryUpdateReasonNone
-// }
-
-// func (u *factoryUpdate) getUpdateTime(lastUpdate time.Time) time.Time {
-// 	return lastUpdate.Add(time.Duration(float64(time.Hour) * u.deltaHours))
-// }
+	return result
+}

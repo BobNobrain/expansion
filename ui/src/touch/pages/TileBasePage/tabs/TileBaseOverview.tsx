@@ -2,6 +2,7 @@ import { createMemo, Show, type Component } from 'solid-js';
 import { useNavigate } from '@solidjs/router';
 import {
     Button,
+    Container,
     DataTable,
     type DataTableColumn,
     DefinitionList,
@@ -13,12 +14,13 @@ import {
     PageHeaderIcon,
     PageHeaderTitle,
     SkeletonText,
+    Text,
 } from '@/atoms';
 import { FactoryStatusLabel } from '@/components/FactoryStatusLabel/FactoryStatusLabel';
 import { GameTimeLabel } from '@/components/GameTimeLabel/GameTimeLabel';
 import { OperationDisplay } from '@/components/OperationDisplay/OperationDisplay';
 import { Factory, type BaseContent } from '@/domain/Base';
-import { IconArea, IconCross, IconEquipment, IconFactory, IconNametag, IconPlus } from '@/icons';
+import { IconArea, IconEquipment, IconFactory, IconPencil, IconPlus, IconTrashBin } from '@/icons';
 import { buildingsAsset } from '@/lib/assetmanager';
 import { useAsset } from '@/lib/solid/asset';
 import { emulateLinkClick } from '@/lib/solid/emulateLinkClick';
@@ -33,11 +35,32 @@ import { CreateFactoryForm } from '@/views/CreateFactoryForm/CreateFactoryForm';
 import { RenameBaseForm } from '@/views/RenameBaseForm/RenameBaseForm';
 import { useBase } from '../hooks';
 
+const TileBaseName: Component<{ baseId: number; baseName: string }> = (props) => {
+    const renameBaseModal = useModalRouteState('renameBase');
+
+    return (
+        <Container direction="row" hasGap size="s">
+            <Text>{props.baseName}</Text>
+            <Button style="text" square size="text" onClick={renameBaseModal.open}>
+                <IconPencil size={20} />
+            </Button>
+            <TouchModal isOpen={renameBaseModal.isOpen()} onClose={renameBaseModal.close} title="Rename">
+                <RenameBaseForm
+                    baseId={props.baseId}
+                    currentName={props.baseName}
+                    onSuccess={renameBaseModal.close}
+                    onCancel={renameBaseModal.close}
+                />
+            </TouchModal>
+        </Container>
+    );
+};
+
 const DEFS: DefinitionListItem<BaseContent>[] = [
     {
         title: 'Name',
         skeletonLength: 10,
-        render: 'name',
+        render: ({ id, name }) => <TileBaseName baseId={id} baseName={name} />,
     },
     {
         title: 'Location',
@@ -126,18 +149,17 @@ export const TileBaseOverview: Component = () => {
     });
 
     const createFactoryModal = useModalRouteState('createFactory');
-    const renameBaseModal = useModalRouteState('renameBase');
 
     return (
         <>
             <PageHeader>
                 <PageHeaderTitle>Base Overview</PageHeaderTitle>
                 <PageHeaderActions pushRight>
-                    <Button square style="light" onClick={renameBaseModal.open}>
+                    {/* <Button square style="light" onClick={renameBaseModal.open}>
                         <IconNametag size={32} />
-                    </Button>
+                    </Button> */}
                     <Button square style="light">
-                        <IconCross size={32} color="error" />
+                        <IconTrashBin size={32} color="error" />
                     </Button>
                 </PageHeaderActions>
             </PageHeader>
@@ -204,15 +226,6 @@ export const TileBaseOverview: Component = () => {
                     nFactoriesExisting={Object.keys(factories.result()).length}
                     onCancel={createFactoryModal.close}
                     onSuccess={createFactoryModal.close}
-                />
-            </TouchModal>
-
-            <TouchModal isOpen={renameBaseModal.isOpen()} onClose={renameBaseModal.close} title="Rename">
-                <RenameBaseForm
-                    baseId={base()?.id}
-                    currentName={base()?.name}
-                    onSuccess={renameBaseModal.close}
-                    onCancel={renameBaseModal.close}
                 />
             </TouchModal>
         </>

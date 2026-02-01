@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"srv/internal/components"
 	"srv/internal/datafront/dfcore"
+	"srv/internal/domain"
 	"srv/internal/game"
 	"srv/internal/game/gamelogic"
 	"srv/internal/utils"
@@ -50,8 +51,8 @@ func (t *baseEnvsTable) dispose() {
 
 func (t *baseEnvsTable) queryByIDs(
 	req dfapi.DFTableRequest,
-	ctx dfcore.DFRequestContext,
-) (*dfcore.TableResponse, common.Error) {
+	ctx domain.RequestContext,
+) (domain.EntityCollection, common.Error) {
 	ids := make([]game.GalacticTileID, 0, len(req.IDs))
 	worldIdsToQuery := make(map[game.CelestialID]bool)
 
@@ -77,8 +78,8 @@ func (t *baseEnvsTable) queryByIDs(
 func (t *baseEnvsTable) queryByFactoryID(
 	payload api.BaseEnvsQueryByFactoryID,
 	req dfapi.DFTableQueryRequest,
-	ctx dfcore.DFRequestContext,
-) (*dfcore.TableResponse, common.Error) {
+	ctx domain.RequestContext,
+) (domain.EntityCollection, common.Error) {
 	overviews, err := t.factoriesRepo.ResolveFactoryOverviews([]game.FactoryID{game.FactoryID(payload.FactoryID)})
 	if err != nil {
 		return nil, err
@@ -100,7 +101,7 @@ func (t *baseEnvsTable) queryByFactoryID(
 	return t.resolveGalacticTileIDs(ids)
 }
 
-func (t *baseEnvsTable) resolveGalacticTileIDs(ids []game.GalacticTileID) (*dfcore.TableResponse, common.Error) {
+func (t *baseEnvsTable) resolveGalacticTileIDs(ids []game.GalacticTileID) (domain.EntityCollection, common.Error) {
 	worldIdsToQuery := make(map[game.CelestialID]bool)
 	for _, id := range ids {
 		worldIdsToQuery[id.GetWorldID()] = true
@@ -116,7 +117,7 @@ func (t *baseEnvsTable) resolveGalacticTileIDs(ids []game.GalacticTileID) (*dfco
 		worldsById[w.ID] = w
 	}
 
-	result := dfcore.NewTableResponse()
+	result := t.MakeCollection()
 
 	for _, id := range ids {
 		world := worldsById[id.GetWorldID()]
@@ -153,10 +154,32 @@ func (t *baseEnvsTable) resolveGalacticTileIDs(ids []game.GalacticTileID) (*dfco
 			})
 		}
 
-		result.Add(dfcore.EntityID(id.String()), common.AsEncodable(encoded))
+		result.Add(baseEnvsEntity{
+			id:  domain.EntityID(id.String()),
+			row: encoded,
+		})
 	}
 
 	return result, nil
+}
+
+func (t *baseEnvsTable) IdentifyEntity(e baseEnvsEntity) domain.EntityID {
+	return e.id
+}
+func (t *baseEnvsTable) EncodeEntity(e baseEnvsEntity) common.Encodable {
+	return e
+}
+func (t *baseEnvsTable) MakeCollection() domain.EntityCollectionBuilder[baseEnvsEntity] {
+	return domain.MakeUnorderedEntityCollection(t, nil)
+}
+
+type baseEnvsEntity struct {
+	id  domain.EntityID
+	row api.BaseEnvsTableRow
+}
+
+func (e baseEnvsEntity) Encode() any {
+	return e.row
 }
 
 func encodeResourceDeposit(deposit game.ResourceDeposit) api.WorldsTableRowResourceDeposit {

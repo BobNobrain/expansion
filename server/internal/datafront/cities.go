@@ -3,6 +3,7 @@ package datafront
 import (
 	"srv/internal/components"
 	"srv/internal/datafront/dfcore"
+	"srv/internal/domain"
 	"srv/internal/game"
 	"srv/internal/globals/events"
 	"srv/internal/utils"
@@ -44,21 +45,21 @@ func (t *citiesTable) dispose() {
 
 func (t *citiesTable) queryByIDs(
 	req dfapi.DFTableRequest,
-	ctx dfcore.DFRequestContext,
-) (*dfcore.TableResponse, common.Error) {
+	ctx domain.RequestContext,
+) (domain.EntityCollection, common.Error) {
 	cities, err := t.repo.ResolveIDs(utils.ParseInts[game.CityID](req.IDs))
 	if err != nil {
 		return nil, err
 	}
 
-	return dfcore.NewTableResponseFromList(cities, identifyCity, encodeCity), nil
+	return t.MakeCollection().AddList(cities), nil
 }
 
 func (t *citiesTable) queryByWorldID(
 	payload api.CitiesQueryByWorldID,
 	_ dfapi.DFTableQueryRequest,
-	_ dfcore.DFRequestContext,
-) (*dfcore.TableResponse, common.Error) {
+	_ domain.RequestContext,
+) (domain.EntityCollection, common.Error) {
 	worldId := game.CelestialID(payload.WorldID)
 	if worldId.IsStarID() {
 		return nil, common.NewValidationError("CitiesQueryBySystemID::WorldID", "wrong world id")
@@ -69,9 +70,9 @@ func (t *citiesTable) queryByWorldID(
 		return nil, err
 	}
 
-	result := dfcore.NewTableResponse()
+	result := t.MakeCollection()
 	for _, city := range cities {
-		result.Add(dfcore.EntityID(city.CityID.String()), encodeCity(city))
+		result.Add(city)
 	}
 
 	return result, nil
@@ -81,11 +82,10 @@ func (t *citiesTable) onNewCityFounded(payload events.CityCreatedPayload) {
 	t.qByWorldID.PublishChangedNotification(api.CitiesQueryByWorldID{WorldID: string(payload.WorldID)})
 }
 
-func identifyCity(city game.City) dfcore.EntityID {
-	return dfcore.EntityID(city.CityID.String())
+func (t *citiesTable) IdentifyEntity(city game.City) domain.EntityID {
+	return domain.EntityID(city.CityID.String())
 }
-
-func encodeCity(city game.City) common.Encodable {
+func (t *citiesTable) EncodeEntity(city game.City) common.Encodable {
 	buildings := make(map[string]int)
 	for bid, count := range city.CityBuildings {
 		buildings[string(bid)] = count
@@ -107,4 +107,7 @@ func encodeCity(city game.City) common.Encodable {
 		PopulationCounts: popCounts,
 		CityTiles:        utils.ConvertInts[game.TileID, int](city.CityTiles),
 	})
+}
+func (t *citiesTable) MakeCollection() domain.EntityCollectionBuilder[game.City] {
+	return domain.MakeUnorderedEntityCollection(t, nil)
 }

@@ -6,7 +6,7 @@ import solidStyleColors from './solid.module.css';
 import textStyleColors from './text.module.css';
 
 export type ButtonStyle = 'solid' | 'text' | 'light';
-export type ButtonSize = 's' | 'm' | 'l';
+export type ButtonSize = 's' | 'm' | 'l' | 'text';
 
 export type ButtonProps = ParentProps & {
     color?: SemanticColor;
@@ -21,6 +21,13 @@ export type ButtonProps = ParentProps & {
     stopPropagation?: boolean;
     onClick?: (ev: MouseEvent) => void;
     type?: 'button' | 'submit'; // TODO: add 'link'?
+};
+
+const sizeClasses: Record<ButtonSize, string> = {
+    text: common.sizeText,
+    s: common.sizeS,
+    m: common.sizeM,
+    l: common.sizeL,
 };
 
 export const Button: Component<ButtonProps> = (props) => {
@@ -58,7 +65,7 @@ export const Button: Component<ButtonProps> = (props) => {
 
         return {
             [colorClassName]: !props.disabled,
-            [common[size]]: true,
+            [sizeClasses[size]]: true,
             [common.square]: props.square,
             [common[style]]: true,
             [common.compact]: props.compact,

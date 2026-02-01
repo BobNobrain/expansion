@@ -57,11 +57,11 @@ export const dfBaseOverviews = createDatafrontTable<BaseOverviewsTableRow, BaseO
             worldId: data.worldId,
             tileId: World.makeTileId(data.tileId),
             cityId: data.cityId,
-            name: data.name,
             areaUsage: 0,
             employment: 0,
             inventoryUsage: 0,
-            nFactories: data.nFactories,
+            name: data.privateInfo?.name ?? '',
+            nFactories: data.privateInfo?.nFactories ?? 0,
         };
 
         console.log(result);

@@ -91,19 +91,7 @@ func (l *FactoryUpgradeLogic) GetConstructionCosts(fup game.FactoryUpgradeProjec
 	result := game.NewContribution()
 
 	for _, feq := range fup.Equipment {
-		eqData := l.reg.GetEquipment(feq.EquipmentID)
-		building := l.reg.GetBaseBuilding(eqData.Building)
-
-		if building.MatsPerArea == nil {
-			// TODO: return error?
-			continue
-		}
-
-		for cid, amount := range building.MatsPerArea {
-			result.AmountsRequired[cid] += amount * eqData.Area * float64(feq.Count)
-		}
-
-		result.AmountsRequired.Add(eqData.ConstructionParts)
+		result.AmountsRequired.Add(Construction().GetConstructionCosts(feq.EquipmentID, feq.Count))
 	}
 
 	result.History = fup.Progress

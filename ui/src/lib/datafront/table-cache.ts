@@ -5,6 +5,7 @@ type CacheEntry<A, E> = {
     getEntity: () => E | null;
     setData: (a: A) => void;
     setEntity: (e: E) => void;
+    clearData: () => void;
 
     uses: number;
     state: CacheEntryState;
@@ -12,7 +13,7 @@ type CacheEntry<A, E> = {
     // version: number;
 };
 
-type CacheEntryState = 'done' | 'loading' | 'created';
+type CacheEntryState = 'done' | 'loading' | 'created' | 'deleted';
 
 export class DatafrontTableCache<ApiEntity, Entity> {
     private entries: Record<string, CacheEntry<ApiEntity, Entity>> = {};
@@ -99,6 +100,15 @@ export class DatafrontTableCache<ApiEntity, Entity> {
         entry.setData(newData);
         entry.setEntity(this.map(newData));
     }
+    remove(id: string) {
+        const entry = this.entries[id];
+        if (!entry) {
+            return;
+        }
+
+        entry.clearData();
+        delete this.entries[id];
+    }
 
     private getOrCreate(id: string): CacheEntry<ApiEntity, Entity> {
         if (!this.entries[id]) {
@@ -112,12 +122,18 @@ function createCacheEntry<A, E>(): CacheEntry<A, E> {
     const [getData, setData] = createSignal<A | null>(null);
     const [getEntity, setEntity] = createSignal<E | null>(null);
 
-    return {
+    const entry: CacheEntry<A, E> = {
         getData,
         setData,
         getEntity,
         setEntity,
+        clearData: () => {
+            setData(null);
+            setEntity(null);
+            entry.state = 'deleted';
+        },
         uses: 0,
         state: 'created',
     };
+    return entry;
 }

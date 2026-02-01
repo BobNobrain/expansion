@@ -1,15 +1,14 @@
 {
     "$schema": "../schemas/commodities.json",
     "commodities": {
-        "grain": {
-            "category": "crops",
-            "mass": 0.8,
-            "volume": 1,
-            "expiry": "14d"
-        },
         "limestone": {
             "category": "minerals",
             "mass": 2.4,
+            "volume": 1
+        },
+        "carbon": {
+            "category": "minerals",
+            "mass": 1.3,
             "volume": 1
         },
         "ironOre": {
@@ -17,14 +16,39 @@
             "mass": 2.5,
             "volume": 1
         },
-        "aluminiumOre": {
+        "diamonds": {
             "category": "minerals",
-            "mass": 1.4,
+            "mass": 3.3,
+            "volume": 1
+        },
+        "silverOre": {
+            "category": "minerals",
+            "mass": 4.8,
+            "volume": 1
+        },
+        "oil": {
+            "category": "minerals",
+            "mass": 0.8,
             "volume": 1
         },
         "copperOre": {
             "category": "minerals",
-            "mass": 3.2,
+            "mass": 2.5,
+            "volume": 1
+        },
+        "sand": {
+            "category": "minerals",
+            "mass": 1.5,
+            "volume": 1
+        },
+        "aluminiumOre": {
+            "category": "minerals",
+            "mass": 1.3,
+            "volume": 1
+        },
+        "goldOre": {
+            "category": "minerals",
+            "mass": 5.1,
             "volume": 1
         },
         "water": {
@@ -37,14 +61,44 @@
             "mass": 1.1,
             "volume": 1
         },
-        "coal": {
-            "category": "minerals",
-            "mass": 1.3,
+        "methane": {
+            "category": "gases",
+            "mass": 0.72,
             "volume": 1
         },
         "steel": {
             "category": "metals",
             "mass": 7.85,
+            "volume": 1
+        },
+        "hardenedSteel": {
+            "category": "metals",
+            "mass": 7.8,
+            "volume": 1
+        },
+        "copper": {
+            "category": "metals",
+            "mass": 8.96,
+            "volume": 1
+        },
+        "silver": {
+            "category": "metals",
+            "mass": 10.5,
+            "volume": 1
+        },
+        "gold": {
+            "category": "metals",
+            "mass": 19.32,
+            "volume": 1
+        },
+        "aluminium": {
+            "category": "metals",
+            "mass": 2.7,
+            "volume": 1
+        },
+        "silicon": {
+            "category": "metals",
+            "mass": 2.33,
             "volume": 1
         },
         "concrete": {
@@ -61,7 +115,8 @@
         "constructionBlocks": {
             "category": "construction",
             "mass": 1,
-            "volume": 2
+            "volume": 2,
+            "quantized": true
         },
         "steelBeams": {
             "category": "construction",
@@ -69,46 +124,174 @@
             "volume": 0.2,
             "quantized": true
         },
+        "drillBlade": {
+            "category": "mechanicalParts",
+            "mass": 2.5,
+            "volume": 0.5,
+            "quantized": true
+        },
+        "powerRotor": {
+            "category": "mechanicalParts",
+            "mass": 0.5,
+            "volume": 0.5,
+            "quantized": true
+        },
+        "liquidPump": {
+            "category": "mechanicalParts",
+            "mass": 0.5,
+            "volume": 0.5,
+            "quantized": true
+        },
+        "copperWire": {
+            "category": "mechanicalParts",
+            "mass": 0.8,
+            "volume": 0.1,
+            "quantized": true
+        },
+        "metalPiping": {
+            "category": "mechanicalParts",
+            "mass": 2,
+            "volume": 1
+        },
+        "metalTank": {
+            "category": "mechanicalParts",
+            "mass": 1,
+            "volume": 4,
+            "quantized": true
+        },
+        "hardenedPlate": {
+            "category": "mechanicalParts",
+            "mass": 1.5,
+            "volume": 0.1,
+            "quantized": true
+        },
+        "roboArm": {
+            "category": "mechanicalParts",
+            "mass": 1,
+            "volume": 0.2,
+            "quantized": true
+        },
+        "airFilter": {
+            "category": "mechanicalParts",
+            "mass": 0.1,
+            "volume": 1
+        },
+        "fan": {
+            "category": "mechanicalParts",
+            "mass": 0.5,
+            "volume": 0.5,
+            "quantized": true
+        },
+        "microchips": {
+            "category": "mechanicalParts",
+            "mass": 1.2,
+            "volume": 1
+        },
+        "grain": {
+            "category": "crops",
+            "mass": 0.9,
+            "volume": 1
+        },
+        "sugaryVegetables": {
+            "category": "crops",
+            "mass": 2,
+            "volume": 1
+        },
+        "fruits": {
+            "category": "crops",
+            "mass": 1,
+            "volume": 1
+        },
+        "edibleVegetables": {
+            "category": "crops",
+            "mass": 1.8,
+            "volume": 1
+        },
+        "meat": {
+            "category": "crops",
+            "mass": 1,
+            "volume": 1
+        },
+        "fiberPlants": {
+            "category": "crops",
+            "mass": 0.7,
+            "volume": 1
+        },
+        "sugar": {
+            "category": "consumerGoods",
+            "mass": 0.9,
+            "volume": 1
+        },
+        "basicMeals": {
+            "category": "consumerGoods",
+            "mass": 1,
+            "volume": 1
+        },
+        "fiber": {
+            "category": "consumerGoods",
+            "mass": 0.5,
+            "volume": 1
+        },
+        "resin": {
+            "category": "chemicals",
+            "mass": 1.3,
+            "volume": 1
+        },
+        "polymerBase": {
+            "category": "chemicals",
+            "mass": 1.2,
+            "volume": 1
+        },
+        "technicalAlcohol": {
+            "category": "chemicals",
+            "mass": 0.79,
+            "volume": 1
+        },
+        "plastic": {
+            "category": "chemicals",
+            "mass": 0.5,
+            "volume": 1
+        },
         "powerDrill": {
             "category": "machinery",
-            "mass": 10,
-            "volume": 5,
+            "mass": 3,
+            "volume": 2,
             "quantized": true
         },
         "powerPump": {
             "category": "machinery",
-            "mass": 5,
-            "volume": 5,
+            "mass": 1,
+            "volume": 3,
             "quantized": true
         },
         "airFilteringKit": {
             "category": "machinery",
-            "mass": 3,
-            "volume": 20,
+            "mass": 2.5,
+            "volume": 5,
             "quantized": true
         },
         "foodCooker": {
             "category": "machinery",
-            "mass": 4,
-            "volume": 4,
+            "mass": 1.6,
+            "volume": 3,
             "quantized": true
         },
         "powerMixer": {
             "category": "machinery",
-            "mass": 4,
-            "volume": 4,
+            "mass": 3,
+            "volume": 3,
             "quantized": true
         },
         "powerPress": {
             "category": "machinery",
-            "mass": 5,
-            "volume": 7,
+            "mass": 3,
+            "volume": 3,
             "quantized": true
         },
         "powerHammer": {
             "category": "machinery",
             "mass": 4,
-            "volume": 2,
+            "volume": 3,
             "quantized": true
         },
         "metalRollingMachine": {
@@ -119,38 +302,38 @@
         },
         "machineAssembler": {
             "category": "machinery",
-            "mass": 3,
-            "volume": 5,
+            "mass": 7,
+            "volume": 3,
             "quantized": true
         },
         "plasticPrinter": {
             "category": "machinery",
-            "mass": 2,
-            "volume": 4,
+            "mass": 4,
+            "volume": 3,
             "quantized": true
         },
         "cleanroomKit": {
             "category": "machinery",
-            "mass": 2,
-            "volume": 2,
+            "mass": 8,
+            "volume": 5,
             "quantized": true
         },
         "electronicsAssembler": {
             "category": "machinery",
-            "mass": 1,
-            "volume": 1,
+            "mass": 5,
+            "volume": 4,
             "quantized": true
         },
         "laboratoryEquipment": {
             "category": "machinery",
-            "mass": 1,
-            "volume": 2,
+            "mass": 7,
+            "volume": 6,
             "quantized": true
         },
         "officeFurniture": {
             "category": "machinery",
-            "mass": 2,
-            "volume": 2,
+            "mass": 1,
+            "volume": 4,
             "quantized": true
         }
     },
@@ -159,26 +342,48 @@
             "abundance": 0.8,
             "veins": 0.5
         },
+        "carbon": {
+            "abundance": 0.5,
+            "veins": 0.6,
+            "fertileOnly": true
+        },
         "ironOre": {
             "abundance": 0.9,
             "veins": 0.6
         },
-        "aluminiumOre": {
-            "abundance": 0.8,
-            "veins": 0.4
+        "diamonds": {
+            "abundance": 0.4,
+            "veins": 0.05
+        },
+        "silverOre": {
+            "abundance": 0.7,
+            "veins": 0.3
+        },
+        "oil": {
+            "abundance": 0.5,
+            "veins": 0.5,
+            "fertileOnly": true
         },
         "copperOre": {
             "abundance": 0.9,
             "veins": 0.55
         },
-        "coal": {
-            "abundance": 0.5,
-            "veins": 0.6,
-            "fertileOnly": true
+        "sand": {
+            "abundance": 0.8,
+            "veins": 0.7
+        },
+        "aluminiumOre": {
+            "abundance": 0.8,
+            "veins": 0.4
+        },
+        "goldOre": {
+            "abundance": 0.7,
+            "veins": 0.2
         }
     },
     "worldgenMaterials": {
         "h2o": "water",
-        "o2": "oxygen"
+        "o2": "oxygen",
+        "ch4": "methane"
     }
 }

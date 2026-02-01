@@ -46,8 +46,12 @@ export function createDatafrontTable<ApiEntity, Entity>({
     // subscribing for lifetime, because there are not that much singletons
     // maybe cleanup will be made later, if it makes sense
     updater.subscribeToTableUpdates(name, (update) => {
-        const patch = update.update as Partial<ApiEntity>;
-        cache.patch(update.eid, patch);
+        const patch = update.update as Partial<ApiEntity> | null;
+        if (patch === null) {
+            cache.remove(update.eid);
+        } else {
+            cache.patch(update.eid, patch);
+        }
     });
 
     const useMany = (ids: () => (string | number)[]): UseTableResult<Entity> => {
@@ -115,6 +119,7 @@ export function createDatafrontTable<ApiEntity, Entity>({
 
                 return cache.get(requestedIds);
             }),
+            retry: () => goFetchEntities(strIds().filter((id) => !cache.hasDataFor(id))),
         };
     };
 

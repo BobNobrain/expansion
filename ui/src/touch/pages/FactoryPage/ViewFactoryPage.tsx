@@ -22,6 +22,7 @@ import { dfContributeToFactory, dfRebalanceFactory } from '@/store/datafront';
 import { TouchContentSingle } from '@/touch/components/TouchContentSingle/TouchContentSingle';
 import { usePageContextBinding } from '@/touch/components/TouchPage';
 import { useFactoryRelatedData } from './hooks';
+import { OperationDisplay } from '@/components/OperationDisplay/OperationDisplay';
 
 export const ViewFactoryPage: Component = () => {
     const routeInfo = useRouteInfo(factoryViewRoute);
@@ -46,6 +47,8 @@ export const ViewFactoryPage: Component = () => {
                     navigate(getBasesRoute({ worldId: baseData.worldId, tileId: baseData.tileId }));
                     return;
                 }
+
+                navigate(getBasesRoute({}));
             },
         };
     });
@@ -123,43 +126,45 @@ export const ViewFactoryPage: Component = () => {
         <TouchContentSingle>
             <TabsList style="pagetop" scrollable tabs={tabs()} />
             <Container padded>
-                <FactoryDisplay
-                    factory={factory.result()}
-                    editable={false}
-                    isLoading={isFactoryLoading()}
-                    availableArea={500}
-                    tileId={base.result()?.tileId ?? null}
-                    worldId={base.result()?.worldId ?? null}
-                    baseInventory={baseInventory()}
-                    tileConditions={tileConditions()}
-                    dynamicRecipes={dynamicRecipes()}
-                    onUpgrade={(f, ev) => {
-                        let href: string;
-                        let replace = false;
-                        if (Factory.hasUpgradePlanned(f) && routeInfo().tab !== ViewFactoryTab.Upgrade) {
-                            href = factoryViewRoute.render({ factoryId: f.id, tab: ViewFactoryTab.Upgrade });
-                            replace = true;
-                        } else {
-                            href = factoryEditRoute.render({ factoryId: f.id });
-                        }
+                <OperationDisplay error={factory.error()}>
+                    <FactoryDisplay
+                        factory={factory.result()}
+                        editable={false}
+                        isLoading={isFactoryLoading()}
+                        availableArea={500}
+                        tileId={base.result()?.tileId ?? null}
+                        worldId={base.result()?.worldId ?? null}
+                        baseInventory={baseInventory()}
+                        tileConditions={tileConditions()}
+                        dynamicRecipes={dynamicRecipes()}
+                        onUpgrade={(f, ev) => {
+                            let href: string;
+                            let replace = false;
+                            if (Factory.hasUpgradePlanned(f) && routeInfo().tab !== ViewFactoryTab.Upgrade) {
+                                href = factoryViewRoute.render({ factoryId: f.id, tab: ViewFactoryTab.Upgrade });
+                                replace = true;
+                            } else {
+                                href = factoryEditRoute.render({ factoryId: f.id });
+                            }
 
-                        emulateLinkClick({ navigate, href, replace }, ev);
-                    }}
-                    onSubmitContribution={onContributeClick}
-                    isSubmittingContribution={contribute.isLoading()}
-                    isRebalanceInProgress={rebalance.isLoading()}
-                    onRebalance={onRebalanceClick}
-                >
-                    <TabContent
-                        active={routeInfo().tab ?? ViewFactoryTab.Overview}
-                        components={{
-                            [ViewFactoryTab.Overview]: FactoryDisplayOverview,
-                            [ViewFactoryTab.Upgrade]: FactoryDisplayUpgrade,
-                            [ViewFactoryTab.Production]: FactoryDisplayEquipment,
-                            [ViewFactoryTab.Workforce]: FactoryDisplayWorkforce,
+                            emulateLinkClick({ navigate, href, replace }, ev);
                         }}
-                    />
-                </FactoryDisplay>
+                        onSubmitContribution={onContributeClick}
+                        isSubmittingContribution={contribute.isLoading()}
+                        isRebalanceInProgress={rebalance.isLoading()}
+                        onRebalance={onRebalanceClick}
+                    >
+                        <TabContent
+                            active={routeInfo().tab ?? ViewFactoryTab.Overview}
+                            components={{
+                                [ViewFactoryTab.Overview]: FactoryDisplayOverview,
+                                [ViewFactoryTab.Upgrade]: FactoryDisplayUpgrade,
+                                [ViewFactoryTab.Production]: FactoryDisplayEquipment,
+                                [ViewFactoryTab.Workforce]: FactoryDisplayWorkforce,
+                            }}
+                        />
+                    </FactoryDisplay>
+                </OperationDisplay>
             </Container>
         </TouchContentSingle>
     );

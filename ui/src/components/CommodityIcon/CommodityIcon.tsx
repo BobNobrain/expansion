@@ -4,10 +4,13 @@ import {
     type Icon,
     IconBarrel,
     IconCloud,
+    IconCogs,
     IconConstruction,
     IconEquipment,
+    IconFlask,
     IconIngot,
     IconLeaf,
+    IconPackage,
     IconRocks,
     IconUnknown,
 } from '@/icons';
@@ -31,6 +34,9 @@ const iconsByCategory: Record<string, Icon> = {
     crops: IconLeaf,
     metals: IconIngot,
     machinery: IconEquipment,
+    mechanicalParts: IconCogs,
+    consumerGoods: IconPackage,
+    chemicals: IconFlask,
 };
 
 const classesByCategory: Record<string, string | undefined> = {
@@ -42,6 +48,9 @@ const classesByCategory: Record<string, string | undefined> = {
     crops: styles.catCrops,
     metals: styles.catMetals,
     machinery: styles.catMachinery,
+    mechanicalParts: styles.catMechanicalParts,
+    consumerGoods: styles.consumerGoods,
+    chemicals: styles.chemicals,
 };
 
 export const CommodityIcon: Component<CommodityIconProps> = (props) => {

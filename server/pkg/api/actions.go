@@ -17,6 +17,7 @@ const (
 	ActionContributeToUpgrade  = "factory.contribute"
 	ActionTransferFactoryItems = "factory.transfer"
 	ActionRenameFactory        = "factory.rename"
+	ActionDemolishFactory      = "factory.demolish"
 
 	// inventory management
 	ActionTransferItems = "transferItems"
@@ -58,6 +59,9 @@ type CreateFactoryPayload struct {
 type UpgradeFactoryPayload struct {
 	FactoryID int                              `json:"factoryId"`
 	Equipment []FactoriesTableRowEquipmentPlan `json:"equipment"`
+}
+type DemolishFactoryPayload struct {
+	FactoryID int `json:"factoryId"`
 }
 
 type RebalanceFactoryPayload struct {

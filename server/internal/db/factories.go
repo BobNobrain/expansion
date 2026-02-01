@@ -134,10 +134,16 @@ func (b *factoriesRepoImpl) CreateBaseFactory(factory game.Factory) common.Error
 		return makeDBError(jerr, "FactoriesRepo::CreateBaseFactory(FactoryData.ToJSON)")
 	}
 
+	owner, err := parseUUID(factory.OwnerID)
+	if err != nil {
+		return err
+	}
+
 	dberr := b.q.CreateFactory(b.ctx, dbq.CreateFactoryParams{
-		BaseID: int32(factory.BaseID),
-		Data:   factoryDataJSON,
-		Name:   factory.Name,
+		BaseID:  int32(factory.BaseID),
+		Data:    factoryDataJSON,
+		Name:    factory.Name,
+		OwnerID: owner,
 	})
 	if dberr != nil {
 		return makeDBError(dberr, "FactoriesRepo::CreateBaseFactory")
@@ -195,6 +201,7 @@ func decodeFactory(row dbq.Factory) (game.Factory, common.Error) {
 		FactoryID: game.FactoryID(row.ID),
 		BaseID:    game.BaseID(row.BaseID),
 		BuiltAt:   row.CreatedAt.Time,
+		OwnerID:   domain.UserID(row.OwnerID.String()),
 		Name:      row.Name,
 
 		Production: game.MakeFactoryProductionPeriodFrom(

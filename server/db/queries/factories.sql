@@ -1,6 +1,6 @@
 -- name: CreateFactory :exec
-INSERT INTO factories (base_id, name, data)
-VALUES ($1, $2, $3);
+INSERT INTO factories (owner_id, base_id, name, data)
+VALUES ($1, $2, $3, $4);
 
 -- name: ResolveFactories :many
 SELECT *

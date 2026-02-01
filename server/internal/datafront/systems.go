@@ -3,6 +3,7 @@ package datafront
 import (
 	"srv/internal/components"
 	"srv/internal/datafront/dfcore"
+	"srv/internal/domain"
 	"srv/internal/game"
 	"srv/internal/globals/events"
 	"srv/internal/globals/logger"
@@ -40,8 +41,8 @@ func (t *systemsTable) dispose() {
 
 func (t *systemsTable) queryByIDs(
 	req dfapi.DFTableRequest,
-	_ dfcore.DFRequestContext,
-) (*dfcore.TableResponse, common.Error) {
+	_ domain.RequestContext,
+) (domain.EntityCollection, common.Error) {
 	systemIDs := make([]game.StarSystemID, 0, len(req.IDs))
 	for _, id := range req.IDs {
 		systemID := game.StarSystemID(id)
@@ -57,12 +58,7 @@ func (t *systemsTable) queryByIDs(
 		return nil, err
 	}
 
-	response := dfcore.NewTableResponse()
-	for _, system := range systems {
-		response.Add(dfcore.EntityID(system.ID), encodeSystem(system))
-	}
-
-	return response, nil
+	return t.MakeCollection().AddList(systems), nil
 }
 
 func (t *systemsTable) onSystemUpdated(payload events.SystemUpdatedPayload) {
@@ -72,10 +68,13 @@ func (t *systemsTable) onSystemUpdated(payload events.SystemUpdatedPayload) {
 		return
 	}
 
-	t.table.PublishEntities(dfcore.NewTableResponseFromSingle(dfcore.EntityID(system.ID), encodeSystem(system)))
+	t.table.PublishEntities(t.MakeCollection().Add(system))
 }
 
-func encodeSystem(system game.StarSystemContent) common.Encodable {
+func (t *systemsTable) IdentifyEntity(system game.StarSystemContent) domain.EntityID {
+	return domain.EntityID(system.ID)
+}
+func (t *systemsTable) EncodeEntity(system game.StarSystemContent) common.Encodable {
 	stars := make(map[string]api.SysOverviewsTableRowStar, len(system.Stars))
 	for _, star := range system.Stars {
 		stars[string(star.ID)] = api.SysOverviewsTableRowStar{
@@ -107,4 +106,7 @@ func encodeSystem(system game.StarSystemContent) common.Encodable {
 		Stars:      stars,
 		Orbits:     orbits,
 	})
+}
+func (t *systemsTable) MakeCollection() domain.EntityCollectionBuilder[game.StarSystemContent] {
+	return domain.MakeUnorderedEntityCollection(t, nil)
 }

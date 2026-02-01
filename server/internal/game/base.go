@@ -2,6 +2,7 @@ package game
 
 import (
 	"fmt"
+	"srv/internal/domain"
 	"strconv"
 	"time"
 )
@@ -13,18 +14,33 @@ func (bid BaseID) String() string {
 }
 
 type BaseOverview struct {
-	ID         BaseID
-	Created    time.Time
-	Operator   CompanyID
-	WorldID    CelestialID
-	TileID     TileID
-	CityID     CityID
-	NFactories int
+	ID       BaseID
+	OwnerID  domain.UserID
+	Created  time.Time
+	Operator CompanyID
+	WorldID  CelestialID
+	TileID   TileID
+	CityID   CityID
+
+	PrivateInfo *BaseOverviewPrivateInfo
+}
+
+type BaseOverviewPrivateInfo struct {
 	Name       string
+	NFactories int
+}
+
+func (b BaseOverview) ViewFor(viewer domain.UserID) *BaseOverview {
+	view := b
+	if viewer != b.OwnerID {
+		view.PrivateInfo = nil
+	}
+	return &view
 }
 
 type Base struct {
 	ID       BaseID
+	OwnerID  domain.UserID
 	Created  time.Time
 	Operator CompanyID
 	WorldID  CelestialID

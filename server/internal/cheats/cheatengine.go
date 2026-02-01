@@ -93,7 +93,7 @@ func (arg cheatCommandArg) Inventory() map[string]float64 {
 	for _, item := range items {
 		item = strings.TrimSpace(item)
 		nameStarts := strings.IndexFunc(item, func(r rune) bool {
-			return !unicode.IsDigit(r) && r != '.'
+			return !unicode.IsDigit(r) && r != '.' && r != '-'
 		})
 
 		if nameStarts == -1 {

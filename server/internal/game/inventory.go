@@ -98,6 +98,9 @@ func (i Inventory) GetDeltaTo(target Inventory) InventoryDelta {
 
 	return result
 }
+func (i Inventory) ToDelta() InventoryDelta {
+	return MakeInventoryDeltaFrom(i.ToMap())
+}
 
 func (i Inventory) ToMap() map[string]float64 {
 	result := make(map[string]float64)
@@ -136,6 +139,16 @@ func (d InventoryDelta) ToMap() map[string]float64 {
 		result[string(cid)] = amount
 	}
 	return result
+}
+func (d InventoryDelta) Add(another InventoryDelta, scale float64) {
+	for cid, amount := range another {
+		d[cid] += amount * scale
+	}
+}
+func (d InventoryDelta) Scale(scale float64) {
+	for cid := range d {
+		d[cid] *= scale
+	}
 }
 
 func (d InventoryDelta) IsEmpty() bool {

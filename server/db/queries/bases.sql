@@ -1,5 +1,6 @@
 -- name: CreateBase :exec
 INSERT INTO bases (
+        owner_id,
         system_id,
         world_id,
         tile_id,
@@ -8,7 +9,7 @@ INSERT INTO bases (
         name,
         data
     )
-VALUES ($1, $2, $3, $4, $5, $6, $7);
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
 
 -- name: GetBaseByID :one
 SELECT *

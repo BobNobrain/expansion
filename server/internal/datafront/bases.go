@@ -3,6 +3,7 @@ package datafront
 import (
 	"srv/internal/components"
 	"srv/internal/datafront/dfcore"
+	"srv/internal/domain"
 	"srv/internal/game"
 	"srv/internal/globals/events"
 	"srv/internal/globals/logger"
@@ -48,8 +49,8 @@ func (t *basesTable) dispose() {
 
 func (t *basesTable) queryByIDs(
 	req dfapi.DFTableRequest,
-	ctx dfcore.DFRequestContext,
-) (*dfcore.TableResponse, common.Error) {
+	ctx domain.RequestContext,
+) (domain.EntityCollection, common.Error) {
 	bases, err := t.basesRepo.ResolveBases(utils.ParseInts[game.BaseID](req.IDs))
 	if err != nil {
 		return nil, err
@@ -70,24 +71,24 @@ func (t *basesTable) queryByIDs(
 		worldsById[w.ID] = w
 	}
 
-	return dfcore.NewTableResponseFromList(bases, identifyBase, encodeBase), nil
+	return t.MakeCollection().AddList(bases), nil
 }
 
 func (t *basesTable) queryByLocation(
 	payload api.BasesQueryByLocation,
 	req dfapi.DFTableQueryRequest,
-	ctx dfcore.DFRequestContext,
-) (*dfcore.TableResponse, common.Error) {
+	ctx domain.RequestContext,
+) (domain.EntityCollection, common.Error) {
 	base, err := t.basesRepo.GetBaseAt(game.CelestialID(payload.WorldID), game.TileID(payload.TileID))
 	if err != nil {
 		return nil, err
 	}
 
 	if base == nil {
-		return dfcore.NewTableResponse(), nil
+		return t.MakeCollection(), nil
 	}
 
-	return dfcore.NewTableResponseFromSingle(identifyBase(*base), encodeBase(*base)), nil
+	return t.MakeCollection().Add(*base), nil
 }
 
 func (t *basesTable) onBaseCreated(ev events.BaseCreatedPayload) {
@@ -113,18 +114,14 @@ func (t *basesTable) onBaseUpdated(ev events.BaseUpdatedPayload) {
 		base = *basePtr
 	}
 
-	t.table.PublishEntities(dfcore.NewTableResponseFromSingle(
-		identifyBase(base),
-		encodeBase(base),
-	))
+	t.table.PublishEntities(t.MakeCollection().Add(base))
 }
 
-func identifyBase(b game.Base) dfcore.EntityID {
-	return dfcore.EntityID(b.ID.String())
+func (t *basesTable) IdentifyEntity(b game.Base) domain.EntityID {
+	return domain.EntityID(b.ID.String())
 }
-
-func baseToApi(b game.Base) api.BasesTableRow {
-	return api.BasesTableRow{
+func (t *basesTable) EncodeEntity(b game.Base) common.Encodable {
+	return common.AsEncodable(api.BasesTableRow{
 		BaseID:    int(b.ID),
 		WorldID:   string(b.WorldID),
 		TileID:    int(b.TileID),
@@ -135,9 +132,14 @@ func baseToApi(b game.Base) api.BasesTableRow {
 		Storage: api.BasesTableRowStorage{
 			Inventory: b.Inventory.ToMap(),
 		},
-	}
+	})
 }
-
-func encodeBase(b game.Base) common.Encodable {
-	return common.AsEncodable(baseToApi(b))
+func (t *basesTable) ViewFor(b game.Base, req domain.RequestContext) *game.Base {
+	if b.OwnerID != req.UserID {
+		return nil
+	}
+	return &b
+}
+func (t *basesTable) MakeCollection() domain.EntityCollectionBuilder[game.Base] {
+	return domain.MakeUnorderedEntityCollection(t, t)
 }

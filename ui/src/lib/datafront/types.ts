@@ -1,5 +1,6 @@
 export type DatafrontTable<Entity> = {
     useMany: (ids: () => string[] | number[]) => UseTableResult<Entity>;
+    /** @deprecated */
     useSingle: (id: () => string | number | null) => UseTableSingleResult<Entity>;
 
     createQuery: <Payload>(
@@ -16,6 +17,7 @@ export type UseTableResult<Entity> = {
     result: () => Record<string, Entity>;
     isLoading: () => boolean;
     error: () => DatafrontError | null;
+    retry: () => void;
 };
 
 export type UseTableSingleResult<Entity> = {

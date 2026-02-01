@@ -51,8 +51,10 @@
                         "liquids",
                         "gases",
                         "crops",
-                        "consumables",
+                        "consumerGoods",
                         "construction",
+                        "mechanicalParts",
+                        "chemicals",
                         "machinery"
                     ]
                 },

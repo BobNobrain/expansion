@@ -23,67 +23,388 @@
             "affectedByAtmosphere": true
         },
         {
-            "equipment": "field",
-            "inputs": { },
-            "outputs": {
-                "grain": 10
-            },
-            "baseTime": "1h",
-            "affectedByFertility": true
+            "equipment": "chemicalLab",
+            "inputs": { "carbon": 5 },
+            "outputs": { "diamonds": 1 },
+            "baseTime": "1h"
         },
         {
             "equipment": "smelter",
-            "inputs": {
-                "ironOre": 1,
-                "oxygen": 1,
-                "coal": 1
-            },
-            "outputs": {
-                "steel": 1
-            },
+            "inputs": { "carbon": 2, "ironOre": 2, "oxygen": 1 },
+            "outputs": { "steel": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "smelter",
+            "inputs": { "steel": 1 },
+            "outputs": { "hardenedSteel": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "smelter",
+            "inputs": { "carbon": 1, "copperOre": 4, "oxygen": 1 },
+            "outputs": { "copper": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "smelter",
+            "inputs": { "silverOre": 3, "oxygen": 2 },
+            "outputs": { "silver": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "smelter",
+            "inputs": { "goldOre": 10, "oxygen": 5 },
+            "outputs": { "gold": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "smelter",
+            "inputs": { "aluminiumOre": 3, "oxygen": 1 },
+            "outputs": { "aluminium": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "smelter",
+            "inputs": { "sand": 3, "oxygen": 1 },
+            "outputs": { "silicon": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "constructionMixer",
+            "inputs": { "limestone": 2, "sand": 2, "water": 1 },
+            "outputs": { "concrete": 2 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "constructionPress",
+            "inputs": { "copper": 1, "concrete": 1 },
+            "outputs": { "constructionPanel": 10 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "constructionPress",
+            "inputs": { "limestone": 0.1, "concrete": 1 },
+            "outputs": { "constructionBlocks": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "smithingStation",
+            "inputs": { "steel": 1 },
+            "outputs": { "steelBeams": 7 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "smithingStation",
+            "inputs": { "diamonds": 0.01, "hardenedSteel": 0.4 },
+            "outputs": { "drillBlade": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "smithingStation",
+            "inputs": { "steel": 0.1, "copperWire": 0.05 },
+            "outputs": { "powerRotor": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "smithingStation",
+            "inputs": { "steel": 0.1, "resin": 0.1 },
+            "outputs": { "liquidPump": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "smithingStation",
+            "inputs": { "copper": 0.1 },
+            "outputs": { "copperWire": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "smithingStation",
+            "inputs": { "steel": 0.5 },
+            "outputs": { "metalPiping": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "smithingStation",
+            "inputs": { "steel": 0.2 },
+            "outputs": { "metalTank": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "smithingStation",
+            "inputs": { "hardenedSteel": 0.2 },
+            "outputs": { "hardenedPlate": 1 },
             "baseTime": "1h"
         },
         {
             "equipment": "smithingStation",
             "inputs": {
-                "steel": 1
+                "steel": 0.1,
+                "powerRotor": 2,
+                "copperWire": 0.5,
+                "microchips": 0.05
             },
-            "outputs": {
-                "steelBeams": 7
-            },
+            "outputs": { "roboArm": 1 },
             "baseTime": "1h"
         },
         {
-            "equipment": "constructionMixer",
-            "inputs": {
-                "limestone": 3
-            },
-            "outputs": {
-                "concrete": 2
-            },
-            "baseTime": "2h"
-        },
-        {
-            "equipment": "constructionPress",
-            "inputs": {
-                "concrete": 1,
-                "steelBeams": 1
-            },
-            "outputs": {
-                "constructionPanel": 5
-            },
+            "equipment": "machineAssembler",
+            "inputs": { "fiber": 1 },
+            "outputs": { "airFilter": 1 },
             "baseTime": "1h"
         },
         {
-            "equipment": "constructionPress",
+            "equipment": "smithingStation",
+            "inputs": { "steel": 0.1, "powerRotor": 1, "copperWire": 0.1 },
+            "outputs": { "fan": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "electronicsAssembler",
             "inputs": {
-                "concrete": 1,
-                "limestone": 0.1
+                "copper": 0.2,
+                "silver": 0.2,
+                "gold": 0.1,
+                "silicon": 0.5,
+                "plastic": 0.5
             },
-            "outputs": {
-                "constructionBlocks": 3
+            "outputs": { "microchips": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "field",
+            "inputs": { "water": 1 },
+            "outputs": { "grain": 1 },
+            "baseTime": "1h",
+            "affectedByFertility": true
+        },
+        {
+            "equipment": "field",
+            "inputs": { "water": 1 },
+            "outputs": { "sugaryVegetables": 1 },
+            "baseTime": "1h",
+            "affectedByFertility": true
+        },
+        {
+            "equipment": "field",
+            "inputs": { "water": 1 },
+            "outputs": { "fruits": 1 },
+            "baseTime": "1h",
+            "affectedByFertility": true
+        },
+        {
+            "equipment": "field",
+            "inputs": { "water": 1 },
+            "outputs": { "edibleVegetables": 1 },
+            "baseTime": "1h",
+            "affectedByFertility": true
+        },
+        {
+            "equipment": "field",
+            "inputs": { "sugaryVegetables": 5 },
+            "outputs": { "meat": 1 },
+            "baseTime": "1h",
+            "affectedByFertility": true
+        },
+        {
+            "equipment": "field",
+            "inputs": { "water": 1 },
+            "outputs": { "fiberPlants": 1 },
+            "baseTime": "1h",
+            "affectedByFertility": true
+        },
+        {
+            "equipment": "foodProcessor",
+            "inputs": { "sugaryVegetables": 2 },
+            "outputs": { "sugar": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "foodProcessor",
+            "inputs": {
+                "water": 0.1,
+                "grain": 1,
+                "edibleVegetables": 1,
+                "meat": 1
             },
-            "baseTime": "2h"
+            "outputs": { "basicMeals": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "textileProcessor",
+            "inputs": { "plastic": 3 },
+            "outputs": { "fiber": 2 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "textileProcessor",
+            "inputs": { "fiberPlants": 1 },
+            "outputs": { "fiber": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "chemicalMixer",
+            "inputs": { "oil": 3 },
+            "outputs": { "resin": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "chemicalMixer",
+            "inputs": { "polymerBase": 2 },
+            "outputs": { "resin": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "chemicalMixer",
+            "inputs": { },
+            "outputs": { "polymerBase": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "chemicalMixer",
+            "inputs": { "water": 0.8, "grain": 0.5, "sugar": 0.5 },
+            "outputs": { "technicalAlcohol": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "chemicalMixer",
+            "inputs": { "water": 0.8, "fruits": 0.5 },
+            "outputs": { "technicalAlcohol": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "chemicalMixer",
+            "inputs": { "polymerBase": 0.5, "technicalAlcohol": 0.1 },
+            "outputs": { "plastic": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "chemicalMixer",
+            "inputs": { "oil": 1.5 },
+            "outputs": { "plastic": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "machineAssembler",
+            "inputs": { "drillBlade": 1, "powerRotor": 1, "microchips": 0.01 },
+            "outputs": { "powerDrill": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "machineAssembler",
+            "inputs": { "powerRotor": 1, "liquidPump": 1 },
+            "outputs": { "powerPump": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "machineAssembler",
+            "inputs": {
+                "liquidPump": 1,
+                "copperWire": 0.05,
+                "metalPiping": 1,
+                "metalTank": 1
+            },
+            "outputs": { "airFilteringKit": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "machineAssembler",
+            "inputs": { "copperWire": 0.1, "metalPiping": 0.2, "metalTank": 2 },
+            "outputs": { "foodCooker": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "machineAssembler",
+            "inputs": { "powerRotor": 1, "metalTank": 1, "hardenedPlate": 1 },
+            "outputs": { "powerMixer": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "machineAssembler",
+            "inputs": {
+                "powerRotor": 1,
+                "liquidPump": 1,
+                "copperWire": 0.2,
+                "metalPiping": 0.2,
+                "hardenedPlate": 2
+            },
+            "outputs": { "powerPress": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "machineAssembler",
+            "inputs": {
+                "steelBeams": 1,
+                "copperWire": 0.2,
+                "metalPiping": 0.2,
+                "hardenedPlate": 2
+            },
+            "outputs": { "powerHammer": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "machineAssembler",
+            "inputs": { "powerRotor": 2, "copperWire": 0.2, "hardenedPlate": 2 },
+            "outputs": { "metalRollingMachine": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "machineAssembler",
+            "inputs": {
+                "powerRotor": 1,
+                "copperWire": 0.2,
+                "hardenedPlate": 1,
+                "roboArm": 5,
+                "microchips": 0.01
+            },
+            "outputs": { "machineAssembler": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "machineAssembler",
+            "inputs": {
+                "liquidPump": 1,
+                "copperWire": 0.2,
+                "metalPiping": 0.5,
+                "hardenedPlate": 1,
+                "roboArm": 1,
+                "microchips": 0.05
+            },
+            "outputs": { "plasticPrinter": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "machineAssembler",
+            "inputs": { "copperWire": 0.5, "roboArm": 5, "airFilter": 5, "fan": 5 },
+            "outputs": { "cleanroomKit": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "machineAssembler",
+            "inputs": { "copperWire": 0.5, "roboArm": 5, "microchips": 0.05 },
+            "outputs": { "electronicsAssembler": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "machineAssembler",
+            "inputs": {
+                "liquidPump": 1,
+                "copperWire": 0.5,
+                "metalPiping": 0.5,
+                "metalTank": 1,
+                "hardenedPlate": 1,
+                "roboArm": 2,
+                "airFilter": 1,
+                "fan": 2
+            },
+            "outputs": { "laboratoryEquipment": 1 },
+            "baseTime": "1h"
+        },
+        {
+            "equipment": "machineAssembler",
+            "inputs": { "copperWire": 0.1, "fiber": 1, "resin": 0.1, "plastic": 1 },
+            "outputs": { "officeFurniture": 1 },
+            "baseTime": "1h"
         }
     ]
 }

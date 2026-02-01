@@ -4,7 +4,7 @@ CAESAR = node ./tools/caesar.js
 # generated files
 #
 .PHONY: setup api-types sqlc client-assets assets
-setup: dev-db
+setup: dev-db-container
 	@echo "Setting up the project for local development"
 	cd server && make setup setup-dev-db
 	cd ui && npm i && npm run build:editor
@@ -57,8 +57,8 @@ editor:
 #
 # db
 #
-.PHONY: dev-db dev-db-schema dev-db-galaxy dev-db-users
-dev-db:
+.PHONY: dev-db-container dev-db-setup
+dev-db-container:
 	docker run \
 		--name expansion-dev-db \
 		-e POSTGRES_USER=devsrv \
@@ -69,11 +69,5 @@ dev-db:
 
 	DB_CONTAINER=expansion-dev-db DB_USER=devsrv ./tools/db/wait.sh
 
-dev-db-schema:
-	cd server && ARGS='-action=schema' make dev-db
-
-dev-db-galaxy:
-	cd server && ARGS='-action=galaxy' make dev-db
-
-dev-db-users:
-	cd server && ARGS='-action=users' make dev-db
+dev-db-setup:
+	cd server && make setup-dev-db

@@ -92,3 +92,10 @@ func NewValidationError(field string, msg string, opts ...errorConstructor) Erro
 func NewDecodingError(inner error) Error {
 	return NewError(WithCode("ERR_DECODE"), WithInnerError(inner))
 }
+func NewRequirementsError(msg string, opts ...errorConstructor) Error {
+	allArgs := append([]errorConstructor{
+		WithCode("ERR_REQUIREMENTS"),
+		WithMessage(msg),
+	}, opts...)
+	return NewError(allArgs...)
+}

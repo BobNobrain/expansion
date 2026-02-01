@@ -13,26 +13,26 @@ type QueryableTable struct {
 	path DFPath
 
 	lock          *sync.RWMutex
-	idSubs        map[EntityID]*utils.UndeterministicSet[domain.ClientID]
-	idSubsReverse map[domain.ClientID]*utils.UndeterministicSet[EntityID]
+	idSubs        map[domain.EntityID]*utils.UndeterministicSet[domain.ClientID]
+	idSubsReverse map[domain.ClientID]*utils.UndeterministicSet[domain.EntityID]
 	dataSource    TableDataSource
 }
 
 type QueryableTableFrontend interface {
-	Query(dfapi.DFTableRequest, DFRequestContext) (map[string]any, common.Error)
+	Query(dfapi.DFTableRequest, domain.RequestContext) (common.Encodable, common.Error)
 	UnsubscribeFromIDs(dfapi.DFTableUnsubscribeRequest, domain.ClientID)
 	UnsubscribeFromAll(domain.ClientID)
 	Attach(*DataFront, DFPath)
 	Dispose()
 }
 
-type TableDataSource func(dfapi.DFTableRequest, DFRequestContext) (*TableResponse, common.Error)
+type TableDataSource func(dfapi.DFTableRequest, domain.RequestContext) (domain.EntityCollection, common.Error)
 
 func NewQueryableTable(dataSource TableDataSource) *QueryableTable {
 	table := &QueryableTable{
 		lock:          new(sync.RWMutex),
-		idSubs:        make(map[EntityID]*utils.UndeterministicSet[domain.ClientID]),
-		idSubsReverse: make(map[domain.ClientID]*utils.UndeterministicSet[EntityID]),
+		idSubs:        make(map[domain.EntityID]*utils.UndeterministicSet[domain.ClientID]),
+		idSubsReverse: make(map[domain.ClientID]*utils.UndeterministicSet[domain.EntityID]),
 		dataSource:    dataSource,
 	}
 
@@ -53,15 +53,16 @@ func (q *QueryableTable) Dispose() {
 
 func (table *QueryableTable) Query(
 	req dfapi.DFTableRequest,
-	ctx DFRequestContext,
-) (map[string]any, common.Error) {
+	ctx domain.RequestContext,
+) (common.Encodable, common.Error) {
 	rows, err := table.dataSource(req, ctx)
 	if err != nil {
 		return nil, err
 	}
 
+	rows.ApplyAccessControl(ctx)
 	table.subscribeForResponse(rows, ctx.ClientID)
-	return rows.Encode(), nil
+	return rows.AsEncodableMap(), nil
 }
 
 func (table *QueryableTable) UnsubscribeFromAll(cid domain.ClientID) {
@@ -84,7 +85,7 @@ func (table *QueryableTable) UnsubscribeFromIDs(req dfapi.DFTableUnsubscribeRequ
 	defer table.lock.Unlock()
 
 	for _, id := range req.IDs {
-		eid := EntityID(id)
+		eid := domain.EntityID(id)
 
 		subs := table.idSubs[eid]
 		if subs != nil {
@@ -98,11 +99,11 @@ func (table *QueryableTable) UnsubscribeFromIDs(req dfapi.DFTableUnsubscribeRequ
 	}
 }
 
-func (table *QueryableTable) PublishEntities(entities *TableResponse) {
+func (table *QueryableTable) PublishEntities(entities domain.EntityCollection) {
 	table.lock.RLock()
 	defer table.lock.RUnlock()
 
-	for eid, entity := range entities.results {
+	for _, eid := range entities.GetIDs() {
 		subs := table.idSubs[eid]
 		if subs == nil {
 			continue
@@ -110,21 +111,37 @@ func (table *QueryableTable) PublishEntities(entities *TableResponse) {
 		table.df.updatesQueue.pushTable(dfapi.DFTableUpdatePatch{
 			Path:     table.path.String(),
 			EntityID: string(eid),
-			Update:   entity.Encode(),
+			Update:   entities.GetEncodedEntity(eid).Encode(),
+		}, subs.ToSlice())
+	}
+}
+func (table *QueryableTable) UnpublishEntities(entities []domain.EntityID) {
+	table.lock.RLock()
+	defer table.lock.RUnlock()
+
+	for _, eid := range entities {
+		subs := table.idSubs[eid]
+		if subs == nil {
+			continue
+		}
+		table.df.updatesQueue.pushTable(dfapi.DFTableUpdatePatch{
+			Path:     table.path.String(),
+			EntityID: string(eid),
+			Update:   nil,
 		}, subs.ToSlice())
 	}
 }
 
-func (table *QueryableTable) subscribeForResponse(response *TableResponse, client domain.ClientID) {
+func (table *QueryableTable) subscribeForResponse(response domain.EntityCollection, client domain.ClientID) {
 	table.lock.Lock()
 	defer table.lock.Unlock()
 
-	for id := range response.results {
+	for _, id := range response.GetIDs() {
 		if table.idSubs[id] == nil {
 			table.idSubs[id] = utils.NewUndeterministicSet[domain.ClientID]()
 		}
 		if table.idSubsReverse[client] == nil {
-			table.idSubsReverse[client] = utils.NewUndeterministicSet[EntityID]()
+			table.idSubsReverse[client] = utils.NewUndeterministicSet[domain.EntityID]()
 		}
 
 		table.idSubs[id].Add(client)

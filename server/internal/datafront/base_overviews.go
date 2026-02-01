@@ -3,6 +3,7 @@ package datafront
 import (
 	"srv/internal/components"
 	"srv/internal/datafront/dfcore"
+	"srv/internal/domain"
 	"srv/internal/game"
 	"srv/internal/globals/events"
 	"srv/internal/utils"
@@ -49,34 +50,34 @@ func (t *baseOverviewsTable) dispose() {
 
 func (t *baseOverviewsTable) queryByIDs(
 	req dfapi.DFTableRequest,
-	ctx dfcore.DFRequestContext,
-) (*dfcore.TableResponse, common.Error) {
+	ctx domain.RequestContext,
+) (domain.EntityCollection, common.Error) {
 	overviews, err := t.basesRepo.ResolveOverviews(utils.ParseInts[game.BaseID](req.IDs))
 	if err != nil {
 		return nil, err
 	}
 
-	return dfcore.NewTableResponseFromList(overviews, identifyBaseOverview, encodeBaseOverview), nil
+	return t.MakeCollection().AddList(overviews), nil
 }
 
 func (t *baseOverviewsTable) queryByCompanyID(
 	payload api.BaseOverviewsQueryByCompanyID,
 	req dfapi.DFTableQueryRequest,
-	ctx dfcore.DFRequestContext,
-) (*dfcore.TableResponse, common.Error) {
+	ctx domain.RequestContext,
+) (domain.EntityCollection, common.Error) {
 	bases, err := t.basesRepo.GetCompanyBases(game.CompanyID(payload.CompanyID))
 	if err != nil {
 		return nil, err
 	}
 
-	return dfcore.NewTableResponseFromList(bases, identifyBaseOverview, encodeBaseOverview), nil
+	return t.MakeCollection().AddList(bases), nil
 }
 
 func (t *baseOverviewsTable) queryByBranch(
 	payload api.BaseOverviewsQueryByBranch,
 	req dfapi.DFTableQueryRequest,
-	ctx dfcore.DFRequestContext,
-) (*dfcore.TableResponse, common.Error) {
+	ctx domain.RequestContext,
+) (domain.EntityCollection, common.Error) {
 	bases, err := t.basesRepo.GetCompanyBasesOnPlanet(
 		game.CompanyID(payload.CompanyID),
 		game.CelestialID(payload.WorldID),
@@ -86,7 +87,7 @@ func (t *baseOverviewsTable) queryByBranch(
 		return nil, err
 	}
 
-	return dfcore.NewTableResponseFromList(bases, identifyBaseOverview, encodeBaseOverview), nil
+	return t.MakeCollection().AddList(bases), nil
 }
 
 func (t *baseOverviewsTable) onBaseCreated(ev events.BaseCreatedPayload) {
@@ -106,21 +107,34 @@ func (t *baseOverviewsTable) fetchAndPublishOverview(id game.BaseID) {
 		return
 	}
 
-	t.table.PublishEntities(dfcore.NewTableResponseFromList(overviews, identifyBaseOverview, encodeBaseOverview))
+	t.table.PublishEntities(t.MakeCollection().AddList(overviews))
 }
 
-func identifyBaseOverview(b game.BaseOverview) dfcore.EntityID {
-	return dfcore.EntityID(b.ID.String())
+func (t *baseOverviewsTable) IdentifyEntity(b game.BaseOverview) domain.EntityID {
+	return domain.EntityID(b.ID.String())
 }
+func (t *baseOverviewsTable) EncodeEntity(b game.BaseOverview) common.Encodable {
+	row := api.BaseOverviewsTableRow{
+		BaseID:    int(b.ID),
+		WorldID:   string(b.WorldID),
+		TileID:    int(b.TileID),
+		CompanyID: string(b.Operator),
+		CityID:    int(b.CityID),
+		CreatedAt: b.Created,
+	}
 
-func encodeBaseOverview(b game.BaseOverview) common.Encodable {
-	return common.AsEncodable(api.BaseOverviewsTableRow{
-		BaseID:     int(b.ID),
-		WorldID:    string(b.WorldID),
-		TileID:     int(b.TileID),
-		CompanyID:  string(b.Operator),
-		CityID:     int(b.CityID),
-		CreatedAt:  b.Created,
-		NFactories: b.NFactories,
-	})
+	if b.PrivateInfo != nil {
+		row.PrivateInfo = &api.BaseOverviewsTableRowPrivateInfo{
+			Name:       b.PrivateInfo.Name,
+			NFactories: b.PrivateInfo.NFactories,
+		}
+	}
+
+	return common.AsEncodable(row)
+}
+func (t *baseOverviewsTable) ViewFor(b game.BaseOverview, req domain.RequestContext) *game.BaseOverview {
+	return b.ViewFor(req.UserID)
+}
+func (t *baseOverviewsTable) MakeCollection() domain.EntityCollectionBuilder[game.BaseOverview] {
+	return domain.MakeUnorderedEntityCollection(t, t)
 }

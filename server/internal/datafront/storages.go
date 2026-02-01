@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"srv/internal/components"
 	"srv/internal/datafront/dfcore"
+	"srv/internal/domain"
 	"srv/internal/game"
 	"srv/internal/game/gamelogic"
 	"srv/internal/globals/events"
@@ -89,8 +90,8 @@ func (t *storagesTable) resolveIds(ids []game.StorageID, tx components.GlobalRep
 
 func (t *storagesTable) queryByIDs(
 	req dfapi.DFTableRequest,
-	ctx dfcore.DFRequestContext,
-) (*dfcore.TableResponse, common.Error) {
+	ctx domain.RequestContext,
+) (domain.EntityCollection, common.Error) {
 	tx, err := t.storage.StartTransaction(context.TODO())
 	if err != nil {
 		return nil, err
@@ -116,14 +117,14 @@ func (t *storagesTable) queryByIDs(
 		return nil, err
 	}
 
-	return dfcore.NewTableResponseFromList(storages, identifyStorage, encodeStorage), tx.Commit()
+	return t.MakeCollection().AddList(storages), tx.Commit()
 }
 
 func (t *storagesTable) queryNeighbours(
 	payload api.StoragesQueryAllNeighbours,
 	req dfapi.DFTableQueryRequest,
-	ctx dfcore.DFRequestContext,
-) (*dfcore.TableResponse, common.Error) {
+	ctx domain.RequestContext,
+) (domain.EntityCollection, common.Error) {
 	tx, err := t.storage.StartTransaction(context.TODO())
 	if err != nil {
 		return nil, err
@@ -144,7 +145,7 @@ func (t *storagesTable) queryNeighbours(
 		return nil, err
 	}
 
-	return dfcore.NewTableResponseFromList(storages, identifyStorage, encodeStorage), tx.Commit()
+	return t.MakeCollection().AddList(storages), tx.Commit()
 }
 
 // func (t *storagesTable) onFactoryCreated(ev events.FactoryCreatedPayload) {
@@ -162,10 +163,10 @@ func (t *storagesTable) queryNeighbours(
 // 	)
 // }
 
-func identifyStorage(s game.Storage) dfcore.EntityID {
-	return dfcore.EntityID(s.GetStorageID())
+func (t *storagesTable) IdentifyEntity(s game.Storage) domain.EntityID {
+	return domain.EntityID(s.GetStorageID())
 }
-func encodeStorage(s game.Storage) common.Encodable {
+func (t *storagesTable) EncodeEntity(s game.Storage) common.Encodable {
 	return common.AsEncodable(api.StoragesTableRow{
 		StorageID:      string(s.GetStorageID()),
 		Name:           s.GetName(),
@@ -176,4 +177,7 @@ func encodeStorage(s game.Storage) common.Encodable {
 			VolumeM3: s.GetSizeLimit().GetVolume().CubicMeters(),
 		},
 	})
+}
+func (t *storagesTable) MakeCollection() domain.EntityCollectionBuilder[game.Storage] {
+	return domain.MakeUnorderedEntityCollection(t, nil)
 }

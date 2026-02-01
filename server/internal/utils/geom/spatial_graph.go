@@ -111,9 +111,7 @@ func (sg *spatialGraph) GetAllCoords() []Vec3 {
 
 func (sg *spatialGraph) GetVerticiesAround(center int, radius int) *utils.DeterministicSet[int] {
 	visited := utils.NewDeterministicSet[int]()
-
-	front := make([]int, 0, 1)
-	front = append(front, center)
+	front := []int{center}
 
 	for range radius {
 		newFront := make([]int, 0)

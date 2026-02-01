@@ -1,5 +1,6 @@
 CREATE TABLE IF NOT EXISTS bases (
     id SERIAL PRIMARY KEY NOT NULL,
+    owner_id UUID NOT NULL REFERENCES users,
     system_id CHAR(6) NOT NULL REFERENCES star_systems,
     world_id VARCHAR(15) NOT NULL REFERENCES worlds,
     tile_id SMALLINT NOT NULL,
@@ -12,6 +13,7 @@ CREATE TABLE IF NOT EXISTS bases (
 
 CREATE TABLE IF NOT EXISTS factories (
     id SERIAL PRIMARY KEY NOT NULL,
+    owner_id UUID NOT NULL REFERENCES users,
     base_id INTEGER NOT NULL REFERENCES bases,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -23,6 +25,7 @@ CREATE TABLE IF NOT EXISTS factories (
 CREATE
 OR REPLACE VIEW base_overviews AS
 SELECT id,
+    owner_id,
     system_id,
     world_id,
     tile_id,

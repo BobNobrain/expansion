@@ -2,6 +2,7 @@ package datafront
 
 import (
 	"srv/internal/datafront/dfcore"
+	"srv/internal/domain"
 	"srv/internal/game"
 	"srv/internal/globals/assets"
 	"srv/internal/utils/common"
@@ -25,7 +26,7 @@ func (gdf *GameDataFront) InitGalaxyMap() {
 	gdf.galaxy = gmap
 }
 
-func (gmap *galaxyMapSingleton) getValue(_ dfcore.DFRequestContext) (common.Encodable, common.Error) {
+func (gmap *galaxyMapSingleton) getValue(_ domain.RequestContext) (common.Encodable, common.Error) {
 	return common.AsEncodable(gmap.valueData), nil
 }
 

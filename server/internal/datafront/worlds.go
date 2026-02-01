@@ -3,6 +3,7 @@ package datafront
 import (
 	"srv/internal/components"
 	"srv/internal/datafront/dfcore"
+	"srv/internal/domain"
 	"srv/internal/game"
 	"srv/internal/globals/events"
 	"srv/internal/globals/logger"
@@ -36,10 +37,10 @@ func (gdf *GameDataFront) InitWorlds(repo components.WorldsRepoReadonly) {
 	gdf.df.AttachTable(dfcore.DFPath("worlds"), worlds.table)
 }
 
-func (w *worldsTable) queryByIDs(
+func (t *worldsTable) queryByIDs(
 	req dfapi.DFTableRequest,
-	_ dfcore.DFRequestContext,
-) (*dfcore.TableResponse, common.Error) {
+	_ domain.RequestContext,
+) (domain.EntityCollection, common.Error) {
 	worldIDs := make([]game.CelestialID, 0, len(req.IDs))
 	for _, id := range req.IDs {
 		worldID := game.CelestialID(id)
@@ -54,16 +55,12 @@ func (w *worldsTable) queryByIDs(
 		worldIDs = append(worldIDs, worldID)
 	}
 
-	worlds, err := w.repo.GetDataMany(worldIDs)
+	worlds, err := t.repo.GetDataMany(worldIDs)
 	if err != nil {
 		return nil, err
 	}
 
-	response := dfcore.NewTableResponse()
-	for _, world := range worlds {
-		response.Add(dfcore.EntityID(world.ID), encodeWorld(world))
-	}
-	return response, nil
+	return t.MakeCollection().AddList(worlds), nil
 }
 
 func (t *worldsTable) onWorldUpdated(payload events.WorldUpdatedPayload) {
@@ -73,10 +70,7 @@ func (t *worldsTable) onWorldUpdated(payload events.WorldUpdatedPayload) {
 		return
 	}
 
-	t.table.PublishEntities(dfcore.NewTableResponseFromSingle(
-		dfcore.EntityID(payload.WorldID),
-		encodeWorld(worldData),
-	))
+	t.table.PublishEntities(t.MakeCollection().Add(worldData))
 }
 
 func (t *worldsTable) onBaseCreated(payload events.BaseCreatedPayload) {
@@ -86,13 +80,13 @@ func (t *worldsTable) onBaseCreated(payload events.BaseCreatedPayload) {
 		return
 	}
 
-	t.table.PublishEntities(dfcore.NewTableResponseFromSingle(
-		dfcore.EntityID(payload.WorldID),
-		encodeWorld(worldData),
-	))
+	t.table.PublishEntities(t.MakeCollection().Add(worldData))
 }
 
-func encodeWorld(w game.WorldData) common.Encodable {
+func (t *worldsTable) IdentifyEntity(w game.WorldData) domain.EntityID {
+	return domain.EntityID(w.ID)
+}
+func (t *worldsTable) EncodeEntity(w game.WorldData) common.Encodable {
 	var exploredBy string
 	var exploredAt time.Time
 
@@ -184,7 +178,10 @@ func encodeWorld(w game.WorldData) common.Encodable {
 		TileBases:  tileBases,
 	})
 }
+func (t *worldsTable) MakeCollection() domain.EntityCollectionBuilder[game.WorldData] {
+	return domain.MakeUnorderedEntityCollection(t, nil)
+}
 
-func (w *worldsTable) dispose() {
-	w.sub.UnsubscribeAll()
+func (t *worldsTable) dispose() {
+	t.sub.UnsubscribeAll()
 }

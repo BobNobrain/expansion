@@ -4,6 +4,7 @@ import (
 	"context"
 	"srv/internal/components"
 	"srv/internal/datafront/dfcore"
+	"srv/internal/domain"
 	"srv/internal/game"
 	"srv/internal/game/gamelogic"
 	"srv/internal/globals/events"
@@ -48,8 +49,8 @@ func (t *factoriesTable) dispose() {
 
 func (t *factoriesTable) queryByIDs(
 	req dfapi.DFTableRequest,
-	ctx dfcore.DFRequestContext,
-) (*dfcore.TableResponse, common.Error) {
+	ctx domain.RequestContext,
+) (domain.EntityCollection, common.Error) {
 	tx, err := t.storage.StartTransaction(context.TODO())
 	if err != nil {
 		return nil, err
@@ -63,14 +64,14 @@ func (t *factoriesTable) queryByIDs(
 		return nil, err
 	}
 
-	return dfcore.NewTableResponseFromList(factories, identifyFactory, encodeFactory), tx.Commit()
+	return t.MakeCollection().AddList(factories), tx.Commit()
 }
 
 func (t *factoriesTable) queryByBaseID(
 	payload api.FactoriesQueryByBaseID,
 	req dfapi.DFTableQueryRequest,
-	ctx dfcore.DFRequestContext,
-) (*dfcore.TableResponse, common.Error) {
+	ctx domain.RequestContext,
+) (domain.EntityCollection, common.Error) {
 	tx, err := t.storage.StartTransaction(context.TODO())
 	if err != nil {
 		return nil, err
@@ -84,7 +85,7 @@ func (t *factoriesTable) queryByBaseID(
 		return nil, err
 	}
 
-	return dfcore.NewTableResponseFromList(factories, identifyFactory, encodeFactory), tx.Commit()
+	return t.MakeCollection().AddList(factories), tx.Commit()
 }
 
 func (t *factoriesTable) onFactoryCreated(ev events.FactoryCreatedPayload) {
@@ -92,20 +93,16 @@ func (t *factoriesTable) onFactoryCreated(ev events.FactoryCreatedPayload) {
 }
 func (t *factoriesTable) onFactoryRemoved(ev events.FactoryRemovedPayload) {
 	t.qByBaseID.PublishChangedNotification(api.FactoriesQueryByBaseID{BaseID: int(ev.BaseID)})
+	t.table.UnpublishEntities([]domain.EntityID{domain.EntityID(ev.FactoryID.String())})
 }
 func (t *factoriesTable) onFactoryUpdated(ev events.FactoryUpdatedPayload) {
-	t.table.PublishEntities(
-		dfcore.NewTableResponseFromSingle(
-			identifyFactory(ev.Factory),
-			encodeFactory(ev.Factory),
-		),
-	)
+	t.table.PublishEntities(t.MakeCollection().Add(ev.Factory))
 }
 
-func identifyFactory(f game.Factory) dfcore.EntityID {
-	return dfcore.EntityID(f.FactoryID.String())
+func (t *factoriesTable) IdentifyEntity(f game.Factory) domain.EntityID {
+	return domain.EntityID(f.FactoryID.String())
 }
-func encodeFactory(f game.Factory) common.Encodable {
+func (t *factoriesTable) EncodeEntity(f game.Factory) common.Encodable {
 	return common.AsEncodable(api.FactoriesTableRow{
 		FactoryID: int(f.FactoryID),
 		BaseID:    int(f.BaseID),
@@ -133,6 +130,16 @@ func encodeFactory(f game.Factory) common.Encodable {
 		UpgradeContribution: encodeContribution(gamelogic.FactoryUpgrade().GetConstructionCosts(f.Upgrade)),
 		UpgradeLastUpdated:  f.Upgrade.LastUpdated,
 	})
+}
+func (t *factoriesTable) ViewFor(f game.Factory, req domain.RequestContext) *game.Factory {
+	if f.OwnerID != req.UserID {
+		return nil
+	}
+
+	return &f
+}
+func (t *factoriesTable) MakeCollection() domain.EntityCollectionBuilder[game.Factory] {
+	return domain.MakeUnorderedEntityCollection(t, t)
 }
 
 func encodeFactoryEquipment(eq game.FactoryEquipment) api.FactoriesTableRowEquipment {

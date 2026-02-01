@@ -1,4 +1,5 @@
 import { createMemo, Show, type Component } from 'solid-js';
+import { useNavigate } from '@solidjs/router';
 import {
     Badge,
     Button,
@@ -18,7 +19,7 @@ import { StorageContent } from '@/components/StorageContent/StorageContent';
 import { Factory } from '@/domain/Base';
 import { Storage } from '@/domain/Inventory';
 import { World } from '@/domain/World';
-import { IconArea, IconCross, IconEquipment, IconNametag } from '@/icons';
+import { IconArea, IconEquipment, IconPencil, IconTrashBin } from '@/icons';
 import { buildingsAsset } from '@/lib/assetmanager';
 import { formatNumericId } from '@/lib/id';
 import { useAsset } from '@/lib/solid/asset';
@@ -26,6 +27,7 @@ import { formatInteger } from '@/lib/strings';
 import { getBasesRoute } from '@/routes/bases';
 import { useModalRouteState } from '@/routes/modals';
 import { TouchModal } from '@/touch/components/TouchModal';
+import { DemolishFactoryForm } from '@/views/DemolishFactoryForm/DemolishFactoryForm';
 import { RenameFactoryForm } from '@/views/RenameFactoryForm/RenameFactoryForm';
 import { useFactoryDisplayContext } from '../state';
 
@@ -109,7 +111,7 @@ const DEFS: DefinitionListItem<FactoryInfo>[] = [
 
 export const FactoryDisplayOverview: Component = () => {
     const { factory, isLoading, worldId, tileId, onUpgrade } = useFactoryDisplayContext();
-    // const navigate = useNavigate();
+    const navigate = useNavigate();
     const buildings = useAsset(buildingsAsset);
 
     const info = createMemo((): FactoryInfo | null => {
@@ -153,6 +155,7 @@ export const FactoryDisplayOverview: Component = () => {
     });
 
     const renameModal = useModalRouteState('renameFactory');
+    const demolishModal = useModalRouteState('demolishFactory');
 
     return (
         <>
@@ -160,10 +163,10 @@ export const FactoryDisplayOverview: Component = () => {
                 <PageHeaderTitle>Overview</PageHeaderTitle>
                 <PageHeaderActions pushRight>
                     <Button square style="light" onClick={renameModal.open}>
-                        <IconNametag size={32} />
+                        <IconPencil size={32} />
                     </Button>
-                    <Button square style="light">
-                        <IconCross size={32} color="error" />
+                    <Button square style="light" onClick={demolishModal.open}>
+                        <IconTrashBin size={32} color="error" />
                     </Button>
                 </PageHeaderActions>
             </PageHeader>
@@ -177,6 +180,21 @@ export const FactoryDisplayOverview: Component = () => {
                     currentName={factory()?.name}
                     onSuccess={renameModal.close}
                     onCancel={renameModal.close}
+                />
+            </TouchModal>
+            <TouchModal isOpen={demolishModal.isOpen()} onClose={demolishModal.close} title="Demolish Factory">
+                <DemolishFactoryForm
+                    factoryId={factory()?.id}
+                    factoryData={{
+                        worldId: worldId() ?? undefined,
+                        tileId: tileId() ?? undefined,
+                    }}
+                    onSuccess={({ worldId, tileId }) => {
+                        console.log('ONSUCCESS', worldId, tileId);
+                        // demolishModal.close();
+                        navigate(getBasesRoute({ worldId, tileId }), { replace: true });
+                    }}
+                    onCancel={demolishModal.close}
                 />
             </TouchModal>
         </>

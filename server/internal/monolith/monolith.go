@@ -71,6 +71,7 @@ func (m *Monolith) Start() error {
 		usecases.NewContributeToFactoryUsecase(store),
 		usecases.NewTransferFactoryItemsUsecase(store),
 		usecases.NewRenameFactoryUsecase(store),
+		usecases.NewFactoryDemolishUsecase(store),
 	)
 
 	if config.World().AllowCheats {

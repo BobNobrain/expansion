@@ -46,13 +46,17 @@ type BaseOverviewsQueryByBranch struct {
 }
 
 type BaseOverviewsTableRow struct {
-	BaseID     int    `json:"id"`
-	WorldID    string `json:"worldId"`
-	TileID     int    `json:"tileId"`
-	CompanyID  string `json:"companyId"`
-	CityID     int    `json:"cityId"`
+	BaseID    int       `json:"id"`
+	WorldID   string    `json:"worldId"`
+	TileID    int       `json:"tileId"`
+	CompanyID string    `json:"companyId"`
+	CityID    int       `json:"cityId"`
+	CreatedAt time.Time `json:"established"`
+
+	PrivateInfo *BaseOverviewsTableRowPrivateInfo `json:"privateInfo,omitempty"`
+}
+
+type BaseOverviewsTableRowPrivateInfo struct {
 	NFactories int    `json:"nFactories"`
 	Name       string `json:"name"`
-
-	CreatedAt time.Time `json:"established"`
 }

@@ -26,7 +26,8 @@ func (g *giveCheatImpl) Run(
 		return nil, err
 	}
 
-	base.Inventory.Add(inv)
+	inv.Scale(-1)
+	base.Inventory.RemoveAsMuchAsPossible(inv)
 
 	err = repos.Bases().UpdateBaseContent(*base)
 	if err != nil {

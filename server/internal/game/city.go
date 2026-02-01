@@ -2,6 +2,7 @@ package game
 
 import (
 	"fmt"
+	"slices"
 	"srv/internal/domain"
 	"srv/internal/utils/predictable"
 	"time"
@@ -29,6 +30,13 @@ type City struct {
 	Population CityPopulationData
 
 	CityTiles []TileID
+}
+
+func (c City) IsOwnedAndNotCenter(tid TileID) bool {
+	if c.TileID == tid {
+		return false
+	}
+	return slices.Index(c.CityTiles, tid) >= 0
 }
 
 type CityBuildingID string

@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS cities (
     -- city founding info
     name TEXT NOT NULL,
     established_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    established_by UUID NOT NULL,
+    established_by UUID NOT NULL REFERENCES users,
     -- city data
     city_level SMALLINT NOT NULL DEFAULT 0,
     city_data JSONB NOT NULL DEFAULT '{}'::JSONB,

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"srv/internal/components"
 	"srv/internal/datafront/dfcore"
+	"srv/internal/domain"
 	"srv/internal/game"
 	"srv/internal/globals/events"
 	"srv/internal/globals/logger"
@@ -54,25 +55,23 @@ func (u *sysOverviewsTable) onSystemUpdated(payload events.SystemUpdatedPayload)
 		return
 	}
 
-	update := dfcore.NewTableResponse()
-	update.Add(dfcore.EntityID(payload.SystemID), encodeSystemOverview(game.StarSystemOverview{
+	u.table.PublishEntities(u.MakeCollection().Add(game.StarSystemOverview{
 		ID:         system.ID,
 		IsExplored: !system.Explored.By.IsEmpty(),
 		Stars:      system.Stars,
 		// TODO: properly retrieve and calculate values like NPlanets
 	}))
-	u.table.PublishEntities(update)
 }
 
-func (t *sysOverviewsTable) queryByID(req dfapi.DFTableRequest, _ dfcore.DFRequestContext) (*dfcore.TableResponse, common.Error) {
+func (t *sysOverviewsTable) queryByID(req dfapi.DFTableRequest, _ domain.RequestContext) (domain.EntityCollection, common.Error) {
 	return nil, common.NewError(common.WithCode("ERR_TODO"), common.WithMessage("sys_overviews[id] is not implemented yet"))
 }
 
 func (u *sysOverviewsTable) queryBySectorID(
 	q api.SysOverviewsQueryBySectorID,
 	_ dfapi.DFTableQueryRequest,
-	_ dfcore.DFRequestContext,
-) (*dfcore.TableResponse, common.Error) {
+	_ domain.RequestContext,
+) (domain.EntityCollection, common.Error) {
 
 	if len(q.SectorID) != 2 {
 		return nil, common.NewValidationError(
@@ -86,19 +85,14 @@ func (u *sysOverviewsTable) queryBySectorID(
 		return nil, err
 	}
 
-	result := dfcore.NewTableResponse()
-	for _, overview := range overviews {
-		result.Add(dfcore.EntityID(overview.ID), encodeSystemOverview(overview))
-	}
-
-	return result, nil
+	return u.MakeCollection().AddList(overviews), nil
 }
 
 func (u *sysOverviewsTable) queryByCoords(
 	q api.SysOverviewsQueryByCoords,
 	_ dfapi.DFTableQueryRequest,
-	_ dfcore.DFRequestContext,
-) (*dfcore.TableResponse, common.Error) {
+	_ domain.RequestContext,
+) (domain.EntityCollection, common.Error) {
 	overviews, err := u.repo.GetSystemsOnMap(components.StarSystemRepoMapRequest{
 		Limit: q.Limit,
 		Sector: game.GalacticSectorCoords{
@@ -112,15 +106,13 @@ func (u *sysOverviewsTable) queryByCoords(
 		return nil, err
 	}
 
-	result := dfcore.NewTableResponse()
-	for _, overview := range overviews {
-		result.Add(dfcore.EntityID(overview.ID), encodeSystemOverview(overview))
-	}
-
-	return result, nil
+	return u.MakeCollection().AddList(overviews), nil
 }
 
-func encodeSystemOverview(overview game.StarSystemOverview) common.Encodable {
+func (t *sysOverviewsTable) IdentifyEntity(overview game.StarSystemOverview) domain.EntityID {
+	return domain.EntityID(overview.ID)
+}
+func (t *sysOverviewsTable) EncodeEntity(overview game.StarSystemOverview) common.Encodable {
 	stars := make([]api.SysOverviewsTableRowStar, 0, len(overview.Stars))
 	for _, star := range overview.Stars {
 		stars = append(stars, api.SysOverviewsTableRowStar{
@@ -147,4 +139,7 @@ func encodeSystemOverview(overview game.StarSystemOverview) common.Encodable {
 		NCities:     overview.PopInfo.NCities,
 		Stars:       stars,
 	})
+}
+func (t *sysOverviewsTable) MakeCollection() domain.EntityCollectionBuilder[game.StarSystemOverview] {
+	return domain.MakeUnorderedEntityCollection(t, nil)
 }

@@ -57,12 +57,7 @@ func (df *DataFront) handleTableRequest(rq components.DataFrontRequest) (common.
 		return nil, common.NewValidationError("DFTableRequest::Path", "table path does not exist")
 	}
 
-	result, err := q.Query(query, MakeDFRequestContext(rq))
-	if err != nil {
-		return nil, err
-	}
-
-	return common.AsEncodable(result), nil
+	return q.Query(query, MakeDFRequestContext(rq))
 }
 
 func (df *DataFront) handleTableUnsubscribe(rq components.DataFrontRequest) common.Error {
@@ -98,12 +93,7 @@ func (df *DataFront) handleQueryRequest(rq components.DataFrontRequest) (common.
 		return nil, common.NewValidationError("DFTableRequest::Path", "table query path does not exist")
 	}
 
-	result, err := q.Query(query, MakeDFRequestContext(rq))
-	if err != nil {
-		return nil, err
-	}
-
-	return common.AsEncodable(result), nil
+	return q.Query(query, MakeDFRequestContext(rq))
 }
 
 func (df *DataFront) handleQueryUnsubscribe(rq components.DataFrontRequest) common.Error {

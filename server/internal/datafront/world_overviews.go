@@ -3,6 +3,7 @@ package datafront
 import (
 	"srv/internal/components"
 	"srv/internal/datafront/dfcore"
+	"srv/internal/domain"
 	"srv/internal/game"
 	"srv/internal/globals/events"
 	"srv/internal/globals/logger"
@@ -45,16 +46,16 @@ func (t *worldOverviewsTable) dispose() {
 
 func (t *worldOverviewsTable) queryByIDs(
 	req dfapi.DFTableRequest,
-	ctx dfcore.DFRequestContext,
-) (*dfcore.TableResponse, common.Error) {
+	ctx domain.RequestContext,
+) (domain.EntityCollection, common.Error) {
 	return nil, common.NewError(common.WithCode("ERR_TODO"), common.WithMessage("world_overviews[id] is not implemented yet"))
 }
 
 func (t *worldOverviewsTable) queryBySystemID(
 	payload api.WorldOverviewsQueryBySystemID,
 	_ dfapi.DFTableQueryRequest,
-	_ dfcore.DFRequestContext,
-) (*dfcore.TableResponse, common.Error) {
+	_ domain.RequestContext,
+) (domain.EntityCollection, common.Error) {
 	systemID := game.StarSystemID(payload.SystemID)
 	if !systemID.IsValid() {
 		return nil, common.NewValidationError("WorldOverviewsQueryBySystemID::SystemID", "wrong system id")
@@ -65,12 +66,7 @@ func (t *worldOverviewsTable) queryBySystemID(
 		return nil, err
 	}
 
-	result := dfcore.NewTableResponse()
-	for _, overview := range overviews {
-		result.Add(dfcore.EntityID(overview.ID), encodeWorldOverview(overview))
-	}
-
-	return result, nil
+	return t.MakeCollection().AddList(overviews), nil
 }
 
 func (t *worldOverviewsTable) onSystemUpdated(payload events.SystemUpdatedPayload) {
@@ -84,7 +80,7 @@ func (t *worldOverviewsTable) onWorldUpdated(payload events.WorldUpdatedPayload)
 		return
 	}
 
-	t.table.PublishEntities(dfcore.NewTableResponseFromList(overviews, identifyWorldOverview, encodeWorldOverview))
+	t.table.PublishEntities(t.MakeCollection().AddList(overviews))
 }
 
 func (t *worldOverviewsTable) onBaseCreated(payload events.BaseCreatedPayload) {
@@ -94,14 +90,13 @@ func (t *worldOverviewsTable) onBaseCreated(payload events.BaseCreatedPayload) {
 		return
 	}
 
-	t.table.PublishEntities(dfcore.NewTableResponseFromList(overviews, identifyWorldOverview, encodeWorldOverview))
+	t.table.PublishEntities(t.MakeCollection().AddList(overviews))
 }
 
-func identifyWorldOverview(overview game.WorldOverview) dfcore.EntityID {
-	return dfcore.EntityID(overview.ID)
+func (t *worldOverviewsTable) IdentifyEntity(overview game.WorldOverview) domain.EntityID {
+	return domain.EntityID(overview.ID)
 }
-
-func encodeWorldOverview(overview game.WorldOverview) common.Encodable {
+func (t *worldOverviewsTable) EncodeEntity(overview game.WorldOverview) common.Encodable {
 	return common.AsEncodable(api.WorldOverviewsTableRow{
 		WorldID:    string(overview.ID),
 		Size:       overview.Size,
@@ -122,4 +117,7 @@ func encodeWorldOverview(overview game.WorldOverview) common.Encodable {
 		NBases:  overview.Population.NBases,
 		NCities: overview.Population.NCities,
 	})
+}
+func (t *worldOverviewsTable) MakeCollection() domain.EntityCollectionBuilder[game.WorldOverview] {
+	return domain.MakeUnorderedEntityCollection(t, nil)
 }

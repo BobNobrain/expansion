@@ -118,6 +118,11 @@ func (b *basesRepoImpl) CreateBase(payload components.CreateBasePayload) common.
 		return makeDBError(jerr, "BasesRepo::CreateCompanyBase")
 	}
 
+	owner, err := parseUUID(payload.OwnerID)
+	if err != nil {
+		return err
+	}
+
 	dberr := b.q.CreateBase(b.ctx, dbq.CreateBaseParams{
 		SystemID:  string(payload.WorldID.GetStarSystemID()),
 		WorldID:   string(payload.WorldID),
@@ -125,6 +130,8 @@ func (b *basesRepoImpl) CreateBase(payload components.CreateBasePayload) common.
 		CompanyID: operator,
 		CityID:    int32(payload.CityID),
 		Data:      baseData,
+		Name:      payload.Name,
+		OwnerID:   owner,
 	})
 	if dberr != nil {
 		return makeDBError(dberr, "BasesRepo::CreateCompanyBase")
@@ -192,6 +199,7 @@ func decodeBase(row dbq.Base) (game.Base, common.Error) {
 		WorldID:   game.CelestialID(row.WorldID),
 		TileID:    game.TileID(row.TileID),
 		CityID:    game.CityID(row.CityID),
+		OwnerID:   domain.UserID(row.OwnerID.String()),
 		Name:      row.Name,
 		Inventory: game.MakeInventoryFrom(baseData.Inventory),
 	}
@@ -201,13 +209,16 @@ func decodeBase(row dbq.Base) (game.Base, common.Error) {
 
 func decodeBaseOverview(row dbq.BaseOverview) game.BaseOverview {
 	return game.BaseOverview{
-		ID:         game.BaseID(row.ID),
-		Created:    row.EstablishedAt.Time,
-		Operator:   game.CompanyID(row.CompanyID.String()),
-		WorldID:    game.CelestialID(row.WorldID),
-		TileID:     game.TileID(row.TileID),
-		CityID:     game.CityID(row.CityID),
-		NFactories: int(row.NFactories),
-		Name:       row.Name,
+		ID:       game.BaseID(row.ID),
+		Created:  row.EstablishedAt.Time,
+		Operator: game.CompanyID(row.CompanyID.String()),
+		WorldID:  game.CelestialID(row.WorldID),
+		TileID:   game.TileID(row.TileID),
+		CityID:   game.CityID(row.CityID),
+		OwnerID:  domain.UserID(row.OwnerID.String()),
+		PrivateInfo: &game.BaseOverviewPrivateInfo{
+			Name:       row.Name,
+			NFactories: int(row.NFactories),
+		},
 	}
 }

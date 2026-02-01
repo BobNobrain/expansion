@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"srv/internal/domain"
 	"srv/internal/utils/common"
+	"time"
 )
 
 type DataFrontRequestID int
@@ -13,6 +14,7 @@ type DataFrontRequest struct {
 	ClientID domain.ClientID
 	OnBehalf domain.UserID
 	Type     string
+	Received time.Time
 	Request  json.RawMessage
 }
 

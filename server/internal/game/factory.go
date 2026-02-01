@@ -2,6 +2,7 @@ package game
 
 import (
 	"fmt"
+	"srv/internal/domain"
 	"strconv"
 	"time"
 )
@@ -14,6 +15,7 @@ func (f FactoryID) String() string {
 
 type FactoryStaticOverview struct {
 	FactoryID FactoryID
+	OwnerID   domain.UserID
 	BaseID    BaseID
 	WorldID   CelestialID
 	TileID    TileID
@@ -23,6 +25,7 @@ type FactoryStaticOverview struct {
 
 type Factory struct {
 	FactoryID FactoryID
+	OwnerID   domain.UserID
 	BaseID    BaseID
 	BuiltAt   time.Time
 	Name      string

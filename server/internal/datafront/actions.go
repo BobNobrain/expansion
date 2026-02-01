@@ -46,18 +46,20 @@ func (gdf *GameDataFront) InitCityActions(foundCity components.Usecase[usecases.
 }
 
 func (gdf *GameDataFront) InitBaseActions(
-	createBase components.Usecase[usecases.CreateBaseUsecaseInput],
+	createBase components.UsecaseWithOutput[usecases.BaseCreateInput, any],
 	renameBase components.Usecase[usecases.RenameBaseUsecaseInput],
 ) {
-	gdf.df.AttachAction(api.ActionCreateBase, newActionFromUsecase(
+	gdf.df.AttachAction(api.ActionCreateBase, newActionFromUsecaseWithResult(
 		createBase,
-		func(payload api.CreateBasePayload) usecases.CreateBaseUsecaseInput {
-			return usecases.CreateBaseUsecaseInput{
+		func(payload api.CreateBasePayload) usecases.BaseCreateInput {
+			return usecases.BaseCreateInput{
 				WorldID:  game.CelestialID(payload.WorldID),
 				TileID:   game.TileID(payload.TileID),
 				Operator: game.CompanyID(payload.Operator),
+				Name:     payload.Name,
 			}
 		},
+		emptyEncodable,
 	))
 
 	gdf.df.AttachAction(api.ActionRenameBase, newActionFromUsecase(
@@ -78,6 +80,7 @@ func (gdf *GameDataFront) InitFactoryActions(
 	contributeToFactory components.Usecase[usecases.ContributeToFactoryUsecaseInput],
 	transferFactoryItems components.Usecase[usecases.TransferFactoryItemsUsecaseInput],
 	renameFactory components.Usecase[usecases.RenameFactoryUsecaseInput],
+	demolishFactory components.UsecaseWithOutput[usecases.FactoryDemolishInput, any],
 ) {
 	gdf.df.AttachAction(api.ActionCreateFactory, newActionFromUsecase(
 		createFactory,
@@ -175,6 +178,16 @@ func (gdf *GameDataFront) InitFactoryActions(
 			}
 		},
 	))
+
+	gdf.df.AttachAction(api.ActionDemolishFactory, newActionFromUsecaseWithResult(
+		demolishFactory,
+		func(payload api.DemolishFactoryPayload) usecases.FactoryDemolishInput {
+			return usecases.FactoryDemolishInput{
+				FactoryID: game.FactoryID(payload.FactoryID),
+			}
+		},
+		emptyEncodable,
+	))
 }
 
 func (gdf *GameDataFront) InitCheatAction(uc components.UsecaseWithOutput[usecases.CheatUsecaseInput, usecases.CheatUsecaseOutput]) {
@@ -190,4 +203,8 @@ func (gdf *GameDataFront) InitCheatAction(uc components.UsecaseWithOutput[usecas
 			},
 		),
 	)
+}
+
+func emptyEncodable(_ any) common.Encodable {
+	return common.EmptyEncodable()
 }

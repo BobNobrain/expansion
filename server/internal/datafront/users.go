@@ -39,76 +39,95 @@ func (gdf *GameDataFront) InitUsers(repo components.UserRepoReadonly, tracker co
 	gdf.df.AttachTable(dfcore.DFPath("users"), users.table)
 }
 
-func (u *usersTable) dispose() {
-	u.sub.UnsubscribeAll()
+func (t *usersTable) dispose() {
+	t.sub.UnsubscribeAll()
 }
 
-func (u *usersTable) onUserCreated(payload events.UserUpdatedPayload) {
-	u.table.PublishEntities(dfcore.NewTableResponseFromSingle(
-		dfcore.EntityID(payload.User.ID),
-		encodeUser(payload.User, nil),
-	))
+func (t *usersTable) onUserCreated(payload events.UserUpdatedPayload) {
+	t.table.PublishEntities(t.MakeCollection().Add(userEntity{
+		id:   payload.User.ID,
+		user: &payload.User,
+	}))
 }
 
-func (u *usersTable) onUserUpdated(payload events.UserUpdatedPayload) {
-	u.table.PublishEntities(dfcore.NewTableResponseFromSingle(
-		dfcore.EntityID(payload.User.ID),
-		encodeUser(payload.User, nil),
-	))
+func (t *usersTable) onUserUpdated(payload events.UserUpdatedPayload) {
+	t.table.PublishEntities(t.MakeCollection().Add(userEntity{
+		id:   payload.User.ID,
+		user: &payload.User,
+	}))
 }
 
-func (u *usersTable) onUserOnline(payload events.ClientConnected) {
+func (t *usersTable) onUserOnline(payload events.ClientConnected) {
 	isOnline := true
-	u.table.PublishEntities(dfcore.NewTableResponseFromSingle(
-		dfcore.EntityID(payload.User.ID),
-		common.AsEncodable(api.UsersTableRow{
-			IsOnline: &isOnline,
-		}),
-	))
+	t.table.PublishEntities(t.MakeCollection().Add(userEntity{
+		id:       payload.User.ID,
+		isOnline: &isOnline,
+	}))
 }
 
-func (u *usersTable) onUserOffline(payload events.ClientConnected) {
+func (t *usersTable) onUserOffline(payload events.ClientConnected) {
 	isOnline := false
-	u.table.PublishEntities(dfcore.NewTableResponseFromSingle(
-		dfcore.EntityID(payload.User.ID),
-		common.AsEncodable(api.UsersTableRow{
-			IsOnline: &isOnline,
-		}),
-	))
+	t.table.PublishEntities(t.MakeCollection().Add(userEntity{
+		id:       payload.User.ID,
+		isOnline: &isOnline,
+	}))
 }
 
-func (u *usersTable) queryByIds(
+func (t *usersTable) queryByIds(
 	req dfapi.DFTableRequest,
-	_ dfcore.DFRequestContext,
-) (*dfcore.TableResponse, common.Error) {
+	_ domain.RequestContext,
+) (domain.EntityCollection, common.Error) {
 	uids := make([]domain.UserID, 0, len(req.IDs))
 	for _, uid := range req.IDs {
 		uids = append(uids, domain.UserID(uid))
 	}
 
-	fetchedUsersById, err := u.repo.GetManyByIDs(uids)
+	fetchedUsersById, err := t.repo.GetManyByIDs(uids)
 	if err != nil {
 		return nil, err
 	}
 
-	result := dfcore.NewTableResponse()
+	result := t.MakeCollection()
 	for _, user := range fetchedUsersById {
-		isOnline, err := u.tracker.IsOnline(user.ID)
+		isOnline, err := t.tracker.IsOnline(user.ID)
 		var isOnlineNullable *bool
 		if err != nil {
 			isOnlineNullable = &isOnline
 		}
-		result.Add(dfcore.EntityID(user.ID), encodeUser(user, isOnlineNullable))
+		result.Add(userEntity{
+			id:       user.ID,
+			user:     &user,
+			isOnline: isOnlineNullable,
+		})
 	}
 
 	return result, nil
 }
 
-func encodeUser(user domain.User, isOnline *bool) common.Encodable {
+func (t *usersTable) IdentifyEntity(u userEntity) domain.EntityID {
+	return domain.EntityID(u.id)
+}
+func (t *usersTable) EncodeEntity(u userEntity) common.Encodable {
+	if u.user != nil {
+		return common.AsEncodable(api.UsersTableRow{
+			ID:       string(u.id),
+			Username: string(u.user.Username),
+			Created:  u.user.Created,
+			IsOnline: u.isOnline,
+		})
+	}
+
 	return common.AsEncodable(api.UsersTableRow{
-		ID:       string(user.ID),
-		Username: string(user.Username),
-		Created:  user.Created,
-		IsOnline: isOnline,
+		ID:       string(u.id),
+		IsOnline: u.isOnline,
 	})
+}
+func (t *usersTable) MakeCollection() domain.EntityCollectionBuilder[userEntity] {
+	return domain.MakeUnorderedEntityCollection(t, nil)
+}
+
+type userEntity struct {
+	id       domain.UserID
+	user     *domain.User
+	isOnline *bool
 }

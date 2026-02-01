@@ -26,6 +26,8 @@ import {
     ActionRenameFactory,
     type RenameBasePayload,
     ActionRenameBase,
+    type DemolishFactoryPayload,
+    ActionDemolishFactory,
 } from '@/lib/net/types.generated';
 import { ws } from '@/lib/net/ws';
 
@@ -51,6 +53,10 @@ export const dfTransferFactoryItems = createDatafrontAction<TransferFactoryItems
 });
 export const dfRenameFactory = createDatafrontAction<RenameFactoryPayload>({
     name: ActionRenameFactory,
+    ws,
+});
+export const dfDemolishFactory = createDatafrontAction<DemolishFactoryPayload>({
+    name: ActionDemolishFactory,
     ws,
 });
 

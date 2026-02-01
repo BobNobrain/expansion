@@ -8,7 +8,7 @@ import (
 )
 
 type QueryableSingletonFrontend interface {
-	Query(dfapi.DFSingletonRequest, DFRequestContext) (common.Encodable, common.Error)
+	Query(dfapi.DFSingletonRequest, domain.RequestContext) (common.Encodable, common.Error)
 	Unsubscribe(domain.ClientID)
 	Attach(*DataFront, DFPath)
 	Dispose()
@@ -29,10 +29,10 @@ type queryableSingletonImpl struct {
 
 	lock *sync.RWMutex
 	subs map[domain.ClientID]bool
-	ds   func(DFRequestContext) (common.Encodable, common.Error)
+	ds   func(domain.RequestContext) (common.Encodable, common.Error)
 }
 
-func NewQueryableSingleton(dataSource func(DFRequestContext) (common.Encodable, common.Error)) QueryableSingleton {
+func NewQueryableSingleton(dataSource func(domain.RequestContext) (common.Encodable, common.Error)) QueryableSingleton {
 	return &queryableSingletonImpl{
 		lock: new(sync.RWMutex),
 		subs: make(map[domain.ClientID]bool),
@@ -49,7 +49,7 @@ func (s *queryableSingletonImpl) Dispose() {}
 
 func (s *queryableSingletonImpl) Query(
 	req dfapi.DFSingletonRequest,
-	ctx DFRequestContext,
+	ctx domain.RequestContext,
 ) (common.Encodable, common.Error) {
 	if !req.JustBrowsing {
 		s.lock.Lock()

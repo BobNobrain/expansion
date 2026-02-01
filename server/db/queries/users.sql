@@ -1,24 +1,28 @@
 -- name: ResolveUsers :many
 SELECT *
 FROM users
-WHERE uid = ANY($1::UUID [ ]);
+WHERE uid = ANY($1::UUID [ ])
+    AND deleted_at IS NULL;
 
 -- name: GetUserByID :one
 SELECT *
 FROM users
 WHERE uid = $1
+    AND deleted_at IS NULL
 LIMIT 1;
 
 -- name: GetUserByUsername :one
 SELECT *
 FROM users
 WHERE username = $1
+    AND deleted_at IS NULL
 LIMIT 1;
 
 -- name: GetUserByEmail :one
 SELECT *
 FROM users
 WHERE email = $1
+    AND deleted_at IS NULL
 LIMIT 1;
 
 -- name: GetCredentials :one
@@ -27,6 +31,7 @@ SELECT uid,
     password_hash
 FROM users
 WHERE username = $1
+    AND deleted_at IS NULL
 LIMIT 1;
 
 -- name: CreateUser :one

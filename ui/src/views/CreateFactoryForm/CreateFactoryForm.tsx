@@ -1,6 +1,7 @@
 import { createMemo, Show, type Component } from 'solid-js';
 import { Button, Form, FormActions, FormField, TextInput, createFormFieldState, useValidateAll } from '@/atoms';
 import { dfCreateFactory } from '@/store/datafront';
+import { createIdempotencyToken } from '@/lib/datafront/utils';
 
 export type CreateFactoryFormProps = {
     baseId: number | undefined;
@@ -23,7 +24,8 @@ export const CreateFactoryForm: Component<CreateFactoryFormProps> = (props) => {
     });
     const validateForm = useValidateAll([factoryName]);
 
-    const action = dfCreateFactory.use(() => props.nFactoriesExisting.toString());
+    const idempotencyToken = createIdempotencyToken();
+    const action = dfCreateFactory.use(idempotencyToken.getToken);
 
     const onSubmit = () => {
         if (props.baseId === undefined) {
@@ -34,13 +36,20 @@ export const CreateFactoryForm: Component<CreateFactoryFormProps> = (props) => {
             return;
         }
 
+        idempotencyToken.aquire();
         action.run(
             {
                 baseId: props.baseId,
-                name: factoryName.get() ?? defaultName(),
+                name: factoryName.get() || defaultName(),
             },
             {
-                onSuccess: props.onSuccess,
+                onSuccess: () => {
+                    props.onSuccess?.();
+                    idempotencyToken.release();
+                },
+                onError: () => {
+                    idempotencyToken.release();
+                },
             },
         );
     };

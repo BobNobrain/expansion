@@ -21,6 +21,8 @@ type CreateBasePayload struct {
 	WorldID  game.CelestialID
 	TileID   game.TileID
 	CityID   game.CityID
+	OwnerID  domain.UserID
+	Name     string
 }
 
 type BasesRepo interface {

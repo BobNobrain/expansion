@@ -1,51 +1,79 @@
 package usecases
 
 import (
-	"context"
-	"slices"
 	"srv/internal/components"
 	"srv/internal/game"
 	"srv/internal/globals/events"
 	"srv/internal/utils/common"
 )
 
-type createBaseUsecase struct {
-	store components.GlobalReposReadonly
+func NewCreateBaseUsecase(repos components.GlobalRepos) components.UsecaseWithOutput[BaseCreateInput, any] {
+	return makeTransactionalUsecase(BaseCreateFactory{}, repos)
 }
 
-type CreateBaseUsecaseInput struct {
+type BaseCreateInput struct {
 	WorldID  game.CelestialID
 	TileID   game.TileID
 	Operator game.CompanyID
+	Name     string
 }
 
-func NewCreateBaseUsecase(store components.GlobalReposReadonly) components.Usecase[CreateBaseUsecaseInput] {
-	return &createBaseUsecase{
-		store: store,
+func (i BaseCreateInput) Validate() common.Error {
+	if !i.WorldID.IsPlanetID() && !i.WorldID.IsAsteroidID() && !i.WorldID.IsMoonID() {
+		return common.NewValidationError(
+			"BaseCreateInput.WorldID",
+			"Bases can only be created on planets, moons, or asteroids",
+			common.WithDetail("worldId", i.WorldID),
+		)
+	}
+	if !i.TileID.IsValid() {
+		return common.NewValidationError(
+			"BaseCreateInput.TileID",
+			"Invalid tile id",
+			common.WithDetail("tileId", i.TileID),
+		)
+	}
+	if !i.Operator.IsValid() {
+		return common.NewValidationError(
+			"BaseCreateInput.Operator",
+			"Invalid company id",
+			common.WithDetail("companyId", i.Operator),
+		)
+	}
+	if len(i.Name) > 32 {
+		return common.NewValidationError(
+			"BaseCreateInput.Name",
+			"Base name is too long",
+			common.WithDetail("nameLength", len(i.Name)),
+		)
+	}
+
+	return nil
+}
+
+type BaseCreateFactory struct{}
+
+func (f BaseCreateFactory) Produce(tuc TransactionalUsecaseContext[BaseCreateInput]) TransactionalUsecase[BaseCreateInput, any] {
+	return &baseCreateInstance{
+		TransactionalUsecaseContext: tuc,
 	}
 }
 
-func (uc *createBaseUsecase) Run(
-	ctx context.Context,
-	input CreateBaseUsecaseInput,
-	uctx components.UsecaseContext,
-) common.Error {
-	tx, err := uc.store.StartTransaction(ctx)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
+type baseCreateInstance struct {
+	TransactionalUsecaseContext[BaseCreateInput]
+	cityID game.CityID
+}
 
+func (uc *baseCreateInstance) Setup() common.Error {
 	// find the city that the base will be attached to
-	cities, err := tx.Cities().GetByWorldID(input.WorldID)
+	cities, err := uc.tx.Cities().GetByWorldID(uc.input.WorldID)
 	if err != nil {
 		return err
 	}
 
 	var cityID game.CityID
 	for _, city := range cities {
-		idx := slices.Index(city.CityTiles, input.TileID)
-		if idx != -1 {
+		if city.IsOwnedAndNotCenter(uc.input.TileID) {
 			cityID = city.CityID
 			break
 		}
@@ -59,8 +87,9 @@ func (uc *createBaseUsecase) Run(
 			common.WithDetail("citiesScanned", len(cities)),
 		)
 	}
+	uc.cityID = cityID
 
-	base, err := tx.Bases().GetBaseAt(input.WorldID, input.TileID)
+	base, err := uc.tx.Bases().GetBaseAt(uc.input.WorldID, uc.input.TileID)
 	if err != nil {
 		return err
 	}
@@ -74,40 +103,40 @@ func (uc *createBaseUsecase) Run(
 		)
 	}
 
-	companies, err := tx.Companies().GetOwnedCompanies(uctx.Author)
+	company, err := uc.tx.Companies().GetCompanyData(uc.input.Operator)
 	if err != nil {
 		return err
 	}
 
-	isOperatorValid := false
-	for _, c := range companies {
-		if c.ID == input.Operator {
-			isOperatorValid = true
-			break
-		}
-	}
-
-	if !isOperatorValid {
+	if company.OwnerID != uc.Author {
 		return common.NewValidationError(
 			"CreateBaseUsecaseInput.Operator",
 			"Specified company is not owned by you",
-			common.WithDetail("nCompaniesChecked", len(companies)),
-			common.WithDetail("operator", input.Operator),
+			common.WithDetail("operator", uc.input.Operator),
 		)
 	}
 
-	tx.Bases().CreateBase(components.CreateBasePayload{
-		WorldID:  input.WorldID,
-		TileID:   input.TileID,
-		CityID:   cityID,
-		Operator: input.Operator,
+	return nil
+}
+
+func (uc *baseCreateInstance) Execute() (any, common.Error) {
+	err := uc.tx.Bases().CreateBase(components.CreateBasePayload{
+		WorldID:  uc.input.WorldID,
+		TileID:   uc.input.TileID,
+		CityID:   uc.cityID,
+		Operator: uc.input.Operator,
+		OwnerID:  uc.Author,
+		Name:     uc.input.Name,
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	events.BaseCreated.Publish(events.BaseCreatedPayload{
-		WorldID:  input.WorldID,
-		TileID:   input.TileID,
-		Operator: input.Operator,
+		WorldID:  uc.input.WorldID,
+		TileID:   uc.input.TileID,
+		Operator: uc.input.Operator,
 	})
 
-	return tx.Commit()
+	return nil, nil
 }

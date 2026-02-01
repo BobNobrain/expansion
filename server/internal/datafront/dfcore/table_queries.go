@@ -9,7 +9,7 @@ import (
 	"sync"
 )
 
-type TableQueryDataSource[P any] func(P, dfapi.DFTableQueryRequest, DFRequestContext) (*TableResponse, common.Error)
+type TableQueryDataSource[P any] func(P, dfapi.DFTableQueryRequest, domain.RequestContext) (domain.EntityCollection, common.Error)
 
 type TrackableTableQuery[P comparable] struct {
 	lock      *sync.Mutex
@@ -22,7 +22,7 @@ type TrackableTableQuery[P comparable] struct {
 }
 
 type TrackableTableQueryFrontend interface {
-	Query(dfapi.DFTableQueryRequest, DFRequestContext) (map[string]any, common.Error)
+	Query(dfapi.DFTableQueryRequest, domain.RequestContext) (common.Encodable, common.Error)
 	Unsubscribe(dfapi.DFTableQueryUnsubscribeRequest, domain.ClientID) common.Error
 	UnsubscribeFromAll(domain.ClientID)
 	Attach(*DataFront, DFPath)
@@ -45,8 +45,8 @@ func NewTrackableTableQuery[P comparable](
 
 func (query *TrackableTableQuery[P]) Query(
 	req dfapi.DFTableQueryRequest,
-	ctx DFRequestContext,
-) (map[string]any, common.Error) {
+	ctx domain.RequestContext,
+) (common.Encodable, common.Error) {
 	var payload P
 	jerr := json.Unmarshal(req.Payload, &payload)
 	if jerr != nil {
@@ -58,13 +58,15 @@ func (query *TrackableTableQuery[P]) Query(
 		return nil, err
 	}
 
+	rows.ApplyAccessControl(ctx)
+
 	if query.listeners[payload] == nil {
 		query.listeners[payload] = utils.NewUndeterministicSet[domain.ClientID]()
 	}
 	query.listeners[payload].Add(ctx.ClientID)
 	query.sourceTable.subscribeForResponse(rows, ctx.ClientID)
 
-	return rows.Encode(), nil
+	return rows.AsEncodableMap(), nil
 }
 
 func (q *TrackableTableQuery[P]) PublishChangedNotification(payload P) {
