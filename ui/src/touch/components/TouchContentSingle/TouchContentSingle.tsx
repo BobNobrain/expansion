@@ -1,6 +1,14 @@
 import { type ParentComponent } from 'solid-js';
 import styles from './TouchContentSingle.module.css';
 
-export const TouchContentSingle: ParentComponent = (props) => {
-    return <main class={styles.single}>{props.children}</main>;
+export type TouchContentSingleProps = {
+    fullHeight?: boolean;
+};
+
+export const TouchContentSingle: ParentComponent<TouchContentSingleProps> = (props) => {
+    return (
+        <main class={styles.single} classList={{ [styles.fullHeight]: props.fullHeight }}>
+            {props.children}
+        </main>
+    );
 };

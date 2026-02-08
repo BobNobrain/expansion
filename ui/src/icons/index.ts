@@ -4,6 +4,7 @@ import { type IconProps } from './common/utils';
 export type { IconProps };
 export type Icon = Component<IconProps>;
 
+export { IconApple } from './apple';
 export { IconArea } from './area';
 export { IconArrowLeftLimit } from './arrow-left-limit';
 export { IconArrowRightLimit } from './arrow-right-limit';

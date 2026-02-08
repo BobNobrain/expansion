@@ -18,6 +18,9 @@
     background-color: var(--p-main-100-75);
     pointer-events: all;
 }
+.wrapper.visible.transparent-backdrop {
+    background-color: transparent;
+}
 
 .backdrop {
     scroll-snap-align: start;
@@ -61,4 +64,6 @@
     box-shadow: 0 16px 16px var(--p-main-500-35);
 
     z-index: calc(var(--z, 0) + 1);
+
+    --container-actual-padding-h: 0;
 }

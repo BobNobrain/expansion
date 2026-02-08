@@ -1,0 +1,33 @@
+.box {
+    display: inline-flex;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    overflow: hidden;
+    font-weight: 500;
+    font-variation-settings: "wght" 500;
+    font-size: 16px;
+    line-height: 24px;
+}
+
+.perfect {
+    color: var(--p-secondary-900);
+    background-color: var(--p-secondary-500);
+}
+.good {
+    color: var(--p-green-900);
+    background-color: var(--p-green-500);
+}
+.mid {
+    color: var(--p-primary-900);
+    background-color: var(--p-primary-400);
+}
+.bad {
+    color: var(--p-red-900);
+    background-color: var(--p-red-400);
+}
+.unknown {
+    color: var(--p-neutral-900);
+    background-color: var(--p-neutral-500);
+}

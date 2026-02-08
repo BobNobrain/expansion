@@ -7,6 +7,7 @@ import {
     exploreRouteDefs,
     factoryRouteDefs,
     inventoryRouteDefs,
+    setupRouteDefs,
     userRouteDefs,
 } from '@/routes/all';
 import { HomePage } from '@/touch/pages/HomePage/HomePage';
@@ -26,6 +27,8 @@ export const TouchUI: Component = () => {
 
                 {userRouteDefs()}
                 {companyRouteDefs()}
+
+                {setupRouteDefs()}
 
                 <Route path="*" component={NotFoundPage} />
             </HashRouter>

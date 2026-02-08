@@ -1,0 +1,29 @@
+.wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-height: 100%;
+}
+
+.logo {
+    /* width: 100%; */
+    max-height: 100%;
+    aspect-ratio: 1;
+
+    font-weight: 700;
+    font-variation-settings: "wght" 700;
+}
+
+.ruler {
+    stroke-width: 1px;
+    stroke: var(--p-main-900);
+    stroke-dasharray: 4px;
+    fill: none;
+}
+
+.border-ruler {
+    composes: ruler;
+}
+.axis-rulers {
+    composes: ruler;
+}

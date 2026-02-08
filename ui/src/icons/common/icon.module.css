@@ -5,6 +5,8 @@
 
     flex-grow: 0;
     flex-shrink: 0;
+
+    vertical-align: bottom; /* for inline icons in text alignment */
 }
 
 .block {

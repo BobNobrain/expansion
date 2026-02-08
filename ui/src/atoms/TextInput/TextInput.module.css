@@ -15,7 +15,7 @@
     box-shadow: inset 0 0 8px var(--p-red-500);
 }
 .wrapper.success {
-    box-shadow: inset 0 0 8px var(--p-red-500);
+    box-shadow: inset 0 0 8px var(--p-green-500);
 }
 .wrapper:focus-within {
     box-shadow: inset 0 0 4px var(--p-main-700);

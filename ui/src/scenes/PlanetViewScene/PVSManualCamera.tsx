@@ -20,7 +20,7 @@ export type PVSCameraProps = {
 
 const ANIMATION_DURATION = 800;
 
-export const PVSCamera: Component<PVSCameraProps> = (props) => {
+export const PVSManualCamera: Component<PVSCameraProps> = (props) => {
     const state = createTargetedCameraState({
         initialPosition: props.selectedTileCoords
             ? calcOrbit(props.selectedTileCoords, 2)

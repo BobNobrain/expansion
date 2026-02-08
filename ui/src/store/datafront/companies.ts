@@ -19,7 +19,14 @@ export const dfCompanies = createDatafrontTable<CompaniesTableRow, Company>({
             created: new Date(data.est),
             name: data.name,
             ownerId: data.owner,
-            logo: {},
+            logo: {
+                elements: [
+                    { type: 'ellipse', c: '#36b', x: 0, y: 0, rx: 100, ry: 50 },
+                    { type: 'text', c: '#fb8', x: 0, y: 0, text: 'BOBS STUFF' },
+                    { type: 'rect', c: '#36b', x: 0, y: 60, rx: 100, ry: 5 },
+                    { type: 'rect', c: '#fb8', x: 0, y: 50, rx: 100, ry: 5 },
+                ],
+            },
         };
 
         return result;

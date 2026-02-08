@@ -6,6 +6,7 @@ import styles from './TouchBottomSheet.module.css';
 export type TouchBottomSheetProps = {
     header?: JSX.Element;
     isOpen: boolean;
+    transparentBackdrop?: boolean;
     onClose?: () => void;
 };
 
@@ -44,6 +45,7 @@ export const TouchBottomSheet: ParentComponent<TouchBottomSheetProps> = (props) 
             class={styles.wrapper}
             classList={{
                 [styles.visible]: props.isOpen,
+                [styles.transparentBackdrop]: props.transparentBackdrop,
             }}
             on:scroll={scrollHandler}
             onClick={props.onClose}

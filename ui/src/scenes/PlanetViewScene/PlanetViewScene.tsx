@@ -3,17 +3,20 @@ import { World } from '@/domain/World';
 import { remap } from '@/lib/math/misc';
 import { dfWorlds } from '@/store/datafront';
 import { PVSAtmosphere } from './PVSAtmosphere';
-import { PVSCamera } from './PVSCamera';
+import { PVSManualCamera } from './PVSManualCamera';
 import { PVSLights } from './PVSLights';
 import { PVSObjects } from './PVSObjects';
 import { PVSPlanet } from './PVSPlanet';
 import { PVSSettings } from './PVSSettings';
 import { usePlanet } from './planet';
 import { createPlanetViewSceneSettings } from './settings';
+import { PVSAutoCamera } from './PVSAutoCamera';
 
 export type PlanetViewSceneProps = {
     isActive: boolean;
     worldId: string;
+    hideControls?: boolean;
+    cameraMode?: 'manual' | 'auto';
 
     selectedTileId?: string;
     onTileSelected?: (plotId: string | undefined) => void;
@@ -75,7 +78,12 @@ export const PlanetViewScene: Component<PlanetViewSceneProps> = (props) => {
 
     return (
         <Show when={props.isActive && world.result()}>
-            <PVSCamera selectedTileCoords={currentTileCoords()} />
+            <Show
+                when={props.cameraMode === 'auto'}
+                fallback={<PVSManualCamera selectedTileCoords={currentTileCoords()} />}
+            >
+                <PVSAutoCamera />
+            </Show>
             <PVSLights isNatural={renderSettings.hasNaturalLighting()} />
             <PVSPlanet
                 activeTileIndex={activeTileIndex()}
@@ -88,7 +96,9 @@ export const PlanetViewScene: Component<PlanetViewSceneProps> = (props) => {
             <PVSObjects world={world.result()} surface={surfaceBuilder()} />
             <PVSAtmosphere isNatural={renderSettings.hasNaturalLighting()} density={atmDensity()} />
 
-            <PVSSettings {...renderSettings} isFertilePlanet={Boolean(world.result()?.soilFertilities)} />
+            <Show when={!props.hideControls}>
+                <PVSSettings {...renderSettings} isFertilePlanet={Boolean(world.result()?.soilFertilities)} />
+            </Show>
         </Show>
     );
 };

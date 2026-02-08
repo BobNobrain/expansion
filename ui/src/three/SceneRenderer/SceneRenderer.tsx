@@ -9,6 +9,7 @@ import styles from './SceneRenderer.module.css';
 
 type SceneRendererProps = {
     clearColor?: ColorRepresentation;
+    nonInteractive?: boolean;
 };
 
 export const SceneRenderer: ParentComponent<SceneRendererProps> = (props) => {
@@ -27,7 +28,9 @@ export const SceneRenderer: ParentComponent<SceneRendererProps> = (props) => {
             throw new Error('canvas ref is not set');
         }
 
-        gestures.attach(canvas);
+        if (!props.nonInteractive) {
+            gestures.attach(canvas);
+        }
 
         renderer = new WebGLRenderer({
             canvas,

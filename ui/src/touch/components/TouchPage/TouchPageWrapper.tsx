@@ -10,6 +10,7 @@ import { TouchOfflineIndicator } from '../TouchOfflineIndicator/TouchOfflineIndi
 import { TouchSidePanel } from '../TouchSidePanel/TouchSidePanel';
 import { createPageContext, PageContext } from './context';
 import { TouchPage } from './TouchPage';
+import { TouchCompanySetupModal } from '../TouchCompanySetupModal/TouchCompanySetupModal';
 
 const defaultNavItems: TouchNavBarItem[] = [
     {
@@ -78,6 +79,7 @@ export const TouchPageWrapper: ParentComponent = (props) => {
             <TouchSidePanel side="right" active={isUserPanelVisible()} onClose={closeUserPanel}>
                 <SidePanelContent />
             </TouchSidePanel>
+            <TouchCompanySetupModal />
             <TouchLoginModal />
             <TouchOfflineIndicator />
         </TouchPage>

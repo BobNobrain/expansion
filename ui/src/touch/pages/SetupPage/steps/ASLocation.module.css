@@ -1,0 +1,19 @@
+.world-info {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto;
+}
+
+.button-wrapper {
+    height: 0;
+    overflow: visible;
+    position: relative;
+}
+.button-wrapper > * {
+    position: absolute;
+    bottom: 8px;
+    left: 12px;
+    right: 12px;
+}

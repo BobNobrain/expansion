@@ -1,0 +1,21 @@
+.wrapper {
+    position: relative;
+    height: 100%;
+    --content-padding-top: 32px;
+}
+
+.progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+
+.content-pane {
+    min-height: 100%;
+    padding: var(--content-padding-top) 12px 48px;
+    --container-actual-padding-h: 12px;
+}
+.content-pane.no-bottom-padding {
+    padding-bottom: 0;
+}

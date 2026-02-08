@@ -57,6 +57,7 @@ export type ListItemContentProps = {
     title: JSX.Element;
     icon?: Icon;
     subtitle?: JSX.Element;
+    actions?: JSX.Element;
 };
 
 export const ListItemContent: Component<ListItemContentProps> = (props) => {
@@ -77,6 +78,9 @@ export const ListItemContent: Component<ListItemContentProps> = (props) => {
                     </Text>
                 </Show>
             </div>
+            <Show when={props.actions}>
+                <div class={styles.actions}>{props.actions}</div>
+            </Show>
         </div>
     );
 };

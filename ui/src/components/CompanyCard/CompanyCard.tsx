@@ -1,5 +1,5 @@
 import { Show, type Component } from 'solid-js';
-import { Badge, Container, Island, SkeletonText, Text } from '@/atoms';
+import { Badge, Card, Container, SkeletonText, Text } from '@/atoms';
 import type { Company } from '@/domain/Company';
 import { IconBranchOffice, IconFlag } from '@/icons';
 import { CompanyLogo } from '../CompanyLogo/CompanyLogo';
@@ -14,12 +14,12 @@ export type CompanyCardProps = {
 
 export const CompanyCard: Component<CompanyCardProps> = (props) => {
     return (
-        <Island onClick={props.onClick}>
+        <Card onClick={props.onClick}>
             <Container direction="row" hasGap>
                 <div class={styles.logoCanvas}>
                     <CompanyLogo
                         companyName={props.company?.name ?? null}
-                        value={props.company?.logo}
+                        value={props.company?.logo ?? null}
                         isLoading={props.isLoading}
                     />
                 </div>
@@ -42,6 +42,6 @@ export const CompanyCard: Component<CompanyCardProps> = (props) => {
                     </Container>
                 </Container>
             </Container>
-        </Island>
+        </Card>
     );
 };

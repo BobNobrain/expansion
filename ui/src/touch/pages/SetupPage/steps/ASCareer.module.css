@@ -1,0 +1,39 @@
+.vertical-tabs {
+    display: grid;
+    grid-template-columns: 52px 1fr;
+
+    margin-top: 32px;
+    border-top: 1px solid var(--p-main-500);
+    border-bottom: 1px solid var(--p-main-500);
+
+    margin-left: calc(-1 * var(--container-actual-padding-h, 0));
+    margin-right: calc(-1 * var(--container-actual-padding-h, 0));
+}
+
+.icon-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.icon-option {
+    width: 52px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-right: 4px solid var(--p-main-500);
+    background-color: var(--p-main-500-25);
+}
+.icon-option.active {
+    background-color: var(--p-primary-500-25);
+    border-color: var(--p-primary-500);
+    color: var(--p-primary-500);
+}
+
+.content-wrapper {
+    overflow: hidden;
+    padding: 8px;
+    padding-right: calc(-1 * var(--container-actual-padding-h, 0));
+}

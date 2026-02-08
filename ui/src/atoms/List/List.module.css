@@ -72,3 +72,11 @@
 .selected .content-title {
     color: var(--p-primary-500);
 }
+
+.actions {
+    flex: 0 0 auto;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-left: 8px;
+}

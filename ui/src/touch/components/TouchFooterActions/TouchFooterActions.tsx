@@ -22,6 +22,7 @@ export type TouchFooterActionLinkProps = {
     text: string;
     color?: TouchFooterActionColor;
     loading?: boolean;
+    disabled?: boolean;
 };
 
 export const TouchFooterActionLink: Component<TouchFooterActionLinkProps> = (props) => {
@@ -34,10 +35,11 @@ export const TouchFooterActionLink: Component<TouchFooterActionLinkProps> = (pro
             classList={{
                 [colorStyles[props.color ?? 'secondary']]: true,
                 [styles.loading]: props.loading,
+                [styles.disabled]: props.disabled,
             }}
             aria-disabled={props.loading}
             onClick={(ev) => {
-                if (props.loading) {
+                if (props.loading || props.disabled) {
                     ev.preventDefault();
                 }
             }}

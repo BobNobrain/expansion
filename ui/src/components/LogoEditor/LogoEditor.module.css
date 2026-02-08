@@ -1,0 +1,65 @@
+.palette {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-rows: repeat(6, 1fr);
+    grid-auto-columns: 1fr;
+    gap: 8px;
+    padding: 8px;
+}
+
+.swatch {
+    all: unset;
+
+    display: block;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    width: 100%;
+
+    background-color: var(--swatch-color, #f0f);
+}
+.swatch.active {
+    width: calc(100% - 4px);
+    border: solid var(--p-primary-500);
+    border-width: 2px;
+}
+
+.element-color-button {
+    all: unset;
+
+    display: block;
+    border-radius: 4px;
+    width: 32px;
+    height: 32px;
+
+    background-color: var(--swatch-color, #f0f);
+}
+
+.element-type-selector {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr;
+    gap: 8px;
+    padding: 12px;
+}
+
+.element-swap-buttons {
+    margin: -4px 0 -4px 8px;
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    height: 55px;
+}
+
+.slider-labels {
+    display: flex;
+}
+.slider-label {
+    margin-left: auto;
+    margin-right: auto;
+}
+.slider-label:first-child {
+    margin-left: 0;
+}
+.slider-label:last-child {
+    margin-right: 0;
+}

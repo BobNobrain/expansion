@@ -47,7 +47,7 @@ export const CompanyPage: Component = () => {
         <TouchContentDouble
             display={
                 <CompanyLogo
-                    value={company.result()?.logo}
+                    value={company.result()?.logo ?? null}
                     isLoading={company.isLoading()}
                     companyName={company.result()?.name ?? null}
                 />
